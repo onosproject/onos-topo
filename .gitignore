@@ -1,4 +1,4 @@
-cmd/onos-config/onos-control
+cmd/onos-topo/onos-topo
 vendor
 build/_output
 *.DS_Store
