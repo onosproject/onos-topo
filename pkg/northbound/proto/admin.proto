@@ -19,6 +19,114 @@ syntax = "proto3";
 // Package admin defines the administrative and diagnostic gRPC interfaces.
 package proto;
 
+// AddDeviceRequest adds a device to the topology
+message AddDeviceRequest {
+
+}
+
+// AddDeviceResponse is sent in response to an AddDeviceRequest
+message AddDeviceResponse {
+
+}
+
+// GetDeviceRequest gets a device by ID
+message GetDeviceRequest {
+    string device_id = 1;
+}
+
+// GetDeviceResponse carries a device
+message GetDeviceResponse {
+    Device device = 1;
+}
+
+// GetDevicesRequest gets a list of devices in the topology
+message GetDevicesRequest {
+
+}
+
+// GetDevicesResponse carries a list of devices
+message GetDevicesResponse {
+    repeated Device devices = 1;
+}
+
+// RemoveDeviceRequest removes a device by ID
+message RemoveDeviceRequest {
+    string device_id = 1;
+}
+
+// RemoveDeviceResponse is sent in response to a RemoveDeviceRequest
+message RemoveDeviceResponse {
+
+}
+
+// StreamDevicesRequest requests a stream of device changes
+message StreamDevicesRequest {
+
+}
+
+// StreamDevicesResponse carries a single device event
+message StreamDevicesResponse {
+    // Device event type
+    enum Type {
+        // ADD occurs when a device is added to the topology
+        ADD = 0;
+
+        // UPDATE occurs when a device is updated
+        UPDATE = 1;
+
+        // REMOVE occurs when a device is removed from the topology
+        REMOVE = 2;
+    }
+}
+
+// Device contains information about a device
+message Device {
+    // id is a globally unique device identifier
+    string id = 1;
+
+    // address is the host:port of the device
+    string address = 2;
+
+    // target is the device target
+    string target = 3;
+
+    // version is the device version
+    string version = 4;
+
+    // secret is the name of the k8s secret to use
+    string secret = 5;
+
+    // plain indicates whether to connect to the device over plaintext
+    bool plain = 6;
+
+    // insecure indicates whether to connect to the device with insecure communication
+    bool insecure = 7;
+
+    // timeout indicates the device request timeout
+    int64 timeout = 8;
+}
+
 // TopoAdminService provides means for interactions with the topology subsystem.
 service TopoAdminService {
+
+    // AddDevice adds a device to the topology
+    rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse) {
+    }
+
+    // GetDevice gets a device by ID
+    rpc GetDevice(GetDeviceRequest) returns (GetDeviceResponse) {
+    }
+
+    // GetDevices gets a list of devices
+    rpc GetDevices(GetDevicesRequest) returns (GetDevicesResponse) {
+    }
+
+    // RemoveDevice removes a device from the topology
+    rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse) {
+    }
+
+    // StreamDevices gets a stream of device add/update/remove events
+    rpc StreamDevices(StreamDevicesRequest) returns (stream StreamDevicesResponse) {
+    }
+
 }
