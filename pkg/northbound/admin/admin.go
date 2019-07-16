@@ -35,4 +35,3 @@ func (s Service) Register(r *grpc.Server) {
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
 }
-

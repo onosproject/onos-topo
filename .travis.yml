@@ -1,0 +1,36 @@
+sudo: false
+
+language: go
+
+go:
+  - '1.12.x'
+
+services:
+  - docker
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - $HOME/gopath/pkg/mod         # Cache the Go modules
+
+before_script:
+  - go get -u golang.org/x/lint/golint
+  - go get -u github.com/fzipp/gocyclo
+  - go get -u github.com/client9/misspell/cmd/misspell
+  - go get -u github.com/gordonklaus/ineffassign
+
+jobs:
+  include:
+    - stage: tests
+      script: make coverage
+
+
+
+
+
