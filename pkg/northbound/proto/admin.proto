@@ -60,8 +60,13 @@ message RemoveDeviceResponse {
 }
 
 // StreamDevicesRequest requests a stream of device changes
+// By default, the request requests a stream of all device events that occur *after* the request is
+// received by the service. However, if `all` is `true`, the stream is prefixed by a device `ADD` event
+// for each existing device in the store.
 message StreamDevicesRequest {
 
+    // all indicates whether to initially stream existing devices in the store
+    bool all = 1;
 }
 
 // StreamDevicesResponse carries a single device event
