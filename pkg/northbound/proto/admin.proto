@@ -66,6 +66,13 @@ message StreamDevicesRequest {
 
 // StreamDevicesResponse carries a single device event
 message StreamDevicesResponse {
+
+    // type is the type of the event
+    Type type = 1;
+
+    // device is the device on which the event occurred
+    Device device = 2;
+
     // Device event type
     enum Type {
         // ADD occurs when a device is added to the topology
@@ -93,17 +100,43 @@ message Device {
     // version is the device version
     string version = 4;
 
-    // secret is the name of the k8s secret to use
-    string secret = 5;
+    // timeout indicates the device request timeout
+    int64 timeout = 5;
+
+    // credentials contains the credentials for connecting to the device
+    Credentials credentials = 6;
+
+    // tls is the device TLS configuration
+    TlsConfig tls = 7;
+}
+
+// Credentials is the device credentials
+message Credentials {
+
+    // user is the user with which to connect to the device
+    string user = 1;
+
+    // password is the password for connecting to the device
+    string password = 2;
+}
+
+// Device TLS configuration
+message TlsConfig {
+
+    // caCert is the name of the device's CA certificate
+    string caCert = 3;
+
+    // cert is the name of the device's certificate
+    string cert = 4;
+
+    // key is the name of the device's TLS key
+    string key = 5;
 
     // plain indicates whether to connect to the device over plaintext
     bool plain = 6;
 
     // insecure indicates whether to connect to the device with insecure communication
     bool insecure = 7;
-
-    // timeout indicates the device request timeout
-    int64 timeout = 8;
 }
 
 // TopoAdminService provides means for interactions with the topology subsystem.
