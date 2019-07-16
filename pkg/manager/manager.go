@@ -28,8 +28,7 @@ type Manager struct {
 // NewManager initializes the network control manager subsystem.
 func NewManager() (*Manager, error) {
 	log.Info("Creating Manager")
-	mgr = Manager{
-	}
+	mgr = Manager{}
 
 	return &mgr, nil
 }
@@ -38,7 +37,6 @@ func NewManager() (*Manager, error) {
 func LoadManager() (*Manager, error) {
 	return NewManager()
 }
-
 
 // Run starts a synchronizer based on the devices and the northbound services.
 func (m *Manager) Run() {

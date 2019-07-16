@@ -30,34 +30,34 @@ deps: # @HELP ensure that the required dependencies are in place
 lint: # @HELP run the linters for Go source code
 	golint -set_exit_status github.com/onosproject/onos-topo/pkg/...
 	golint -set_exit_status github.com/onosproject/onos-topo/cmd/...
-	golint -set_exit_status github.com/onosproject/onos-topo/test/...
+	#golint -set_exit_status github.com/onosproject/onos-topo/test/...
 
 vet: # @HELP examines Go source code and reports suspicious constructs
 	go vet github.com/onosproject/onos-topo/pkg/...
 	go vet github.com/onosproject/onos-topo/cmd/...
-	go vet github.com/onosproject/onos-topo/test/...
+	#go vet github.com/onosproject/onos-topo/test/...
 
 cyclo: # @HELP examines Go source code and reports complex cycles in code
 	gocyclo -over 25 pkg/
 	gocyclo -over 25 cmd/
-	gocyclo -over 25 test/
+	#gocyclo -over 25 test/
 
 misspell: # @HELP examines Go source code and reports misspelled words
 	misspell -error -source=text pkg/
 	misspell -error -source=text cmd/
-	misspell -error -source=text test/
+	#misspell -error -source=text test/
 	misspell -error docs/
 
 ineffassign: # @HELP examines Go source code and reports inefficient assignments
 	ineffassign pkg/
 	ineffassign cmd/
-	ineffassign test/
+	#ineffassign test/
 
 license_check: # @HELP examine and ensure license headers exist
 	./build/licensing/boilerplate.py -v
 
 gofmt: # @HELP run the Go format validation
-	bash -c "diff -u <(echo -n) <(gofmt -d pkg/ cmd/ tests/)"
+	bash -c "diff -u <(echo -n) <(gofmt -d pkg/ cmd/)"
 
 protos: # @HELP compile the protobuf files (using protoc-go Docker)
 	docker run -it -v `pwd`:/go/src/github.com/onosproject/onos-topo \

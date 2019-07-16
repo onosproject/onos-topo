@@ -31,9 +31,9 @@ package main
 import (
 	"flag"
 	"github.com/onosproject/onos-topo/pkg/manager"
+	"github.com/onosproject/onos-topo/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/northbound/admin"
 	"github.com/onosproject/onos-topo/pkg/northbound/diags"
-	"github.com/onosproject/onos-topo/pkg/northbound"
 	log "k8s.io/klog"
 )
 
