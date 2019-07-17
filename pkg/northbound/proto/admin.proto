@@ -46,7 +46,7 @@ message GetDevicesRequest {
 
 // GetDevicesResponse carries a list of devices
 message GetDevicesResponse {
-    repeated Device devices = 1;
+    Device device = 1;
 }
 
 // RemoveDeviceRequest removes a device by ID
@@ -156,7 +156,7 @@ service TopoAdminService {
     }
 
     // GetDevices gets a list of devices
-    rpc GetDevices(GetDevicesRequest) returns (GetDevicesResponse) {
+    rpc GetDevices(GetDevicesRequest) returns (stream GetDevicesResponse) {
     }
 
     // RemoveDevice removes a device from the topology
