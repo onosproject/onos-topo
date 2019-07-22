@@ -72,17 +72,17 @@ message GetAllResponse {
 
     // Device event type
     enum Type {
-        // DEVICE indicates a device already present in the store
-        DEVICE = 0;
+        // PRESENT indicates a device already present in the store
+        PRESENT = 0;
 
-        // ADD is an event which occurs when a device is added to the topology
-        ADD = 1;
+        // ADDED is an event which occurs when a device is added to the topology
+        ADDED = 1;
 
-        // UPDATE is an event which occurs when a device is updated
-        UPDATE = 2;
+        // UPDATED is an event which occurs when a device is updated
+        UPDATED = 2;
 
-        // REMOVE is an event which occurs when a device is removed from the topology
-        REMOVE = 3;
+        // REMOVED is an event which occurs when a device is removed from the topology
+        REMOVED = 3;
     }
 }
 
