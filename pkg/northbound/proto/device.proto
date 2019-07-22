@@ -29,6 +29,16 @@ message AddDeviceResponse {
 
 }
 
+// UpdateDeviceRequest updates a device
+message UpdateDeviceRequest {
+    Device device = 1;
+}
+
+// UpdateDeviceResponse is sent in response to an UpdateDeviceRequest
+message UpdateDeviceResponse {
+
+}
+
 // GetDeviceRequest gets a device by ID
 message GetDeviceRequest {
     string device_id = 1;
@@ -39,14 +49,41 @@ message GetDeviceResponse {
     Device device = 1;
 }
 
-// GetDevicesRequest gets a list of devices in the topology
-message GetDevicesRequest {
+// GetAllRequest requests a stream of devices and changes
+// By default, the request requests a stream of all devices that are present in the topology when
+// the request is received by the service. However, if `subscribe` is `true`, the stream will remain
+// open after all devices have been sent and events that occur following the last device will be
+// streamed to the client until the stream is closed.
+message GetAllRequest {
 
+    // subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur
+    // after all devices have been streamed to the client
+    bool subscribe = 1;
 }
 
-// GetDevicesResponse carries a list of devices
-message GetDevicesResponse {
-    Device device = 1;
+// GetAllResponse carries a single device event
+message GetAllResponse {
+
+    // type is the type of the event
+    Type type = 1;
+
+    // device is the device on which the event occurred
+    Device device = 2;
+
+    // Device event type
+    enum Type {
+        // DEVICE indicates a device already present in the store
+        DEVICE = 0;
+
+        // ADD is an event which occurs when a device is added to the topology
+        ADD = 1;
+
+        // UPDATE is an event which occurs when a device is updated
+        UPDATE = 2;
+
+        // REMOVE is an event which occurs when a device is removed from the topology
+        REMOVE = 3;
+    }
 }
 
 // RemoveDeviceRequest removes a device by ID
@@ -57,38 +94,6 @@ message RemoveDeviceRequest {
 // RemoveDeviceResponse is sent in response to a RemoveDeviceRequest
 message RemoveDeviceResponse {
 
-}
-
-// StreamDevicesRequest requests a stream of device changes
-// By default, the request requests a stream of all device events that occur *after* the request is
-// received by the service. However, if `all` is `true`, the stream is prefixed by a device `ADD` event
-// for each existing device in the store.
-message StreamDevicesRequest {
-
-    // all indicates whether to initially stream existing devices in the store
-    bool all = 1;
-}
-
-// StreamDevicesResponse carries a single device event
-message StreamDevicesResponse {
-
-    // type is the type of the event
-    Type type = 1;
-
-    // device is the device on which the event occurred
-    Device device = 2;
-
-    // Device event type
-    enum Type {
-        // ADD occurs when a device is added to the topology
-        ADD = 0;
-
-        // UPDATE occurs when a device is updated
-        UPDATE = 1;
-
-        // REMOVE occurs when a device is removed from the topology
-        REMOVE = 2;
-    }
 }
 
 // Device contains information about a device
@@ -147,24 +152,24 @@ message TlsConfig {
 // DeviceService provides an API for managing devices.
 service DeviceService {
 
-    // AddDevice adds a device to the topology
-    rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse) {
+    // Add adds a device to the topology
+    rpc Add(AddDeviceRequest) returns (AddDeviceResponse) {
     }
 
-    // GetDevice gets a device by ID
-    rpc GetDevice(GetDeviceRequest) returns (GetDeviceResponse) {
+    // Update updates a device
+    rpc Update(UpdateDeviceRequest) returns (UpdateDeviceResponse) {
     }
 
-    // GetDevices gets a list of devices
-    rpc GetDevices(GetDevicesRequest) returns (stream GetDevicesResponse) {
+    // Get gets a device by ID
+    rpc Get(GetDeviceRequest) returns (GetDeviceResponse) {
     }
 
-    // RemoveDevice removes a device from the topology
-    rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse) {
+    // GetAll gets a stream of device add/update/remove events
+    rpc GetAll(GetAllRequest) returns (stream GetAllResponse) {
     }
 
-    // StreamDevices gets a stream of device add/update/remove events
-    rpc StreamDevices(StreamDevicesRequest) returns (stream StreamDevicesResponse) {
+    // Remove removes a device from the topology
+    rpc Remove(RemoveDeviceRequest) returns (RemoveDeviceResponse) {
     }
 
 }
