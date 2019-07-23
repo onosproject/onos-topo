@@ -27,35 +27,39 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // Device event type
-type StreamDevicesResponse_Type int32
+type GetAllResponse_Type int32
 
 const (
-	// ADD occurs when a device is added to the topology
-	StreamDevicesResponse_ADD StreamDevicesResponse_Type = 0
-	// UPDATE occurs when a device is updated
-	StreamDevicesResponse_UPDATE StreamDevicesResponse_Type = 1
-	// REMOVE occurs when a device is removed from the topology
-	StreamDevicesResponse_REMOVE StreamDevicesResponse_Type = 2
+	// PRESENT indicates a device already present in the store
+	GetAllResponse_PRESENT GetAllResponse_Type = 0
+	// ADDED is an event which occurs when a device is added to the topology
+	GetAllResponse_ADDED GetAllResponse_Type = 1
+	// UPDATED is an event which occurs when a device is updated
+	GetAllResponse_UPDATED GetAllResponse_Type = 2
+	// REMOVED is an event which occurs when a device is removed from the topology
+	GetAllResponse_REMOVED GetAllResponse_Type = 3
 )
 
-var StreamDevicesResponse_Type_name = map[int32]string{
-	0: "ADD",
-	1: "UPDATE",
-	2: "REMOVE",
+var GetAllResponse_Type_name = map[int32]string{
+	0: "PRESENT",
+	1: "ADDED",
+	2: "UPDATED",
+	3: "REMOVED",
 }
 
-var StreamDevicesResponse_Type_value = map[string]int32{
-	"ADD":    0,
-	"UPDATE": 1,
-	"REMOVE": 2,
+var GetAllResponse_Type_value = map[string]int32{
+	"PRESENT": 0,
+	"ADDED":   1,
+	"UPDATED": 2,
+	"REMOVED": 3,
 }
 
-func (x StreamDevicesResponse_Type) String() string {
-	return proto.EnumName(StreamDevicesResponse_Type_name, int32(x))
+func (x GetAllResponse_Type) String() string {
+	return proto.EnumName(GetAllResponse_Type_name, int32(x))
 }
 
-func (StreamDevicesResponse_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{9, 0}
+func (GetAllResponse_Type) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_fd506e14b3f7d725, []int{7, 0}
 }
 
 // AddDeviceRequest adds a device to the topology
@@ -122,8 +126,82 @@ func (m *AddDeviceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AddDeviceResponse proto.InternalMessageInfo
 
+// UpdateDeviceRequest updates a device
+type UpdateDeviceRequest struct {
+	// device is the updated device
+	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateDeviceRequest) Reset()         { *m = UpdateDeviceRequest{} }
+func (m *UpdateDeviceRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateDeviceRequest) ProtoMessage()    {}
+func (*UpdateDeviceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_fd506e14b3f7d725, []int{2}
+}
+
+func (m *UpdateDeviceRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateDeviceRequest.Unmarshal(m, b)
+}
+func (m *UpdateDeviceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateDeviceRequest.Marshal(b, m, deterministic)
+}
+func (m *UpdateDeviceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateDeviceRequest.Merge(m, src)
+}
+func (m *UpdateDeviceRequest) XXX_Size() int {
+	return xxx_messageInfo_UpdateDeviceRequest.Size(m)
+}
+func (m *UpdateDeviceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateDeviceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateDeviceRequest proto.InternalMessageInfo
+
+func (m *UpdateDeviceRequest) GetDevice() *Device {
+	if m != nil {
+		return m.Device
+	}
+	return nil
+}
+
+// UpdateDeviceResponse is sent in response to an UpdateDeviceRequest
+type UpdateDeviceResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateDeviceResponse) Reset()         { *m = UpdateDeviceResponse{} }
+func (m *UpdateDeviceResponse) String() string { return proto.CompactTextString(m) }
+func (*UpdateDeviceResponse) ProtoMessage()    {}
+func (*UpdateDeviceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_fd506e14b3f7d725, []int{3}
+}
+
+func (m *UpdateDeviceResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateDeviceResponse.Unmarshal(m, b)
+}
+func (m *UpdateDeviceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateDeviceResponse.Marshal(b, m, deterministic)
+}
+func (m *UpdateDeviceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateDeviceResponse.Merge(m, src)
+}
+func (m *UpdateDeviceResponse) XXX_Size() int {
+	return xxx_messageInfo_UpdateDeviceResponse.Size(m)
+}
+func (m *UpdateDeviceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateDeviceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateDeviceResponse proto.InternalMessageInfo
+
 // GetDeviceRequest gets a device by ID
 type GetDeviceRequest struct {
+	// device_id is the unique device ID with which to lookup the device
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -134,7 +212,7 @@ func (m *GetDeviceRequest) Reset()         { *m = GetDeviceRequest{} }
 func (m *GetDeviceRequest) String() string { return proto.CompactTextString(m) }
 func (*GetDeviceRequest) ProtoMessage()    {}
 func (*GetDeviceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{2}
+	return fileDescriptor_fd506e14b3f7d725, []int{4}
 }
 
 func (m *GetDeviceRequest) XXX_Unmarshal(b []byte) error {
@@ -164,6 +242,7 @@ func (m *GetDeviceRequest) GetDeviceId() string {
 
 // GetDeviceResponse carries a device
 type GetDeviceResponse struct {
+	// device is the device object
 	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -174,7 +253,7 @@ func (m *GetDeviceResponse) Reset()         { *m = GetDeviceResponse{} }
 func (m *GetDeviceResponse) String() string { return proto.CompactTextString(m) }
 func (*GetDeviceResponse) ProtoMessage()    {}
 func (*GetDeviceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{3}
+	return fileDescriptor_fd506e14b3f7d725, []int{5}
 }
 
 func (m *GetDeviceResponse) XXX_Unmarshal(b []byte) error {
@@ -202,72 +281,96 @@ func (m *GetDeviceResponse) GetDevice() *Device {
 	return nil
 }
 
-// GetDevicesRequest gets a list of devices in the topology
-type GetDevicesRequest struct {
+// GetAllRequest requests a stream of devices and changes
+// By default, the request requests a stream of all devices that are present in the topology when
+// the request is received by the service. However, if `subscribe` is `true`, the stream will remain
+// open after all devices have been sent and events that occur following the last device will be
+// streamed to the client until the stream is closed.
+type GetAllRequest struct {
+	// subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur
+	// after all devices have been streamed to the client
+	Subscribe            bool     `protobuf:"varint,1,opt,name=subscribe,proto3" json:"subscribe,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetDevicesRequest) Reset()         { *m = GetDevicesRequest{} }
-func (m *GetDevicesRequest) String() string { return proto.CompactTextString(m) }
-func (*GetDevicesRequest) ProtoMessage()    {}
-func (*GetDevicesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{4}
+func (m *GetAllRequest) Reset()         { *m = GetAllRequest{} }
+func (m *GetAllRequest) String() string { return proto.CompactTextString(m) }
+func (*GetAllRequest) ProtoMessage()    {}
+func (*GetAllRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_fd506e14b3f7d725, []int{6}
 }
 
-func (m *GetDevicesRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetDevicesRequest.Unmarshal(m, b)
+func (m *GetAllRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAllRequest.Unmarshal(m, b)
 }
-func (m *GetDevicesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetDevicesRequest.Marshal(b, m, deterministic)
+func (m *GetAllRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAllRequest.Marshal(b, m, deterministic)
 }
-func (m *GetDevicesRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetDevicesRequest.Merge(m, src)
+func (m *GetAllRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAllRequest.Merge(m, src)
 }
-func (m *GetDevicesRequest) XXX_Size() int {
-	return xxx_messageInfo_GetDevicesRequest.Size(m)
+func (m *GetAllRequest) XXX_Size() int {
+	return xxx_messageInfo_GetAllRequest.Size(m)
 }
-func (m *GetDevicesRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetDevicesRequest.DiscardUnknown(m)
+func (m *GetAllRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAllRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetDevicesRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetAllRequest proto.InternalMessageInfo
 
-// GetDevicesResponse carries a list of devices
-type GetDevicesResponse struct {
-	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
+func (m *GetAllRequest) GetSubscribe() bool {
+	if m != nil {
+		return m.Subscribe
+	}
+	return false
+}
+
+// GetAllResponse carries a single device event
+type GetAllResponse struct {
+	// type is the type of the event
+	Type GetAllResponse_Type `protobuf:"varint,1,opt,name=type,proto3,enum=proto.GetAllResponse_Type" json:"type,omitempty"`
+	// device is the device on which the event occurred
+	Device               *Device  `protobuf:"bytes,2,opt,name=device,proto3" json:"device,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetDevicesResponse) Reset()         { *m = GetDevicesResponse{} }
-func (m *GetDevicesResponse) String() string { return proto.CompactTextString(m) }
-func (*GetDevicesResponse) ProtoMessage()    {}
-func (*GetDevicesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{5}
+func (m *GetAllResponse) Reset()         { *m = GetAllResponse{} }
+func (m *GetAllResponse) String() string { return proto.CompactTextString(m) }
+func (*GetAllResponse) ProtoMessage()    {}
+func (*GetAllResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_fd506e14b3f7d725, []int{7}
 }
 
-func (m *GetDevicesResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetDevicesResponse.Unmarshal(m, b)
+func (m *GetAllResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAllResponse.Unmarshal(m, b)
 }
-func (m *GetDevicesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetDevicesResponse.Marshal(b, m, deterministic)
+func (m *GetAllResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAllResponse.Marshal(b, m, deterministic)
 }
-func (m *GetDevicesResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetDevicesResponse.Merge(m, src)
+func (m *GetAllResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAllResponse.Merge(m, src)
 }
-func (m *GetDevicesResponse) XXX_Size() int {
-	return xxx_messageInfo_GetDevicesResponse.Size(m)
+func (m *GetAllResponse) XXX_Size() int {
+	return xxx_messageInfo_GetAllResponse.Size(m)
 }
-func (m *GetDevicesResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetDevicesResponse.DiscardUnknown(m)
+func (m *GetAllResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAllResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetDevicesResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetAllResponse proto.InternalMessageInfo
 
-func (m *GetDevicesResponse) GetDevice() *Device {
+func (m *GetAllResponse) GetType() GetAllResponse_Type {
+	if m != nil {
+		return m.Type
+	}
+	return GetAllResponse_PRESENT
+}
+
+func (m *GetAllResponse) GetDevice() *Device {
 	if m != nil {
 		return m.Device
 	}
@@ -276,6 +379,7 @@ func (m *GetDevicesResponse) GetDevice() *Device {
 
 // RemoveDeviceRequest removes a device by ID
 type RemoveDeviceRequest struct {
+	// device_id is the unique identifier for the device to remove from the store
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -286,7 +390,7 @@ func (m *RemoveDeviceRequest) Reset()         { *m = RemoveDeviceRequest{} }
 func (m *RemoveDeviceRequest) String() string { return proto.CompactTextString(m) }
 func (*RemoveDeviceRequest) ProtoMessage()    {}
 func (*RemoveDeviceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{6}
+	return fileDescriptor_fd506e14b3f7d725, []int{8}
 }
 
 func (m *RemoveDeviceRequest) XXX_Unmarshal(b []byte) error {
@@ -325,7 +429,7 @@ func (m *RemoveDeviceResponse) Reset()         { *m = RemoveDeviceResponse{} }
 func (m *RemoveDeviceResponse) String() string { return proto.CompactTextString(m) }
 func (*RemoveDeviceResponse) ProtoMessage()    {}
 func (*RemoveDeviceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{7}
+	return fileDescriptor_fd506e14b3f7d725, []int{9}
 }
 
 func (m *RemoveDeviceResponse) XXX_Unmarshal(b []byte) error {
@@ -346,116 +450,24 @@ func (m *RemoveDeviceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RemoveDeviceResponse proto.InternalMessageInfo
 
-// StreamDevicesRequest requests a stream of device changes
-// By default, the request requests a stream of all device events that occur *after* the request is
-// received by the service. However, if `all` is `true`, the stream is prefixed by a device `ADD` event
-// for each existing device in the store.
-type StreamDevicesRequest struct {
-	// all indicates whether to initially stream existing devices in the store
-	All                  bool     `protobuf:"varint,1,opt,name=all,proto3" json:"all,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *StreamDevicesRequest) Reset()         { *m = StreamDevicesRequest{} }
-func (m *StreamDevicesRequest) String() string { return proto.CompactTextString(m) }
-func (*StreamDevicesRequest) ProtoMessage()    {}
-func (*StreamDevicesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{8}
-}
-
-func (m *StreamDevicesRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_StreamDevicesRequest.Unmarshal(m, b)
-}
-func (m *StreamDevicesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_StreamDevicesRequest.Marshal(b, m, deterministic)
-}
-func (m *StreamDevicesRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StreamDevicesRequest.Merge(m, src)
-}
-func (m *StreamDevicesRequest) XXX_Size() int {
-	return xxx_messageInfo_StreamDevicesRequest.Size(m)
-}
-func (m *StreamDevicesRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_StreamDevicesRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_StreamDevicesRequest proto.InternalMessageInfo
-
-func (m *StreamDevicesRequest) GetAll() bool {
-	if m != nil {
-		return m.All
-	}
-	return false
-}
-
-// StreamDevicesResponse carries a single device event
-type StreamDevicesResponse struct {
-	// type is the type of the event
-	Type StreamDevicesResponse_Type `protobuf:"varint,1,opt,name=type,proto3,enum=proto.StreamDevicesResponse_Type" json:"type,omitempty"`
-	// device is the device on which the event occurred
-	Device               *Device  `protobuf:"bytes,2,opt,name=device,proto3" json:"device,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *StreamDevicesResponse) Reset()         { *m = StreamDevicesResponse{} }
-func (m *StreamDevicesResponse) String() string { return proto.CompactTextString(m) }
-func (*StreamDevicesResponse) ProtoMessage()    {}
-func (*StreamDevicesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_fd506e14b3f7d725, []int{9}
-}
-
-func (m *StreamDevicesResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_StreamDevicesResponse.Unmarshal(m, b)
-}
-func (m *StreamDevicesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_StreamDevicesResponse.Marshal(b, m, deterministic)
-}
-func (m *StreamDevicesResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StreamDevicesResponse.Merge(m, src)
-}
-func (m *StreamDevicesResponse) XXX_Size() int {
-	return xxx_messageInfo_StreamDevicesResponse.Size(m)
-}
-func (m *StreamDevicesResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_StreamDevicesResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_StreamDevicesResponse proto.InternalMessageInfo
-
-func (m *StreamDevicesResponse) GetType() StreamDevicesResponse_Type {
-	if m != nil {
-		return m.Type
-	}
-	return StreamDevicesResponse_ADD
-}
-
-func (m *StreamDevicesResponse) GetDevice() *Device {
-	if m != nil {
-		return m.Device
-	}
-	return nil
-}
-
 // Device contains information about a device
 type Device struct {
+	// metadata is the store metadata used for concurrency control
+	Metadata *ObjectMetadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	// id is a globally unique device identifier
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	// address is the host:port of the device
-	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	Address string `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
 	// target is the device target
-	Target string `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	// version is the device version
-	Version string `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
+	Target string `protobuf:"bytes,4,opt,name=target,proto3" json:"target,omitempty"`
+	// software_version is the device software version
+	SoftwareVersion string `protobuf:"bytes,5,opt,name=software_version,json=softwareVersion,proto3" json:"software_version,omitempty"`
 	// timeout indicates the device request timeout
-	Timeout int64 `protobuf:"varint,5,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	Timeout int64 `protobuf:"varint,6,opt,name=timeout,proto3" json:"timeout,omitempty"`
 	// credentials contains the credentials for connecting to the device
-	Credentials *Credentials `protobuf:"bytes,6,opt,name=credentials,proto3" json:"credentials,omitempty"`
+	Credentials *Credentials `protobuf:"bytes,7,opt,name=credentials,proto3" json:"credentials,omitempty"`
 	// tls is the device TLS configuration
-	Tls                  *TlsConfig `protobuf:"bytes,7,opt,name=tls,proto3" json:"tls,omitempty"`
+	Tls                  *TlsConfig `protobuf:"bytes,8,opt,name=tls,proto3" json:"tls,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
@@ -486,6 +498,13 @@ func (m *Device) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Device proto.InternalMessageInfo
 
+func (m *Device) GetMetadata() *ObjectMetadata {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
 func (m *Device) GetId() string {
 	if m != nil {
 		return m.Id
@@ -507,9 +526,9 @@ func (m *Device) GetTarget() string {
 	return ""
 }
 
-func (m *Device) GetVersion() string {
+func (m *Device) GetSoftwareVersion() string {
 	if m != nil {
-		return m.Version
+		return m.SoftwareVersion
 	}
 	return ""
 }
@@ -662,63 +681,119 @@ func (m *TlsConfig) GetInsecure() bool {
 	return false
 }
 
+// ObjectMetadata is the metadata required by the store for concurrency control
+type ObjectMetadata struct {
+	// id is the unique identifier for the object
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// version is the store version of the object
+	Version              uint64   `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ObjectMetadata) Reset()         { *m = ObjectMetadata{} }
+func (m *ObjectMetadata) String() string { return proto.CompactTextString(m) }
+func (*ObjectMetadata) ProtoMessage()    {}
+func (*ObjectMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_fd506e14b3f7d725, []int{13}
+}
+
+func (m *ObjectMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ObjectMetadata.Unmarshal(m, b)
+}
+func (m *ObjectMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ObjectMetadata.Marshal(b, m, deterministic)
+}
+func (m *ObjectMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ObjectMetadata.Merge(m, src)
+}
+func (m *ObjectMetadata) XXX_Size() int {
+	return xxx_messageInfo_ObjectMetadata.Size(m)
+}
+func (m *ObjectMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_ObjectMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ObjectMetadata proto.InternalMessageInfo
+
+func (m *ObjectMetadata) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *ObjectMetadata) GetVersion() uint64 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
+}
+
 func init() {
-	proto.RegisterEnum("proto.StreamDevicesResponse_Type", StreamDevicesResponse_Type_name, StreamDevicesResponse_Type_value)
+	proto.RegisterEnum("proto.GetAllResponse_Type", GetAllResponse_Type_name, GetAllResponse_Type_value)
 	proto.RegisterType((*AddDeviceRequest)(nil), "proto.AddDeviceRequest")
 	proto.RegisterType((*AddDeviceResponse)(nil), "proto.AddDeviceResponse")
+	proto.RegisterType((*UpdateDeviceRequest)(nil), "proto.UpdateDeviceRequest")
+	proto.RegisterType((*UpdateDeviceResponse)(nil), "proto.UpdateDeviceResponse")
 	proto.RegisterType((*GetDeviceRequest)(nil), "proto.GetDeviceRequest")
 	proto.RegisterType((*GetDeviceResponse)(nil), "proto.GetDeviceResponse")
-	proto.RegisterType((*GetDevicesRequest)(nil), "proto.GetDevicesRequest")
-	proto.RegisterType((*GetDevicesResponse)(nil), "proto.GetDevicesResponse")
+	proto.RegisterType((*GetAllRequest)(nil), "proto.GetAllRequest")
+	proto.RegisterType((*GetAllResponse)(nil), "proto.GetAllResponse")
 	proto.RegisterType((*RemoveDeviceRequest)(nil), "proto.RemoveDeviceRequest")
 	proto.RegisterType((*RemoveDeviceResponse)(nil), "proto.RemoveDeviceResponse")
-	proto.RegisterType((*StreamDevicesRequest)(nil), "proto.StreamDevicesRequest")
-	proto.RegisterType((*StreamDevicesResponse)(nil), "proto.StreamDevicesResponse")
 	proto.RegisterType((*Device)(nil), "proto.Device")
 	proto.RegisterType((*Credentials)(nil), "proto.Credentials")
 	proto.RegisterType((*TlsConfig)(nil), "proto.TlsConfig")
+	proto.RegisterType((*ObjectMetadata)(nil), "proto.ObjectMetadata")
 }
 
 func init() { proto.RegisterFile("pkg/northbound/proto/device.proto", fileDescriptor_fd506e14b3f7d725) }
 
 var fileDescriptor_fd506e14b3f7d725 = []byte{
-	// 573 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0xcb, 0x6e, 0xd3, 0x40,
-	0x14, 0xad, 0xf3, 0x70, 0xe2, 0x1b, 0x52, 0xb9, 0xb7, 0xa1, 0x98, 0x84, 0x45, 0x6b, 0x09, 0x91,
-	0x55, 0x82, 0x02, 0x6c, 0x40, 0x48, 0x44, 0x49, 0x84, 0xba, 0xe0, 0xa1, 0x69, 0x60, 0x8b, 0xdc,
-	0x78, 0x08, 0x56, 0x1d, 0xdb, 0xcc, 0x4c, 0x82, 0x22, 0xfe, 0x85, 0xef, 0xe2, 0x47, 0xd8, 0xa3,
-	0x79, 0xc4, 0x75, 0x1e, 0xaa, 0xd4, 0x95, 0xef, 0x9d, 0x7b, 0xee, 0xf1, 0x39, 0xf6, 0x1c, 0xb8,
-	0xc8, 0x6e, 0xe6, 0xfd, 0x24, 0x65, 0xe2, 0xc7, 0x75, 0xba, 0x4c, 0xc2, 0x7e, 0xc6, 0x52, 0x91,
-	0xf6, 0x43, 0xba, 0x8a, 0x66, 0xb4, 0xa7, 0x1a, 0xac, 0xaa, 0x87, 0x8f, 0xe0, 0x0e, 0xc3, 0x70,
-	0xac, 0x26, 0x84, 0xfe, 0x5c, 0x52, 0x2e, 0xfc, 0x53, 0x38, 0x29, 0x9c, 0xf1, 0x2c, 0x4d, 0x38,
-	0xf5, 0xfb, 0xe0, 0xbe, 0xa7, 0x62, 0x0b, 0x88, 0x1d, 0x70, 0x34, 0xe7, 0xb7, 0x28, 0xf4, 0xac,
-	0x73, 0xab, 0xeb, 0x90, 0xba, 0x3e, 0xb8, 0x0c, 0xfd, 0xd7, 0x70, 0x52, 0x58, 0xd0, 0x2c, 0xf8,
-	0x14, 0x6c, 0x0d, 0x50, 0xf0, 0xc6, 0xa0, 0xa9, 0xd5, 0xf4, 0x0c, 0xcc, 0x0c, 0xa5, 0x82, 0x7c,
-	0x97, 0x6f, 0x64, 0xbd, 0x01, 0x2c, 0x1e, 0xde, 0x8f, 0x71, 0x00, 0xa7, 0x84, 0x2e, 0xd2, 0x15,
-	0xbd, 0x87, 0x83, 0x33, 0x68, 0x6d, 0xef, 0x98, 0x4f, 0xd1, 0x85, 0xd6, 0x95, 0x60, 0x34, 0x58,
-	0x6c, 0x0b, 0x44, 0x17, 0xca, 0x41, 0x1c, 0x2b, 0x9a, 0x3a, 0x91, 0xa5, 0xff, 0xc7, 0x82, 0x87,
-	0x3b, 0x50, 0x23, 0xfb, 0x15, 0x54, 0xc4, 0x3a, 0xd3, 0xa2, 0x8f, 0x07, 0x17, 0x46, 0xf4, 0x41,
-	0x6c, 0x6f, 0xba, 0xce, 0x28, 0x51, 0xf0, 0x82, 0xdb, 0xd2, 0x5d, 0x6e, 0x9f, 0x41, 0x45, 0x2e,
-	0x61, 0x0d, 0xca, 0xc3, 0xf1, 0xd8, 0x3d, 0x42, 0x00, 0xfb, 0xcb, 0xe7, 0xf1, 0x70, 0x3a, 0x71,
-	0x2d, 0x59, 0x93, 0xc9, 0x87, 0x4f, 0x5f, 0x27, 0x6e, 0xc9, 0xff, 0x6b, 0x81, 0xad, 0x77, 0xf1,
-	0x18, 0x4a, 0xf9, 0x37, 0x28, 0x45, 0x21, 0x7a, 0x50, 0x0b, 0xc2, 0x90, 0x51, 0xce, 0xd5, 0xbb,
-	0x1c, 0xb2, 0x69, 0xf1, 0x0c, 0x6c, 0x11, 0xb0, 0x39, 0x15, 0x5e, 0x59, 0x0d, 0x4c, 0x27, 0x37,
-	0x56, 0x94, 0xf1, 0x28, 0x4d, 0xbc, 0x8a, 0xde, 0x30, 0xad, 0x9c, 0x88, 0x68, 0x41, 0xd3, 0xa5,
-	0xf0, 0xaa, 0xe7, 0x56, 0xb7, 0x4c, 0x36, 0x2d, 0xbe, 0x84, 0xc6, 0x8c, 0xd1, 0x90, 0x26, 0x22,
-	0x0a, 0x62, 0xee, 0xd9, 0xca, 0x15, 0x1a, 0x57, 0xa3, 0xdb, 0x09, 0x29, 0xc2, 0xd0, 0x87, 0xb2,
-	0x88, 0xb9, 0x57, 0x53, 0x68, 0xd7, 0xa0, 0xa7, 0x31, 0x1f, 0xa5, 0xc9, 0xf7, 0x68, 0x4e, 0xe4,
-	0xd0, 0x7f, 0x0b, 0x8d, 0xc2, 0x3e, 0x22, 0x54, 0x96, 0x9c, 0x32, 0x63, 0x50, 0xd5, 0xd8, 0x86,
-	0x7a, 0x16, 0x70, 0xfe, 0x2b, 0x65, 0xa1, 0xf1, 0x98, 0xf7, 0xfe, 0x6f, 0x70, 0x72, 0x42, 0xe9,
-	0x78, 0x16, 0x8c, 0x28, 0xcb, 0x1d, 0xeb, 0x4e, 0x92, 0xce, 0xe4, 0xa9, 0xb6, 0xab, 0x6a, 0x79,
-	0x0b, 0x6e, 0xe8, 0x5a, 0xf9, 0x74, 0x88, 0x2c, 0xb1, 0x05, 0xd5, 0x2c, 0x0e, 0xa2, 0x44, 0xb9,
-	0xab, 0x13, 0xdd, 0xc8, 0x97, 0x47, 0x09, 0xa7, 0xb3, 0x25, 0xa3, 0xca, 0x48, 0x9d, 0xe4, 0xfd,
-	0xe0, 0x5f, 0x09, 0x9a, 0xfa, 0xb7, 0x5c, 0x51, 0xa6, 0xfe, 0xce, 0x3b, 0x70, 0xf2, 0x4c, 0xe2,
-	0x23, 0xe3, 0x78, 0x37, 0xb9, 0x6d, 0x6f, 0x7f, 0x60, 0xee, 0xec, 0x91, 0x64, 0xc8, 0xe3, 0x93,
-	0x33, 0xec, 0x46, 0x3a, 0x67, 0xd8, 0x8b, 0xae, 0x7f, 0x84, 0x13, 0x80, 0xdb, 0x00, 0xe2, 0x1e,
-	0x72, 0x93, 0x83, 0xf6, 0xe3, 0x03, 0x93, 0x0d, 0xc9, 0x73, 0x0b, 0x2f, 0xe1, 0x41, 0x31, 0x56,
-	0xd8, 0x36, 0xf0, 0x03, 0xf9, 0x6c, 0x77, 0x0e, 0xce, 0x72, 0x45, 0x1f, 0xa1, 0xb9, 0x15, 0x19,
-	0xec, 0x1c, 0x0e, 0x92, 0x26, 0x7b, 0x72, 0x57, 0xca, 0xa4, 0xb4, 0x6b, 0x5b, 0x01, 0x5e, 0xfc,
-	0x0f, 0x00, 0x00, 0xff, 0xff, 0xbe, 0xef, 0xad, 0x54, 0x40, 0x05, 0x00, 0x00,
+	// 654 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0xc1, 0x6e, 0xd3, 0x40,
+	0x10, 0x8d, 0xe3, 0xc4, 0x75, 0x26, 0x6a, 0x70, 0xb7, 0x69, 0xb1, 0x52, 0x0e, 0xc5, 0x12, 0x52,
+	0x39, 0x90, 0x40, 0xe0, 0x00, 0x11, 0x1c, 0xa2, 0x38, 0xaa, 0x38, 0x94, 0x56, 0xdb, 0xb4, 0xd7,
+	0xca, 0xf1, 0x4e, 0x8b, 0x69, 0x6a, 0x1b, 0xef, 0xa6, 0x55, 0xc5, 0xaf, 0x70, 0xe1, 0x7f, 0xf8,
+	0x28, 0xe4, 0xdd, 0xb5, 0x9b, 0xa4, 0x11, 0x82, 0x93, 0x3d, 0x33, 0x6f, 0xde, 0xbe, 0x7d, 0xbb,
+	0xb3, 0xf0, 0x3c, 0xbd, 0xbe, 0xea, 0xc5, 0x49, 0x26, 0xbe, 0x4e, 0x93, 0x79, 0xcc, 0x7a, 0x69,
+	0x96, 0x88, 0xa4, 0xc7, 0xf0, 0x36, 0x0a, 0xb1, 0x2b, 0x03, 0x52, 0x97, 0x1f, 0x8f, 0x80, 0x33,
+	0x64, 0xcc, 0x97, 0x15, 0x8a, 0xdf, 0xe7, 0xc8, 0x85, 0xb7, 0x0d, 0x5b, 0x0b, 0x39, 0x9e, 0x26,
+	0x31, 0x47, 0xef, 0x23, 0x6c, 0x9f, 0xa5, 0x2c, 0x10, 0xb8, 0x84, 0x25, 0x2f, 0xc0, 0x52, 0xb4,
+	0xae, 0xb1, 0x6f, 0x1c, 0x34, 0xfb, 0x9b, 0x8a, 0xbe, 0xab, 0x51, 0xba, 0xe8, 0xed, 0x42, 0x7b,
+	0xb9, 0x5b, 0xb3, 0xf6, 0xc0, 0x39, 0x44, 0xb1, 0x4c, 0xb9, 0x07, 0x0d, 0xd5, 0x75, 0x11, 0x31,
+	0xc9, 0xda, 0xa0, 0xb6, 0x4a, 0x7c, 0x66, 0xde, 0x00, 0xb6, 0x16, 0x1a, 0x14, 0xcb, 0xbf, 0x8a,
+	0x78, 0x05, 0x9b, 0x87, 0x28, 0x86, 0xb3, 0x59, 0xb1, 0xd2, 0x33, 0x68, 0xf0, 0xf9, 0x94, 0x87,
+	0x59, 0x34, 0x55, 0xad, 0x36, 0x7d, 0x48, 0x78, 0xbf, 0x0c, 0x68, 0x15, 0x78, 0xbd, 0x50, 0x17,
+	0x6a, 0xe2, 0x3e, 0x55, 0xd8, 0x56, 0xbf, 0xa3, 0x97, 0x59, 0x06, 0x75, 0x27, 0xf7, 0x29, 0x52,
+	0x89, 0x5b, 0x10, 0x56, 0xfd, 0x9b, 0xb0, 0xf7, 0x50, 0xcb, 0x9b, 0x48, 0x13, 0x36, 0x4e, 0xe8,
+	0xf8, 0x74, 0xfc, 0x65, 0xe2, 0x54, 0x48, 0x03, 0xea, 0x43, 0xdf, 0x1f, 0xfb, 0x8e, 0x91, 0xe7,
+	0xcf, 0x4e, 0xfc, 0xe1, 0x64, 0xec, 0x3b, 0xd5, 0x3c, 0xa0, 0xe3, 0xa3, 0xe3, 0xf3, 0xb1, 0xef,
+	0x98, 0x5e, 0x1f, 0xb6, 0x29, 0xde, 0x24, 0xb7, 0xf8, 0x1f, 0x16, 0xee, 0x42, 0x7b, 0xb9, 0x47,
+	0x9f, 0xc5, 0xcf, 0x2a, 0x58, 0x2a, 0x45, 0xde, 0x80, 0x7d, 0x83, 0x22, 0x60, 0x81, 0x08, 0xb4,
+	0xa5, 0x3b, 0x5a, 0xf9, 0xf1, 0xf4, 0x1b, 0x86, 0xe2, 0x48, 0x17, 0x69, 0x09, 0x23, 0x2d, 0xa8,
+	0x46, 0x4c, 0x6e, 0xb3, 0x41, 0xab, 0x11, 0x23, 0x2e, 0x6c, 0x04, 0x8c, 0x65, 0xc8, 0xb9, 0x6b,
+	0xca, 0x64, 0x11, 0x92, 0x5d, 0xb0, 0x44, 0x90, 0x5d, 0xa1, 0x70, 0x6b, 0xb2, 0xa0, 0x23, 0xf2,
+	0x12, 0x1c, 0x9e, 0x5c, 0x8a, 0xbb, 0x20, 0xc3, 0x8b, 0x5b, 0xcc, 0x78, 0x94, 0xc4, 0x6e, 0x5d,
+	0x22, 0x9e, 0x14, 0xf9, 0x73, 0x95, 0xce, 0xc9, 0x45, 0x74, 0x83, 0xc9, 0x5c, 0xb8, 0xd6, 0xbe,
+	0x71, 0x60, 0xd2, 0x22, 0x24, 0xef, 0xa0, 0x19, 0x66, 0xc8, 0x30, 0x16, 0x51, 0x30, 0xe3, 0xee,
+	0x86, 0x14, 0x4f, 0xb4, 0xf8, 0xd1, 0x43, 0x85, 0x2e, 0xc2, 0x88, 0x07, 0xa6, 0x98, 0x71, 0xd7,
+	0x96, 0x68, 0x47, 0xa3, 0x27, 0x33, 0x3e, 0x4a, 0xe2, 0xcb, 0xe8, 0x8a, 0xe6, 0x45, 0xef, 0x13,
+	0x34, 0x17, 0xfa, 0x09, 0x81, 0xda, 0x9c, 0x63, 0xa6, 0xdd, 0x95, 0xff, 0xa4, 0x03, 0x76, 0x1a,
+	0x70, 0x7e, 0x97, 0x64, 0x85, 0x13, 0x65, 0xec, 0xfd, 0x80, 0x46, 0x49, 0x98, 0x5b, 0x10, 0x06,
+	0x23, 0xcc, 0x84, 0xf6, 0x46, 0x47, 0x39, 0x69, 0x98, 0x67, 0x95, 0x31, 0xf2, 0x9f, 0x38, 0x60,
+	0x5e, 0xe3, 0xbd, 0x76, 0x22, 0xff, 0x25, 0x6d, 0xa8, 0xa7, 0xb3, 0x20, 0x8a, 0xe5, 0xde, 0x6d,
+	0xaa, 0x82, 0x7c, 0xf1, 0x28, 0xe6, 0x18, 0xce, 0x33, 0x94, 0xdb, 0xb6, 0x69, 0x19, 0x7b, 0x03,
+	0x68, 0x2d, 0x1f, 0x9c, 0x3e, 0x2e, 0x63, 0xf1, 0xb8, 0x0a, 0xcf, 0x73, 0xe5, 0x35, 0x5a, 0x84,
+	0xfd, 0xdf, 0x55, 0xd8, 0x54, 0xd7, 0xe2, 0x14, 0x33, 0x79, 0x3b, 0x06, 0x60, 0x0e, 0x19, 0x23,
+	0x4f, 0xb5, 0x4f, 0xab, 0xef, 0x47, 0xc7, 0x7d, 0x5c, 0xd0, 0x57, 0xac, 0x42, 0x46, 0x60, 0xa9,
+	0x87, 0x80, 0x14, 0xd3, 0xb3, 0xe6, 0x55, 0xe9, 0xec, 0xad, 0xad, 0x95, 0x24, 0x03, 0x30, 0x0f,
+	0x51, 0x94, 0x02, 0x56, 0x5f, 0x90, 0x52, 0xc0, 0xa3, 0x97, 0xc2, 0xab, 0x90, 0x0f, 0x60, 0xa9,
+	0x79, 0x25, 0xed, 0x95, 0xf1, 0x55, 0xbd, 0x3b, 0x6b, 0x87, 0xda, 0xab, 0xbc, 0x36, 0x72, 0xed,
+	0x6a, 0x70, 0x4a, 0xed, 0x6b, 0x66, 0xaf, 0xd4, 0xbe, 0x76, 0xc6, 0x2a, 0x53, 0x4b, 0x56, 0xdf,
+	0xfe, 0x09, 0x00, 0x00, 0xff, 0xff, 0x6e, 0x9a, 0x39, 0x15, 0xa3, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -733,16 +808,16 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type DeviceServiceClient interface {
-	// AddDevice adds a device to the topology
-	AddDevice(ctx context.Context, in *AddDeviceRequest, opts ...grpc.CallOption) (*AddDeviceResponse, error)
-	// GetDevice gets a device by ID
-	GetDevice(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*GetDeviceResponse, error)
-	// GetDevices gets a list of devices
-	GetDevices(ctx context.Context, in *GetDevicesRequest, opts ...grpc.CallOption) (DeviceService_GetDevicesClient, error)
-	// RemoveDevice removes a device from the topology
-	RemoveDevice(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceResponse, error)
-	// StreamDevices gets a stream of device add/update/remove events
-	StreamDevices(ctx context.Context, in *StreamDevicesRequest, opts ...grpc.CallOption) (DeviceService_StreamDevicesClient, error)
+	// Add adds a device to the topology
+	Add(ctx context.Context, in *AddDeviceRequest, opts ...grpc.CallOption) (*AddDeviceResponse, error)
+	// Update updates a device
+	Update(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*UpdateDeviceResponse, error)
+	// Get gets a device by ID
+	Get(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*GetDeviceResponse, error)
+	// GetAll gets a stream of device add/update/remove events
+	GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (DeviceService_GetAllClient, error)
+	// Remove removes a device from the topology
+	Remove(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceResponse, error)
 }
 
 type deviceServiceClient struct {
@@ -753,30 +828,39 @@ func NewDeviceServiceClient(cc *grpc.ClientConn) DeviceServiceClient {
 	return &deviceServiceClient{cc}
 }
 
-func (c *deviceServiceClient) AddDevice(ctx context.Context, in *AddDeviceRequest, opts ...grpc.CallOption) (*AddDeviceResponse, error) {
+func (c *deviceServiceClient) Add(ctx context.Context, in *AddDeviceRequest, opts ...grpc.CallOption) (*AddDeviceResponse, error) {
 	out := new(AddDeviceResponse)
-	err := c.cc.Invoke(ctx, "/proto.DeviceService/AddDevice", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.DeviceService/Add", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *deviceServiceClient) GetDevice(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*GetDeviceResponse, error) {
+func (c *deviceServiceClient) Update(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*UpdateDeviceResponse, error) {
+	out := new(UpdateDeviceResponse)
+	err := c.cc.Invoke(ctx, "/proto.DeviceService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deviceServiceClient) Get(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*GetDeviceResponse, error) {
 	out := new(GetDeviceResponse)
-	err := c.cc.Invoke(ctx, "/proto.DeviceService/GetDevice", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.DeviceService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *deviceServiceClient) GetDevices(ctx context.Context, in *GetDevicesRequest, opts ...grpc.CallOption) (DeviceService_GetDevicesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_DeviceService_serviceDesc.Streams[0], "/proto.DeviceService/GetDevices", opts...)
+func (c *deviceServiceClient) GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (DeviceService_GetAllClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_DeviceService_serviceDesc.Streams[0], "/proto.DeviceService/GetAll", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &deviceServiceGetDevicesClient{stream}
+	x := &deviceServiceGetAllClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -786,196 +870,161 @@ func (c *deviceServiceClient) GetDevices(ctx context.Context, in *GetDevicesRequ
 	return x, nil
 }
 
-type DeviceService_GetDevicesClient interface {
-	Recv() (*GetDevicesResponse, error)
+type DeviceService_GetAllClient interface {
+	Recv() (*GetAllResponse, error)
 	grpc.ClientStream
 }
 
-type deviceServiceGetDevicesClient struct {
+type deviceServiceGetAllClient struct {
 	grpc.ClientStream
 }
 
-func (x *deviceServiceGetDevicesClient) Recv() (*GetDevicesResponse, error) {
-	m := new(GetDevicesResponse)
+func (x *deviceServiceGetAllClient) Recv() (*GetAllResponse, error) {
+	m := new(GetAllResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (c *deviceServiceClient) RemoveDevice(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceResponse, error) {
+func (c *deviceServiceClient) Remove(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceResponse, error) {
 	out := new(RemoveDeviceResponse)
-	err := c.cc.Invoke(ctx, "/proto.DeviceService/RemoveDevice", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.DeviceService/Remove", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
-}
-
-func (c *deviceServiceClient) StreamDevices(ctx context.Context, in *StreamDevicesRequest, opts ...grpc.CallOption) (DeviceService_StreamDevicesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_DeviceService_serviceDesc.Streams[1], "/proto.DeviceService/StreamDevices", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &deviceServiceStreamDevicesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type DeviceService_StreamDevicesClient interface {
-	Recv() (*StreamDevicesResponse, error)
-	grpc.ClientStream
-}
-
-type deviceServiceStreamDevicesClient struct {
-	grpc.ClientStream
-}
-
-func (x *deviceServiceStreamDevicesClient) Recv() (*StreamDevicesResponse, error) {
-	m := new(StreamDevicesResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 // DeviceServiceServer is the server API for DeviceService service.
 type DeviceServiceServer interface {
-	// AddDevice adds a device to the topology
-	AddDevice(context.Context, *AddDeviceRequest) (*AddDeviceResponse, error)
-	// GetDevice gets a device by ID
-	GetDevice(context.Context, *GetDeviceRequest) (*GetDeviceResponse, error)
-	// GetDevices gets a list of devices
-	GetDevices(*GetDevicesRequest, DeviceService_GetDevicesServer) error
-	// RemoveDevice removes a device from the topology
-	RemoveDevice(context.Context, *RemoveDeviceRequest) (*RemoveDeviceResponse, error)
-	// StreamDevices gets a stream of device add/update/remove events
-	StreamDevices(*StreamDevicesRequest, DeviceService_StreamDevicesServer) error
+	// Add adds a device to the topology
+	Add(context.Context, *AddDeviceRequest) (*AddDeviceResponse, error)
+	// Update updates a device
+	Update(context.Context, *UpdateDeviceRequest) (*UpdateDeviceResponse, error)
+	// Get gets a device by ID
+	Get(context.Context, *GetDeviceRequest) (*GetDeviceResponse, error)
+	// GetAll gets a stream of device add/update/remove events
+	GetAll(*GetAllRequest, DeviceService_GetAllServer) error
+	// Remove removes a device from the topology
+	Remove(context.Context, *RemoveDeviceRequest) (*RemoveDeviceResponse, error)
 }
 
 // UnimplementedDeviceServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedDeviceServiceServer struct {
 }
 
-func (*UnimplementedDeviceServiceServer) AddDevice(ctx context.Context, req *AddDeviceRequest) (*AddDeviceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddDevice not implemented")
+func (*UnimplementedDeviceServiceServer) Add(ctx context.Context, req *AddDeviceRequest) (*AddDeviceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
 }
-func (*UnimplementedDeviceServiceServer) GetDevice(ctx context.Context, req *GetDeviceRequest) (*GetDeviceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetDevice not implemented")
+func (*UnimplementedDeviceServiceServer) Update(ctx context.Context, req *UpdateDeviceRequest) (*UpdateDeviceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (*UnimplementedDeviceServiceServer) GetDevices(req *GetDevicesRequest, srv DeviceService_GetDevicesServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetDevices not implemented")
+func (*UnimplementedDeviceServiceServer) Get(ctx context.Context, req *GetDeviceRequest) (*GetDeviceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (*UnimplementedDeviceServiceServer) RemoveDevice(ctx context.Context, req *RemoveDeviceRequest) (*RemoveDeviceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveDevice not implemented")
+func (*UnimplementedDeviceServiceServer) GetAll(req *GetAllRequest, srv DeviceService_GetAllServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (*UnimplementedDeviceServiceServer) StreamDevices(req *StreamDevicesRequest, srv DeviceService_StreamDevicesServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamDevices not implemented")
+func (*UnimplementedDeviceServiceServer) Remove(ctx context.Context, req *RemoveDeviceRequest) (*RemoveDeviceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
 
 func RegisterDeviceServiceServer(s *grpc.Server, srv DeviceServiceServer) {
 	s.RegisterService(&_DeviceService_serviceDesc, srv)
 }
 
-func _DeviceService_AddDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DeviceService_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeviceServiceServer).AddDevice(ctx, in)
+		return srv.(DeviceServiceServer).Add(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.DeviceService/AddDevice",
+		FullMethod: "/proto.DeviceService/Add",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).AddDevice(ctx, req.(*AddDeviceRequest))
+		return srv.(DeviceServiceServer).Add(ctx, req.(*AddDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DeviceService_GetDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DeviceService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeviceServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.DeviceService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeviceServiceServer).Update(ctx, req.(*UpdateDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeviceService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeviceServiceServer).GetDevice(ctx, in)
+		return srv.(DeviceServiceServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.DeviceService/GetDevice",
+		FullMethod: "/proto.DeviceService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).GetDevice(ctx, req.(*GetDeviceRequest))
+		return srv.(DeviceServiceServer).Get(ctx, req.(*GetDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DeviceService_GetDevices_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetDevicesRequest)
+func _DeviceService_GetAll_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetAllRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(DeviceServiceServer).GetDevices(m, &deviceServiceGetDevicesServer{stream})
+	return srv.(DeviceServiceServer).GetAll(m, &deviceServiceGetAllServer{stream})
 }
 
-type DeviceService_GetDevicesServer interface {
-	Send(*GetDevicesResponse) error
+type DeviceService_GetAllServer interface {
+	Send(*GetAllResponse) error
 	grpc.ServerStream
 }
 
-type deviceServiceGetDevicesServer struct {
+type deviceServiceGetAllServer struct {
 	grpc.ServerStream
 }
 
-func (x *deviceServiceGetDevicesServer) Send(m *GetDevicesResponse) error {
+func (x *deviceServiceGetAllServer) Send(m *GetAllResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _DeviceService_RemoveDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DeviceService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveDeviceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeviceServiceServer).RemoveDevice(ctx, in)
+		return srv.(DeviceServiceServer).Remove(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.DeviceService/RemoveDevice",
+		FullMethod: "/proto.DeviceService/Remove",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).RemoveDevice(ctx, req.(*RemoveDeviceRequest))
+		return srv.(DeviceServiceServer).Remove(ctx, req.(*RemoveDeviceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
-}
-
-func _DeviceService_StreamDevices_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(StreamDevicesRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(DeviceServiceServer).StreamDevices(m, &deviceServiceStreamDevicesServer{stream})
-}
-
-type DeviceService_StreamDevicesServer interface {
-	Send(*StreamDevicesResponse) error
-	grpc.ServerStream
-}
-
-type deviceServiceStreamDevicesServer struct {
-	grpc.ServerStream
-}
-
-func (x *deviceServiceStreamDevicesServer) Send(m *StreamDevicesResponse) error {
-	return x.ServerStream.SendMsg(m)
 }
 
 var _DeviceService_serviceDesc = grpc.ServiceDesc{
@@ -983,27 +1032,26 @@ var _DeviceService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*DeviceServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddDevice",
-			Handler:    _DeviceService_AddDevice_Handler,
+			MethodName: "Add",
+			Handler:    _DeviceService_Add_Handler,
 		},
 		{
-			MethodName: "GetDevice",
-			Handler:    _DeviceService_GetDevice_Handler,
+			MethodName: "Update",
+			Handler:    _DeviceService_Update_Handler,
 		},
 		{
-			MethodName: "RemoveDevice",
-			Handler:    _DeviceService_RemoveDevice_Handler,
+			MethodName: "Get",
+			Handler:    _DeviceService_Get_Handler,
+		},
+		{
+			MethodName: "Remove",
+			Handler:    _DeviceService_Remove_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetDevices",
-			Handler:       _DeviceService_GetDevices_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "StreamDevices",
-			Handler:       _DeviceService_StreamDevices_Handler,
+			StreamName:    "GetAll",
+			Handler:       _DeviceService_GetAll_Handler,
 			ServerStreams: true,
 		},
 	},

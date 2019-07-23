@@ -31,6 +31,7 @@ message AddDeviceResponse {
 
 // UpdateDeviceRequest updates a device
 message UpdateDeviceRequest {
+    // device is the updated device
     Device device = 1;
 }
 
@@ -41,11 +42,14 @@ message UpdateDeviceResponse {
 
 // GetDeviceRequest gets a device by ID
 message GetDeviceRequest {
+
+    // device_id is the unique device ID with which to lookup the device
     string device_id = 1;
 }
 
 // GetDeviceResponse carries a device
 message GetDeviceResponse {
+    // device is the device object
     Device device = 1;
 }
 
@@ -88,6 +92,8 @@ message GetAllResponse {
 
 // RemoveDeviceRequest removes a device by ID
 message RemoveDeviceRequest {
+
+    // device_id is the unique identifier for the device to remove from the store
     string device_id = 1;
 }
 
@@ -98,26 +104,30 @@ message RemoveDeviceResponse {
 
 // Device contains information about a device
 message Device {
+
+    // metadata is the store metadata used for concurrency control
+    ObjectMetadata metadata = 1;
+
     // id is a globally unique device identifier
-    string id = 1;
+    string id = 2;
 
     // address is the host:port of the device
-    string address = 2;
+    string address = 3;
 
     // target is the device target
-    string target = 3;
+    string target = 4;
 
-    // version is the device version
-    string version = 4;
+    // software_version is the device software version
+    string software_version = 5;
 
     // timeout indicates the device request timeout
-    int64 timeout = 5;
+    int64 timeout = 6;
 
     // credentials contains the credentials for connecting to the device
-    Credentials credentials = 6;
+    Credentials credentials = 7;
 
     // tls is the device TLS configuration
-    TlsConfig tls = 7;
+    TlsConfig tls = 8;
 }
 
 // Credentials is the device credentials
@@ -147,6 +157,17 @@ message TlsConfig {
 
     // insecure indicates whether to connect to the device with insecure communication
     bool insecure = 7;
+}
+
+// ObjectMetadata is the metadata required by the store for concurrency control
+message ObjectMetadata {
+
+    // id is the unique identifier for the object
+    string id = 1;
+
+    // version is the store version of the object
+    uint64 version = 2;
+
 }
 
 // DeviceService provides an API for managing devices.
