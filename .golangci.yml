@@ -1,0 +1,11 @@
+linters:
+  enable:
+    - gofmt
+    - gocyclo
+    - golint
+    - misspell
+    - typecheck
+    - errcheck
+run:
+  skip-dirs:
+    - modelplugin
