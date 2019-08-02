@@ -7,7 +7,6 @@ go:
 
 services:
   - docker
-  - 
 
 notifications:
   email: false
@@ -21,17 +20,11 @@ cache:
     - $HOME/gopath/pkg/mod         # Cache the Go modules
 
 before_script:
-  - go get -u golang.org/x/lint/golint
-  - go get -u github.com/fzipp/gocyclo
-  - go get -u github.com/client9/misspell/cmd/misspell
-  - go get -u github.com/gordonklaus/ineffassign
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
 
 jobs:
   include:
     - stage: tests
-      script: make coverage
-
-
-
-
-
+      script:
+        - make coverage
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./build/bin/push-images; fi'
