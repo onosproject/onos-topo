@@ -17,10 +17,8 @@ package command
 
 import (
 	"github.com/onosproject/onos-config/pkg/certs"
-	"github.com/onosproject/onos-topo/pkg/northbound"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc"
 )
 
 // GetRootCommand returns the root CLI command.
@@ -39,23 +37,12 @@ func GetRootCommand() *cobra.Command {
 	cmd.PersistentFlags().StringP("certPath", "c", viper.GetString("certPath"), "path to client certificate")
 	cmd.PersistentFlags().String("config", "", "config file (default: $HOME/.onos/config.yaml)")
 
-	viper.BindPFlag("address", cmd.PersistentFlags().Lookup("address"))
-	viper.BindPFlag("keyPath", cmd.PersistentFlags().Lookup("keyPath"))
-	viper.BindPFlag("certPath", cmd.PersistentFlags().Lookup("certPath"))
+	_ = viper.BindPFlag("address", cmd.PersistentFlags().Lookup("address"))
+	_ = viper.BindPFlag("keyPath", cmd.PersistentFlags().Lookup("keyPath"))
+	_ = viper.BindPFlag("certPath", cmd.PersistentFlags().Lookup("certPath"))
 
 	cmd.AddCommand(newInitCommand())
 	cmd.AddCommand(newConfigCommand())
 	cmd.AddCommand(newCompletionCommand())
 	return cmd
-}
-
-func getConnection(cmd *cobra.Command) *grpc.ClientConn {
-	keyPath := getConfig("keyPath")
-	certPath := getConfig("certPath")
-	address := getConfig("address")
-	opts, err := certs.HandleCertArgs(&keyPath, &certPath)
-	if err != nil {
-		ExitWithError(ExitError, err)
-	}
-	return northbound.Connect(address, opts...)
 }

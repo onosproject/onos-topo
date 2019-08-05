@@ -6,6 +6,4 @@ linters:
     - misspell
     - typecheck
     - errcheck
-run:
-  skip-dirs:
-    - modelplugin
+

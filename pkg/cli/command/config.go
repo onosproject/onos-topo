@@ -139,15 +139,6 @@ func newInitCommand() *cobra.Command {
 	}
 }
 
-func setConfig(key string, value string) error {
-	viper.Set(key, value)
-	return viper.WriteConfig()
-}
-
-func getConfig(key string) string {
-	return viper.GetString(key)
-}
-
 func initConfig() {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
@@ -163,5 +154,5 @@ func initConfig() {
 		viper.AddConfigPath(".")
 	}
 
-	viper.ReadInConfig()
+	_ = viper.ReadInConfig()
 }
