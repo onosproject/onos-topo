@@ -19,6 +19,8 @@ github.com/atomix/atomix-go-client v0.0.0-20190706023513-51518f9bf013 h1:IxAYyXt
 github.com/atomix/atomix-go-client v0.0.0-20190706023513-51518f9bf013/go.mod h1:N8U2hD9J65jfukKa2LSf53oVFGkcNFyhW9mcEsm08zs=
 github.com/atomix/atomix-go-client v0.0.0-20190806221106-2ee5e3f714d3 h1:fhJKUDbOh11ANEejY/1KRUpcQv0z2nl9IqtgViXifC4=
 github.com/atomix/atomix-go-client v0.0.0-20190806221106-2ee5e3f714d3/go.mod h1:N8U2hD9J65jfukKa2LSf53oVFGkcNFyhW9mcEsm08zs=
+github.com/atomix/atomix-go-client v0.0.0-20190806224917-0d010b56ba74 h1:vHIACi17HJwk/rmaa9byi94ebHLUCReEUlYU/3qAB8Y=
+github.com/atomix/atomix-go-client v0.0.0-20190806224917-0d010b56ba74/go.mod h1:P/m0xcEzXviZLULk78gYlJr0mHjXCZAcem3kOkvwzhA=
 github.com/atomix/atomix-k8s-controller v0.0.0-20190620084759-d5e65f7fbf68/go.mod h1:vdmRfGKhgD28STeLKeKoq3tMZOyTR0l3WSG9QCrZWs0=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
