@@ -99,10 +99,13 @@ func (s *Server) List(request *proto.ListRequest, server proto.DeviceService_Lis
 			case store.DeviceRemoved:
 				t = proto.ListResponse_REMOVED
 			}
-			server.Send(&proto.ListResponse{
+			err := server.Send(&proto.ListResponse{
 				Type:   t,
 				Device: event.Device,
 			})
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		ch := make(chan *proto.Device)
@@ -111,10 +114,13 @@ func (s *Server) List(request *proto.ListRequest, server proto.DeviceService_Lis
 		}
 
 		for device := range ch {
-			server.Send(&proto.ListResponse{
+			err := server.Send(&proto.ListResponse{
 				Type:   proto.ListResponse_NONE,
 				Device: device,
 			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
