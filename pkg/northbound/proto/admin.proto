@@ -21,4 +21,5 @@ package proto;
 
 // TopoAdminService provides means for interactions with the topology subsystem.
 service TopoAdminService {
+
 }

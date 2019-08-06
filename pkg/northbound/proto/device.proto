@@ -1,0 +1,196 @@
+/*
+Copyright 2019-present Open Networking Foundation.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+syntax = "proto3";
+
+// Package admin defines the administrative and diagnostic gRPC interfaces.
+package proto;
+
+// AddDeviceRequest adds a device to the topology
+message AddDeviceRequest {
+
+}
+
+// AddDeviceResponse is sent in response to an AddDeviceRequest
+message AddDeviceResponse {
+
+}
+
+// UpdateDeviceRequest updates a device
+message UpdateDeviceRequest {
+    // device is the updated device
+    Device device = 1;
+}
+
+// UpdateDeviceResponse is sent in response to an UpdateDeviceRequest
+message UpdateDeviceResponse {
+
+}
+
+// GetDeviceRequest gets a device by ID
+message GetDeviceRequest {
+
+    // device_id is the unique device ID with which to lookup the device
+    string device_id = 1;
+}
+
+// GetDeviceResponse carries a device
+message GetDeviceResponse {
+    // device is the device object
+    Device device = 1;
+}
+
+// GetAllRequest requests a stream of devices and changes
+// By default, the request requests a stream of all devices that are present in the topology when
+// the request is received by the service. However, if `subscribe` is `true`, the stream will remain
+// open after all devices have been sent and events that occur following the last device will be
+// streamed to the client until the stream is closed.
+message GetAllRequest {
+
+    // subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur
+    // after all devices have been streamed to the client
+    bool subscribe = 1;
+}
+
+// GetAllResponse carries a single device event
+message GetAllResponse {
+
+    // type is the type of the event
+    Type type = 1;
+
+    // device is the device on which the event occurred
+    Device device = 2;
+
+    // Device event type
+    enum Type {
+        // PRESENT indicates a device already present in the store
+        PRESENT = 0;
+
+        // ADDED is an event which occurs when a device is added to the topology
+        ADDED = 1;
+
+        // UPDATED is an event which occurs when a device is updated
+        UPDATED = 2;
+
+        // REMOVED is an event which occurs when a device is removed from the topology
+        REMOVED = 3;
+    }
+}
+
+// RemoveDeviceRequest removes a device by ID
+message RemoveDeviceRequest {
+
+    // device_id is the unique identifier for the device to remove from the store
+    string device_id = 1;
+}
+
+// RemoveDeviceResponse is sent in response to a RemoveDeviceRequest
+message RemoveDeviceResponse {
+
+}
+
+// Device contains information about a device
+message Device {
+
+    // metadata is the store metadata used for concurrency control
+    ObjectMetadata metadata = 1;
+
+    // id is a globally unique device identifier
+    string id = 2;
+
+    // address is the host:port of the device
+    string address = 3;
+
+    // target is the device target
+    string target = 4;
+
+    // software_version is the device software version
+    string software_version = 5;
+
+    // timeout indicates the device request timeout
+    int64 timeout = 6;
+
+    // credentials contains the credentials for connecting to the device
+    Credentials credentials = 7;
+
+    // tls is the device TLS configuration
+    TlsConfig tls = 8;
+}
+
+// Credentials is the device credentials
+message Credentials {
+
+    // user is the user with which to connect to the device
+    string user = 1;
+
+    // password is the password for connecting to the device
+    string password = 2;
+}
+
+// Device TLS configuration
+message TlsConfig {
+
+    // caCert is the name of the device's CA certificate
+    string caCert = 3;
+
+    // cert is the name of the device's certificate
+    string cert = 4;
+
+    // key is the name of the device's TLS key
+    string key = 5;
+
+    // plain indicates whether to connect to the device over plaintext
+    bool plain = 6;
+
+    // insecure indicates whether to connect to the device with insecure communication
+    bool insecure = 7;
+}
+
+// ObjectMetadata is the metadata required by the store for concurrency control
+message ObjectMetadata {
+
+    // id is the unique identifier for the object
+    string id = 1;
+
+    // version is the store version of the object
+    uint64 version = 2;
+
+}
+
+// DeviceService provides an API for managing devices.
+service DeviceService {
+
+    // Add adds a device to the topology
+    rpc Add(AddDeviceRequest) returns (AddDeviceResponse) {
+    }
+
+    // Update updates a device
+    rpc Update(UpdateDeviceRequest) returns (UpdateDeviceResponse) {
+    }
+
+    // Get gets a device by ID
+    rpc Get(GetDeviceRequest) returns (GetDeviceResponse) {
+    }
+
+    // GetAll gets a stream of device add/update/remove events
+    rpc GetAll(GetAllRequest) returns (stream GetAllResponse) {
+    }
+
+    // Remove removes a device from the topology
+    rpc Remove(RemoveDeviceRequest) returns (RemoveDeviceResponse) {
+    }
+
+}
