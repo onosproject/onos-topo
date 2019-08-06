@@ -53,20 +53,20 @@ message GetDeviceResponse {
     Device device = 1;
 }
 
-// GetAllRequest requests a stream of devices and changes
+// ListRequest requests a stream of devices and changes
 // By default, the request requests a stream of all devices that are present in the topology when
 // the request is received by the service. However, if `subscribe` is `true`, the stream will remain
 // open after all devices have been sent and events that occur following the last device will be
 // streamed to the client until the stream is closed.
-message GetAllRequest {
+message ListRequest {
 
     // subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur
     // after all devices have been streamed to the client
     bool subscribe = 1;
 }
 
-// GetAllResponse carries a single device event
-message GetAllResponse {
+// ListResponse carries a single device event
+message ListResponse {
 
     // type is the type of the event
     Type type = 1;
@@ -174,23 +174,23 @@ message ObjectMetadata {
 service DeviceService {
 
     // Add adds a device to the topology
-    rpc Add(AddDeviceRequest) returns (AddDeviceResponse) {
+    rpc Add (AddDeviceRequest) returns (AddDeviceResponse) {
     }
 
     // Update updates a device
-    rpc Update(UpdateDeviceRequest) returns (UpdateDeviceResponse) {
+    rpc Update (UpdateDeviceRequest) returns (UpdateDeviceResponse) {
     }
 
     // Get gets a device by ID
-    rpc Get(GetDeviceRequest) returns (GetDeviceResponse) {
+    rpc Get (GetDeviceRequest) returns (GetDeviceResponse) {
     }
 
-    // GetAll gets a stream of device add/update/remove events
-    rpc GetAll(GetAllRequest) returns (stream GetAllResponse) {
+    // List gets a stream of device add/update/remove events
+    rpc List (ListRequest) returns (stream ListResponse) {
     }
 
     // Remove removes a device from the topology
-    rpc Remove(RemoveDeviceRequest) returns (RemoveDeviceResponse) {
+    rpc Remove (RemoveDeviceRequest) returns (RemoveDeviceResponse) {
     }
 
 }
