@@ -114,6 +114,7 @@ func (s *atomixDeviceStore) List(ch chan<- *deviceproto.Device) error {
 			}
 		}
 	}()
+	return nil
 }
 
 func (s *atomixDeviceStore) Watch(ch chan<- *DeviceEvent) error {

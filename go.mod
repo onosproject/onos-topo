@@ -5,13 +5,14 @@ go 1.12
 require (
 	cloud.google.com/go v0.43.0 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
-	github.com/atomix/atomix-go-client v0.0.0-20190806221106-2ee5e3f714d3 // indirect
+	github.com/atomix/atomix-go-client v0.0.0-20190806221106-2ee5e3f714d3
 	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
 	github.com/elazarl/goproxy v0.0.0-20190711103511-473e67f1d7d2 // indirect
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
 	github.com/go-openapi/spec v0.19.2 // indirect
 	github.com/go-openapi/swag v0.19.4 // indirect
+	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/google/pprof v0.0.0-20190723021845-34ac40c74b70 // indirect
