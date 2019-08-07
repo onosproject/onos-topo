@@ -21,12 +21,14 @@ package proto;
 
 // AddDeviceRequest adds a device to the topology
 message AddDeviceRequest {
-
+    // device is the device to add
+    Device device = 1;
 }
 
 // AddDeviceResponse is sent in response to an AddDeviceRequest
 message AddDeviceResponse {
-
+    // metadata is the added device metadata
+    ObjectMetadata metadata = 1;
 }
 
 // UpdateDeviceRequest updates a device
@@ -37,7 +39,8 @@ message UpdateDeviceRequest {
 
 // UpdateDeviceResponse is sent in response to an UpdateDeviceRequest
 message UpdateDeviceResponse {
-
+    // metadata is the updated device metadata
+    ObjectMetadata metadata = 1;
 }
 
 // GetDeviceRequest gets a device by ID
@@ -76,8 +79,8 @@ message ListResponse {
 
     // Device event type
     enum Type {
-        // PRESENT indicates a device already present in the store
-        PRESENT = 0;
+        // NONE indicates this response does not represent a state change
+        NONE = 0;
 
         // ADDED is an event which occurs when a device is added to the topology
         ADDED = 1;
@@ -92,9 +95,8 @@ message ListResponse {
 
 // RemoveDeviceRequest removes a device by ID
 message RemoveDeviceRequest {
-
-    // device_id is the unique identifier for the device to remove from the store
-    string device_id = 1;
+    // device is the device to remove
+    Device device = 1;
 }
 
 // RemoveDeviceResponse is sent in response to a RemoveDeviceRequest
