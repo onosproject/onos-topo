@@ -5,7 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.43.0 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
-	github.com/atomix/atomix-go-client v0.0.0-20190806224917-0d010b56ba74
+	github.com/atomix/atomix-go-client v0.0.0-20190807011524-58b4352273d7
 	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
 	github.com/elazarl/goproxy v0.0.0-20190711103511-473e67f1d7d2 // indirect
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect

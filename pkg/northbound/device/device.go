@@ -22,6 +22,8 @@ import (
 	"github.com/onosproject/onos-topo/pkg/northbound/proto"
 	"github.com/onosproject/onos-topo/pkg/store"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // NewService returns a new device Service
@@ -52,6 +54,11 @@ type Server struct {
 
 func (s *Server) Add(ctx context.Context, request *proto.AddDeviceRequest) (*proto.AddDeviceResponse, error) {
 	device := request.Device
+	if device == nil {
+		return nil, status.Error(codes.InvalidArgument, "no device specified")
+	} else if device.Metadata != nil && device.Metadata.Version != 0 {
+		return nil, status.Error(codes.InvalidArgument, "device version is already set")
+	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
@@ -62,6 +69,11 @@ func (s *Server) Add(ctx context.Context, request *proto.AddDeviceRequest) (*pro
 
 func (s *Server) Update(ctx context.Context, request *proto.UpdateDeviceRequest) (*proto.UpdateDeviceResponse, error) {
 	device := request.Device
+	if device == nil {
+		return nil, status.Error(codes.InvalidArgument, "no device specified")
+	} else if device.Metadata == nil || device.Metadata.Version == 0 {
+		return nil, status.Error(codes.InvalidArgument, "device version not set")
+	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
@@ -74,6 +86,8 @@ func (s *Server) Get(ctx context.Context, request *proto.GetDeviceRequest) (*pro
 	device, err := s.deviceStore.Load(request.DeviceId)
 	if err != nil {
 		return nil, err
+	} else if device == nil {
+		return nil, status.Error(codes.NotFound, "device not found")
 	}
 	return &proto.GetDeviceResponse{
 		Device: device,
@@ -127,7 +141,11 @@ func (s *Server) List(request *proto.ListRequest, server proto.DeviceService_Lis
 }
 
 func (s *Server) Remove(ctx context.Context, request *proto.RemoveDeviceRequest) (*proto.RemoveDeviceResponse, error) {
-	err := s.deviceStore.Delete(request.Device)
+	device := request.Device
+	if device == nil || device.Metadata == nil || device.Metadata.Version == 0 {
+		return nil, status.Error(codes.InvalidArgument, "device version not specified")
+	}
+	err := s.deviceStore.Delete(device)
 	if err != nil {
 		return nil, err
 	}

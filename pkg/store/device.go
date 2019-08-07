@@ -90,10 +90,14 @@ func (s *atomixDeviceStore) Store(device *deviceproto.Device) error {
 
 	// Put the device in the map using an optimistic lock if this is an update
 	var kv *map_.KeyValue
-	if device.Metadata.Version == 0 {
+	if device.Metadata == nil || device.Metadata.Version == 0 {
 		kv, err = s.devices.Put(ctx, device.Id, bytes)
 	} else {
 		kv, err = s.devices.Put(ctx, device.Id, bytes, map_.WithVersion(int64(device.Metadata.Version)))
+	}
+
+	if err != nil {
+		return err
 	}
 
 	// Update the device metadata
@@ -108,20 +112,18 @@ func (s *atomixDeviceStore) Delete(device *deviceproto.Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := s.devices.Remove(ctx, device.Metadata.Id)
+	_, err := s.devices.Remove(ctx, device.Metadata.Id, map_.WithVersion(int64(device.Metadata.Version)))
 	return err
 }
 
 func (s *atomixDeviceStore) List(ch chan<- *deviceproto.Device) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
 	mapCh := make(chan *map_.KeyValue)
-	if err := s.devices.Entries(ctx, mapCh); err != nil {
+	if err := s.devices.Entries(context.Background(), mapCh); err != nil {
 		return err
 	}
 
 	go func() {
+		defer close(ch)
 		for kv := range mapCh {
 			if device, err := decodeDevice(kv.Key, kv.Value, kv.Version); err == nil {
 				ch <- device
@@ -132,15 +134,13 @@ func (s *atomixDeviceStore) List(ch chan<- *deviceproto.Device) error {
 }
 
 func (s *atomixDeviceStore) Watch(ch chan<- *DeviceEvent) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
 	mapCh := make(chan *map_.MapEvent)
-	if err := s.devices.Watch(ctx, mapCh, map_.WithReplay()); err != nil {
+	if err := s.devices.Watch(context.Background(), mapCh, map_.WithReplay()); err != nil {
 		return err
 	}
 
 	go func() {
+		defer close(ch)
 		for event := range mapCh {
 			if device, err := decodeDevice(event.Key, event.Value, event.Version); err == nil {
 				ch <- &DeviceEvent{
