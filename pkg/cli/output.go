@@ -40,7 +40,7 @@ func Output(msg string, args ...interface{}) {
 
 // ExitWithOutput prints the specified entity and exits program with success.
 func ExitWithOutput(msg string, output ...interface{}) {
-	fmt.Fprintf(os.Stdout, msg, output...)
+	fmt.Fprintln(os.Stdout, fmt.Sprintf(msg, output...))
 	os.Exit(ExitSuccess)
 }
 
@@ -57,6 +57,6 @@ func ExitWithError(code int, err error) {
 
 // ExitWithErrorMessage prints the specified message and exits program with the given error code.
 func ExitWithErrorMessage(msg string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, msg, args...)
+	fmt.Fprintln(os.Stderr, fmt.Sprintf(msg, args...))
 	os.Exit(ExitError)
 }
