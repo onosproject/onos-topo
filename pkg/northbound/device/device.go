@@ -142,9 +142,6 @@ func (s *Server) List(request *proto.ListRequest, server proto.DeviceService_Lis
 
 func (s *Server) Remove(ctx context.Context, request *proto.RemoveDeviceRequest) (*proto.RemoveDeviceResponse, error) {
 	device := request.Device
-	if device == nil || device.Metadata == nil || device.Metadata.Version == 0 {
-		return nil, status.Error(codes.InvalidArgument, "device version not specified")
-	}
 	err := s.deviceStore.Delete(device)
 	if err != nil {
 		return nil, err
