@@ -112,7 +112,11 @@ func (s *atomixDeviceStore) Delete(device *deviceproto.Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := s.devices.Remove(ctx, device.Metadata.Id, map_.WithVersion(int64(device.Metadata.Version)))
+	if device.Metadata != nil && device.Metadata.Version > 0 {
+		_, err := s.devices.Remove(ctx, device.Metadata.Id, map_.WithVersion(int64(device.Metadata.Version)))
+		return err
+	}
+	_, err := s.devices.Remove(ctx, device.Id)
 	return err
 }
 

@@ -19,6 +19,8 @@ syntax = "proto3";
 // Package admin defines the administrative and diagnostic gRPC interfaces.
 package proto;
 
+import "google/protobuf/duration.proto";
+
 // AddDeviceRequest adds a device to the topology
 message AddDeviceRequest {
     // device is the device to add
@@ -123,7 +125,7 @@ message Device {
     string software_version = 5;
 
     // timeout indicates the device request timeout
-    int64 timeout = 6;
+    google.protobuf.Duration timeout = 6;
 
     // credentials contains the credentials for connecting to the device
     Credentials credentials = 7;

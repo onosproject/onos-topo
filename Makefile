@@ -9,9 +9,8 @@ ONOS_BUILD_VERSION := stable
 
 build: # @HELP build the Go binaries and run all validations (default)
 build:
-	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos
+	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos-topo
 	CGO_ENABLED=1 go build -gcflags "all=-N -l" -o build/_output/onos-topo-debug ./cmd/onos-topo
-	go build -o build/_output/onos ./cmd/onos
 
 test: # @HELP run the unit tests and source code validation
 test: build deps license_check linters
@@ -55,24 +54,6 @@ onos-topo-debug-docker: onos-topo-base-docker # @HELP build onos-topo Docker deb
 	docker build . -f build/onos-topo-debug/Dockerfile \
 		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
 		-t onosproject/onos-topo:${ONOS_TOPO_DEBUG_VERSION}
-
-onos-cli-docker: onos-topo-base-docker # @HELP build onos-cli Docker image
-	docker build . -f build/onos-cli/Dockerfile \
-		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
-		-t onosproject/onos-cli:${ONOS_TOPO_VERSION}
-
-onos-topo-it-docker: onos-topo-base-docker # @HELP build onos-topo-integration-tests Docker image
-	docker build . -f build/onos-it/Dockerfile \
-		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
-		-t onosproject/onos-topo-integration-tests:${ONOS_TOPO_VERSION}
-
-# integration: @HELP build and run integration tests
-integration: kind
-	onit create cluster
-	onit add simulator
-	onit add simulator
-	onit run suite integration-tests
-
 
 images: # @HELP build all Docker images
 images: build onos-topo-docker onos-topo-debug-docker
