@@ -115,10 +115,9 @@ func (s *atomixDeviceStore) Delete(device *deviceproto.Device) error {
 	if device.Metadata != nil && device.Metadata.Version > 0 {
 		_, err := s.devices.Remove(ctx, device.Metadata.Id, map_.WithVersion(int64(device.Metadata.Version)))
 		return err
-	} else {
-		_, err := s.devices.Remove(ctx, device.Id)
-		return err
 	}
+	_, err := s.devices.Remove(ctx, device.Id)
+	return err
 }
 
 func (s *atomixDeviceStore) List(ch chan<- *deviceproto.Device) error {
