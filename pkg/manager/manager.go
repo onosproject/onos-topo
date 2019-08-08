@@ -16,24 +16,20 @@
 package manager
 
 import (
-	"github.com/onosproject/onos-topo/pkg/store"
 	log "k8s.io/klog"
 )
 
 var mgr Manager
 
 // NewManager initializes the network control manager subsystem.
-func NewManager(deviceStore store.DeviceStore) (*Manager, error) {
+func NewManager() (*Manager, error) {
 	log.Info("Creating Manager")
-	mgr = Manager{
-		DeviceStore: deviceStore,
-	}
+	mgr = Manager{}
 	return &mgr, nil
 }
 
 // Manager single point of entry for the topology system.
 type Manager struct {
-	DeviceStore store.DeviceStore
 }
 
 // Run starts a synchronizer based on the devices and the northbound services.

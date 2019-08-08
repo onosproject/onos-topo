@@ -17,7 +17,6 @@ package diags
 
 import (
 	"github.com/onosproject/onos-topo/pkg/northbound"
-	"github.com/onosproject/onos-topo/pkg/northbound/proto"
 	"google.golang.org/grpc"
 )
 
@@ -28,7 +27,7 @@ type Service struct {
 
 // Register registers the Service with the gRPC server.
 func (s Service) Register(r *grpc.Server) {
-	proto.RegisterTopoDiagsServer(r, Server{})
+	RegisterTopoDiagsServer(r, Server{})
 }
 
 // Server implements the gRPC service for diagnostic facilities.

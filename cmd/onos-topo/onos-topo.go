@@ -35,7 +35,6 @@ import (
 	"github.com/onosproject/onos-topo/pkg/northbound/admin"
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/onosproject/onos-topo/pkg/northbound/diags"
-	"github.com/onosproject/onos-topo/pkg/store"
 	log "k8s.io/klog"
 )
 
@@ -69,17 +68,12 @@ func main() {
 	})
 	log.Info("Starting onos-topo")
 
-	deviceStore, err := store.NewAtomixDeviceStore()
-	if err != nil {
-		log.Fatal("Unable to load device store", err)
-	}
-
-	mgr, err := manager.NewManager(deviceStore)
+	mgr, err := manager.NewManager()
 	if err != nil {
 		log.Fatal("Unable to load onos-topo ", err)
 	} else {
 		mgr.Run()
-		err = startServer(*caPath, *keyPath, *certPath, mgr)
+		err = startServer(*caPath, *keyPath, *certPath)
 		if err != nil {
 			log.Fatal("Unable to start onos-topo ", err)
 		}
@@ -87,11 +81,16 @@ func main() {
 }
 
 // Creates gRPC server and registers various services; then serves.
-func startServer(caPath string, keyPath string, certPath string, mgr *manager.Manager) error {
+func startServer(caPath string, keyPath string, certPath string) error {
 	s := northbound.NewServer(northbound.NewServerConfig(caPath, keyPath, certPath))
 	s.AddService(admin.Service{})
 	s.AddService(diags.Service{})
-	s.AddService(device.NewService(mgr))
+
+	deviceService, err := device.NewService()
+	if err != nil {
+		return err
+	}
+	s.AddService(deviceService)
 
 	return s.Serve(func(started string) {
 		log.Info("Started NBI on ", started)

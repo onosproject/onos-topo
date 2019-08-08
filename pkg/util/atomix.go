@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package store
+package util
 
 import (
 	"github.com/atomix/atomix-go-client/pkg/client"
@@ -38,12 +38,12 @@ func getAtomixApp() string {
 	return os.Getenv(atomixAppEnv)
 }
 
-func getAtomixRaftGroup() string {
+func GetAtomixRaftGroup() string {
 	return os.Getenv(atomixRaftGroup)
 }
 
-// getAtomixClient returns the Atomix client
-func getAtomixClient() (*client.Client, error) {
+// GetAtomixClient returns the Atomix client
+func GetAtomixClient() (*client.Client, error) {
 	opts := []client.ClientOption{
 		client.WithNamespace(getAtomixNamespace()),
 		client.WithApplication(getAtomixApp()),

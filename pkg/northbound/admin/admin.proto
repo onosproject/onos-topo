@@ -17,7 +17,7 @@ limitations under the License.
 syntax = "proto3";
 
 // Package admin defines the administrative and diagnostic gRPC interfaces.
-package proto;
+package topo.admin;
 
 // TopoAdminService provides means for interactions with the topology subsystem.
 service TopoAdminService {

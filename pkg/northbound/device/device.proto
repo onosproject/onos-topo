@@ -17,7 +17,7 @@ limitations under the License.
 syntax = "proto3";
 
 // Package admin defines the administrative and diagnostic gRPC interfaces.
-package proto;
+package topo.device;
 
 import "google/protobuf/duration.proto";
 

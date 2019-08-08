@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package store
+package device
 
 import (
 	"context"
 	"github.com/atomix/atomix-go-client/pkg/client/map_"
 	"github.com/atomix/atomix-go-client/pkg/client/session"
 	"github.com/gogo/protobuf/proto"
-	deviceproto "github.com/onosproject/onos-topo/pkg/northbound/proto"
+	"github.com/onosproject/onos-topo/pkg/util"
 	"time"
 )
 
 // NewAtomixDeviceStore returns a new persistent DeviceStore
 func NewAtomixDeviceStore() (DeviceStore, error) {
-	client, err := getAtomixClient()
+	client, err := util.GetAtomixClient()
 	if err != nil {
 		return nil, err
 	}
 
-	group, err := client.GetGroup(context.Background(), getAtomixRaftGroup())
+	group, err := client.GetGroup(context.Background(), util.GetAtomixRaftGroup())
 	if err != nil {
 		return nil, err
 	}
@@ -48,16 +48,16 @@ func NewAtomixDeviceStore() (DeviceStore, error) {
 // DeviceStore stores topology information
 type DeviceStore interface {
 	// Load loads a device from the store
-	Load(deviceID string) (*deviceproto.Device, error)
+	Load(deviceID string) (*Device, error)
 
 	// Store stores a device in the store
-	Store(*deviceproto.Device) error
+	Store(*Device) error
 
 	// Delete deletes a device from the store
-	Delete(*deviceproto.Device) error
+	Delete(*Device) error
 
 	// List streams devices to the given channel
-	List(chan<- *deviceproto.Device) error
+	List(chan<- *Device) error
 
 	// Watch streams device events to the given channel
 	Watch(chan<- *DeviceEvent) error
@@ -68,7 +68,7 @@ type atomixDeviceStore struct {
 	devices map_.Map
 }
 
-func (s *atomixDeviceStore) Load(deviceID string) (*deviceproto.Device, error) {
+func (s *atomixDeviceStore) Load(deviceID string) (*Device, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -79,7 +79,7 @@ func (s *atomixDeviceStore) Load(deviceID string) (*deviceproto.Device, error) {
 	return decodeDevice(kv.Key, kv.Value, kv.Version)
 }
 
-func (s *atomixDeviceStore) Store(device *deviceproto.Device) error {
+func (s *atomixDeviceStore) Store(device *Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -101,14 +101,14 @@ func (s *atomixDeviceStore) Store(device *deviceproto.Device) error {
 	}
 
 	// Update the device metadata
-	device.Metadata = &deviceproto.ObjectMetadata{
+	device.Metadata = &ObjectMetadata{
 		Id:      device.Id,
 		Version: uint64(kv.Version),
 	}
 	return err
 }
 
-func (s *atomixDeviceStore) Delete(device *deviceproto.Device) error {
+func (s *atomixDeviceStore) Delete(device *Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -120,7 +120,7 @@ func (s *atomixDeviceStore) Delete(device *deviceproto.Device) error {
 	return err
 }
 
-func (s *atomixDeviceStore) List(ch chan<- *deviceproto.Device) error {
+func (s *atomixDeviceStore) List(ch chan<- *Device) error {
 	mapCh := make(chan *map_.KeyValue)
 	if err := s.devices.Entries(context.Background(), mapCh); err != nil {
 		return err
@@ -157,12 +157,12 @@ func (s *atomixDeviceStore) Watch(ch chan<- *DeviceEvent) error {
 	return nil
 }
 
-func decodeDevice(key string, value []byte, version int64) (*deviceproto.Device, error) {
-	device := &deviceproto.Device{}
+func decodeDevice(key string, value []byte, version int64) (*Device, error) {
+	device := &Device{}
 	if err := proto.Unmarshal(value, device); err != nil {
 		return nil, err
 	}
-	device.Metadata = &deviceproto.ObjectMetadata{
+	device.Metadata = &ObjectMetadata{
 		Id:      key,
 		Version: uint64(version),
 	}
@@ -182,5 +182,5 @@ const (
 // DeviceEvent is a store event for a device
 type DeviceEvent struct {
 	Type   DeviceEventType
-	Device *deviceproto.Device
+	Device *Device
 }
