@@ -53,7 +53,7 @@ type Server struct {
 	deviceStore DeviceStore
 }
 
-func (s *Server) Add(ctx context.Context, request *AddDeviceRequest) (*AddDeviceResponse, error) {
+func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
@@ -63,12 +63,12 @@ func (s *Server) Add(ctx context.Context, request *AddDeviceRequest) (*AddDevice
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	return &AddDeviceResponse{
+	return &AddResponse{
 		Metadata: device.Metadata,
 	}, nil
 }
 
-func (s *Server) Update(ctx context.Context, request *UpdateDeviceRequest) (*UpdateDeviceResponse, error) {
+func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
@@ -78,19 +78,19 @@ func (s *Server) Update(ctx context.Context, request *UpdateDeviceRequest) (*Upd
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	return &UpdateDeviceResponse{
+	return &UpdateResponse{
 		Metadata: device.Metadata,
 	}, nil
 }
 
-func (s *Server) Get(ctx context.Context, request *GetDeviceRequest) (*GetDeviceResponse, error) {
+func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, error) {
 	device, err := s.deviceStore.Load(request.DeviceId)
 	if err != nil {
 		return nil, err
 	} else if device == nil {
 		return nil, status.Error(codes.NotFound, "device not found")
 	}
-	return &GetDeviceResponse{
+	return &GetResponse{
 		Device: device,
 	}, nil
 }
@@ -141,11 +141,11 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 	return nil
 }
 
-func (s *Server) Remove(ctx context.Context, request *RemoveDeviceRequest) (*RemoveDeviceResponse, error) {
+func (s *Server) Remove(ctx context.Context, request *RemoveRequest) (*RemoveResponse, error) {
 	device := request.Device
 	err := s.deviceStore.Delete(device)
 	if err != nil {
 		return nil, err
 	}
-	return &RemoveDeviceResponse{}, nil
+	return &RemoveResponse{}, nil
 }

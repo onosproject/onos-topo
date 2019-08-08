@@ -63,8 +63,8 @@ func (ListResponse_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{7, 0}
 }
 
-// AddDeviceRequest adds a device to the topology
-type AddDeviceRequest struct {
+// AddRequest adds a device to the topology
+type AddRequest struct {
 	// device is the device to add
 	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -72,40 +72,40 @@ type AddDeviceRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AddDeviceRequest) Reset()         { *m = AddDeviceRequest{} }
-func (m *AddDeviceRequest) String() string { return proto.CompactTextString(m) }
-func (*AddDeviceRequest) ProtoMessage()    {}
-func (*AddDeviceRequest) Descriptor() ([]byte, []int) {
+func (m *AddRequest) Reset()         { *m = AddRequest{} }
+func (m *AddRequest) String() string { return proto.CompactTextString(m) }
+func (*AddRequest) ProtoMessage()    {}
+func (*AddRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{0}
 }
 
-func (m *AddDeviceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddDeviceRequest.Unmarshal(m, b)
+func (m *AddRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddRequest.Unmarshal(m, b)
 }
-func (m *AddDeviceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddDeviceRequest.Marshal(b, m, deterministic)
+func (m *AddRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddRequest.Marshal(b, m, deterministic)
 }
-func (m *AddDeviceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddDeviceRequest.Merge(m, src)
+func (m *AddRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddRequest.Merge(m, src)
 }
-func (m *AddDeviceRequest) XXX_Size() int {
-	return xxx_messageInfo_AddDeviceRequest.Size(m)
+func (m *AddRequest) XXX_Size() int {
+	return xxx_messageInfo_AddRequest.Size(m)
 }
-func (m *AddDeviceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddDeviceRequest.DiscardUnknown(m)
+func (m *AddRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddDeviceRequest proto.InternalMessageInfo
+var xxx_messageInfo_AddRequest proto.InternalMessageInfo
 
-func (m *AddDeviceRequest) GetDevice() *Device {
+func (m *AddRequest) GetDevice() *Device {
 	if m != nil {
 		return m.Device
 	}
 	return nil
 }
 
-// AddDeviceResponse is sent in response to an AddDeviceRequest
-type AddDeviceResponse struct {
+// AddResponse is sent in response to an AddDeviceRequest
+type AddResponse struct {
 	// metadata is the added device metadata
 	Metadata             *ObjectMetadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
@@ -113,40 +113,40 @@ type AddDeviceResponse struct {
 	XXX_sizecache        int32           `json:"-"`
 }
 
-func (m *AddDeviceResponse) Reset()         { *m = AddDeviceResponse{} }
-func (m *AddDeviceResponse) String() string { return proto.CompactTextString(m) }
-func (*AddDeviceResponse) ProtoMessage()    {}
-func (*AddDeviceResponse) Descriptor() ([]byte, []int) {
+func (m *AddResponse) Reset()         { *m = AddResponse{} }
+func (m *AddResponse) String() string { return proto.CompactTextString(m) }
+func (*AddResponse) ProtoMessage()    {}
+func (*AddResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{1}
 }
 
-func (m *AddDeviceResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddDeviceResponse.Unmarshal(m, b)
+func (m *AddResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddResponse.Unmarshal(m, b)
 }
-func (m *AddDeviceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddDeviceResponse.Marshal(b, m, deterministic)
+func (m *AddResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddResponse.Marshal(b, m, deterministic)
 }
-func (m *AddDeviceResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddDeviceResponse.Merge(m, src)
+func (m *AddResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddResponse.Merge(m, src)
 }
-func (m *AddDeviceResponse) XXX_Size() int {
-	return xxx_messageInfo_AddDeviceResponse.Size(m)
+func (m *AddResponse) XXX_Size() int {
+	return xxx_messageInfo_AddResponse.Size(m)
 }
-func (m *AddDeviceResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddDeviceResponse.DiscardUnknown(m)
+func (m *AddResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddDeviceResponse proto.InternalMessageInfo
+var xxx_messageInfo_AddResponse proto.InternalMessageInfo
 
-func (m *AddDeviceResponse) GetMetadata() *ObjectMetadata {
+func (m *AddResponse) GetMetadata() *ObjectMetadata {
 	if m != nil {
 		return m.Metadata
 	}
 	return nil
 }
 
-// UpdateDeviceRequest updates a device
-type UpdateDeviceRequest struct {
+// UpdateRequest updates a device
+type UpdateRequest struct {
 	// device is the updated device
 	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -154,40 +154,40 @@ type UpdateDeviceRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *UpdateDeviceRequest) Reset()         { *m = UpdateDeviceRequest{} }
-func (m *UpdateDeviceRequest) String() string { return proto.CompactTextString(m) }
-func (*UpdateDeviceRequest) ProtoMessage()    {}
-func (*UpdateDeviceRequest) Descriptor() ([]byte, []int) {
+func (m *UpdateRequest) Reset()         { *m = UpdateRequest{} }
+func (m *UpdateRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateRequest) ProtoMessage()    {}
+func (*UpdateRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{2}
 }
 
-func (m *UpdateDeviceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateDeviceRequest.Unmarshal(m, b)
+func (m *UpdateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateRequest.Unmarshal(m, b)
 }
-func (m *UpdateDeviceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateDeviceRequest.Marshal(b, m, deterministic)
+func (m *UpdateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateRequest.Marshal(b, m, deterministic)
 }
-func (m *UpdateDeviceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateDeviceRequest.Merge(m, src)
+func (m *UpdateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateRequest.Merge(m, src)
 }
-func (m *UpdateDeviceRequest) XXX_Size() int {
-	return xxx_messageInfo_UpdateDeviceRequest.Size(m)
+func (m *UpdateRequest) XXX_Size() int {
+	return xxx_messageInfo_UpdateRequest.Size(m)
 }
-func (m *UpdateDeviceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateDeviceRequest.DiscardUnknown(m)
+func (m *UpdateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UpdateDeviceRequest proto.InternalMessageInfo
+var xxx_messageInfo_UpdateRequest proto.InternalMessageInfo
 
-func (m *UpdateDeviceRequest) GetDevice() *Device {
+func (m *UpdateRequest) GetDevice() *Device {
 	if m != nil {
 		return m.Device
 	}
 	return nil
 }
 
-// UpdateDeviceResponse is sent in response to an UpdateDeviceRequest
-type UpdateDeviceResponse struct {
+// UpdateResponse is sent in response to an UpdateDeviceRequest
+type UpdateResponse struct {
 	// metadata is the updated device metadata
 	Metadata             *ObjectMetadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
@@ -195,40 +195,40 @@ type UpdateDeviceResponse struct {
 	XXX_sizecache        int32           `json:"-"`
 }
 
-func (m *UpdateDeviceResponse) Reset()         { *m = UpdateDeviceResponse{} }
-func (m *UpdateDeviceResponse) String() string { return proto.CompactTextString(m) }
-func (*UpdateDeviceResponse) ProtoMessage()    {}
-func (*UpdateDeviceResponse) Descriptor() ([]byte, []int) {
+func (m *UpdateResponse) Reset()         { *m = UpdateResponse{} }
+func (m *UpdateResponse) String() string { return proto.CompactTextString(m) }
+func (*UpdateResponse) ProtoMessage()    {}
+func (*UpdateResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{3}
 }
 
-func (m *UpdateDeviceResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateDeviceResponse.Unmarshal(m, b)
+func (m *UpdateResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateResponse.Unmarshal(m, b)
 }
-func (m *UpdateDeviceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateDeviceResponse.Marshal(b, m, deterministic)
+func (m *UpdateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateResponse.Marshal(b, m, deterministic)
 }
-func (m *UpdateDeviceResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateDeviceResponse.Merge(m, src)
+func (m *UpdateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateResponse.Merge(m, src)
 }
-func (m *UpdateDeviceResponse) XXX_Size() int {
-	return xxx_messageInfo_UpdateDeviceResponse.Size(m)
+func (m *UpdateResponse) XXX_Size() int {
+	return xxx_messageInfo_UpdateResponse.Size(m)
 }
-func (m *UpdateDeviceResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateDeviceResponse.DiscardUnknown(m)
+func (m *UpdateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UpdateDeviceResponse proto.InternalMessageInfo
+var xxx_messageInfo_UpdateResponse proto.InternalMessageInfo
 
-func (m *UpdateDeviceResponse) GetMetadata() *ObjectMetadata {
+func (m *UpdateResponse) GetMetadata() *ObjectMetadata {
 	if m != nil {
 		return m.Metadata
 	}
 	return nil
 }
 
-// GetDeviceRequest gets a device by ID
-type GetDeviceRequest struct {
+// GetRequest gets a device by ID
+type GetRequest struct {
 	// device_id is the unique device ID with which to lookup the device
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -236,40 +236,40 @@ type GetDeviceRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetDeviceRequest) Reset()         { *m = GetDeviceRequest{} }
-func (m *GetDeviceRequest) String() string { return proto.CompactTextString(m) }
-func (*GetDeviceRequest) ProtoMessage()    {}
-func (*GetDeviceRequest) Descriptor() ([]byte, []int) {
+func (m *GetRequest) Reset()         { *m = GetRequest{} }
+func (m *GetRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRequest) ProtoMessage()    {}
+func (*GetRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{4}
 }
 
-func (m *GetDeviceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetDeviceRequest.Unmarshal(m, b)
+func (m *GetRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRequest.Unmarshal(m, b)
 }
-func (m *GetDeviceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetDeviceRequest.Marshal(b, m, deterministic)
+func (m *GetRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRequest.Marshal(b, m, deterministic)
 }
-func (m *GetDeviceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetDeviceRequest.Merge(m, src)
+func (m *GetRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequest.Merge(m, src)
 }
-func (m *GetDeviceRequest) XXX_Size() int {
-	return xxx_messageInfo_GetDeviceRequest.Size(m)
+func (m *GetRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRequest.Size(m)
 }
-func (m *GetDeviceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetDeviceRequest.DiscardUnknown(m)
+func (m *GetRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetDeviceRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetRequest proto.InternalMessageInfo
 
-func (m *GetDeviceRequest) GetDeviceId() string {
+func (m *GetRequest) GetDeviceId() string {
 	if m != nil {
 		return m.DeviceId
 	}
 	return ""
 }
 
-// GetDeviceResponse carries a device
-type GetDeviceResponse struct {
+// GetResponse carries a device
+type GetResponse struct {
 	// device is the device object
 	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -277,32 +277,32 @@ type GetDeviceResponse struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetDeviceResponse) Reset()         { *m = GetDeviceResponse{} }
-func (m *GetDeviceResponse) String() string { return proto.CompactTextString(m) }
-func (*GetDeviceResponse) ProtoMessage()    {}
-func (*GetDeviceResponse) Descriptor() ([]byte, []int) {
+func (m *GetResponse) Reset()         { *m = GetResponse{} }
+func (m *GetResponse) String() string { return proto.CompactTextString(m) }
+func (*GetResponse) ProtoMessage()    {}
+func (*GetResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{5}
 }
 
-func (m *GetDeviceResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetDeviceResponse.Unmarshal(m, b)
+func (m *GetResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetResponse.Unmarshal(m, b)
 }
-func (m *GetDeviceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetDeviceResponse.Marshal(b, m, deterministic)
+func (m *GetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetResponse.Marshal(b, m, deterministic)
 }
-func (m *GetDeviceResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetDeviceResponse.Merge(m, src)
+func (m *GetResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetResponse.Merge(m, src)
 }
-func (m *GetDeviceResponse) XXX_Size() int {
-	return xxx_messageInfo_GetDeviceResponse.Size(m)
+func (m *GetResponse) XXX_Size() int {
+	return xxx_messageInfo_GetResponse.Size(m)
 }
-func (m *GetDeviceResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetDeviceResponse.DiscardUnknown(m)
+func (m *GetResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetDeviceResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetResponse proto.InternalMessageInfo
 
-func (m *GetDeviceResponse) GetDevice() *Device {
+func (m *GetResponse) GetDevice() *Device {
 	if m != nil {
 		return m.Device
 	}
@@ -405,8 +405,8 @@ func (m *ListResponse) GetDevice() *Device {
 	return nil
 }
 
-// RemoveDeviceRequest removes a device by ID
-type RemoveDeviceRequest struct {
+// RemoveRequest removes a device by ID
+type RemoveRequest struct {
 	// device is the device to remove
 	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -414,69 +414,69 @@ type RemoveDeviceRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RemoveDeviceRequest) Reset()         { *m = RemoveDeviceRequest{} }
-func (m *RemoveDeviceRequest) String() string { return proto.CompactTextString(m) }
-func (*RemoveDeviceRequest) ProtoMessage()    {}
-func (*RemoveDeviceRequest) Descriptor() ([]byte, []int) {
+func (m *RemoveRequest) Reset()         { *m = RemoveRequest{} }
+func (m *RemoveRequest) String() string { return proto.CompactTextString(m) }
+func (*RemoveRequest) ProtoMessage()    {}
+func (*RemoveRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{8}
 }
 
-func (m *RemoveDeviceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RemoveDeviceRequest.Unmarshal(m, b)
+func (m *RemoveRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveRequest.Unmarshal(m, b)
 }
-func (m *RemoveDeviceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RemoveDeviceRequest.Marshal(b, m, deterministic)
+func (m *RemoveRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveRequest.Marshal(b, m, deterministic)
 }
-func (m *RemoveDeviceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveDeviceRequest.Merge(m, src)
+func (m *RemoveRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveRequest.Merge(m, src)
 }
-func (m *RemoveDeviceRequest) XXX_Size() int {
-	return xxx_messageInfo_RemoveDeviceRequest.Size(m)
+func (m *RemoveRequest) XXX_Size() int {
+	return xxx_messageInfo_RemoveRequest.Size(m)
 }
-func (m *RemoveDeviceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_RemoveDeviceRequest.DiscardUnknown(m)
+func (m *RemoveRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RemoveDeviceRequest proto.InternalMessageInfo
+var xxx_messageInfo_RemoveRequest proto.InternalMessageInfo
 
-func (m *RemoveDeviceRequest) GetDevice() *Device {
+func (m *RemoveRequest) GetDevice() *Device {
 	if m != nil {
 		return m.Device
 	}
 	return nil
 }
 
-// RemoveDeviceResponse is sent in response to a RemoveDeviceRequest
-type RemoveDeviceResponse struct {
+// RemoveResponse is sent in response to a RemoveDeviceRequest
+type RemoveResponse struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RemoveDeviceResponse) Reset()         { *m = RemoveDeviceResponse{} }
-func (m *RemoveDeviceResponse) String() string { return proto.CompactTextString(m) }
-func (*RemoveDeviceResponse) ProtoMessage()    {}
-func (*RemoveDeviceResponse) Descriptor() ([]byte, []int) {
+func (m *RemoveResponse) Reset()         { *m = RemoveResponse{} }
+func (m *RemoveResponse) String() string { return proto.CompactTextString(m) }
+func (*RemoveResponse) ProtoMessage()    {}
+func (*RemoveResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b9d152c21573e6ba, []int{9}
 }
 
-func (m *RemoveDeviceResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RemoveDeviceResponse.Unmarshal(m, b)
+func (m *RemoveResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveResponse.Unmarshal(m, b)
 }
-func (m *RemoveDeviceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RemoveDeviceResponse.Marshal(b, m, deterministic)
+func (m *RemoveResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveResponse.Marshal(b, m, deterministic)
 }
-func (m *RemoveDeviceResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveDeviceResponse.Merge(m, src)
+func (m *RemoveResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveResponse.Merge(m, src)
 }
-func (m *RemoveDeviceResponse) XXX_Size() int {
-	return xxx_messageInfo_RemoveDeviceResponse.Size(m)
+func (m *RemoveResponse) XXX_Size() int {
+	return xxx_messageInfo_RemoveResponse.Size(m)
 }
-func (m *RemoveDeviceResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_RemoveDeviceResponse.DiscardUnknown(m)
+func (m *RemoveResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RemoveDeviceResponse proto.InternalMessageInfo
+var xxx_messageInfo_RemoveResponse proto.InternalMessageInfo
 
 // Device contains information about a device
 type Device struct {
@@ -761,16 +761,16 @@ func (m *ObjectMetadata) GetVersion() uint64 {
 
 func init() {
 	proto.RegisterEnum("topo.device.ListResponse_Type", ListResponse_Type_name, ListResponse_Type_value)
-	proto.RegisterType((*AddDeviceRequest)(nil), "topo.device.AddDeviceRequest")
-	proto.RegisterType((*AddDeviceResponse)(nil), "topo.device.AddDeviceResponse")
-	proto.RegisterType((*UpdateDeviceRequest)(nil), "topo.device.UpdateDeviceRequest")
-	proto.RegisterType((*UpdateDeviceResponse)(nil), "topo.device.UpdateDeviceResponse")
-	proto.RegisterType((*GetDeviceRequest)(nil), "topo.device.GetDeviceRequest")
-	proto.RegisterType((*GetDeviceResponse)(nil), "topo.device.GetDeviceResponse")
+	proto.RegisterType((*AddRequest)(nil), "topo.device.AddRequest")
+	proto.RegisterType((*AddResponse)(nil), "topo.device.AddResponse")
+	proto.RegisterType((*UpdateRequest)(nil), "topo.device.UpdateRequest")
+	proto.RegisterType((*UpdateResponse)(nil), "topo.device.UpdateResponse")
+	proto.RegisterType((*GetRequest)(nil), "topo.device.GetRequest")
+	proto.RegisterType((*GetResponse)(nil), "topo.device.GetResponse")
 	proto.RegisterType((*ListRequest)(nil), "topo.device.ListRequest")
 	proto.RegisterType((*ListResponse)(nil), "topo.device.ListResponse")
-	proto.RegisterType((*RemoveDeviceRequest)(nil), "topo.device.RemoveDeviceRequest")
-	proto.RegisterType((*RemoveDeviceResponse)(nil), "topo.device.RemoveDeviceResponse")
+	proto.RegisterType((*RemoveRequest)(nil), "topo.device.RemoveRequest")
+	proto.RegisterType((*RemoveResponse)(nil), "topo.device.RemoveResponse")
 	proto.RegisterType((*Device)(nil), "topo.device.Device")
 	proto.RegisterType((*Credentials)(nil), "topo.device.Credentials")
 	proto.RegisterType((*TlsConfig)(nil), "topo.device.TlsConfig")
@@ -780,51 +780,51 @@ func init() {
 func init() { proto.RegisterFile("pkg/northbound/device/device.proto", fileDescriptor_b9d152c21573e6ba) }
 
 var fileDescriptor_b9d152c21573e6ba = []byte{
-	// 695 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0x5d, 0x4f, 0xdb, 0x3c,
-	0x14, 0xee, 0x17, 0x6d, 0x7a, 0xfa, 0xbe, 0x2c, 0x18, 0x84, 0x42, 0xd9, 0x10, 0xcb, 0x15, 0x13,
-	0x52, 0x3a, 0x15, 0x4d, 0x93, 0x90, 0x26, 0xd6, 0x91, 0x82, 0x26, 0x01, 0x9d, 0x3c, 0xe0, 0x16,
-	0xa5, 0xb5, 0xe9, 0x32, 0x4a, 0x9c, 0xd9, 0x0e, 0x08, 0xed, 0x6e, 0x3f, 0x66, 0xff, 0x65, 0xff,
-	0x6a, 0x8a, 0xed, 0x94, 0xa4, 0x2b, 0x9b, 0x36, 0xae, 0x92, 0x73, 0xfc, 0x9c, 0xe7, 0x7c, 0x1f,
-	0x70, 0xe3, 0xab, 0x71, 0x27, 0x62, 0x5c, 0x7e, 0x1a, 0xb2, 0x24, 0x22, 0x1d, 0x42, 0x6f, 0xc2,
-	0x11, 0x35, 0x1f, 0x2f, 0xe6, 0x4c, 0x32, 0xd4, 0x92, 0x2c, 0x66, 0x9e, 0x56, 0xb5, 0x37, 0xc6,
-	0x8c, 0x8d, 0x27, 0xb4, 0xa3, 0x9e, 0x86, 0xc9, 0x65, 0x87, 0x24, 0x3c, 0x90, 0x21, 0x8b, 0x34,
-	0xd8, 0xdd, 0x03, 0xbb, 0x47, 0x88, 0xaf, 0xc0, 0x98, 0x7e, 0x49, 0xa8, 0x90, 0x68, 0x1b, 0xea,
-	0xda, 0xda, 0x29, 0x6f, 0x96, 0xb7, 0x5a, 0xdd, 0x65, 0x2f, 0xc7, 0xe8, 0x19, 0xac, 0x81, 0xb8,
-	0x47, 0xb0, 0x94, 0x23, 0x10, 0x31, 0x8b, 0x04, 0x45, 0xaf, 0xc1, 0xba, 0xa6, 0x32, 0x20, 0x81,
-	0x0c, 0x0c, 0xc7, 0x7a, 0x81, 0x63, 0x30, 0xfc, 0x4c, 0x47, 0xf2, 0xd8, 0x40, 0xf0, 0x14, 0xec,
-	0xbe, 0x83, 0xe5, 0xb3, 0x98, 0x04, 0x92, 0x3e, 0x22, 0xa2, 0x01, 0xac, 0x14, 0x39, 0x1e, 0x1b,
-	0x54, 0x07, 0xec, 0x43, 0x2a, 0x8b, 0x11, 0xad, 0x43, 0x53, 0x9b, 0x5d, 0x84, 0x44, 0xb1, 0x35,
-	0xb1, 0xa5, 0x15, 0xef, 0x89, 0xfb, 0x16, 0x96, 0x72, 0x06, 0xc6, 0xfd, 0x5f, 0xe5, 0xb0, 0x0d,
-	0xad, 0xa3, 0x50, 0xc8, 0xcc, 0xdb, 0x53, 0x68, 0x8a, 0x64, 0x28, 0x46, 0x3c, 0x1c, 0x6a, 0x73,
-	0x0b, 0xdf, 0x2b, 0xdc, 0xef, 0x65, 0xf8, 0x4f, 0xa3, 0x8d, 0xab, 0x2e, 0xd4, 0xe4, 0x5d, 0xac,
-	0x91, 0x8b, 0xdd, 0x8d, 0x82, 0xa3, 0x3c, 0xd0, 0x3b, 0xbd, 0x8b, 0x29, 0x56, 0xd8, 0x5c, 0x78,
-	0x95, 0x3f, 0x87, 0xf7, 0x0a, 0x6a, 0xa9, 0x29, 0xb2, 0xa0, 0x76, 0x32, 0x38, 0xe9, 0xdb, 0x25,
-	0xd4, 0x84, 0x85, 0x9e, 0xef, 0xf7, 0x7d, 0xbb, 0x8c, 0x5a, 0xd0, 0x38, 0xfb, 0xe0, 0xf7, 0x4e,
-	0xfb, 0xbe, 0x5d, 0x49, 0x05, 0xdc, 0x3f, 0x1e, 0x9c, 0xf7, 0x7d, 0xbb, 0x9a, 0x76, 0x17, 0xd3,
-	0x6b, 0x76, 0xf3, 0x98, 0xee, 0xae, 0xc2, 0x4a, 0x91, 0x43, 0xa7, 0xe2, 0xfe, 0xa8, 0x40, 0x5d,
-	0xab, 0xfe, 0xb9, 0xd1, 0x68, 0x11, 0x2a, 0x21, 0x51, 0xf9, 0x37, 0x71, 0x25, 0x24, 0xc8, 0x81,
-	0x46, 0x40, 0x08, 0xa7, 0x42, 0x38, 0x55, 0xa5, 0xcc, 0x44, 0xb4, 0x0a, 0x75, 0x19, 0xf0, 0x31,
-	0x95, 0x4e, 0x4d, 0x3d, 0x18, 0x09, 0xbd, 0x00, 0x5b, 0xb0, 0x4b, 0x79, 0x1b, 0x70, 0x7a, 0x71,
-	0x43, 0xb9, 0x08, 0x59, 0xe4, 0x2c, 0x28, 0xc4, 0x93, 0x4c, 0x7f, 0xae, 0xd5, 0x68, 0x07, 0x1a,
-	0x32, 0xbc, 0xa6, 0x2c, 0x91, 0x4e, 0x5d, 0x05, 0xb9, 0xe6, 0xe9, 0x5d, 0xf5, 0xb2, 0x5d, 0xf5,
-	0x7c, 0xb3, 0xab, 0x38, 0x43, 0xa2, 0x5d, 0x68, 0x8d, 0x38, 0x25, 0x34, 0x92, 0x61, 0x30, 0x11,
-	0x4e, 0x43, 0x19, 0x3a, 0x85, 0xec, 0xf6, 0xef, 0xdf, 0x71, 0x1e, 0x8c, 0xb6, 0xa0, 0x2a, 0x27,
-	0xc2, 0xb1, 0x94, 0xcd, 0x6a, 0xc1, 0xe6, 0x74, 0x22, 0xf6, 0x59, 0x74, 0x19, 0x8e, 0x71, 0x0a,
-	0x71, 0xdf, 0x40, 0x2b, 0xc7, 0x82, 0x10, 0xd4, 0x12, 0x41, 0xb9, 0x19, 0x73, 0xf5, 0x8f, 0xda,
-	0x60, 0xc5, 0x81, 0x10, 0xb7, 0x8c, 0x67, 0x05, 0x9b, 0xca, 0xee, 0x57, 0x68, 0x4e, 0x09, 0xd3,
-	0x4a, 0x8d, 0x82, 0x7d, 0xca, 0xa5, 0x29, 0xa1, 0x91, 0x52, 0xd2, 0x51, 0xaa, 0xd5, 0xf5, 0x53,
-	0xff, 0xc8, 0x86, 0xea, 0x15, 0xbd, 0x33, 0x05, 0x4b, 0x7f, 0xd1, 0x0a, 0x2c, 0xc4, 0x93, 0x20,
-	0x8c, 0x54, 0x89, 0x2c, 0xac, 0x85, 0xd4, 0x79, 0x18, 0x09, 0x3a, 0x4a, 0x38, 0x55, 0x25, 0xb0,
-	0xf0, 0x54, 0x76, 0x77, 0x61, 0xb1, 0xd8, 0x5f, 0xd3, 0xd5, 0x72, 0xbe, 0xab, 0x59, 0x6b, 0xd2,
-	0xc8, 0x6b, 0x38, 0x13, 0xbb, 0xdf, 0xaa, 0xf0, 0xbf, 0x9e, 0xa1, 0x8f, 0x94, 0xab, 0x51, 0x3a,
-	0x80, 0x6a, 0x8f, 0x10, 0xf4, 0xac, 0x50, 0xad, 0xd9, 0x83, 0xd9, 0xde, 0x78, 0xe8, 0xd9, 0xcc,
-	0x66, 0x09, 0x0d, 0xa0, 0xae, 0x6f, 0x12, 0xda, 0x2c, 0x60, 0xe7, 0x1c, 0xbb, 0xf6, 0xf3, 0xdf,
-	0x20, 0xa6, 0x84, 0x07, 0x50, 0x3d, 0xa4, 0x72, 0x26, 0xb0, 0xd9, 0x2b, 0x35, 0x13, 0xd8, 0x2f,
-	0x37, 0xc9, 0x2d, 0xa1, 0x3d, 0xa8, 0xa5, 0x17, 0x01, 0x39, 0x73, 0x8e, 0x84, 0xe6, 0x58, 0x7b,
-	0xf0, 0x7c, 0xb8, 0xa5, 0x97, 0xe5, 0x34, 0x33, 0xbd, 0x8f, 0x33, 0x99, 0xcd, 0x59, 0xf4, 0x99,
-	0xcc, 0xe6, 0xae, 0x71, 0x69, 0x58, 0x57, 0xe3, 0xbf, 0xf3, 0x33, 0x00, 0x00, 0xff, 0xff, 0x60,
-	0x95, 0x28, 0x02, 0xeb, 0x06, 0x00, 0x00,
+	// 689 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0x5d, 0x6f, 0xd3, 0x3c,
+	0x14, 0xee, 0xd7, 0xda, 0xf4, 0xe4, 0x5d, 0xdf, 0xca, 0xa0, 0x91, 0x75, 0x68, 0x42, 0xb9, 0xda,
+	0x34, 0x29, 0x45, 0x9d, 0x10, 0xa2, 0x02, 0xa1, 0xaa, 0x29, 0xd3, 0x24, 0xb6, 0x21, 0xb3, 0xed,
+	0x76, 0x4a, 0x63, 0xaf, 0x84, 0x75, 0x71, 0xb0, 0x9d, 0x4d, 0x13, 0xff, 0x87, 0xff, 0xc2, 0x2d,
+	0xbf, 0x08, 0xc5, 0x76, 0xda, 0xa4, 0x0c, 0x21, 0xc6, 0x55, 0x72, 0x8e, 0x9f, 0xe7, 0xf8, 0xf1,
+	0xf9, 0x02, 0x37, 0xb9, 0x9a, 0xf5, 0x63, 0xc6, 0xe5, 0xa7, 0x29, 0x4b, 0x63, 0xd2, 0x27, 0xf4,
+	0x26, 0x0a, 0xa9, 0xf9, 0x78, 0x09, 0x67, 0x92, 0x21, 0x5b, 0xb2, 0x84, 0x79, 0xda, 0xd5, 0xdb,
+	0x9e, 0x31, 0x36, 0x9b, 0xd3, 0xbe, 0x3a, 0x9a, 0xa6, 0x97, 0x7d, 0x92, 0xf2, 0x40, 0x46, 0x2c,
+	0xd6, 0x60, 0xf7, 0x15, 0xc0, 0x88, 0x10, 0x4c, 0xbf, 0xa4, 0x54, 0x48, 0xb4, 0x07, 0x4d, 0xcd,
+	0x73, 0xaa, 0xcf, 0xaa, 0x3b, 0xf6, 0xe0, 0x91, 0x57, 0x88, 0xe5, 0xf9, 0xea, 0x83, 0x0d, 0xc4,
+	0x7d, 0x07, 0xb6, 0xa2, 0x8a, 0x84, 0xc5, 0x82, 0xa2, 0x97, 0x60, 0x5d, 0x53, 0x19, 0x90, 0x40,
+	0x06, 0x86, 0xbd, 0x55, 0x62, 0x9f, 0x4c, 0x3f, 0xd3, 0x50, 0x1e, 0x19, 0x08, 0x5e, 0x80, 0xdd,
+	0xd7, 0xb0, 0x7e, 0x96, 0x90, 0x40, 0xd2, 0x07, 0xa9, 0x38, 0x84, 0x4e, 0xce, 0xfe, 0x57, 0x21,
+	0xbb, 0x00, 0x07, 0x54, 0xe6, 0x2a, 0xb6, 0xa0, 0xad, 0x09, 0x17, 0x11, 0x51, 0x71, 0xda, 0xd8,
+	0xd2, 0x8e, 0x43, 0xe2, 0x0e, 0xc1, 0x56, 0x50, 0x73, 0xe5, 0x5f, 0x29, 0xde, 0x03, 0xfb, 0x7d,
+	0x24, 0x16, 0xf7, 0x3c, 0x85, 0xb6, 0x48, 0xa7, 0x22, 0xe4, 0xd1, 0x54, 0xd3, 0x2d, 0xbc, 0x74,
+	0xb8, 0xdf, 0xaa, 0xf0, 0x9f, 0x46, 0x9b, 0xab, 0x06, 0xd0, 0x90, 0x77, 0x89, 0x46, 0x76, 0x06,
+	0xdb, 0xa5, 0x8b, 0x8a, 0x40, 0xef, 0xf4, 0x2e, 0xa1, 0x58, 0x61, 0x0b, 0xf2, 0x6a, 0x7f, 0x96,
+	0xf7, 0x02, 0x1a, 0x19, 0x15, 0x59, 0xd0, 0x38, 0x3e, 0x39, 0x9e, 0x74, 0x2b, 0xa8, 0x0d, 0x6b,
+	0x23, 0xdf, 0x9f, 0xf8, 0xdd, 0x2a, 0xb2, 0xa1, 0x75, 0xf6, 0xc1, 0x1f, 0x9d, 0x4e, 0xfc, 0x6e,
+	0x2d, 0x33, 0xf0, 0xe4, 0xe8, 0xe4, 0x7c, 0xe2, 0x77, 0xeb, 0x59, 0x15, 0x31, 0xbd, 0x66, 0x37,
+	0x0f, 0xab, 0x62, 0x17, 0x3a, 0x39, 0x5b, 0xcb, 0x77, 0xbf, 0xd7, 0xa0, 0xa9, 0x41, 0x0f, 0x2e,
+	0x28, 0xea, 0x40, 0x2d, 0x22, 0xea, 0xcd, 0x6d, 0x5c, 0x8b, 0x08, 0x72, 0xa0, 0x15, 0x10, 0xc2,
+	0xa9, 0x10, 0x4e, 0x5d, 0x39, 0x73, 0x13, 0x6d, 0x40, 0x53, 0x06, 0x7c, 0x46, 0xa5, 0xd3, 0x50,
+	0x07, 0xc6, 0x42, 0xbb, 0xd0, 0x15, 0xec, 0x52, 0xde, 0x06, 0x9c, 0x5e, 0xdc, 0x50, 0x2e, 0x22,
+	0x16, 0x3b, 0x6b, 0x0a, 0xf1, 0x7f, 0xee, 0x3f, 0xd7, 0x6e, 0xb4, 0x0f, 0x2d, 0x19, 0x5d, 0x53,
+	0x96, 0x4a, 0xa7, 0xa9, 0x44, 0x6e, 0x7a, 0x7a, 0xf6, 0xbc, 0x7c, 0xf6, 0x3c, 0xdf, 0xcc, 0x1e,
+	0xce, 0x91, 0x68, 0x08, 0x76, 0xc8, 0x29, 0xa1, 0xb1, 0x8c, 0x82, 0xb9, 0x70, 0x5a, 0x8a, 0xe8,
+	0x94, 0x5e, 0x37, 0x5e, 0x9e, 0xe3, 0x22, 0x18, 0xed, 0x40, 0x5d, 0xce, 0x85, 0x63, 0x29, 0xce,
+	0x46, 0x89, 0x73, 0x3a, 0x17, 0x63, 0x16, 0x5f, 0x46, 0x33, 0x9c, 0x41, 0xdc, 0x37, 0x60, 0x17,
+	0xa2, 0x20, 0x04, 0x8d, 0x54, 0x50, 0x6e, 0x9a, 0x5a, 0xfd, 0xa3, 0x1e, 0x58, 0x49, 0x20, 0xc4,
+	0x2d, 0xe3, 0x79, 0xc2, 0x16, 0xb6, 0xfb, 0x15, 0xda, 0x8b, 0x80, 0x59, 0xa6, 0xc2, 0x60, 0x4c,
+	0xb9, 0x34, 0x29, 0x34, 0x56, 0x16, 0x34, 0xcc, 0xbc, 0x3a, 0x7f, 0xea, 0x1f, 0x75, 0xa1, 0x7e,
+	0x45, 0xef, 0x4c, 0xc2, 0xb2, 0x5f, 0xf4, 0x18, 0xd6, 0x92, 0x79, 0x10, 0xc5, 0x2a, 0x45, 0x16,
+	0xd6, 0x46, 0x76, 0x79, 0x14, 0x0b, 0x1a, 0xa6, 0x9c, 0xaa, 0x14, 0x58, 0x78, 0x61, 0xbb, 0x43,
+	0xe8, 0x94, 0xeb, 0x6b, 0xaa, 0x5a, 0x2d, 0x56, 0x35, 0x2f, 0x4d, 0xa6, 0xbc, 0x81, 0x73, 0x73,
+	0xf0, 0xa3, 0x06, 0xeb, 0xba, 0x87, 0x3e, 0x52, 0xae, 0x5a, 0x69, 0x08, 0xf5, 0x11, 0x21, 0xe8,
+	0x49, 0x29, 0x5b, 0xcb, 0x05, 0xd8, 0x73, 0x7e, 0x3d, 0x30, 0xfd, 0x58, 0x41, 0x63, 0x68, 0xea,
+	0x4d, 0x83, 0x7a, 0x25, 0x54, 0x69, 0x79, 0xf5, 0xb6, 0xee, 0x3d, 0x5b, 0x04, 0x19, 0x42, 0xfd,
+	0x80, 0xca, 0x15, 0x01, 0xcb, 0xad, 0xb3, 0x22, 0xa0, 0xb0, 0x63, 0xdc, 0x0a, 0x7a, 0x0b, 0x8d,
+	0x6c, 0xc2, 0x91, 0x73, 0xcf, 0xd0, 0x6b, 0xf6, 0xe6, 0x6f, 0xd7, 0x81, 0x5b, 0x79, 0x5e, 0xcd,
+	0x5e, 0xa0, 0xa7, 0x6c, 0xe5, 0x05, 0xa5, 0xc1, 0x5d, 0x79, 0xc1, 0xca, 0x58, 0x56, 0xa6, 0x4d,
+	0xd5, 0xce, 0xfb, 0x3f, 0x03, 0x00, 0x00, 0xff, 0xff, 0x9d, 0xd7, 0xf7, 0x8f, 0x8b, 0x06, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -840,15 +840,15 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type DeviceServiceClient interface {
 	// Add adds a device to the topology
-	Add(ctx context.Context, in *AddDeviceRequest, opts ...grpc.CallOption) (*AddDeviceResponse, error)
+	Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error)
 	// Update updates a device
-	Update(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*UpdateDeviceResponse, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	// Get gets a device by ID
-	Get(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*GetDeviceResponse, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	// List gets a stream of device add/update/remove events
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (DeviceService_ListClient, error)
 	// Remove removes a device from the topology
-	Remove(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceResponse, error)
+	Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error)
 }
 
 type deviceServiceClient struct {
@@ -859,8 +859,8 @@ func NewDeviceServiceClient(cc *grpc.ClientConn) DeviceServiceClient {
 	return &deviceServiceClient{cc}
 }
 
-func (c *deviceServiceClient) Add(ctx context.Context, in *AddDeviceRequest, opts ...grpc.CallOption) (*AddDeviceResponse, error) {
-	out := new(AddDeviceResponse)
+func (c *deviceServiceClient) Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error) {
+	out := new(AddResponse)
 	err := c.cc.Invoke(ctx, "/topo.device.DeviceService/Add", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -868,8 +868,8 @@ func (c *deviceServiceClient) Add(ctx context.Context, in *AddDeviceRequest, opt
 	return out, nil
 }
 
-func (c *deviceServiceClient) Update(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*UpdateDeviceResponse, error) {
-	out := new(UpdateDeviceResponse)
+func (c *deviceServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
+	out := new(UpdateResponse)
 	err := c.cc.Invoke(ctx, "/topo.device.DeviceService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -877,8 +877,8 @@ func (c *deviceServiceClient) Update(ctx context.Context, in *UpdateDeviceReques
 	return out, nil
 }
 
-func (c *deviceServiceClient) Get(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*GetDeviceResponse, error) {
-	out := new(GetDeviceResponse)
+func (c *deviceServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
 	err := c.cc.Invoke(ctx, "/topo.device.DeviceService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -918,8 +918,8 @@ func (x *deviceServiceListClient) Recv() (*ListResponse, error) {
 	return m, nil
 }
 
-func (c *deviceServiceClient) Remove(ctx context.Context, in *RemoveDeviceRequest, opts ...grpc.CallOption) (*RemoveDeviceResponse, error) {
-	out := new(RemoveDeviceResponse)
+func (c *deviceServiceClient) Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error) {
+	out := new(RemoveResponse)
 	err := c.cc.Invoke(ctx, "/topo.device.DeviceService/Remove", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -930,34 +930,34 @@ func (c *deviceServiceClient) Remove(ctx context.Context, in *RemoveDeviceReques
 // DeviceServiceServer is the server API for DeviceService service.
 type DeviceServiceServer interface {
 	// Add adds a device to the topology
-	Add(context.Context, *AddDeviceRequest) (*AddDeviceResponse, error)
+	Add(context.Context, *AddRequest) (*AddResponse, error)
 	// Update updates a device
-	Update(context.Context, *UpdateDeviceRequest) (*UpdateDeviceResponse, error)
+	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	// Get gets a device by ID
-	Get(context.Context, *GetDeviceRequest) (*GetDeviceResponse, error)
+	Get(context.Context, *GetRequest) (*GetResponse, error)
 	// List gets a stream of device add/update/remove events
 	List(*ListRequest, DeviceService_ListServer) error
 	// Remove removes a device from the topology
-	Remove(context.Context, *RemoveDeviceRequest) (*RemoveDeviceResponse, error)
+	Remove(context.Context, *RemoveRequest) (*RemoveResponse, error)
 }
 
 // UnimplementedDeviceServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedDeviceServiceServer struct {
 }
 
-func (*UnimplementedDeviceServiceServer) Add(ctx context.Context, req *AddDeviceRequest) (*AddDeviceResponse, error) {
+func (*UnimplementedDeviceServiceServer) Add(ctx context.Context, req *AddRequest) (*AddResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
 }
-func (*UnimplementedDeviceServiceServer) Update(ctx context.Context, req *UpdateDeviceRequest) (*UpdateDeviceResponse, error) {
+func (*UnimplementedDeviceServiceServer) Update(ctx context.Context, req *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (*UnimplementedDeviceServiceServer) Get(ctx context.Context, req *GetDeviceRequest) (*GetDeviceResponse, error) {
+func (*UnimplementedDeviceServiceServer) Get(ctx context.Context, req *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (*UnimplementedDeviceServiceServer) List(req *ListRequest, srv DeviceService_ListServer) error {
 	return status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (*UnimplementedDeviceServiceServer) Remove(ctx context.Context, req *RemoveDeviceRequest) (*RemoveDeviceResponse, error) {
+func (*UnimplementedDeviceServiceServer) Remove(ctx context.Context, req *RemoveRequest) (*RemoveResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
 
@@ -966,7 +966,7 @@ func RegisterDeviceServiceServer(s *grpc.Server, srv DeviceServiceServer) {
 }
 
 func _DeviceService_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddDeviceRequest)
+	in := new(AddRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -978,13 +978,13 @@ func _DeviceService_Add_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/topo.device.DeviceService/Add",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).Add(ctx, req.(*AddDeviceRequest))
+		return srv.(DeviceServiceServer).Add(ctx, req.(*AddRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DeviceService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateDeviceRequest)
+	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -996,13 +996,13 @@ func _DeviceService_Update_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/topo.device.DeviceService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).Update(ctx, req.(*UpdateDeviceRequest))
+		return srv.(DeviceServiceServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DeviceService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetDeviceRequest)
+	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1014,7 +1014,7 @@ func _DeviceService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/topo.device.DeviceService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).Get(ctx, req.(*GetDeviceRequest))
+		return srv.(DeviceServiceServer).Get(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1041,7 +1041,7 @@ func (x *deviceServiceListServer) Send(m *ListResponse) error {
 }
 
 func _DeviceService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveDeviceRequest)
+	in := new(RemoveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1053,7 +1053,7 @@ func _DeviceService_Remove_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/topo.device.DeviceService/Remove",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceServiceServer).Remove(ctx, req.(*RemoveDeviceRequest))
+		return srv.(DeviceServiceServer).Remove(ctx, req.(*RemoveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
