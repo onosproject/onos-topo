@@ -107,11 +107,11 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 			switch event.Type {
 			case EventNone:
 				t = ListResponse_NONE
-			case DeviceInserted:
+			case EventInserted:
 				t = ListResponse_ADDED
-			case DeviceUpdated:
+			case EventUpdated:
 				t = ListResponse_UPDATED
-			case DeviceRemoved:
+			case EventRemoved:
 				t = ListResponse_REMOVED
 			}
 			err := server.Send(&ListResponse{
