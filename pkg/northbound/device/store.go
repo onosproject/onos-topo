@@ -23,8 +23,8 @@ import (
 	"time"
 )
 
-// NewAtomixDeviceStore returns a new persistent DeviceStore
-func NewAtomixDeviceStore() (DeviceStore, error) {
+// NewAtomixStore returns a new persistent Store
+func NewAtomixStore() (Store, error) {
 	client, err := util.GetAtomixClient()
 	if err != nil {
 		return nil, err
@@ -40,13 +40,13 @@ func NewAtomixDeviceStore() (DeviceStore, error) {
 		return nil, err
 	}
 
-	return &atomixDeviceStore{
+	return &atomixStore{
 		devices: devices,
 	}, nil
 }
 
-// DeviceStore stores topology information
-type DeviceStore interface {
+// Store stores topology information
+type Store interface {
 	// Load loads a device from the store
 	Load(deviceID string) (*Device, error)
 
@@ -60,15 +60,15 @@ type DeviceStore interface {
 	List(chan<- *Device) error
 
 	// Watch streams device events to the given channel
-	Watch(chan<- *DeviceEvent) error
+	Watch(chan<- *Event) error
 }
 
-// atomixDeviceStore is the device implementation of the DeviceStore
-type atomixDeviceStore struct {
+// atomixStore is the device implementation of the Store
+type atomixStore struct {
 	devices map_.Map
 }
 
-func (s *atomixDeviceStore) Load(deviceID string) (*Device, error) {
+func (s *atomixStore) Load(deviceID string) (*Device, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -79,7 +79,7 @@ func (s *atomixDeviceStore) Load(deviceID string) (*Device, error) {
 	return decodeDevice(kv.Key, kv.Value, kv.Version)
 }
 
-func (s *atomixDeviceStore) Store(device *Device) error {
+func (s *atomixStore) Store(device *Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -108,7 +108,7 @@ func (s *atomixDeviceStore) Store(device *Device) error {
 	return err
 }
 
-func (s *atomixDeviceStore) Delete(device *Device) error {
+func (s *atomixStore) Delete(device *Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -120,7 +120,7 @@ func (s *atomixDeviceStore) Delete(device *Device) error {
 	return err
 }
 
-func (s *atomixDeviceStore) List(ch chan<- *Device) error {
+func (s *atomixStore) List(ch chan<- *Device) error {
 	mapCh := make(chan *map_.KeyValue)
 	if err := s.devices.Entries(context.Background(), mapCh); err != nil {
 		return err
@@ -137,7 +137,7 @@ func (s *atomixDeviceStore) List(ch chan<- *Device) error {
 	return nil
 }
 
-func (s *atomixDeviceStore) Watch(ch chan<- *DeviceEvent) error {
+func (s *atomixStore) Watch(ch chan<- *Event) error {
 	mapCh := make(chan *map_.MapEvent)
 	if err := s.devices.Watch(context.Background(), mapCh, map_.WithReplay()); err != nil {
 		return err
@@ -147,8 +147,8 @@ func (s *atomixDeviceStore) Watch(ch chan<- *DeviceEvent) error {
 		defer close(ch)
 		for event := range mapCh {
 			if device, err := decodeDevice(event.Key, event.Value, event.Version); err == nil {
-				ch <- &DeviceEvent{
-					Type:   DeviceEventType(event.Type),
+				ch <- &Event{
+					Type:   EventType(event.Type),
 					Device: device,
 				}
 			}
@@ -169,18 +169,18 @@ func decodeDevice(key string, value []byte, version int64) (*Device, error) {
 	return device, nil
 }
 
-// DeviceEventType provides the type for a device event
-type DeviceEventType string
+// EventType provides the type for a device event
+type EventType string
 
 const (
-	EventNone      DeviceEventType = ""
-	DeviceInserted DeviceEventType = "inserted"
-	DeviceUpdated  DeviceEventType = "updated"
-	DeviceRemoved  DeviceEventType = "removed"
+	EventNone      EventType = ""
+	DeviceInserted EventType = "inserted"
+	DeviceUpdated  EventType = "updated"
+	DeviceRemoved  EventType = "removed"
 )
 
-// DeviceEvent is a store event for a device
-type DeviceEvent struct {
-	Type   DeviceEventType
+// Event is a store event for a device
+type Event struct {
+	Type   EventType
 	Device *Device
 }

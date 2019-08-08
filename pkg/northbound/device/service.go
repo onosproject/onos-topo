@@ -25,7 +25,7 @@ import (
 
 // NewService returns a new device Service
 func NewService() (northbound.Service, error) {
-	deviceStore, err := NewAtomixDeviceStore()
+	deviceStore, err := NewAtomixStore()
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func NewService() (northbound.Service, error) {
 // Service is a Service implementation for administration.
 type Service struct {
 	northbound.Service
-	store DeviceStore
+	store Store
 }
 
 // Register registers the Service with the gRPC server.
@@ -50,7 +50,7 @@ func (s Service) Register(r *grpc.Server) {
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	deviceStore DeviceStore
+	deviceStore Store
 }
 
 func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
@@ -97,7 +97,7 @@ func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, er
 
 func (s *Server) List(request *ListRequest, server DeviceService_ListServer) error {
 	if request.Subscribe {
-		ch := make(chan *DeviceEvent)
+		ch := make(chan *Event)
 		if err := s.deviceStore.Watch(ch); err != nil {
 			return err
 		}
