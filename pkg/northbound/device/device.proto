@@ -16,10 +16,11 @@ limitations under the License.
 
 syntax = "proto3";
 
-// Package admin defines the administrative and diagnostic gRPC interfaces.
+// Package topo.device defines interfaces for managing devices.
 package topo.device;
 
 import "google/protobuf/duration.proto";
+import "gogoproto/gogo.proto";
 
 // AddRequest adds a device to the topology
 message AddRequest {
@@ -29,8 +30,8 @@ message AddRequest {
 
 // AddResponse is sent in response to an AddDeviceRequest
 message AddResponse {
-    // metadata is the added device metadata
-    ObjectMetadata metadata = 1;
+    // version is the version of the device
+    uint64 version = 1 [(gogoproto.casttype) = "Version"];
 }
 
 // UpdateRequest updates a device
@@ -41,15 +42,15 @@ message UpdateRequest {
 
 // UpdateResponse is sent in response to an UpdateDeviceRequest
 message UpdateResponse {
-    // metadata is the updated device metadata
-    ObjectMetadata metadata = 1;
+    // version is the updated version of the device
+    uint64 version = 1 [(gogoproto.casttype) = "Version"];
 }
 
 // GetRequest gets a device by ID
 message GetRequest {
 
-    // device_id is the unique device ID with which to lookup the device
-    string device_id = 1;
+    // id is the unique device ID with which to lookup the device
+    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
 }
 
 // GetResponse carries a device
@@ -109,11 +110,11 @@ message RemoveResponse {
 // Device contains information about a device
 message Device {
 
-    // metadata is the store metadata used for concurrency control
-    ObjectMetadata metadata = 1;
-
     // id is a globally unique device identifier
-    string id = 2;
+    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+
+    // version is the version of the device state
+    uint64 version = 2 [(gogoproto.casttype) = "Version"];
 
     // address is the host:port of the device
     string address = 3;
@@ -125,13 +126,13 @@ message Device {
     string software_version = 5;
 
     // timeout indicates the device request timeout
-    google.protobuf.Duration timeout = 6;
+    google.protobuf.Duration timeout = 6 [(gogoproto.stdduration) = true];
 
     // credentials contains the credentials for connecting to the device
-    Credentials credentials = 7;
+    Credentials credentials = 7 [(gogoproto.nullable) = false];
 
     // tls is the device TLS configuration
-    TlsConfig tls = 8;
+    TlsConfig tls = 8 [(gogoproto.customname) = "TLS", (gogoproto.nullable) = false];
 }
 
 // Credentials is the device credentials
@@ -161,17 +162,6 @@ message TlsConfig {
 
     // insecure indicates whether to connect to the device with insecure communication
     bool insecure = 7;
-}
-
-// ObjectMetadata is the metadata required by the store for concurrency control
-message ObjectMetadata {
-
-    // id is the unique identifier for the object
-    string id = 1;
-
-    // version is the store version of the object
-    uint64 version = 2;
-
 }
 
 // DeviceService provides an API for managing devices.
