@@ -48,7 +48,7 @@ func NewAtomixStore() (Store, error) {
 // Store stores topology information
 type Store interface {
 	// Load loads a device from the store
-	Load(deviceID string) (*Device, error)
+	Load(deviceID ID) (*Device, error)
 
 	// Store stores a device in the store
 	Store(*Device) error
@@ -68,11 +68,11 @@ type atomixStore struct {
 	devices map_.Map
 }
 
-func (s *atomixStore) Load(deviceID string) (*Device, error) {
+func (s *atomixStore) Load(deviceID ID) (*Device, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	kv, err := s.devices.Get(ctx, deviceID)
+	kv, err := s.devices.Get(ctx, string(deviceID))
 	if err != nil {
 		return nil, err
 	}
@@ -90,10 +90,10 @@ func (s *atomixStore) Store(device *Device) error {
 
 	// Put the device in the map using an optimistic lock if this is an update
 	var kv *map_.KeyValue
-	if device.Metadata == nil || device.Metadata.Version == 0 {
-		kv, err = s.devices.Put(ctx, device.Id, bytes)
+	if device.Revision == 0 {
+		kv, err = s.devices.Put(ctx, string(device.ID), bytes)
 	} else {
-		kv, err = s.devices.Put(ctx, device.Id, bytes, map_.WithVersion(int64(device.Metadata.Version)))
+		kv, err = s.devices.Put(ctx, string(device.ID), bytes, map_.WithVersion(int64(device.Revision)))
 	}
 
 	if err != nil {
@@ -101,10 +101,7 @@ func (s *atomixStore) Store(device *Device) error {
 	}
 
 	// Update the device metadata
-	device.Metadata = &ObjectMetadata{
-		Id:      device.Id,
-		Version: uint64(kv.Version),
-	}
+	device.Revision = Revision(kv.Version)
 	return err
 }
 
@@ -112,11 +109,11 @@ func (s *atomixStore) Delete(device *Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	if device.Metadata != nil && device.Metadata.Version > 0 {
-		_, err := s.devices.Remove(ctx, device.Metadata.Id, map_.WithVersion(int64(device.Metadata.Version)))
+	if device.Revision > 0 {
+		_, err := s.devices.Remove(ctx, string(device.ID), map_.WithVersion(int64(device.Revision)))
 		return err
 	}
-	_, err := s.devices.Remove(ctx, device.Id)
+	_, err := s.devices.Remove(ctx, string(device.ID))
 	return err
 }
 
@@ -162,10 +159,8 @@ func decodeDevice(key string, value []byte, version int64) (*Device, error) {
 	if err := proto.Unmarshal(value, device); err != nil {
 		return nil, err
 	}
-	device.Metadata = &ObjectMetadata{
-		Id:      key,
-		Version: uint64(version),
-	}
+	device.ID = ID(key)
+	device.Revision = Revision(version)
 	return device, nil
 }
 

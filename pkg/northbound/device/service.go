@@ -57,14 +57,14 @@ func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, er
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
-	} else if device.Metadata != nil && device.Metadata.Version != 0 {
+	} else if device.Revision > 0 {
 		return nil, status.Error(codes.InvalidArgument, "device version is already set")
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
 	return &AddResponse{
-		Metadata: device.Metadata,
+		Device: device,
 	}, nil
 }
 
@@ -72,19 +72,19 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
-	} else if device.Metadata == nil || device.Metadata.Version == 0 {
+	} else if device.Revision == 0 {
 		return nil, status.Error(codes.InvalidArgument, "device version not set")
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
 	return &UpdateResponse{
-		Metadata: device.Metadata,
+		Device: device,
 	}, nil
 }
 
 func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, error) {
-	device, err := s.deviceStore.Load(request.DeviceId)
+	device, err := s.deviceStore.Load(request.ID)
 	if err != nil {
 		return nil, err
 	} else if device == nil {

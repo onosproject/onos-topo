@@ -17,7 +17,6 @@ package cli
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/spf13/cobra"
 	"io"
@@ -75,33 +74,33 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 				ExitWithError(ExitError, err)
 			}
 
-			dvc := response.Device
+			dev := response.Device
 			if verbose {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dvc.Id, dvc.Address, dvc.SoftwareVersion, dvc.Credentials.User, dvc.Credentials.Password))
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
 			} else {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dvc.Id, dvc.Address, dvc.SoftwareVersion))
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.Version))
 			}
 		}
 		writer.Flush()
 	} else {
 		response, err := client.Get(ctx, &device.GetRequest{
-			DeviceId: args[0],
+			ID: device.ID(args[0]),
 		})
 		if err != nil {
 			ExitWithError(ExitBadConnection, err)
 		}
 
-		dvc := response.Device
+		dev := response.Device
 
 		writer := new(tabwriter.Writer)
 		writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
-		fmt.Fprintln(writer, fmt.Sprintf("ID\t%s", dvc.Id))
-		fmt.Fprintln(writer, fmt.Sprintf("ADDRESS\t%s", dvc.Address))
-		fmt.Fprintln(writer, fmt.Sprintf("VERSION\t%s", dvc.SoftwareVersion))
+		fmt.Fprintln(writer, fmt.Sprintf("ID\t%s", dev.ID))
+		fmt.Fprintln(writer, fmt.Sprintf("ADDRESS\t%s", dev.Address))
+		fmt.Fprintln(writer, fmt.Sprintf("VERSION\t%s", dev.Version))
 
 		if verbose {
-			fmt.Fprintln(writer, fmt.Sprintf("USER\t%s", dvc.Credentials.User))
-			fmt.Fprintln(writer, fmt.Sprintf("PASSWORD\t%s", dvc.Credentials.Password))
+			fmt.Fprintln(writer, fmt.Sprintf("USER\t%s", dev.Credentials.User))
+			fmt.Fprintln(writer, fmt.Sprintf("PASSWORD\t%s", dev.Credentials.Password))
 		}
 		writer.Flush()
 	}
@@ -142,16 +141,16 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 
 	client := device.NewDeviceServiceClient(conn)
 
-	dvc := &device.Device{
-		Id:              id,
-		Address:         address,
-		SoftwareVersion: version,
-		Timeout:         ptypes.DurationProto(timeout),
-		Credentials: &device.Credentials{
+	dev := &device.Device{
+		ID:      device.ID(id),
+		Address: address,
+		Version: version,
+		Timeout: &timeout,
+		Credentials: device.Credentials{
 			User:     user,
 			Password: password,
 		},
-		Tls: &device.TlsConfig{
+		TLS: device.TlsConfig{
 			Cert:   cert,
 			Key:    key,
 			CaCert: caCert,
@@ -162,7 +161,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	defer cancel()
 
 	_, err := client.Add(ctx, &device.AddRequest{
-		Device: dvc,
+		Device: dev,
 	})
 	if err != nil {
 		ExitWithError(ExitBadConnection, err)
@@ -201,7 +200,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 
 	response, err := client.Get(ctx, &device.GetRequest{
-		DeviceId: id,
+		ID: device.ID(id),
 	})
 	if err != nil {
 		ExitWithError(ExitBadConnection, err)
@@ -224,23 +223,23 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	}
 	if cmd.Flags().Changed("version") {
 		version, _ := cmd.Flags().GetString("version")
-		dvc.SoftwareVersion = version
+		dvc.Version = version
 	}
 	if cmd.Flags().Changed("key") {
 		key, _ := cmd.Flags().GetString("key")
-		dvc.Tls.Key = key
+		dvc.TLS.Key = key
 	}
 	if cmd.Flags().Changed("cert") {
 		cert, _ := cmd.Flags().GetString("cert")
-		dvc.Tls.Cert = cert
+		dvc.TLS.Cert = cert
 	}
 	if cmd.Flags().Changed("ca-cert") {
 		caCert, _ := cmd.Flags().GetString("ca-cert")
-		dvc.Tls.CaCert = caCert
+		dvc.TLS.CaCert = caCert
 	}
 	if cmd.Flags().Changed("timeout") {
 		timeout, _ := cmd.Flags().GetDuration("timeout")
-		dvc.Timeout = ptypes.DurationProto(timeout)
+		dvc.Timeout = &timeout
 	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
@@ -279,7 +278,7 @@ func runRemoveDeviceCommand(cmd *cobra.Command, args []string) {
 
 	_, err := client.Remove(ctx, &device.RemoveRequest{
 		Device: &device.Device{
-			Id: id,
+			ID: device.ID(id),
 		},
 	})
 	if err != nil {
@@ -346,15 +345,15 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 			ExitWithError(ExitError, err)
 		}
 
-		device := response.Device
-		if id != "" && device.Id != id {
+		dev := response.Device
+		if id != "" && dev.ID != device.ID(id) {
 			continue
 		}
 
 		if verbose {
-			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", response.Type, device.Id, device.Address, device.SoftwareVersion, device.Credentials.User, device.Credentials.Password))
+			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
 		} else {
-			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", response.Type, device.Id, device.Address, device.SoftwareVersion))
+			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.Version))
 		}
 		writer.Flush()
 	}
