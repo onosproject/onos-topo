@@ -17,7 +17,6 @@ package admin
 
 import (
 	"github.com/onosproject/onos-topo/pkg/northbound"
-	"github.com/onosproject/onos-topo/pkg/northbound/proto"
 	"google.golang.org/grpc"
 )
 
@@ -29,7 +28,7 @@ type Service struct {
 // Register registers the Service with the gRPC server.
 func (s Service) Register(r *grpc.Server) {
 	server := Server{}
-	proto.RegisterTopoAdminServiceServer(r, server)
+	RegisterTopoAdminServiceServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.

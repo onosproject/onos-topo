@@ -17,43 +17,43 @@ limitations under the License.
 syntax = "proto3";
 
 // Package admin defines the administrative and diagnostic gRPC interfaces.
-package proto;
+package topo.device;
 
 import "google/protobuf/duration.proto";
 
-// AddDeviceRequest adds a device to the topology
-message AddDeviceRequest {
+// AddRequest adds a device to the topology
+message AddRequest {
     // device is the device to add
     Device device = 1;
 }
 
-// AddDeviceResponse is sent in response to an AddDeviceRequest
-message AddDeviceResponse {
+// AddResponse is sent in response to an AddDeviceRequest
+message AddResponse {
     // metadata is the added device metadata
     ObjectMetadata metadata = 1;
 }
 
-// UpdateDeviceRequest updates a device
-message UpdateDeviceRequest {
+// UpdateRequest updates a device
+message UpdateRequest {
     // device is the updated device
     Device device = 1;
 }
 
-// UpdateDeviceResponse is sent in response to an UpdateDeviceRequest
-message UpdateDeviceResponse {
+// UpdateResponse is sent in response to an UpdateDeviceRequest
+message UpdateResponse {
     // metadata is the updated device metadata
     ObjectMetadata metadata = 1;
 }
 
-// GetDeviceRequest gets a device by ID
-message GetDeviceRequest {
+// GetRequest gets a device by ID
+message GetRequest {
 
     // device_id is the unique device ID with which to lookup the device
     string device_id = 1;
 }
 
-// GetDeviceResponse carries a device
-message GetDeviceResponse {
+// GetResponse carries a device
+message GetResponse {
     // device is the device object
     Device device = 1;
 }
@@ -95,14 +95,14 @@ message ListResponse {
     }
 }
 
-// RemoveDeviceRequest removes a device by ID
-message RemoveDeviceRequest {
+// RemoveRequest removes a device by ID
+message RemoveRequest {
     // device is the device to remove
     Device device = 1;
 }
 
-// RemoveDeviceResponse is sent in response to a RemoveDeviceRequest
-message RemoveDeviceResponse {
+// RemoveResponse is sent in response to a RemoveDeviceRequest
+message RemoveResponse {
 
 }
 
@@ -178,15 +178,15 @@ message ObjectMetadata {
 service DeviceService {
 
     // Add adds a device to the topology
-    rpc Add (AddDeviceRequest) returns (AddDeviceResponse) {
+    rpc Add (AddRequest) returns (AddResponse) {
     }
 
     // Update updates a device
-    rpc Update (UpdateDeviceRequest) returns (UpdateDeviceResponse) {
+    rpc Update (UpdateRequest) returns (UpdateResponse) {
     }
 
     // Get gets a device by ID
-    rpc Get (GetDeviceRequest) returns (GetDeviceResponse) {
+    rpc Get (GetRequest) returns (GetResponse) {
     }
 
     // List gets a stream of device add/update/remove events
@@ -194,7 +194,7 @@ service DeviceService {
     }
 
     // Remove removes a device from the topology
-    rpc Remove (RemoveDeviceRequest) returns (RemoveDeviceResponse) {
+    rpc Remove (RemoveRequest) returns (RemoveResponse) {
     }
 
 }

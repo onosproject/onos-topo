@@ -35,7 +35,7 @@ license_check: # @HELP examine and ensure license headers exist
 protos: # @HELP compile the protobuf files (using protoc-go Docker)
 	docker run -it -v `pwd`:/go/src/github.com/onosproject/onos-topo \
 		-w /go/src/github.com/onosproject/onos-topo \
-		--entrypoint pkg/northbound/proto/compile-protos.sh \
+		--entrypoint build/bin/compile-protos.sh \
 		onosproject/protoc-go:stable
 
 onos-topo-base-docker: # @HELP build onos-topo base Docker image
