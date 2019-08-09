@@ -30,8 +30,8 @@ message AddRequest {
 
 // AddResponse is sent in response to an AddDeviceRequest
 message AddResponse {
-    // version is the version of the device
-    uint64 version = 1 [(gogoproto.casttype) = "Version"];
+    // device is the device with a revision number
+    Device device = 1;
 }
 
 // UpdateRequest updates a device
@@ -42,8 +42,8 @@ message UpdateRequest {
 
 // UpdateResponse is sent in response to an UpdateDeviceRequest
 message UpdateResponse {
-    // version is the updated version of the device
-    uint64 version = 1 [(gogoproto.casttype) = "Version"];
+    // device is the device with updated revision
+    Device device = 1;
 }
 
 // GetRequest gets a device by ID
@@ -113,8 +113,8 @@ message Device {
     // id is a globally unique device identifier
     string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
 
-    // version is the version of the device state
-    uint64 version = 2 [(gogoproto.casttype) = "Version"];
+    // revision is the revision of the device
+    uint64 revision = 2 [(gogoproto.casttype) = "Revision"];
 
     // address is the host:port of the device
     string address = 3;
@@ -122,8 +122,8 @@ message Device {
     // target is the device target
     string target = 4;
 
-    // software_version is the device software version
-    string software_version = 5;
+    // version is the device software version
+    string version = 5;
 
     // timeout indicates the device request timeout
     google.protobuf.Duration timeout = 6 [(gogoproto.stdduration) = true];

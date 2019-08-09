@@ -76,9 +76,9 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 
 			dev := response.Device
 			if verbose {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.SoftwareVersion, dev.Credentials.User, dev.Credentials.Password))
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
 			} else {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.SoftwareVersion))
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.Version))
 			}
 		}
 		writer.Flush()
@@ -96,7 +96,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 		writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
 		fmt.Fprintln(writer, fmt.Sprintf("ID\t%s", dev.ID))
 		fmt.Fprintln(writer, fmt.Sprintf("ADDRESS\t%s", dev.Address))
-		fmt.Fprintln(writer, fmt.Sprintf("VERSION\t%s", dev.SoftwareVersion))
+		fmt.Fprintln(writer, fmt.Sprintf("VERSION\t%s", dev.Version))
 
 		if verbose {
 			fmt.Fprintln(writer, fmt.Sprintf("USER\t%s", dev.Credentials.User))
@@ -142,10 +142,10 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	client := device.NewDeviceServiceClient(conn)
 
 	dev := &device.Device{
-		ID:              device.ID(id),
-		Address:         address,
-		SoftwareVersion: version,
-		Timeout:         &timeout,
+		ID:      device.ID(id),
+		Address: address,
+		Version: version,
+		Timeout: &timeout,
 		Credentials: device.Credentials{
 			User:     user,
 			Password: password,
@@ -223,7 +223,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	}
 	if cmd.Flags().Changed("version") {
 		version, _ := cmd.Flags().GetString("version")
-		dvc.SoftwareVersion = version
+		dvc.Version = version
 	}
 	if cmd.Flags().Changed("key") {
 		key, _ := cmd.Flags().GetString("key")
@@ -351,9 +351,9 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 		}
 
 		if verbose {
-			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.SoftwareVersion, dev.Credentials.User, dev.Credentials.Password))
+			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
 		} else {
-			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.SoftwareVersion))
+			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.Version))
 		}
 		writer.Flush()
 	}

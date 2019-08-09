@@ -17,5 +17,5 @@ package device
 // ID is a device ID
 type ID string
 
-// Version is the device version
-type Version uint64
+// Revision is the device revision number
+type Revision uint64

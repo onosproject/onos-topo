@@ -90,10 +90,10 @@ func (s *atomixStore) Store(device *Device) error {
 
 	// Put the device in the map using an optimistic lock if this is an update
 	var kv *map_.KeyValue
-	if device.Version == 0 {
+	if device.Revision == 0 {
 		kv, err = s.devices.Put(ctx, string(device.ID), bytes)
 	} else {
-		kv, err = s.devices.Put(ctx, string(device.ID), bytes, map_.WithVersion(int64(device.Version)))
+		kv, err = s.devices.Put(ctx, string(device.ID), bytes, map_.WithVersion(int64(device.Revision)))
 	}
 
 	if err != nil {
@@ -101,7 +101,7 @@ func (s *atomixStore) Store(device *Device) error {
 	}
 
 	// Update the device metadata
-	device.Version = Version(kv.Version)
+	device.Revision = Revision(kv.Version)
 	return err
 }
 
@@ -109,8 +109,8 @@ func (s *atomixStore) Delete(device *Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	if device.Version > 0 {
-		_, err := s.devices.Remove(ctx, string(device.ID), map_.WithVersion(int64(device.Version)))
+	if device.Revision > 0 {
+		_, err := s.devices.Remove(ctx, string(device.ID), map_.WithVersion(int64(device.Revision)))
 		return err
 	}
 	_, err := s.devices.Remove(ctx, string(device.ID))
@@ -160,7 +160,7 @@ func decodeDevice(key string, value []byte, version int64) (*Device, error) {
 		return nil, err
 	}
 	device.ID = ID(key)
-	device.Version = Version(version)
+	device.Revision = Revision(version)
 	return device, nil
 }
 
