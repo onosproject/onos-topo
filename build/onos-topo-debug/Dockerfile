@@ -5,13 +5,15 @@ FROM onosproject/onos-topo-base:$ONOS_TOPO_BASE_VERSION as base
 FROM golang:1.12.6-alpine3.9 as debugBuilder
 
 RUN apk upgrade --update --no-cache && apk add git && \
-    go get -u github.com/go-delve/delve/cmd/dlv
+    go get -u github.com/go-delve/delve/cmd/dlv && \
+    go get -u github.com/onosproject/onos-cli/cmd/onos
 
 FROM alpine:3.9
 
 RUN apk upgrade --update --no-cache && apk add bash bash-completion libc6-compat
 
 COPY --from=base /go/src/github.com/onosproject/onos-topo/build/_output/onos-topo-debug /usr/local/bin/onos-topo
+COPY --from=debugBuilder /go/bin/onos /usr/local/bin/onos
 COPY --from=debugBuilder /go/bin/dlv /usr/local/bin/dlv
 
 RUN echo "#!/bin/sh" >> /usr/local/bin/onos-topo-debug && \
