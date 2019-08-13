@@ -315,10 +315,7 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 
 	client := device.NewDeviceServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
-	stream, err := client.List(ctx, &device.ListRequest{
+	stream, err := client.List(context.Background(), &device.ListRequest{
 		Subscribe: true,
 	})
 	if err != nil {
