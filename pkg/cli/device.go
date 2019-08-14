@@ -127,6 +127,8 @@ func getAddDeviceCommand() *cobra.Command {
 
 func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	id := args[0]
+	deviceType, _ := cmd.Flags().GetString("type")
+	deviceRole, _ := cmd.Flags().GetString("role")
 	address, _ := cmd.Flags().GetString("address")
 	user, _ := cmd.Flags().GetString("user")
 	password, _ := cmd.Flags().GetString("password")
@@ -135,6 +137,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	cert, _ := cmd.Flags().GetString("cert")
 	caCert, _ := cmd.Flags().GetString("ca-cert")
 	timeout, _ := cmd.Flags().GetDuration("timeout")
+	attributes, _ := cmd.Flags().GetStringToString("attributes")
 
 	conn := getConnection()
 	defer conn.Close()
@@ -143,6 +146,8 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 
 	dev := &device.Device{
 		ID:      device.ID(id),
+		Type:    device.Type(deviceType),
+		Role:    device.Role(deviceRole),
 		Address: address,
 		Version: version,
 		Timeout: &timeout,
@@ -155,6 +160,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 			Key:    key,
 			CaCert: caCert,
 		},
+		Attributes: attributes,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -178,6 +184,8 @@ func getUpdateDeviceCommand() *cobra.Command {
 		Short:   "Update a device",
 		Run:     runUpdateDeviceCommand,
 	}
+	cmd.Flags().StringP("type", "t", "", "the type of the device")
+	cmd.Flags().StringP("role", "r", "", "the device role")
 	cmd.Flags().StringP("address", "a", "", "the address of the device")
 	cmd.Flags().StringP("user", "u", "", "the device username")
 	cmd.Flags().StringP("password", "p", "", "the device password")
@@ -185,7 +193,8 @@ func getUpdateDeviceCommand() *cobra.Command {
 	cmd.Flags().String("key", "", "the TLS key")
 	cmd.Flags().String("cert", "", "the TLS certificate")
 	cmd.Flags().String("ca-cert", "", "the TLS CA certificate")
-	cmd.Flags().DurationP("timeout", "t", 30*time.Second, "the device connection timeout")
+	cmd.Flags().Duration("timeout", 30*time.Second, "the device connection timeout")
+	cmd.Flags().StringToString("attributes", map[string]string{}, "an arbitrary mapping of device attributes")
 	return cmd
 }
 

@@ -17,5 +17,11 @@ package device
 // ID is a device ID
 type ID string
 
+// Type is a device type
+type Type string
+
+// Role is a device role
+type Role string
+
 // Revision is the device revision number
 type Revision uint64

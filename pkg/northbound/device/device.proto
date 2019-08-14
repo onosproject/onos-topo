@@ -133,6 +133,15 @@ message Device {
 
     // tls is the device TLS configuration
     TlsConfig tls = 8 [(gogoproto.customname) = "TLS", (gogoproto.nullable) = false];
+
+    // type is the type of the device
+    string type = 9 [(gogoproto.casttype) = "Type"];
+
+    // role is a role for the device
+    string role = 10 [(gogoproto.casttype) = "Role"];
+
+    // attributes is an arbitrary mapping of attribute keys/values
+    map<string, string> attributes = 11;
 }
 
 // Credentials is the device credentials
