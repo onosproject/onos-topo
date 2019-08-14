@@ -3,7 +3,7 @@ module github.com/onosproject/onos-topo
 go 1.12
 
 require (
-	github.com/atomix/atomix-go-client v0.0.0-20190807011524-58b4352273d7
+	github.com/atomix/atomix-go-client v0.0.0-20190814013624-2b7049842ee1
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
 	github.com/golang/protobuf v1.3.2
 	github.com/mitchellh/go-homedir v1.1.0
