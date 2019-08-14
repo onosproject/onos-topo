@@ -5,7 +5,6 @@ go 1.12
 require (
 	github.com/atomix/atomix-go-client v0.0.0-20190814013624-2b7049842ee1
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
-	github.com/golang/protobuf v1.3.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onosproject/onos-config v0.0.0-20190715180819-079d3a8dc433
 	github.com/onosproject/onos-control v0.0.0-20190715190020-706a2ee0d37b // indirect

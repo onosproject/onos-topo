@@ -114,6 +114,8 @@ func getAddDeviceCommand() *cobra.Command {
 		Short:   "Add a device",
 		Run:     runAddDeviceCommand,
 	}
+	cmd.Flags().StringP("type", "t", "", "the type of the device")
+	cmd.Flags().StringP("role", "r", "", "the device role")
 	cmd.Flags().StringP("address", "a", "", "the address of the device")
 	cmd.Flags().StringP("user", "u", "", "the device username")
 	cmd.Flags().StringP("password", "p", "", "the device password")
@@ -121,7 +123,8 @@ func getAddDeviceCommand() *cobra.Command {
 	cmd.Flags().String("key", "", "the TLS key")
 	cmd.Flags().String("cert", "", "the TLS certificate")
 	cmd.Flags().String("ca-cert", "", "the TLS CA certificate")
-	cmd.Flags().DurationP("timeout", "t", 30*time.Second, "the device connection timeout")
+	cmd.Flags().Duration("timeout", 30*time.Second, "the device connection timeout")
+	cmd.Flags().StringToString("attributes", map[string]string{}, "an arbitrary mapping of device attributes")
 	return cmd
 }
 
@@ -218,6 +221,14 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	cancel()
 	dvc := response.Device
 
+	if cmd.Flags().Changed("type") {
+		deviceType, _ := cmd.Flags().GetString("type")
+		dvc.Type = device.Type(deviceType)
+	}
+	if cmd.Flags().Changed("role") {
+		deviceRole, _ := cmd.Flags().GetString("role")
+		dvc.Role = device.Role(deviceRole)
+	}
 	if cmd.Flags().Changed("address") {
 		address, _ := cmd.Flags().GetString("address")
 		dvc.Address = address
@@ -249,6 +260,10 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	if cmd.Flags().Changed("timeout") {
 		timeout, _ := cmd.Flags().GetDuration("timeout")
 		dvc.Timeout = &timeout
+	}
+	if cmd.Flags().Changed("attributes") {
+		attributes, _ := cmd.Flags().GetStringToString("attributes")
+		dvc.Attributes = attributes
 	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
