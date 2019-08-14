@@ -123,6 +123,8 @@ func getAddDeviceCommand() *cobra.Command {
 	cmd.Flags().String("key", "", "the TLS key")
 	cmd.Flags().String("cert", "", "the TLS certificate")
 	cmd.Flags().String("ca-cert", "", "the TLS CA certificate")
+	cmd.Flags().Bool("plain", false, "whether to connect over a plaintext connection")
+	cmd.Flags().Bool("insecure", false, "whether to enable skip verification")
 	cmd.Flags().Duration("timeout", 30*time.Second, "the device connection timeout")
 	cmd.Flags().StringToString("attributes", map[string]string{}, "an arbitrary mapping of device attributes")
 	return cmd
@@ -139,6 +141,8 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	key, _ := cmd.Flags().GetString("key")
 	cert, _ := cmd.Flags().GetString("cert")
 	caCert, _ := cmd.Flags().GetString("ca-cert")
+	plain, _ := cmd.Flags().GetBool("plain")
+	insecure, _ := cmd.Flags().GetBool("insecure")
 	timeout, _ := cmd.Flags().GetDuration("timeout")
 	attributes, _ := cmd.Flags().GetStringToString("attributes")
 
@@ -159,9 +163,11 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 			Password: password,
 		},
 		TLS: device.TlsConfig{
-			Cert:   cert,
-			Key:    key,
-			CaCert: caCert,
+			Cert:     cert,
+			Key:      key,
+			CaCert:   caCert,
+			Plain:    plain,
+			Insecure: insecure,
 		},
 		Attributes: attributes,
 	}
@@ -196,6 +202,8 @@ func getUpdateDeviceCommand() *cobra.Command {
 	cmd.Flags().String("key", "", "the TLS key")
 	cmd.Flags().String("cert", "", "the TLS certificate")
 	cmd.Flags().String("ca-cert", "", "the TLS CA certificate")
+	cmd.Flags().Bool("plain", false, "whether to connect over a plaintext connection")
+	cmd.Flags().Bool("insecure", false, "whether to enable skip verification")
 	cmd.Flags().Duration("timeout", 30*time.Second, "the device connection timeout")
 	cmd.Flags().StringToString("attributes", map[string]string{}, "an arbitrary mapping of device attributes")
 	return cmd
@@ -256,6 +264,14 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	if cmd.Flags().Changed("ca-cert") {
 		caCert, _ := cmd.Flags().GetString("ca-cert")
 		dvc.TLS.CaCert = caCert
+	}
+	if cmd.Flags().Changed("plain") {
+		plain, _ := cmd.Flags().GetBool("plain")
+		dvc.TLS.Plain = plain
+	}
+	if cmd.Flags().Changed("insecure") {
+		insecure, _ := cmd.Flags().GetBool("insecure")
+		dvc.TLS.Insecure = insecure
 	}
 	if cmd.Flags().Changed("timeout") {
 		timeout, _ := cmd.Flags().GetDuration("timeout")
