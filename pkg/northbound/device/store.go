@@ -102,7 +102,7 @@ func (s *localStore) Store(device *Device) error {
 			s.devices[device.ID] = *device
 			s.broadcastEvent(&Event{
 				Type:   EventInserted,
-				Device: &*device,
+				Device: device,
 			})
 		} else {
 			return errors.New("device already exists")
@@ -115,7 +115,7 @@ func (s *localStore) Store(device *Device) error {
 			s.devices[device.ID] = *device
 			s.broadcastEvent(&Event{
 				Type:   EventUpdated,
-				Device: &*device,
+				Device: device,
 			})
 		} else {
 			return errors.New("unknown device")

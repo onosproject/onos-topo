@@ -24,16 +24,6 @@ import (
 	"testing"
 )
 
-type testListServer struct {
-	grpc.ServerStream
-	ch chan *ListResponse
-}
-
-func (s *testListServer) Send(m *ListResponse) error {
-	s.ch <- m
-	return nil
-}
-
 func TestLocalServer(t *testing.T) {
 	lis := bufconn.Listen(1024 * 1024)
 	s := grpc.NewServer()
@@ -44,7 +34,7 @@ func TestLocalServer(t *testing.T) {
 
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			t.Fatalf("Server exited with error %v", err)
+			panic("Server exited with error")
 		}
 	}()
 
@@ -54,7 +44,7 @@ func TestLocalServer(t *testing.T) {
 
 	conn, err := grpc.DialContext(context.Background(), "bufnet", grpc.WithContextDialer(dialer), grpc.WithInsecure())
 	if err != nil {
-		t.Fatalf("Failed to dial bufnet %v", err)
+		panic("Failed to dial bufnet")
 	}
 
 	client := NewDeviceServiceClient(conn)
@@ -77,6 +67,7 @@ func TestLocalServer(t *testing.T) {
 	assert.Equal(t, "foo:1234", getResponse.Device.Address)
 
 	list, err := client.List(context.Background(), &ListRequest{})
+	assert.NoError(t, err)
 	for {
 		listResponse, err := list.Recv()
 		if err == io.EOF {
@@ -93,6 +84,7 @@ func TestLocalServer(t *testing.T) {
 	subscribe, err := client.List(context.Background(), &ListRequest{
 		Subscribe: true,
 	})
+	assert.NoError(t, err)
 
 	eventCh := make(chan *ListResponse)
 	go func() {
@@ -102,7 +94,7 @@ func TestLocalServer(t *testing.T) {
 				break
 			}
 			if err != nil {
-				t.Fatalf("subscribe failed with error %v", err)
+				panic("subscribe failed with error")
 			}
 			eventCh <- subscribeResponse
 		}
@@ -134,7 +126,7 @@ func TestLocalServer(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	listResponse = <- eventCh
+	listResponse = <-eventCh
 	assert.Equal(t, ListResponse_REMOVED, listResponse.Type)
 	assert.Equal(t, ID("foo"), listResponse.Device.ID)
 	assert.Equal(t, "foo:1234", listResponse.Device.Address)
