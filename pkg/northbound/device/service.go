@@ -58,7 +58,7 @@ func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, er
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision > 0 {
-		return nil, status.Error(codes.InvalidArgument, "device version is already set")
+		return nil, status.Error(codes.InvalidArgument, "device revision is already set")
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision == 0 {
-		return nil, status.Error(codes.InvalidArgument, "device version not set")
+		return nil, status.Error(codes.InvalidArgument, "device revision not set")
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err

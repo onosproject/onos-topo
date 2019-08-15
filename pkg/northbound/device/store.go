@@ -48,11 +48,11 @@ func NewAtomixStore() (Store, error) {
 }
 
 // NewLocalStore returns a new local device store
-func NewLocalStore() (Store, error) {
+func NewLocalStore() Store {
 	return &localStore{
 		devices:  make(map[ID]Device),
 		watchers: make([]chan<- *Event, 0),
-	}, nil
+	}
 }
 
 // Store stores topology information
@@ -95,9 +95,18 @@ func (s *localStore) Store(device *Device) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if device.Revision == 0 {
-		s.revision++
-		device.Revision = Revision(s.revision)
-		s.devices[device.ID] = *device
+		_, ok := s.devices[device.ID]
+		if !ok {
+			s.revision++
+			device.Revision = Revision(s.revision)
+			s.devices[device.ID] = *device
+			s.broadcastEvent(&Event{
+				Type:   EventInserted,
+				Device: &*device,
+			})
+		} else {
+			return errors.New("device already exists")
+		}
 	} else {
 		storedDevice, ok := s.devices[device.ID]
 		if ok && device.Revision == storedDevice.Revision {
@@ -105,7 +114,7 @@ func (s *localStore) Store(device *Device) error {
 			device.Revision = Revision(s.revision)
 			s.devices[device.ID] = *device
 			s.broadcastEvent(&Event{
-				Type: EventUpdated,
+				Type:   EventUpdated,
 				Device: &*device,
 			})
 		} else {
@@ -116,17 +125,22 @@ func (s *localStore) Store(device *Device) error {
 }
 
 func (s *localStore) Delete(device *Device) error {
+	if device.Revision == 0 {
+		return errors.New("no device revision provided")
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if device.Revision == 0 {
+	storedDevice, ok := s.devices[device.ID]
+	if ok && storedDevice.Revision == device.Revision {
 		delete(s.devices, device.ID)
-	} else {
-		storedDevice, ok := s.devices[device.ID]
-		if ok && storedDevice.Revision == device.Revision {
-			delete(s.devices, device.ID)
-		}
+		s.broadcastEvent(&Event{
+			Type:   EventRemoved,
+			Device: &storedDevice,
+		})
+		return nil
 	}
-	return nil
+	return errors.New("device out of date")
 }
 
 func (s *localStore) List(ch chan<- *Device) error {
@@ -138,6 +152,7 @@ func (s *localStore) List(ch chan<- *Device) error {
 		}
 		s.mu.RUnlock()
 
+		defer close(ch)
 		for _, device := range devices {
 			ch <- device
 		}
@@ -146,9 +161,22 @@ func (s *localStore) List(ch chan<- *Device) error {
 }
 
 func (s *localStore) Watch(ch chan<- *Event) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.watchers = append(s.watchers, ch)
+	go func() {
+		s.mu.Lock()
+		s.watchers = append(s.watchers, ch)
+		devices := make([]*Device, 0, len(s.devices))
+		for _, device := range s.devices {
+			devices = append(devices, &device)
+		}
+		defer s.mu.Unlock()
+
+		for _, device := range devices {
+			ch <- &Event{
+				Type:   EventNone,
+				Device: device,
+			}
+		}
+	}()
 	return nil
 }
 
