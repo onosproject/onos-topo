@@ -16,10 +16,12 @@ package device
 
 import (
 	"context"
+	"errors"
 	"github.com/atomix/atomix-go-client/pkg/client/map_"
 	"github.com/atomix/atomix-go-client/pkg/client/session"
 	"github.com/gogo/protobuf/proto"
 	"github.com/onosproject/onos-topo/pkg/util"
+	"sync"
 	"time"
 )
 
@@ -45,6 +47,14 @@ func NewAtomixStore() (Store, error) {
 	}, nil
 }
 
+// NewLocalStore returns a new local device store
+func NewLocalStore() (Store, error) {
+	return &localStore{
+		devices:  make(map[ID]Device),
+		watchers: make([]chan<- *Event, 0),
+	}, nil
+}
+
 // Store stores topology information
 type Store interface {
 	// Load loads a device from the store
@@ -61,6 +71,91 @@ type Store interface {
 
 	// Watch streams device events to the given channel
 	Watch(chan<- *Event) error
+}
+
+// localStore is a local implementation of the device Store
+type localStore struct {
+	devices  map[ID]Device
+	mu       sync.RWMutex
+	revision uint64
+	watchers []chan<- *Event
+}
+
+func (s *localStore) Load(deviceID ID) (*Device, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	device, ok := s.devices[deviceID]
+	if !ok {
+		return nil, nil
+	}
+	return &device, nil
+}
+
+func (s *localStore) Store(device *Device) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if device.Revision == 0 {
+		s.revision++
+		device.Revision = Revision(s.revision)
+		s.devices[device.ID] = *device
+	} else {
+		storedDevice, ok := s.devices[device.ID]
+		if ok && device.Revision == storedDevice.Revision {
+			s.revision++
+			device.Revision = Revision(s.revision)
+			s.devices[device.ID] = *device
+			s.broadcastEvent(&Event{
+				Type: EventUpdated,
+				Device: &*device,
+			})
+		} else {
+			return errors.New("unknown device")
+		}
+	}
+	return nil
+}
+
+func (s *localStore) Delete(device *Device) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if device.Revision == 0 {
+		delete(s.devices, device.ID)
+	} else {
+		storedDevice, ok := s.devices[device.ID]
+		if ok && storedDevice.Revision == device.Revision {
+			delete(s.devices, device.ID)
+		}
+	}
+	return nil
+}
+
+func (s *localStore) List(ch chan<- *Device) error {
+	go func() {
+		s.mu.RLock()
+		devices := make([]*Device, 0, len(s.devices))
+		for _, device := range s.devices {
+			devices = append(devices, &device)
+		}
+		s.mu.RUnlock()
+
+		for _, device := range devices {
+			ch <- device
+		}
+	}()
+	return nil
+}
+
+func (s *localStore) Watch(ch chan<- *Event) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.watchers = append(s.watchers, ch)
+	return nil
+}
+
+func (s *localStore) broadcastEvent(event *Event) {
+	for _, watcher := range s.watchers {
+		watcher <- event
+	}
 }
 
 // atomixStore is the device implementation of the Store
