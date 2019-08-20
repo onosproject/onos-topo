@@ -28,8 +28,12 @@ func TestLocalServer(t *testing.T) {
 	lis := bufconn.Listen(1024 * 1024)
 	s := grpc.NewServer()
 
+	store, err := NewLocalStore()
+	assert.NoError(t, err)
+	defer store.Close()
+
 	RegisterDeviceServiceServer(s, &Server{
-		deviceStore: NewLocalStore(),
+		deviceStore: store,
 	})
 
 	go func() {

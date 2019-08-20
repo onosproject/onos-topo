@@ -16,12 +16,17 @@ package device
 
 import (
 	"context"
-	"errors"
-	"github.com/atomix/atomix-go-client/pkg/client/map_"
+	"github.com/atomix/atomix-go-client/pkg/client/map"
+	"github.com/atomix/atomix-go-client/pkg/client/primitive"
 	"github.com/atomix/atomix-go-client/pkg/client/session"
+	"github.com/atomix/atomix-go-local/pkg/atomix/local"
+	"github.com/atomix/atomix-go-node/pkg/atomix"
 	"github.com/gogo/protobuf/proto"
 	"github.com/onosproject/onos-topo/pkg/util"
-	"sync"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/test/bufconn"
+	"io"
+	"net"
 	"time"
 )
 
@@ -44,19 +49,51 @@ func NewAtomixStore() (Store, error) {
 
 	return &atomixStore{
 		devices: devices,
+		closer:  devices,
 	}, nil
 }
 
 // NewLocalStore returns a new local device store
-func NewLocalStore() Store {
-	return &localStore{
-		devices:  make(map[ID]Device),
-		watchers: make([]chan<- *Event, 0),
+func NewLocalStore() (Store, error) {
+	lis := bufconn.Listen(1024 * 1024)
+	node := local.NewLocalNode(lis)
+	go node.Start()
+	name := primitive.Name{
+		Namespace: "local",
+		Name:      "devices",
 	}
+	dialer := func(ctx context.Context, address string) (net.Conn, error) {
+		return lis.Dial()
+	}
+
+	conn, err := grpc.DialContext(context.Background(), "devices", grpc.WithContextDialer(dialer), grpc.WithInsecure())
+	if err != nil {
+		panic("Failed to dial devices")
+	}
+
+	devices, err := _map.New(context.Background(), name, []*grpc.ClientConn{conn})
+	if err != nil {
+		return nil, err
+	}
+
+	return &atomixStore{
+		devices: devices,
+		closer:  &nodeCloser{node},
+	}, nil
+}
+
+type nodeCloser struct {
+	node *atomix.Node
+}
+
+func (c *nodeCloser) Close() error {
+	return c.node.Stop()
 }
 
 // Store stores topology information
 type Store interface {
+	io.Closer
+
 	// Load loads a device from the store
 	Load(deviceID ID) (*Device, error)
 
@@ -73,122 +110,10 @@ type Store interface {
 	Watch(chan<- *Event) error
 }
 
-// localStore is a local implementation of the device Store
-type localStore struct {
-	devices  map[ID]Device
-	mu       sync.RWMutex
-	revision uint64
-	watchers []chan<- *Event
-}
-
-func (s *localStore) Load(deviceID ID) (*Device, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	device, ok := s.devices[deviceID]
-	if !ok {
-		return nil, nil
-	}
-	return &device, nil
-}
-
-func (s *localStore) Store(device *Device) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if device.Revision == 0 {
-		_, ok := s.devices[device.ID]
-		if !ok {
-			s.revision++
-			device.Revision = Revision(s.revision)
-			s.devices[device.ID] = *device
-			s.broadcastEvent(&Event{
-				Type:   EventInserted,
-				Device: device,
-			})
-		} else {
-			return errors.New("device already exists")
-		}
-	} else {
-		storedDevice, ok := s.devices[device.ID]
-		if ok && device.Revision == storedDevice.Revision {
-			s.revision++
-			device.Revision = Revision(s.revision)
-			s.devices[device.ID] = *device
-			s.broadcastEvent(&Event{
-				Type:   EventUpdated,
-				Device: device,
-			})
-		} else {
-			return errors.New("unknown device")
-		}
-	}
-	return nil
-}
-
-func (s *localStore) Delete(device *Device) error {
-	if device.Revision == 0 {
-		return errors.New("no device revision provided")
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	storedDevice, ok := s.devices[device.ID]
-	if ok && storedDevice.Revision == device.Revision {
-		delete(s.devices, device.ID)
-		s.broadcastEvent(&Event{
-			Type:   EventRemoved,
-			Device: &storedDevice,
-		})
-		return nil
-	}
-	return errors.New("device out of date")
-}
-
-func (s *localStore) List(ch chan<- *Device) error {
-	go func() {
-		s.mu.RLock()
-		devices := make([]*Device, 0, len(s.devices))
-		for _, device := range s.devices {
-			devices = append(devices, &device)
-		}
-		s.mu.RUnlock()
-
-		defer close(ch)
-		for _, device := range devices {
-			ch <- device
-		}
-	}()
-	return nil
-}
-
-func (s *localStore) Watch(ch chan<- *Event) error {
-	go func() {
-		s.mu.Lock()
-		s.watchers = append(s.watchers, ch)
-		devices := make([]*Device, 0, len(s.devices))
-		for _, device := range s.devices {
-			devices = append(devices, &device)
-		}
-		defer s.mu.Unlock()
-
-		for _, device := range devices {
-			ch <- &Event{
-				Type:   EventNone,
-				Device: device,
-			}
-		}
-	}()
-	return nil
-}
-
-func (s *localStore) broadcastEvent(event *Event) {
-	for _, watcher := range s.watchers {
-		watcher <- event
-	}
-}
-
 // atomixStore is the device implementation of the Store
 type atomixStore struct {
-	devices map_.Map
+	devices _map.Map
+	closer  io.Closer
 }
 
 func (s *atomixStore) Load(deviceID ID) (*Device, error) {
@@ -212,11 +137,11 @@ func (s *atomixStore) Store(device *Device) error {
 	}
 
 	// Put the device in the map using an optimistic lock if this is an update
-	var kv *map_.KeyValue
+	var kv *_map.KeyValue
 	if device.Revision == 0 {
 		kv, err = s.devices.Put(ctx, string(device.ID), bytes)
 	} else {
-		kv, err = s.devices.Put(ctx, string(device.ID), bytes, map_.WithVersion(int64(device.Revision)))
+		kv, err = s.devices.Put(ctx, string(device.ID), bytes, _map.WithVersion(int64(device.Revision)))
 	}
 
 	if err != nil {
@@ -233,7 +158,7 @@ func (s *atomixStore) Delete(device *Device) error {
 	defer cancel()
 
 	if device.Revision > 0 {
-		_, err := s.devices.Remove(ctx, string(device.ID), map_.WithVersion(int64(device.Revision)))
+		_, err := s.devices.Remove(ctx, string(device.ID), _map.WithVersion(int64(device.Revision)))
 		return err
 	}
 	_, err := s.devices.Remove(ctx, string(device.ID))
@@ -241,7 +166,7 @@ func (s *atomixStore) Delete(device *Device) error {
 }
 
 func (s *atomixStore) List(ch chan<- *Device) error {
-	mapCh := make(chan *map_.KeyValue)
+	mapCh := make(chan *_map.KeyValue)
 	if err := s.devices.Entries(context.Background(), mapCh); err != nil {
 		return err
 	}
@@ -258,8 +183,8 @@ func (s *atomixStore) List(ch chan<- *Device) error {
 }
 
 func (s *atomixStore) Watch(ch chan<- *Event) error {
-	mapCh := make(chan *map_.MapEvent)
-	if err := s.devices.Watch(context.Background(), mapCh, map_.WithReplay()); err != nil {
+	mapCh := make(chan *_map.MapEvent)
+	if err := s.devices.Watch(context.Background(), mapCh, _map.WithReplay()); err != nil {
 		return err
 	}
 
@@ -275,6 +200,10 @@ func (s *atomixStore) Watch(ch chan<- *Event) error {
 		}
 	}()
 	return nil
+}
+
+func (s *atomixStore) Close() error {
+	return s.closer.Close()
 }
 
 func decodeDevice(key string, value []byte, version int64) (*Device, error) {
