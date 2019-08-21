@@ -116,6 +116,7 @@ func getAddDeviceCommand() *cobra.Command {
 	}
 	cmd.Flags().StringP("type", "t", "", "the type of the device")
 	cmd.Flags().StringP("role", "r", "", "the device role")
+	cmd.Flags().StringP("target", "g", "", "the device target name")
 	cmd.Flags().StringP("address", "a", "", "the address of the device")
 	cmd.Flags().StringP("user", "u", "", "the device username")
 	cmd.Flags().StringP("password", "p", "", "the device password")
@@ -134,6 +135,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	id := args[0]
 	deviceType, _ := cmd.Flags().GetString("type")
 	deviceRole, _ := cmd.Flags().GetString("role")
+	deviceTarget, _ := cmd.Flags().GetString("target")
 	address, _ := cmd.Flags().GetString("address")
 	user, _ := cmd.Flags().GetString("user")
 	password, _ := cmd.Flags().GetString("password")
@@ -156,6 +158,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 		Type:    device.Type(deviceType),
 		Role:    device.Role(deviceRole),
 		Address: address,
+		Target:  deviceTarget,
 		Version: version,
 		Timeout: &timeout,
 		Credentials: device.Credentials{
