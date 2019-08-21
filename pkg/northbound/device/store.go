@@ -57,7 +57,9 @@ func NewAtomixStore() (Store, error) {
 func NewLocalStore() (Store, error) {
 	lis := bufconn.Listen(1024 * 1024)
 	node := local.NewLocalNode(lis)
-	go node.Start()
+	go func() {
+		_ = node.Start()
+	}()
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "devices",

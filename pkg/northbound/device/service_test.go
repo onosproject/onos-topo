@@ -31,6 +31,7 @@ func TestLocalServer(t *testing.T) {
 	store, err := NewLocalStore()
 	assert.NoError(t, err)
 	defer store.Close()
+	defer s.Stop()
 
 	RegisterDeviceServiceServer(s, &Server{
 		deviceStore: store,
@@ -94,11 +95,8 @@ func TestLocalServer(t *testing.T) {
 	go func() {
 		for {
 			subscribeResponse, err := subscribe.Recv()
-			if err == io.EOF {
-				break
-			}
 			if err != nil {
-				panic("subscribe failed with error")
+				break
 			}
 			eventCh <- subscribeResponse
 		}
