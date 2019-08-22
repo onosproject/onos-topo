@@ -28,6 +28,7 @@ import (
 const (
 	defaultTimeout = 30 * time.Second
 	deviceNamePattern = `^[a-zA-Z0-9\-:_]{4,40}$`
+	deviceAddressPattern = `^[a-zA-Z0-9\-_]+:[0-9]+$`
 	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
 )
 
@@ -71,6 +72,14 @@ func validateDevice(device *Device) error {
 		return status.Errorf(codes.InvalidArgument, "device ID '%s' is invalid", device.ID)
 	}
 
+	addressRegex := regexp.MustCompile(deviceAddressPattern)
+	if device.Address == "" {
+		return status.Error(codes.InvalidArgument, "device address is required")
+	}
+	if !addressRegex.MatchString(device.Address) {
+		return status.Errorf(codes.InvalidArgument, "device address '%s' is invalid", device.Address)
+	}
+
 	if device.Type == "" {
 		return status.Error(codes.InvalidArgument, "device type is required")
 	}
@@ -99,6 +108,8 @@ func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, er
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision > 0 {
 		return nil, status.Error(codes.InvalidArgument, "device revision is already set")
+	} else if err := validateDevice(device); err != nil {
+		return nil, err
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
@@ -114,6 +125,8 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision == 0 {
 		return nil, status.Error(codes.InvalidArgument, "device revision not set")
+	} else if err := validateDevice(device); err != nil {
+		return nil, err
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
