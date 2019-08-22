@@ -128,6 +128,9 @@ func getAddDeviceCommand() *cobra.Command {
 	cmd.Flags().Bool("insecure", false, "whether to enable skip verification")
 	cmd.Flags().Duration("timeout", 30*time.Second, "the device connection timeout")
 	cmd.Flags().StringToString("attributes", map[string]string{}, "an arbitrary mapping of device attributes")
+
+	_ = cmd.MarkFlagRequired("version")
+	_ = cmd.MarkFlagRequired("type")
 	return cmd
 }
 

@@ -21,6 +21,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"regexp"
+	"time"
+)
+
+const (
+	defaultTimeout = 30 * time.Second
+	deviceNamePattern = `^[a-zA-Z0-9\-:_]{4,40}$`
+	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
 )
 
 // NewService returns a new device Service
@@ -51,6 +59,38 @@ func (s Service) Register(r *grpc.Server) {
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
 	deviceStore Store
+}
+
+// validateDevice validates the given device
+func validateDevice(device *Device) error {
+	nameRegex := regexp.MustCompile(deviceNamePattern)
+	if device.ID == "" {
+		return status.Error(codes.InvalidArgument, "device ID is required")
+	}
+	if !nameRegex.MatchString(string(device.ID)) {
+		return status.Errorf(codes.InvalidArgument, "device ID '%s' is invalid", device.ID)
+	}
+
+	if device.Type == "" {
+		return status.Error(codes.InvalidArgument, "device type is required")
+	}
+	if !nameRegex.MatchString(string(device.Type)) {
+		return status.Errorf(codes.InvalidArgument, "device type '%s' is invalid", device.ID)
+	}
+
+	versionRegex := regexp.MustCompile(deviceVersionPattern)
+	if device.Version == "" {
+		return status.Error(codes.InvalidArgument, "device version is required")
+	}
+	if !versionRegex.MatchString(device.Version) {
+		return status.Errorf(codes.InvalidArgument, "device version '%s' is invalid", device.Version)
+	}
+
+	if device.Timeout == nil {
+		timeout := defaultTimeout
+		device.Timeout = &timeout
+	}
+	return nil
 }
 
 func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
