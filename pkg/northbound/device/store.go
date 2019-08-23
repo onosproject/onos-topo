@@ -125,6 +125,8 @@ func (s *atomixStore) Load(deviceID ID) (*Device, error) {
 	kv, err := s.devices.Get(ctx, string(deviceID))
 	if err != nil {
 		return nil, err
+	} else if kv == nil {
+		return nil, nil
 	}
 	return decodeDevice(kv.Key, kv.Value, kv.Version)
 }

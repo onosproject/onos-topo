@@ -54,6 +54,11 @@ func TestLocalServer(t *testing.T) {
 
 	client := NewDeviceServiceClient(conn)
 
+	_, err = client.Get(context.Background(), &GetRequest{
+		ID: ID("none"),
+	})
+	assert.Error(t, err, "device not found")
+
 	_, err = client.Add(context.Background(), &AddRequest{
 		Device: &Device{
 			ID:      ID("foo"),
