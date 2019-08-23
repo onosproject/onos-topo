@@ -201,6 +201,7 @@ func getUpdateDeviceCommand() *cobra.Command {
 	}
 	cmd.Flags().StringP("type", "t", "", "the type of the device")
 	cmd.Flags().StringP("role", "r", "", "the device role")
+	cmd.Flags().StringP("target", "g", "", "the device target name")
 	cmd.Flags().StringP("address", "a", "", "the address of the device")
 	cmd.Flags().StringP("user", "u", "", "the device username")
 	cmd.Flags().StringP("password", "p", "", "the device password")
@@ -238,6 +239,10 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	if cmd.Flags().Changed("type") {
 		deviceType, _ := cmd.Flags().GetString("type")
 		dvc.Type = device.Type(deviceType)
+	}
+	if cmd.Flags().Changed("target") {
+		deviceTarget, _ := cmd.Flags().GetString("target")
+		dvc.Target = deviceTarget
 	}
 	if cmd.Flags().Changed("role") {
 		deviceRole, _ := cmd.Flags().GetString("role")
