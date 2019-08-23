@@ -171,4 +171,14 @@ func TestLocalServer(t *testing.T) {
 	assert.Equal(t, ListResponse_REMOVED, listResponse.Type)
 	assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
 	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
+
+	_, err = client.Add(context.Background(), &AddRequest{
+		Device: &Device{
+			ID:      ID("good"),
+			Type:    "test",
+			Address: "10.11.12.13:1234",
+			Version: "1.0.0",
+		},
+	})
+	assert.NoError(t, err, "device should be good")
 }
