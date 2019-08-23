@@ -26,8 +26,8 @@ import (
 )
 
 const (
-	defaultTimeout = 30 * time.Second
-	deviceNamePattern = `^[a-zA-Z0-9\-:_]{4,40}$`
+	defaultTimeout       = 30 * time.Second
+	deviceNamePattern    = `^[a-zA-Z0-9\-:_]{4,40}$`
 	deviceAddressPattern = `^[a-zA-Z0-9\-_]+:[0-9]+$`
 	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
 )
