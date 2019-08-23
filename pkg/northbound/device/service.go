@@ -21,6 +21,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"regexp"
+	"time"
+)
+
+const (
+	defaultTimeout       = 30 * time.Second
+	deviceNamePattern    = `^[a-zA-Z0-9\-:_]{4,40}$`
+	deviceAddressPattern = `^[a-zA-Z0-9\-_]+:[0-9]+$`
+	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
 )
 
 // NewService returns a new device Service
@@ -53,12 +62,54 @@ type Server struct {
 	deviceStore Store
 }
 
+// validateDevice validates the given device
+func validateDevice(device *Device) error {
+	nameRegex := regexp.MustCompile(deviceNamePattern)
+	if device.ID == "" {
+		return status.Error(codes.InvalidArgument, "device ID is required")
+	}
+	if !nameRegex.MatchString(string(device.ID)) {
+		return status.Errorf(codes.InvalidArgument, "device ID '%s' is invalid", device.ID)
+	}
+
+	addressRegex := regexp.MustCompile(deviceAddressPattern)
+	if device.Address == "" {
+		return status.Error(codes.InvalidArgument, "device address is required")
+	}
+	if !addressRegex.MatchString(device.Address) {
+		return status.Errorf(codes.InvalidArgument, "device address '%s' is invalid", device.Address)
+	}
+
+	if device.Type == "" {
+		return status.Error(codes.InvalidArgument, "device type is required")
+	}
+	if !nameRegex.MatchString(string(device.Type)) {
+		return status.Errorf(codes.InvalidArgument, "device type '%s' is invalid", device.ID)
+	}
+
+	versionRegex := regexp.MustCompile(deviceVersionPattern)
+	if device.Version == "" {
+		return status.Error(codes.InvalidArgument, "device version is required")
+	}
+	if !versionRegex.MatchString(device.Version) {
+		return status.Errorf(codes.InvalidArgument, "device version '%s' is invalid", device.Version)
+	}
+
+	if device.Timeout == nil {
+		timeout := defaultTimeout
+		device.Timeout = &timeout
+	}
+	return nil
+}
+
 func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision > 0 {
 		return nil, status.Error(codes.InvalidArgument, "device revision is already set")
+	} else if err := validateDevice(device); err != nil {
+		return nil, err
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
@@ -74,6 +125,8 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision == 0 {
 		return nil, status.Error(codes.InvalidArgument, "device revision not set")
+	} else if err := validateDevice(device); err != nil {
+		return nil, err
 	}
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err

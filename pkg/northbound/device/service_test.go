@@ -54,22 +54,54 @@ func TestLocalServer(t *testing.T) {
 
 	client := NewDeviceServiceClient(conn)
 
-	addResponse, err := client.Add(context.Background(), &AddRequest{
+	_, err = client.Add(context.Background(), &AddRequest{
 		Device: &Device{
 			ID:      ID("foo"),
+			Type:    "test",
 			Address: "foo:1234",
+			Version: "1.0.0",
+		},
+	})
+	assert.Error(t, err, "device ID 'foo' is invalid")
+
+	_, err = client.Add(context.Background(), &AddRequest{
+		Device: &Device{
+			ID:      ID("foobar"),
+			Type:    "test",
+			Address: "baz",
+			Version: "1.0.0",
+		},
+	})
+	assert.Error(t, err, "device address 'baz' is invalid")
+
+	_, err = client.Add(context.Background(), &AddRequest{
+		Device: &Device{
+			ID:      ID("foobar"),
+			Type:    "test",
+			Address: "baz:1234",
+			Version: "abc",
+		},
+	})
+	assert.Error(t, err, "device version 'abc' is invalid")
+
+	addResponse, err := client.Add(context.Background(), &AddRequest{
+		Device: &Device{
+			ID:      ID("device-foo"),
+			Type:    "test",
+			Address: "device-foo:1234",
+			Version: "1.0.0",
 		},
 	})
 	assert.NoError(t, err)
 	assert.NotEqual(t, Revision(0), addResponse.Device.Revision)
 
 	getResponse, err := client.Get(context.Background(), &GetRequest{
-		ID: ID("foo"),
+		ID: ID("device-foo"),
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, ID("foo"), getResponse.Device.ID)
+	assert.Equal(t, ID("device-foo"), getResponse.Device.ID)
 	assert.Equal(t, addResponse.Device.Revision, getResponse.Device.Revision)
-	assert.Equal(t, "foo:1234", getResponse.Device.Address)
+	assert.Equal(t, "device-foo:1234", getResponse.Device.Address)
 
 	list, err := client.List(context.Background(), &ListRequest{})
 	assert.NoError(t, err)
@@ -81,9 +113,9 @@ func TestLocalServer(t *testing.T) {
 		if err != nil {
 			t.Fatalf("list failed with error %v", err)
 		}
-		assert.Equal(t, ID("foo"), listResponse.Device.ID)
+		assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
 		assert.Equal(t, addResponse.Device.Revision, listResponse.Device.Revision)
-		assert.Equal(t, "foo:1234", listResponse.Device.Address)
+		assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 	}
 
 	subscribe, err := client.List(context.Background(), &ListRequest{
@@ -104,24 +136,26 @@ func TestLocalServer(t *testing.T) {
 
 	listResponse := <-eventCh
 	assert.Equal(t, ListResponse_NONE, listResponse.Type)
-	assert.Equal(t, ID("foo"), listResponse.Device.ID)
-	assert.Equal(t, "foo:1234", listResponse.Device.Address)
+	assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
+	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 
 	addResponse, err = client.Add(context.Background(), &AddRequest{
 		Device: &Device{
-			ID:      ID("bar"),
-			Address: "bar:1234",
+			ID:      ID("device-bar"),
+			Type:    "test",
+			Address: "device-bar:1234",
+			Version: "1.0.0",
 		},
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, ID("bar"), addResponse.Device.ID)
-	assert.Equal(t, "bar:1234", addResponse.Device.Address)
+	assert.Equal(t, ID("device-bar"), addResponse.Device.ID)
+	assert.Equal(t, "device-bar:1234", addResponse.Device.Address)
 	assert.NotEqual(t, Revision(0), addResponse.Device.Revision)
 
 	listResponse = <-eventCh
 	assert.Equal(t, ListResponse_ADDED, listResponse.Type)
-	assert.Equal(t, ID("bar"), listResponse.Device.ID)
-	assert.Equal(t, "bar:1234", listResponse.Device.Address)
+	assert.Equal(t, ID("device-bar"), listResponse.Device.ID)
+	assert.Equal(t, "device-bar:1234", listResponse.Device.Address)
 
 	_, err = client.Remove(context.Background(), &RemoveRequest{
 		Device: getResponse.Device,
@@ -130,6 +164,6 @@ func TestLocalServer(t *testing.T) {
 
 	listResponse = <-eventCh
 	assert.Equal(t, ListResponse_REMOVED, listResponse.Type)
-	assert.Equal(t, ID("foo"), listResponse.Device.ID)
-	assert.Equal(t, "foo:1234", listResponse.Device.Address)
+	assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
+	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 }
