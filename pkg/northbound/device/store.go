@@ -224,10 +224,14 @@ func decodeDevice(key string, value []byte, version int64) (*Device, error) {
 type EventType string
 
 const (
-	EventNone     EventType = ""
+	// EventNone is no event
+	EventNone EventType = ""
+	// EventInserted is inserted
 	EventInserted EventType = "inserted"
-	EventUpdated  EventType = "updated"
-	EventRemoved  EventType = "removed"
+	// EventUpdated is updated
+	EventUpdated EventType = "updated"
+	// EventRemoved is removed
+	EventRemoved EventType = "removed"
 )
 
 // Event is a store event for a device

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package admin implements the northbound administrative gRPC service for the topology subsystem.
+// Package device :
 package device
 
 import (
@@ -102,6 +102,7 @@ func validateDevice(device *Device) error {
 	return nil
 }
 
+// Add :
 func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
 	device := request.Device
 	if device == nil {
@@ -119,6 +120,7 @@ func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, er
 	}, nil
 }
 
+// Update :
 func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateResponse, error) {
 	device := request.Device
 	if device == nil {
@@ -136,6 +138,7 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 	}, nil
 }
 
+// Get :
 func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, error) {
 	device, err := s.deviceStore.Load(request.ID)
 	if err != nil {
@@ -148,6 +151,7 @@ func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, er
 	}, nil
 }
 
+// List :
 func (s *Server) List(request *ListRequest, server DeviceService_ListServer) error {
 	if request.Subscribe {
 		ch := make(chan *Event)
@@ -194,6 +198,7 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 	return nil
 }
 
+// Remove :
 func (s *Server) Remove(ctx context.Context, request *RemoveRequest) (*RemoveResponse, error) {
 	device := request.Device
 	err := s.deviceStore.Delete(device)

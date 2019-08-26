@@ -38,6 +38,7 @@ func getAtomixApp() string {
 	return os.Getenv(atomixAppEnv)
 }
 
+// GetAtomixRaftGroup get the Atomix Raft group
 func GetAtomixRaftGroup() string {
 	return os.Getenv(atomixRaftGroup)
 }
