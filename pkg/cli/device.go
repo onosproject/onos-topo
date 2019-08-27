@@ -151,6 +151,11 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	timeout, _ := cmd.Flags().GetDuration("timeout")
 	attributes, _ := cmd.Flags().GetStringToString("attributes")
 
+	// Target defaults to the ID
+	if deviceTarget == "" {
+		deviceTarget = id
+	}
+
 	conn := getConnection()
 	defer conn.Close()
 
