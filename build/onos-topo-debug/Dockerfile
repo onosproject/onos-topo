@@ -15,7 +15,7 @@ COPY --from=base /go/src/github.com/onosproject/onos-topo/build/_output/onos-top
 COPY --from=debugBuilder /go/bin/dlv /usr/local/bin/dlv
 
 RUN echo "#!/bin/sh" >> /usr/local/bin/onos-topo-debug && \
-    echo "dlv --listen=:40000 --headless=true --accept-multiclient=true --api-version=2 exec /usr/local/bin/onos-topo -- \"\$@\"" >> /usr/local/bin/onos-topo-debug && \
+    echo "dlv --listen=:40000 --headless=true --accept-multiclient=true --continue --api-version=2 exec /usr/local/bin/onos-topo -- \"\$@\"" >> /usr/local/bin/onos-topo-debug && \
     chmod +x /usr/local/bin/onos-topo-debug
 
 RUN addgroup -S onos-topo && adduser -S -G onos-topo onos-topo
