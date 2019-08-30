@@ -56,20 +56,10 @@ func NewAtomixStore() (Store, error) {
 
 // NewLocalStore returns a new local device store
 func NewLocalStore() (Store, error) {
-	lis := bufconn.Listen(1024 * 1024)
-	node := local.NewNode(lis, registry.Registry)
-	_ = node.Start()
+	node, conn := startLocalNode()
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "devices",
-	}
-	dialer := func(ctx context.Context, address string) (net.Conn, error) {
-		return lis.Dial()
-	}
-
-	conn, err := grpc.DialContext(context.Background(), "devices", grpc.WithContextDialer(dialer), grpc.WithInsecure())
-	if err != nil {
-		panic("Failed to dial devices")
 	}
 
 	devices, err := _map.New(context.Background(), name, []*grpc.ClientConn{conn})
@@ -81,6 +71,23 @@ func NewLocalStore() (Store, error) {
 		devices: devices,
 		closer:  &nodeCloser{node},
 	}, nil
+}
+
+// startLocalNode starts a single local node
+func startLocalNode() (*atomix.Node, *grpc.ClientConn) {
+	lis := bufconn.Listen(1024 * 1024)
+	node := local.NewNode(lis, registry.Registry)
+	_ = node.Start()
+
+	dialer := func(ctx context.Context, address string) (net.Conn, error) {
+		return lis.Dial()
+	}
+
+	conn, err := grpc.DialContext(context.Background(), "devices", grpc.WithContextDialer(dialer), grpc.WithInsecure())
+	if err != nil {
+		panic("Failed to dial devices")
+	}
+	return node, conn
 }
 
 type nodeCloser struct {
@@ -206,6 +213,7 @@ func (s *atomixStore) Watch(ch chan<- *Event) error {
 }
 
 func (s *atomixStore) Close() error {
+	_ = s.devices.Close()
 	return s.closer.Close()
 }
 
