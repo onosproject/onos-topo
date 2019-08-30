@@ -45,7 +45,7 @@ func GetAtomixRaftGroup() string {
 
 // GetAtomixClient returns the Atomix client
 func GetAtomixClient() (*client.Client, error) {
-	opts := []client.ClientOption{
+	opts := []client.Option{
 		client.WithNamespace(getAtomixNamespace()),
 		client.WithApplication(getAtomixApp()),
 	}

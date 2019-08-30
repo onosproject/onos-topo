@@ -21,6 +21,7 @@ import (
 	"github.com/atomix/atomix-go-client/pkg/client/session"
 	"github.com/atomix/atomix-go-local/pkg/atomix/local"
 	"github.com/atomix/atomix-go-node/pkg/atomix"
+	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
 	"github.com/gogo/protobuf/proto"
 	"github.com/onosproject/onos-topo/pkg/util"
 	"google.golang.org/grpc"
@@ -56,10 +57,8 @@ func NewAtomixStore() (Store, error) {
 // NewLocalStore returns a new local device store
 func NewLocalStore() (Store, error) {
 	lis := bufconn.Listen(1024 * 1024)
-	node := local.NewLocalNode(lis)
-	go func() {
-		_ = node.Start()
-	}()
+	node := local.NewNode(lis, registry.Registry)
+	_ = node.Start()
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "devices",
@@ -145,7 +144,7 @@ func (s *atomixStore) Store(device *Device) error {
 	if device.Revision == 0 {
 		kv, err = s.devices.Put(ctx, string(device.ID), bytes)
 	} else {
-		kv, err = s.devices.Put(ctx, string(device.ID), bytes, _map.WithVersion(int64(device.Revision)))
+		kv, err = s.devices.Put(ctx, string(device.ID), bytes, _map.IfVersion(int64(device.Revision)))
 	}
 
 	if err != nil {
@@ -162,7 +161,7 @@ func (s *atomixStore) Delete(device *Device) error {
 	defer cancel()
 
 	if device.Revision > 0 {
-		_, err := s.devices.Remove(ctx, string(device.ID), _map.WithVersion(int64(device.Revision)))
+		_, err := s.devices.Remove(ctx, string(device.ID), _map.IfVersion(int64(device.Revision)))
 		return err
 	}
 	_, err := s.devices.Remove(ctx, string(device.ID))
@@ -187,7 +186,7 @@ func (s *atomixStore) List(ch chan<- *Device) error {
 }
 
 func (s *atomixStore) Watch(ch chan<- *Event) error {
-	mapCh := make(chan *_map.MapEvent)
+	mapCh := make(chan *_map.Event)
 	if err := s.devices.Watch(context.Background(), mapCh, _map.WithReplay()); err != nil {
 		return err
 	}
