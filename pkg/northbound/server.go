@@ -20,11 +20,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/onosproject/onos-config/pkg/certs"
-	"google.golang.org/grpc/credentials"
 	"io/ioutil"
-	log "k8s.io/klog"
 	"net"
+
+	"github.com/onosproject/onos-topo/pkg/certs"
+	"google.golang.org/grpc/credentials"
+	log "k8s.io/klog"
 
 	"google.golang.org/grpc"
 )
