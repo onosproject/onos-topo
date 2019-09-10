@@ -33,12 +33,14 @@ func getGetDeviceCommand() *cobra.Command {
 		Short:   "Get a device",
 		Run:     runGetDeviceCommand,
 	}
+	cmd.Flags().StringP("type", "t", "", "the device type")
 	cmd.Flags().BoolP("verbose", "v", false, "whether to print the device with verbose output")
 	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
 func runGetDeviceCommand(cmd *cobra.Command, args []string) {
+	t, _ := cmd.Flags().GetString("type")
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
@@ -75,10 +77,12 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 			}
 
 			dev := response.Device
-			if verbose {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
-			} else {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.Version))
+			if t == "" || dev.Type == device.Type(t) {
+				if verbose {
+					fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
+				} else {
+					fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.Version))
+				}
 			}
 		}
 		writer.Flush()
