@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
@@ -60,7 +61,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 
 		if !noHeaders {
 			if verbose {
-				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tUSER\tPASSWORD")
+				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tUSER\tPASSWORD\tATTRIBUTES")
 			} else {
 				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION")
 			}
@@ -76,7 +77,15 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 
 			dev := response.Device
 			if verbose {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
+				attributesBuf := bytes.Buffer{}
+				for key, attribute := range dev.Attributes {
+					attributesBuf.WriteString(key)
+					attributesBuf.WriteString(": ")
+					attributesBuf.WriteString(attribute)
+					attributesBuf.WriteString(", ")
+				}
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version,
+					dev.Credentials.User, dev.Credentials.Password, attributesBuf.String()))
 			} else {
 				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.Version))
 			}
