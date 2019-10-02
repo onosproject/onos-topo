@@ -18,6 +18,7 @@ package device
 import (
 	"context"
 	"github.com/onosproject/onos-topo/pkg/northbound"
+	service "github.com/onosproject/onos-topo/pkg/service/device"
 	store "github.com/onosproject/onos-topo/pkg/store/device"
 	types "github.com/onosproject/onos-topo/pkg/types/device"
 	"google.golang.org/grpc"
@@ -56,7 +57,7 @@ func (s Service) Register(r *grpc.Server) {
 	server := &Server{
 		deviceStore: s.store,
 	}
-	RegisterDeviceServiceServer(r, server)
+	service.RegisterDeviceServiceServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.
@@ -105,7 +106,7 @@ func validateDevice(device *types.Device) error {
 }
 
 // Add :
-func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
+func (s *Server) Add(ctx context.Context, request *service.AddRequest) (*service.AddResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
@@ -117,13 +118,13 @@ func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, er
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	return &AddResponse{
+	return &service.AddResponse{
 		Device: device,
 	}, nil
 }
 
 // Update :
-func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateResponse, error) {
+func (s *Server) Update(ctx context.Context, request *service.UpdateRequest) (*service.UpdateResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
@@ -135,26 +136,26 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	return &UpdateResponse{
+	return &service.UpdateResponse{
 		Device: device,
 	}, nil
 }
 
 // Get :
-func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, error) {
+func (s *Server) Get(ctx context.Context, request *service.GetRequest) (*service.GetResponse, error) {
 	device, err := s.deviceStore.Load(request.ID)
 	if err != nil {
 		return nil, err
 	} else if device == nil {
 		return nil, status.Error(codes.NotFound, "device not found")
 	}
-	return &GetResponse{
+	return &service.GetResponse{
 		Device: device,
 	}, nil
 }
 
 // List :
-func (s *Server) List(request *ListRequest, server DeviceService_ListServer) error {
+func (s *Server) List(request *service.ListRequest, server service.DeviceService_ListServer) error {
 	if request.Subscribe {
 		ch := make(chan *store.Event)
 		if err := s.deviceStore.Watch(ch); err != nil {
@@ -162,18 +163,18 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 		}
 
 		for event := range ch {
-			var t ListResponse_Type
+			var t service.ListResponse_Type
 			switch event.Type {
 			case store.EventNone:
-				t = ListResponse_NONE
+				t = service.ListResponse_NONE
 			case store.EventInserted:
-				t = ListResponse_ADDED
+				t = service.ListResponse_ADDED
 			case store.EventUpdated:
-				t = ListResponse_UPDATED
+				t = service.ListResponse_UPDATED
 			case store.EventRemoved:
-				t = ListResponse_REMOVED
+				t = service.ListResponse_REMOVED
 			}
-			err := server.Send(&ListResponse{
+			err := server.Send(&service.ListResponse{
 				Type:   t,
 				Device: event.Device,
 			})
@@ -188,8 +189,8 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 		}
 
 		for device := range ch {
-			err := server.Send(&ListResponse{
-				Type:   ListResponse_NONE,
+			err := server.Send(&service.ListResponse{
+				Type:   service.ListResponse_NONE,
 				Device: device,
 			})
 			if err != nil {
@@ -201,11 +202,11 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 }
 
 // Remove :
-func (s *Server) Remove(ctx context.Context, request *RemoveRequest) (*RemoveResponse, error) {
+func (s *Server) Remove(ctx context.Context, request *service.RemoveRequest) (*service.RemoveResponse, error) {
 	device := request.Device
 	err := s.deviceStore.Delete(device)
 	if err != nil {
 		return nil, err
 	}
-	return &RemoveResponse{}, nil
+	return &service.RemoveResponse{}, nil
 }

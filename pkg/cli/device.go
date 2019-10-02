@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	service "github.com/onosproject/onos-topo/pkg/northbound/device"
+	service "github.com/onosproject/onos-topo/pkg/service/device"
 	types "github.com/onosproject/onos-topo/pkg/types/device"
 	"github.com/spf13/cobra"
 	"io"

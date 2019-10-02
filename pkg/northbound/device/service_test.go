@@ -16,8 +16,9 @@ package device
 
 import (
 	"context"
-	devicestore "github.com/onosproject/onos-topo/pkg/store/device"
-	devicetype "github.com/onosproject/onos-topo/pkg/types/device"
+	service "github.com/onosproject/onos-topo/pkg/service/device"
+	store "github.com/onosproject/onos-topo/pkg/store/device"
+	types "github.com/onosproject/onos-topo/pkg/types/device"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
@@ -30,12 +31,12 @@ func TestLocalServer(t *testing.T) {
 	lis := bufconn.Listen(1024 * 1024)
 	s := grpc.NewServer()
 
-	store, err := devicestore.NewLocalStore()
+	store, err := store.NewLocalStore()
 	assert.NoError(t, err)
 	defer store.Close()
 	defer s.Stop()
 
-	RegisterDeviceServiceServer(s, &Server{
+	service.RegisterDeviceServiceServer(s, &Server{
 		deviceStore: store,
 	})
 
@@ -54,16 +55,16 @@ func TestLocalServer(t *testing.T) {
 		panic("Failed to dial bufnet")
 	}
 
-	client := NewDeviceServiceClient(conn)
+	client := service.NewDeviceServiceClient(conn)
 
-	_, err = client.Get(context.Background(), &GetRequest{
-		ID: devicetype.ID("none"),
+	_, err = client.Get(context.Background(), &service.GetRequest{
+		ID: types.ID("none"),
 	})
 	assert.Error(t, err, "device not found")
 
-	_, err = client.Add(context.Background(), &AddRequest{
-		Device: &devicetype.Device{
-			ID:      devicetype.ID("foo"),
+	_, err = client.Add(context.Background(), &service.AddRequest{
+		Device: &types.Device{
+			ID:      types.ID("foo"),
 			Type:    "test",
 			Address: "foo:1234",
 			Version: "1.0.0",
@@ -71,9 +72,9 @@ func TestLocalServer(t *testing.T) {
 	})
 	assert.Error(t, err, "device ID 'foo' is invalid")
 
-	_, err = client.Add(context.Background(), &AddRequest{
-		Device: &devicetype.Device{
-			ID:      devicetype.ID("foobar"),
+	_, err = client.Add(context.Background(), &service.AddRequest{
+		Device: &types.Device{
+			ID:      types.ID("foobar"),
 			Type:    "test",
 			Address: "baz",
 			Version: "1.0.0",
@@ -81,9 +82,9 @@ func TestLocalServer(t *testing.T) {
 	})
 	assert.Error(t, err, "device address 'baz' is invalid")
 
-	_, err = client.Add(context.Background(), &AddRequest{
-		Device: &devicetype.Device{
-			ID:      devicetype.ID("foobar"),
+	_, err = client.Add(context.Background(), &service.AddRequest{
+		Device: &types.Device{
+			ID:      types.ID("foobar"),
 			Type:    "test",
 			Address: "baz:1234",
 			Version: "abc",
@@ -91,26 +92,26 @@ func TestLocalServer(t *testing.T) {
 	})
 	assert.Error(t, err, "device version 'abc' is invalid")
 
-	addResponse, err := client.Add(context.Background(), &AddRequest{
-		Device: &devicetype.Device{
-			ID:      devicetype.ID("device-foo"),
+	addResponse, err := client.Add(context.Background(), &service.AddRequest{
+		Device: &types.Device{
+			ID:      types.ID("device-foo"),
 			Type:    "test",
 			Address: "device-foo:1234",
 			Version: "1.0.0",
 		},
 	})
 	assert.NoError(t, err)
-	assert.NotEqual(t, devicetype.Revision(0), addResponse.Device.Revision)
+	assert.NotEqual(t, types.Revision(0), addResponse.Device.Revision)
 
-	getResponse, err := client.Get(context.Background(), &GetRequest{
-		ID: devicetype.ID("device-foo"),
+	getResponse, err := client.Get(context.Background(), &service.GetRequest{
+		ID: types.ID("device-foo"),
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, devicetype.ID("device-foo"), getResponse.Device.ID)
+	assert.Equal(t, types.ID("device-foo"), getResponse.Device.ID)
 	assert.Equal(t, addResponse.Device.Revision, getResponse.Device.Revision)
 	assert.Equal(t, "device-foo:1234", getResponse.Device.Address)
 
-	list, err := client.List(context.Background(), &ListRequest{})
+	list, err := client.List(context.Background(), &service.ListRequest{})
 	assert.NoError(t, err)
 	for {
 		listResponse, err := list.Recv()
@@ -120,17 +121,17 @@ func TestLocalServer(t *testing.T) {
 		if err != nil {
 			t.Fatalf("list failed with error %v", err)
 		}
-		assert.Equal(t, devicetype.ID("device-foo"), listResponse.Device.ID)
+		assert.Equal(t, types.ID("device-foo"), listResponse.Device.ID)
 		assert.Equal(t, addResponse.Device.Revision, listResponse.Device.Revision)
 		assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 	}
 
-	subscribe, err := client.List(context.Background(), &ListRequest{
+	subscribe, err := client.List(context.Background(), &service.ListRequest{
 		Subscribe: true,
 	})
 	assert.NoError(t, err)
 
-	eventCh := make(chan *ListResponse)
+	eventCh := make(chan *service.ListResponse)
 	go func() {
 		for {
 			subscribeResponse, err := subscribe.Recv()
@@ -142,41 +143,41 @@ func TestLocalServer(t *testing.T) {
 	}()
 
 	listResponse := <-eventCh
-	assert.Equal(t, ListResponse_NONE, listResponse.Type)
-	assert.Equal(t, devicetype.ID("device-foo"), listResponse.Device.ID)
+	assert.Equal(t, service.ListResponse_NONE, listResponse.Type)
+	assert.Equal(t, types.ID("device-foo"), listResponse.Device.ID)
 	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 
-	addResponse, err = client.Add(context.Background(), &AddRequest{
-		Device: &devicetype.Device{
-			ID:      devicetype.ID("device-bar"),
+	addResponse, err = client.Add(context.Background(), &service.AddRequest{
+		Device: &types.Device{
+			ID:      types.ID("device-bar"),
 			Type:    "test",
 			Address: "device-bar:1234",
 			Version: "1.0.0",
 		},
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, devicetype.ID("device-bar"), addResponse.Device.ID)
+	assert.Equal(t, types.ID("device-bar"), addResponse.Device.ID)
 	assert.Equal(t, "device-bar:1234", addResponse.Device.Address)
-	assert.NotEqual(t, devicetype.Revision(0), addResponse.Device.Revision)
+	assert.NotEqual(t, types.Revision(0), addResponse.Device.Revision)
 
 	listResponse = <-eventCh
-	assert.Equal(t, ListResponse_ADDED, listResponse.Type)
-	assert.Equal(t, devicetype.ID("device-bar"), listResponse.Device.ID)
+	assert.Equal(t, service.ListResponse_ADDED, listResponse.Type)
+	assert.Equal(t, types.ID("device-bar"), listResponse.Device.ID)
 	assert.Equal(t, "device-bar:1234", listResponse.Device.Address)
 
-	_, err = client.Remove(context.Background(), &RemoveRequest{
+	_, err = client.Remove(context.Background(), &service.RemoveRequest{
 		Device: getResponse.Device,
 	})
 	assert.NoError(t, err)
 
 	listResponse = <-eventCh
-	assert.Equal(t, ListResponse_REMOVED, listResponse.Type)
-	assert.Equal(t, devicetype.ID("device-foo"), listResponse.Device.ID)
+	assert.Equal(t, service.ListResponse_REMOVED, listResponse.Type)
+	assert.Equal(t, types.ID("device-foo"), listResponse.Device.ID)
 	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 
-	_, err = client.Add(context.Background(), &AddRequest{
-		Device: &devicetype.Device{
-			ID:      devicetype.ID("good"),
+	_, err = client.Add(context.Background(), &service.AddRequest{
+		Device: &types.Device{
+			ID:      types.ID("good"),
 			Type:    "test",
 			Address: "10.11.12.13:1234",
 			Version: "1.0.0",
