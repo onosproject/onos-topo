@@ -16,47 +16,46 @@ limitations under the License.
 
 syntax = "proto3";
 
-// Package topo.device defines interfaces for managing devices.
-package topo.device;
+// Package onos.topo.device defines interfaces for managing devices.
+package onos.topo.device;
 
-import "google/protobuf/duration.proto";
 import "gogoproto/gogo.proto";
+import "github.com/onosproject/onos-topo/pkg/types/device/device.proto";
 
 // AddRequest adds a device to the topology
 message AddRequest {
     // device is the device to add
-    Device device = 1;
+    onos.topo.device.Device device = 1;
 }
 
 // AddResponse is sent in response to an AddDeviceRequest
 message AddResponse {
     // device is the device with a revision number
-    Device device = 1;
+    onos.topo.device.Device device = 1;
 }
 
 // UpdateRequest updates a device
 message UpdateRequest {
     // device is the updated device
-    Device device = 1;
+    onos.topo.device.Device device = 1;
 }
 
 // UpdateResponse is sent in response to an UpdateDeviceRequest
 message UpdateResponse {
     // device is the device with updated revision
-    Device device = 1;
+    onos.topo.device.Device device = 1;
 }
 
 // GetRequest gets a device by ID
 message GetRequest {
-
     // id is the unique device ID with which to lookup the device
-    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "github.com/onosproject/onos-topo/pkg/types/device.ID"];
 }
 
 // GetResponse carries a device
 message GetResponse {
     // device is the device object
-    Device device = 1;
+    onos.topo.device.Device device = 1;
 }
 
 // ListRequest requests a stream of devices and changes
@@ -78,7 +77,7 @@ message ListResponse {
     Type type = 1;
 
     // device is the device on which the event occurred
-    Device device = 2;
+    onos.topo.device.Device device = 2;
 
     // Device event type
     enum Type {
@@ -99,78 +98,12 @@ message ListResponse {
 // RemoveRequest removes a device by ID
 message RemoveRequest {
     // device is the device to remove
-    Device device = 1;
+    onos.topo.device.Device device = 1;
 }
 
 // RemoveResponse is sent in response to a RemoveDeviceRequest
 message RemoveResponse {
 
-}
-
-// Device contains information about a device
-message Device {
-
-    // id is a globally unique device identifier
-    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
-
-    // revision is the revision of the device
-    uint64 revision = 2 [(gogoproto.casttype) = "Revision"];
-
-    // address is the host:port of the device
-    string address = 3;
-
-    // target is the device target
-    string target = 4;
-
-    // version is the device software version
-    string version = 5;
-
-    // timeout indicates the device request timeout
-    google.protobuf.Duration timeout = 6 [(gogoproto.stdduration) = true];
-
-    // credentials contains the credentials for connecting to the device
-    Credentials credentials = 7 [(gogoproto.nullable) = false];
-
-    // tls is the device TLS configuration
-    TlsConfig tls = 8 [(gogoproto.customname) = "TLS", (gogoproto.nullable) = false];
-
-    // type is the type of the device
-    string type = 9 [(gogoproto.casttype) = "Type"];
-
-    // role is a role for the device
-    string role = 10 [(gogoproto.casttype) = "Role"];
-
-    // attributes is an arbitrary mapping of attribute keys/values
-    map<string, string> attributes = 11;
-}
-
-// Credentials is the device credentials
-message Credentials {
-
-    // user is the user with which to connect to the device
-    string user = 1;
-
-    // password is the password for connecting to the device
-    string password = 2;
-}
-
-// Device TLS configuration
-message TlsConfig {
-
-    // caCert is the name of the device's CA certificate
-    string caCert = 3;
-
-    // cert is the name of the device's certificate
-    string cert = 4;
-
-    // key is the name of the device's TLS key
-    string key = 5;
-
-    // plain indicates whether to connect to the device over plaintext
-    bool plain = 6;
-
-    // insecure indicates whether to connect to the device with insecure communication
-    bool insecure = 7;
 }
 
 // DeviceService provides an API for managing devices.

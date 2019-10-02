@@ -18,7 +18,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/onosproject/onos-topo/pkg/northbound/device"
+	service "github.com/onosproject/onos-topo/pkg/northbound/device"
+	types "github.com/onosproject/onos-topo/pkg/types/device"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
@@ -46,12 +47,12 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 	conn := getConnection()
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := service.NewDeviceServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	if len(args) == 0 {
-		stream, err := client.List(ctx, &device.ListRequest{})
+		stream, err := client.List(ctx, &service.ListRequest{})
 		if err != nil {
 			ExitWithError(ExitBadConnection, err)
 		}
@@ -92,8 +93,8 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 		}
 		writer.Flush()
 	} else {
-		response, err := client.Get(ctx, &device.GetRequest{
-			ID: device.ID(args[0]),
+		response, err := client.Get(ctx, &service.GetRequest{
+			ID: types.ID(args[0]),
 		})
 		if err != nil {
 			ExitWithError(ExitBadConnection, err)
@@ -168,21 +169,21 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	conn := getConnection()
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := service.NewDeviceServiceClient(conn)
 
-	dev := &device.Device{
-		ID:      device.ID(id),
-		Type:    device.Type(deviceType),
-		Role:    device.Role(deviceRole),
+	dev := &types.Device{
+		ID:      types.ID(id),
+		Type:    types.Type(deviceType),
+		Role:    types.Role(deviceRole),
 		Address: address,
 		Target:  deviceTarget,
 		Version: version,
 		Timeout: &timeout,
-		Credentials: device.Credentials{
+		Credentials: types.Credentials{
 			User:     user,
 			Password: password,
 		},
-		TLS: device.TlsConfig{
+		TLS: types.TlsConfig{
 			Cert:     cert,
 			Key:      key,
 			CaCert:   caCert,
@@ -195,7 +196,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := client.Add(ctx, &device.AddRequest{
+	_, err := client.Add(ctx, &service.AddRequest{
 		Device: dev,
 	})
 	if err != nil {
@@ -236,12 +237,12 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	conn := getConnection()
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := service.NewDeviceServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 
-	response, err := client.Get(ctx, &device.GetRequest{
-		ID: device.ID(id),
+	response, err := client.Get(ctx, &service.GetRequest{
+		ID: types.ID(id),
 	})
 	if err != nil {
 		ExitWithError(ExitBadConnection, err)
@@ -252,7 +253,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 
 	if cmd.Flags().Changed("type") {
 		deviceType, _ := cmd.Flags().GetString("type")
-		dvc.Type = device.Type(deviceType)
+		dvc.Type = types.Type(deviceType)
 	}
 	if cmd.Flags().Changed("target") {
 		deviceTarget, _ := cmd.Flags().GetString("target")
@@ -260,7 +261,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	}
 	if cmd.Flags().Changed("role") {
 		deviceRole, _ := cmd.Flags().GetString("role")
-		dvc.Role = device.Role(deviceRole)
+		dvc.Role = types.Role(deviceRole)
 	}
 	if cmd.Flags().Changed("address") {
 		address, _ := cmd.Flags().GetString("address")
@@ -310,7 +311,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 	ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err = client.Update(ctx, &device.UpdateRequest{
+	_, err = client.Update(ctx, &service.UpdateRequest{
 		Device: dvc,
 	})
 	if err != nil {
@@ -336,14 +337,14 @@ func runRemoveDeviceCommand(cmd *cobra.Command, args []string) {
 	conn := getConnection()
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := service.NewDeviceServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := client.Remove(ctx, &device.RemoveRequest{
-		Device: &device.Device{
-			ID: device.ID(id),
+	_, err := client.Remove(ctx, &service.RemoveRequest{
+		Device: &types.Device{
+			ID: types.ID(id),
 		},
 	})
 	if err != nil {
@@ -378,9 +379,9 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 	conn := getConnection()
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := service.NewDeviceServiceClient(conn)
 
-	stream, err := client.List(context.Background(), &device.ListRequest{
+	stream, err := client.List(context.Background(), &service.ListRequest{
 		Subscribe: true,
 	})
 	if err != nil {
@@ -408,7 +409,7 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 		}
 
 		dev := response.Device
-		if id != "" && dev.ID != device.ID(id) {
+		if id != "" && dev.ID != types.ID(id) {
 			continue
 		}
 

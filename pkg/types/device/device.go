@@ -14,8 +14,10 @@
 
 package device
 
+import "github.com/onosproject/onos-topo/pkg/types"
+
 // ID is a device ID
-type ID string
+type ID types.ID
 
 // Type is a device type
 type Type string
@@ -24,4 +26,4 @@ type Type string
 type Role string
 
 // Revision is the device revision number
-type Revision uint64
+type Revision types.Revision

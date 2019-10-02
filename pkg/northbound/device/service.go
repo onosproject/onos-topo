@@ -18,6 +18,8 @@ package device
 import (
 	"context"
 	"github.com/onosproject/onos-topo/pkg/northbound"
+	store "github.com/onosproject/onos-topo/pkg/store/device"
+	types "github.com/onosproject/onos-topo/pkg/types/device"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +36,7 @@ const (
 
 // NewService returns a new device Service
 func NewService() (northbound.Service, error) {
-	deviceStore, err := NewAtomixStore()
+	deviceStore, err := store.NewAtomixStore()
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +48,7 @@ func NewService() (northbound.Service, error) {
 // Service is a Service implementation for administration.
 type Service struct {
 	northbound.Service
-	store Store
+	store store.Store
 }
 
 // Register registers the Service with the gRPC server.
@@ -59,11 +61,11 @@ func (s Service) Register(r *grpc.Server) {
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	deviceStore Store
+	deviceStore store.Store
 }
 
 // validateDevice validates the given device
-func validateDevice(device *Device) error {
+func validateDevice(device *types.Device) error {
 	nameRegex := regexp.MustCompile(deviceNamePattern)
 	if device.ID == "" {
 		return status.Error(codes.InvalidArgument, "device ID is required")
@@ -154,7 +156,7 @@ func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, er
 // List :
 func (s *Server) List(request *ListRequest, server DeviceService_ListServer) error {
 	if request.Subscribe {
-		ch := make(chan *Event)
+		ch := make(chan *store.Event)
 		if err := s.deviceStore.Watch(ch); err != nil {
 			return err
 		}
@@ -162,13 +164,13 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 		for event := range ch {
 			var t ListResponse_Type
 			switch event.Type {
-			case EventNone:
+			case store.EventNone:
 				t = ListResponse_NONE
-			case EventInserted:
+			case store.EventInserted:
 				t = ListResponse_ADDED
-			case EventUpdated:
+			case store.EventUpdated:
 				t = ListResponse_UPDATED
-			case EventRemoved:
+			case store.EventRemoved:
 				t = ListResponse_REMOVED
 			}
 			err := server.Send(&ListResponse{
@@ -180,7 +182,7 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 			}
 		}
 	} else {
-		ch := make(chan *Device)
+		ch := make(chan *types.Device)
 		if err := s.deviceStore.List(ch); err != nil {
 			return err
 		}
