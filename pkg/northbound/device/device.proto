@@ -22,6 +22,36 @@ package topo.device;
 import "google/protobuf/duration.proto";
 import "gogoproto/gogo.proto";
 
+// Protocol to interact with a device
+enum Protocol {
+    // GNMI protocol reference
+    GNMI = 0;
+
+    // P4RUNTIME protocol reference
+    P4RUNTIME = 1;
+
+    // GNOI protocol reference
+    GNOI = 2;
+
+    // L3 reachability reference
+    L3_REACHABILITY = 3;
+
+    //TODO extend with needed protocols (e.g. for RAN)
+}
+
+// Device event type
+enum State {
+    // AVAILABLE indicates the corresponding protocol is connected on this device
+    AVAILABLE = 0;
+
+    // UNAVAILABLE indicates the corresponding protocol is not connected on this device
+    UNAVAILABLE = 1;
+
+    // CONNECTING indicates the corresponding protocol is connecting phase on this device
+    CONNECTING = 2;
+
+}
+
 // AddRequest adds a device to the topology
 message AddRequest {
     // device is the device to add
@@ -142,6 +172,8 @@ message Device {
 
     // attributes is an arbitrary mapping of attribute keys/values
     map<string, string> attributes = 11;
+
+    repeated ProtocolState protocols = 12;
 }
 
 // Credentials is the device credentials
@@ -171,6 +203,11 @@ message TlsConfig {
 
     // insecure indicates whether to connect to the device with insecure communication
     bool insecure = 7;
+}
+
+message ProtocolState {
+    Protocol protocol = 1;
+    State state = 2;
 }
 
 // DeviceService provides an API for managing devices.
