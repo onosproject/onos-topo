@@ -41,13 +41,13 @@ enum Protocol {
 
 // Device event type
 enum State {
-    // AVAILABLE indicates the corresponding protocol is connected on this device
-    AVAILABLE = 0;
+    // CONNECTED indicates the corresponding protocol is connected on this device
+    CONNECTED = 0;
 
-    // UNAVAILABLE indicates the corresponding protocol is not connected on this device
-    UNAVAILABLE = 1;
+    // DISCONNECTED indicates the corresponding protocol is not connected on this device
+    DISCONNECTED = 1;
 
-    // CONNECTING indicates the corresponding protocol is connecting phase on this device
+    // CONNECTING indicates the corresponding protocol is in the connecting phase on this device
     CONNECTING = 2;
 
 }
