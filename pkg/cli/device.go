@@ -61,9 +61,9 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 
 		if !noHeaders {
 			if verbose {
-				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tUSER\tPASSWORD\tATTRIBUTES")
+				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tSTATE\tUSER\tPASSWORD\tATTRIBUTES")
 			} else {
-				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION")
+				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tSTATE")
 			}
 		}
 
@@ -76,6 +76,13 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 			}
 
 			dev := response.Device
+			stateBuf := bytes.Buffer{}
+			for _, protocol := range dev.Protocols {
+				stateBuf.WriteString(protocol.Protocol.String())
+				stateBuf.WriteString(": ")
+				stateBuf.WriteString(protocol.State.String())
+				stateBuf.WriteString(", ")
+			}
 			if verbose {
 				attributesBuf := bytes.Buffer{}
 				for key, attribute := range dev.Attributes {
@@ -84,10 +91,10 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 					attributesBuf.WriteString(attribute)
 					attributesBuf.WriteString(", ")
 				}
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version,
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, stateBuf.String(),
 					dev.Credentials.User, dev.Credentials.Password, attributesBuf.String()))
 			} else {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s", dev.ID, dev.Address, dev.Version))
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, stateBuf.String()))
 			}
 		}
 		writer.Flush()
