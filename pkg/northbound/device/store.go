@@ -128,13 +128,13 @@ func (s *atomixStore) Load(deviceID ID) (*Device, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	kv, err := s.devices.Get(ctx, string(deviceID))
+	entry, err := s.devices.Get(ctx, string(deviceID))
 	if err != nil {
 		return nil, err
-	} else if kv == nil {
+	} else if entry == nil {
 		return nil, nil
 	}
-	return decodeDevice(kv.Key, kv.Value, kv.Version)
+	return decodeDevice(entry)
 }
 
 func (s *atomixStore) Store(device *Device) error {
@@ -147,11 +147,11 @@ func (s *atomixStore) Store(device *Device) error {
 	}
 
 	// Put the device in the map using an optimistic lock if this is an update
-	var kv *_map.KeyValue
+	var entry *_map.Entry
 	if device.Revision == 0 {
-		kv, err = s.devices.Put(ctx, string(device.ID), bytes)
+		entry, err = s.devices.Put(ctx, string(device.ID), bytes)
 	} else {
-		kv, err = s.devices.Put(ctx, string(device.ID), bytes, _map.IfVersion(int64(device.Revision)))
+		entry, err = s.devices.Put(ctx, string(device.ID), bytes, _map.IfVersion(int64(device.Revision)))
 	}
 
 	if err != nil {
@@ -159,7 +159,7 @@ func (s *atomixStore) Store(device *Device) error {
 	}
 
 	// Update the device metadata
-	device.Revision = Revision(kv.Version)
+	device.Revision = Revision(entry.Version)
 	return err
 }
 
@@ -176,15 +176,15 @@ func (s *atomixStore) Delete(device *Device) error {
 }
 
 func (s *atomixStore) List(ch chan<- *Device) error {
-	mapCh := make(chan *_map.KeyValue)
+	mapCh := make(chan *_map.Entry)
 	if err := s.devices.Entries(context.Background(), mapCh); err != nil {
 		return err
 	}
 
 	go func() {
 		defer close(ch)
-		for kv := range mapCh {
-			if device, err := decodeDevice(kv.Key, kv.Value, kv.Version); err == nil {
+		for entry := range mapCh {
+			if device, err := decodeDevice(entry); err == nil {
 				ch <- device
 			}
 		}
@@ -201,7 +201,7 @@ func (s *atomixStore) Watch(ch chan<- *Event) error {
 	go func() {
 		defer close(ch)
 		for event := range mapCh {
-			if device, err := decodeDevice(event.Key, event.Value, event.Version); err == nil {
+			if device, err := decodeDevice(event.Entry); err == nil {
 				ch <- &Event{
 					Type:   EventType(event.Type),
 					Device: device,
@@ -217,13 +217,13 @@ func (s *atomixStore) Close() error {
 	return s.closer.Close()
 }
 
-func decodeDevice(key string, value []byte, version int64) (*Device, error) {
+func decodeDevice(entry *_map.Entry) (*Device, error) {
 	device := &Device{}
-	if err := proto.Unmarshal(value, device); err != nil {
+	if err := proto.Unmarshal(entry.Value, device); err != nil {
 		return nil, err
 	}
-	device.ID = ID(key)
-	device.Revision = Revision(version)
+	device.ID = ID(entry.Key)
+	device.Revision = Revision(entry.Version)
 	return device, nil
 }
 
