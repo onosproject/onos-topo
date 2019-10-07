@@ -4,9 +4,9 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.43.0 // indirect
-	github.com/atomix/atomix-go-client v0.0.0-20191003001725-858dcf9a0ea0
-	github.com/atomix/atomix-go-local v0.0.0-20191002230335-39d2b157c446
-	github.com/atomix/atomix-go-node v0.0.0-20191002230317-dabfbb700511
+	github.com/atomix/atomix-go-client v0.0.0-20191007173732-5328130c1310
+	github.com/atomix/atomix-go-local v0.0.0-20191005233404-a691d226511f
+	github.com/atomix/atomix-go-node v0.0.0-20191005232742-ebda59622853
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
 	github.com/google/pprof v0.0.0-20190723021845-34ac40c74b70 // indirect
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
