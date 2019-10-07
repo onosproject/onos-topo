@@ -110,13 +110,12 @@ func TestLocalServer(t *testing.T) {
 	assert.Equal(t, addResponse.Device.Revision, getResponse.Device.Revision)
 	assert.Equal(t, "device-foo:1234", getResponse.Device.Address)
 	device := getResponse.Device
-	device.Protocols = make([]*ProtocolState, 0)
-	device.Protocols = []*ProtocolState{
-		{
-			Protocol: Protocol_GNMI,
-			State:    State_CONNECTED,
-		},
-	}
+	protocolState := new(ProtocolState)
+	protocolState.Protocol = Protocol_GNMI
+	protocolState.ConnectivityState = ConnectivityState_REACHABLE
+	protocolState.ChannelState = ChannelState_CONNECTED
+	protocolState.ServiceState = ServiceState_AVAILABLE
+	device.Protocols = append(device.Protocols, protocolState)
 	updateResponse, errResponse := client.Update(context.Background(), &UpdateRequest{
 		Device: device,
 	})
@@ -124,7 +123,9 @@ func TestLocalServer(t *testing.T) {
 	assert.Equal(t, ID("device-foo"), updateResponse.Device.ID)
 	assert.Equal(t, "device-foo:1234", updateResponse.Device.Address)
 	assert.Equal(t, Protocol_GNMI, updateResponse.Device.Protocols[0].Protocol)
-	assert.Equal(t, State_CONNECTED, updateResponse.Device.Protocols[0].State)
+	assert.Equal(t, ConnectivityState_REACHABLE, updateResponse.Device.Protocols[0].ConnectivityState)
+	assert.Equal(t, ChannelState_CONNECTED, updateResponse.Device.Protocols[0].ChannelState)
+	assert.Equal(t, ServiceState_AVAILABLE, updateResponse.Device.Protocols[0].ServiceState)
 
 	list, err := client.List(context.Background(), &ListRequest{})
 	assert.NoError(t, err)

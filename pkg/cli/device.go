@@ -21,6 +21,7 @@ import (
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/spf13/cobra"
 	"io"
+	log "k8s.io/klog"
 	"os"
 	"text/tabwriter"
 	"time"
@@ -53,9 +54,9 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
 		stream, err := client.List(ctx, &device.ListRequest{})
 		if err != nil {
+			log.Error("list error ", err)
 			ExitWithError(ExitBadConnection, err)
 		}
-
 		writer := new(tabwriter.Writer)
 		writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
 
@@ -72,17 +73,12 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 			if err == io.EOF {
 				break
 			} else if err != nil {
+				log.Error("rcv error ", err)
 				ExitWithError(ExitError, err)
 			}
 
 			dev := response.Device
-			stateBuf := bytes.Buffer{}
-			for _, protocol := range dev.Protocols {
-				stateBuf.WriteString(protocol.Protocol.String())
-				stateBuf.WriteString(": ")
-				stateBuf.WriteString(protocol.State.String())
-				stateBuf.WriteString(", ")
-			}
+			state := stateString(dev)
 			if verbose {
 				attributesBuf := bytes.Buffer{}
 				for key, attribute := range dev.Attributes {
@@ -91,10 +87,10 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 					attributesBuf.WriteString(attribute)
 					attributesBuf.WriteString(", ")
 				}
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, stateBuf.String(),
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, state,
 					dev.Credentials.User, dev.Credentials.Password, attributesBuf.String()))
 			} else {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, stateBuf.String()))
+				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, state))
 			}
 		}
 		writer.Flush()
@@ -103,6 +99,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 			ID: device.ID(args[0]),
 		})
 		if err != nil {
+			log.Error("get error ", err)
 			ExitWithError(ExitBadConnection, err)
 		}
 
@@ -110,16 +107,35 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 
 		writer := new(tabwriter.Writer)
 		writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
+		state := stateString(dev)
 		fmt.Fprintln(writer, fmt.Sprintf("ID\t%s", dev.ID))
 		fmt.Fprintln(writer, fmt.Sprintf("ADDRESS\t%s", dev.Address))
 		fmt.Fprintln(writer, fmt.Sprintf("VERSION\t%s", dev.Version))
-
+		fmt.Fprintln(writer, fmt.Sprintf("STATE\t%s", state))
 		if verbose {
 			fmt.Fprintln(writer, fmt.Sprintf("USER\t%s", dev.Credentials.User))
 			fmt.Fprintln(writer, fmt.Sprintf("PASSWORD\t%s", dev.Credentials.Password))
 		}
 		writer.Flush()
 	}
+}
+
+func stateString(dev *device.Device) string {
+	stateBuf := bytes.Buffer{}
+	for index, protocol := range dev.Protocols {
+		stateBuf.WriteString(protocol.Protocol.String())
+		stateBuf.WriteString(": {Connectivity: ")
+		stateBuf.WriteString(protocol.ConnectivityState.String())
+		stateBuf.WriteString(", Channel: ")
+		stateBuf.WriteString(protocol.ChannelState.String())
+		stateBuf.WriteString(", Service: ")
+		stateBuf.WriteString(protocol.ServiceState.String())
+		stateBuf.WriteString("}")
+		if index != len(dev.Protocols) && len(dev.Protocols) != 1 {
+			stateBuf.WriteString("\n")
+		}
+	}
+	return stateBuf.String()
 }
 
 func getAddDeviceCommand() *cobra.Command {

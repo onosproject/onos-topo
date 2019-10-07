@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	log "k8s.io/klog"
 	"regexp"
 	"time"
 )
@@ -133,6 +134,7 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
+	log.Info("Updated Device {}", device)
 	return &UpdateResponse{
 		Device: device,
 	}, nil
