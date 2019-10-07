@@ -20,8 +20,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
 	"io"
+	log "k8s.io/klog"
 	"net"
 	"testing"
+	"time"
 )
 
 func TestLocalServer(t *testing.T) {
@@ -107,6 +109,23 @@ func TestLocalServer(t *testing.T) {
 	assert.Equal(t, ID("device-foo"), getResponse.Device.ID)
 	assert.Equal(t, addResponse.Device.Revision, getResponse.Device.Revision)
 	assert.Equal(t, "device-foo:1234", getResponse.Device.Address)
+	device := getResponse.Device
+	protocolState := new(ProtocolState)
+	protocolState.Protocol = Protocol_GNMI
+	protocolState.ConnectivityState = ConnectivityState_REACHABLE
+	protocolState.ChannelState = ChannelState_CONNECTED
+	protocolState.ServiceState = ServiceState_AVAILABLE
+	device.Protocols = append(device.Protocols, protocolState)
+	updateResponse, errResponse := client.Update(context.Background(), &UpdateRequest{
+		Device: device,
+	})
+	assert.NoError(t, errResponse)
+	assert.Equal(t, ID("device-foo"), updateResponse.Device.ID)
+	assert.Equal(t, "device-foo:1234", updateResponse.Device.Address)
+	assert.Equal(t, Protocol_GNMI, updateResponse.Device.Protocols[0].Protocol)
+	assert.Equal(t, ConnectivityState_REACHABLE, updateResponse.Device.Protocols[0].ConnectivityState)
+	assert.Equal(t, ChannelState_CONNECTED, updateResponse.Device.Protocols[0].ChannelState)
+	assert.Equal(t, ServiceState_AVAILABLE, updateResponse.Device.Protocols[0].ServiceState)
 
 	list, err := client.List(context.Background(), &ListRequest{})
 	assert.NoError(t, err)
@@ -119,7 +138,7 @@ func TestLocalServer(t *testing.T) {
 			t.Fatalf("list failed with error %v", err)
 		}
 		assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
-		assert.Equal(t, addResponse.Device.Revision, listResponse.Device.Revision)
+		assert.Equal(t, updateResponse.Device.Revision, listResponse.Device.Revision)
 		assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
 	}
 
@@ -138,11 +157,15 @@ func TestLocalServer(t *testing.T) {
 			eventCh <- subscribeResponse
 		}
 	}()
-
-	listResponse := <-eventCh
-	assert.Equal(t, ListResponse_NONE, listResponse.Type)
-	assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
-	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
+	select {
+	case listResponse := <-eventCh:
+		assert.Equal(t, ListResponse_NONE, listResponse.Type)
+		assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
+		assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
+	case <-time.After(1 * time.Second):
+		log.Error("Expected Update Response")
+		t.FailNow()
+	}
 
 	addResponse, err = client.Add(context.Background(), &AddRequest{
 		Device: &Device{
@@ -157,20 +180,29 @@ func TestLocalServer(t *testing.T) {
 	assert.Equal(t, "device-bar:1234", addResponse.Device.Address)
 	assert.NotEqual(t, Revision(0), addResponse.Device.Revision)
 
-	listResponse = <-eventCh
-	assert.Equal(t, ListResponse_ADDED, listResponse.Type)
-	assert.Equal(t, ID("device-bar"), listResponse.Device.ID)
-	assert.Equal(t, "device-bar:1234", listResponse.Device.Address)
-
+	select {
+	case listResponse := <-eventCh:
+		assert.Equal(t, ListResponse_ADDED, listResponse.Type)
+		assert.Equal(t, ID("device-bar"), listResponse.Device.ID)
+		assert.Equal(t, "device-bar:1234", listResponse.Device.Address)
+	case <-time.After(1 * time.Second):
+		log.Error("Expected Update Response")
+		t.FailNow()
+	}
 	_, err = client.Remove(context.Background(), &RemoveRequest{
-		Device: getResponse.Device,
+		Device: updateResponse.Device,
 	})
 	assert.NoError(t, err)
 
-	listResponse = <-eventCh
-	assert.Equal(t, ListResponse_REMOVED, listResponse.Type)
-	assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
-	assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
+	select {
+	case listResponse := <-eventCh:
+		assert.Equal(t, ListResponse_REMOVED, listResponse.Type)
+		assert.Equal(t, ID("device-foo"), listResponse.Device.ID)
+		assert.Equal(t, "device-foo:1234", listResponse.Device.Address)
+	case <-time.After(1 * time.Second):
+		log.Error("Expected Update Response")
+		t.FailNow()
+	}
 
 	_, err = client.Add(context.Background(), &AddRequest{
 		Device: &Device{

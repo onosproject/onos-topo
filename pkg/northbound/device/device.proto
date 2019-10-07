@@ -22,6 +22,60 @@ package topo.device;
 import "google/protobuf/duration.proto";
 import "gogoproto/gogo.proto";
 
+// Protocol to interact with a device
+enum Protocol {
+    //UNKNOWN_PROTOCOL constant needed to go around proto3 nullifying the 0 values
+    UNKNOWN_PROTOCOL = 0;
+
+    // GNMI protocol reference
+    GNMI = 1;
+
+    // P4RUNTIME protocol reference
+    P4RUNTIME = 2;
+
+    // GNOI protocol reference
+    GNOI = 3;
+
+    //TODO extend with needed protocols (e.g. for RAN)
+}
+
+//ConnectivityState represents the L3 reachability of a device from the service container (e.g. enos-config), independently of gRPC or the service itself (e.g. gNMI)
+enum ConnectivityState {
+    //UNKNOWN_CONNECTIVITY_STATE constant needed to go around proto3 nullifying the 0 values
+    UNKNOWN_CONNECTIVITY_STATE = 0;
+
+    // REACHABLE indicates the the service can reach the device at L3
+    REACHABLE = 1;
+
+    // UNREACHABLE indicates the the service can't reach the device at L3
+    UNREACHABLE = 2;
+}
+//ConnectivityState represents the state of a gRPC channel to the device from the service container
+enum ChannelState {
+    //UNKNOWN_CHANNEL_STATE constant needed to go around proto3 nullifying the 0 values
+    UNKNOWN_CHANNEL_STATE = 0;
+
+    // CONNECTED indicates the corresponding grpc channel is connected on this device
+    CONNECTED = 1;
+
+    // DISCONNECTED indicates the corresponding grpc channel is not connected on this device
+    DISCONNECTED = 2;
+}
+//ServiceState represents the state of the gRPC service (e.g. gNMI) to the device from the service container
+enum ServiceState {
+    //UNKNOWN_SERVICE_STATE constant needed to go around proto3 nullifying the 0 values
+    UNKNOWN_SERVICE_STATE = 0;
+
+    // AVAILABLE indicates the corresponding grpc service is available
+    AVAILABLE = 1;
+
+    // UNAVAILABLE indicates the corresponding grpc service is not available
+    UNAVAILABLE = 2;
+
+    // CONNECTING indicates the corresponding protocol is in the connecting phase on this device
+    CONNECTING = 3;
+}
+
 // AddRequest adds a device to the topology
 message AddRequest {
     // device is the device to add
@@ -142,6 +196,8 @@ message Device {
 
     // attributes is an arbitrary mapping of attribute keys/values
     map<string, string> attributes = 11;
+
+    repeated ProtocolState protocols = 12;
 }
 
 // Credentials is the device credentials
@@ -171,6 +227,22 @@ message TlsConfig {
 
     // insecure indicates whether to connect to the device with insecure communication
     bool insecure = 7;
+}
+
+// ProtocolState contains information related to service and connectivity to a device
+message ProtocolState {
+
+    //The protocol to which state relates
+    Protocol protocol = 1;
+
+    //ConnectivityState contains the L3 connectivity information
+    ConnectivityState connectivityState = 2;
+
+    //ChannelState relates to the availability of the gRPC channel
+    ChannelState channelState = 3;
+
+    //ServiceState indicates the availability of the gRPC servic on top of the channel
+    ServiceState serviceState = 4;
 }
 
 // DeviceService provides an API for managing devices.
