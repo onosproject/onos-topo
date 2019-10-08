@@ -22,7 +22,6 @@ func GetCommand() *cobra.Command {
 		Use: "topo {get,add,update,remove,watch} [args]",
 	}
 
-	cmd.AddCommand(getConfigCommand())
 	cmd.AddCommand(getGetCommand())
 	cmd.AddCommand(getAddCommand())
 	cmd.AddCommand(getUpdateCommand())

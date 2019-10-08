@@ -27,6 +27,7 @@ require (
 	golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa // indirect
 	golang.org/x/tools v0.0.0-20190806215303-88ddfcebc769 // indirect
 	google.golang.org/grpc v1.23.1
+	gotest.tools v2.2.0+incompatible
 	honnef.co/go/tools v0.0.1-2019.2.2 // indirect
 	k8s.io/klog v0.3.3
 )

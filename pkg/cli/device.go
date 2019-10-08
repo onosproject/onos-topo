@@ -22,7 +22,6 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	log "k8s.io/klog"
-	"os"
 	"text/tabwriter"
 	"time"
 )
@@ -33,21 +32,25 @@ func getGetDeviceCommand() *cobra.Command {
 		Aliases: []string{"devices"},
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "Get a device",
-		Run:     runGetDeviceCommand,
+		RunE:    runGetDeviceCommand,
 	}
 	cmd.Flags().BoolP("verbose", "v", false, "whether to print the device with verbose output")
 	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
-func runGetDeviceCommand(cmd *cobra.Command, args []string) {
+func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
-	conn := getConnection()
+	conn, err := getConnection()
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
+	outputWriter := GetOutput()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := device.CreateDeviceServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -55,10 +58,10 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 		stream, err := client.List(ctx, &device.ListRequest{})
 		if err != nil {
 			log.Error("list error ", err)
-			ExitWithError(ExitBadConnection, err)
+			return err
 		}
 		writer := new(tabwriter.Writer)
-		writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
+		writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 
 		if !noHeaders {
 			if verbose {
@@ -74,7 +77,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 				break
 			} else if err != nil {
 				log.Error("rcv error ", err)
-				ExitWithError(ExitError, err)
+				return err
 			}
 
 			dev := response.Device
@@ -100,13 +103,13 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 		})
 		if err != nil {
 			log.Error("get error ", err)
-			ExitWithError(ExitBadConnection, err)
+			return err
 		}
 
 		dev := response.Device
 
 		writer := new(tabwriter.Writer)
-		writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
+		writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 		state := stateString(dev)
 		fmt.Fprintln(writer, fmt.Sprintf("ID\t%s", dev.ID))
 		fmt.Fprintln(writer, fmt.Sprintf("ADDRESS\t%s", dev.Address))
@@ -118,6 +121,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) {
 		}
 		writer.Flush()
 	}
+	return nil
 }
 
 func stateString(dev *device.Device) string {
@@ -144,7 +148,7 @@ func getAddDeviceCommand() *cobra.Command {
 		Aliases: []string{"devices"},
 		Args:    cobra.ExactArgs(1),
 		Short:   "Add a device",
-		Run:     runAddDeviceCommand,
+		RunE:    runAddDeviceCommand,
 	}
 	cmd.Flags().StringP("type", "t", "", "the type of the device")
 	cmd.Flags().StringP("role", "r", "", "the device role")
@@ -166,7 +170,7 @@ func getAddDeviceCommand() *cobra.Command {
 	return cmd
 }
 
-func runAddDeviceCommand(cmd *cobra.Command, args []string) {
+func runAddDeviceCommand(cmd *cobra.Command, args []string) error {
 	id := args[0]
 	deviceType, _ := cmd.Flags().GetString("type")
 	deviceRole, _ := cmd.Flags().GetString("role")
@@ -188,10 +192,13 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 		deviceTarget = id
 	}
 
-	conn := getConnection()
+	conn, err := getConnection()
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := device.CreateDeviceServiceClient(conn)
 
 	dev := &device.Device{
 		ID:      device.ID(id),
@@ -218,14 +225,14 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := client.Add(ctx, &device.AddRequest{
+	_, err = client.Add(ctx, &device.AddRequest{
 		Device: dev,
 	})
 	if err != nil {
-		ExitWithError(ExitBadConnection, err)
-	} else {
-		ExitWithOutput("Added device %s", id)
+		return err
 	}
+	Output("Added device %s", id)
+	return nil
 }
 
 func getUpdateDeviceCommand() *cobra.Command {
@@ -234,7 +241,7 @@ func getUpdateDeviceCommand() *cobra.Command {
 		Aliases: []string{"devices"},
 		Args:    cobra.ExactArgs(1),
 		Short:   "Update a device",
-		Run:     runUpdateDeviceCommand,
+		RunE:    runUpdateDeviceCommand,
 	}
 	cmd.Flags().StringP("type", "t", "", "the type of the device")
 	cmd.Flags().StringP("role", "r", "", "the device role")
@@ -253,13 +260,16 @@ func getUpdateDeviceCommand() *cobra.Command {
 	return cmd
 }
 
-func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
+func runUpdateDeviceCommand(cmd *cobra.Command, args []string) error {
 	id := args[0]
 
-	conn := getConnection()
+	conn, err := getConnection()
+	if err != nil {
+		return nil
+	}
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := device.CreateDeviceServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 
@@ -267,7 +277,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 		ID: device.ID(id),
 	})
 	if err != nil {
-		ExitWithError(ExitBadConnection, err)
+		return err
 	}
 
 	cancel()
@@ -337,10 +347,10 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) {
 		Device: dvc,
 	})
 	if err != nil {
-		ExitWithError(ExitBadConnection, err)
-	} else {
-		ExitWithOutput("Updated device %s", id)
+		return err
 	}
+	Output("Updated device %s", id)
+	return nil
 }
 
 func getRemoveDeviceCommand() *cobra.Command {
@@ -349,31 +359,34 @@ func getRemoveDeviceCommand() *cobra.Command {
 		Aliases: []string{"devices"},
 		Args:    cobra.ExactArgs(1),
 		Short:   "Remove a device",
-		Run:     runRemoveDeviceCommand,
+		RunE:    runRemoveDeviceCommand,
 	}
 }
 
-func runRemoveDeviceCommand(cmd *cobra.Command, args []string) {
+func runRemoveDeviceCommand(cmd *cobra.Command, args []string) error {
 	id := args[0]
 
-	conn := getConnection()
+	conn, err := getConnection()
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := device.CreateDeviceServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := client.Remove(ctx, &device.RemoveRequest{
+	_, err = client.Remove(ctx, &device.RemoveRequest{
 		Device: &device.Device{
 			ID: device.ID(id),
 		},
 	})
 	if err != nil {
-		ExitWithError(ExitBadConnection, err)
-	} else {
-		ExitWithOutput("Removed device %s", id)
+		return err
 	}
+	Output("Removed device %s", id)
+	return nil
 }
 
 func getWatchDeviceCommand() *cobra.Command {
@@ -382,14 +395,14 @@ func getWatchDeviceCommand() *cobra.Command {
 		Aliases: []string{"devices"},
 		Args:    cobra.MaximumNArgs(1),
 		Short:   "Watch for device changes",
-		Run:     runWatchDeviceCommand,
+		RunE:    runWatchDeviceCommand,
 	}
 	cmd.Flags().BoolP("verbose", "v", false, "whether to print the device with verbose output")
 	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
-func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
+func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 	var id string
 	if len(args) > 0 {
 		id = args[0]
@@ -398,20 +411,23 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
-	conn := getConnection()
+	conn, err := getConnection()
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
 
-	client := device.NewDeviceServiceClient(conn)
+	client := device.CreateDeviceServiceClient(conn)
 
 	stream, err := client.List(context.Background(), &device.ListRequest{
 		Subscribe: true,
 	})
 	if err != nil {
-		ExitWithError(ExitBadConnection, err)
+		return err
 	}
 
 	writer := new(tabwriter.Writer)
-	writer.Init(os.Stdout, 0, 0, 3, ' ', tabwriter.FilterHTML)
+	writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 
 	if !noHeaders {
 		if verbose {
@@ -425,9 +441,9 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) {
 	for {
 		response, err := stream.Recv()
 		if err == io.EOF {
-			ExitWithSuccess()
+			return nil
 		} else if err != nil {
-			ExitWithError(ExitError, err)
+			return err
 		}
 
 		dev := response.Device

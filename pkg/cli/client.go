@@ -17,6 +17,7 @@ package cli
 import (
 	"crypto/tls"
 	"github.com/onosproject/onos-topo/pkg/certs"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -26,15 +27,19 @@ const (
 )
 
 // getConnection returns a gRPC client connection to the topo service
-func getConnection() *grpc.ClientConn {
-	address := getConfigOrDefault("address", defaultAddress).(string)
-	certPath := getConfigString("tls.certPath")
-	keyPath := getConfigString("tls.keyPath")
+func getConnection() (*grpc.ClientConn, error) {
+	addressObj := viper.Get("address")
+	if addressObj == nil {
+		addressObj = defaultAddress
+	}
+	address := addressObj.(string)
+	certPath := viper.GetString("tls.certPath")
+	keyPath := viper.GetString("tls.keyPath")
 	var opts []grpc.DialOption
 	if certPath != "" && keyPath != "" {
 		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 		if err != nil {
-			ExitWithError(ExitBadArgs, err)
+			return nil, err
 		}
 		opts = []grpc.DialOption{
 			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
@@ -46,7 +51,7 @@ func getConnection() *grpc.ClientConn {
 		// Load default Certificates
 		cert, err := tls.X509KeyPair([]byte(certs.DefaultClientCrt), []byte(certs.DefaultClientKey))
 		if err != nil {
-			ExitWithError(ExitBadArgs, err)
+			return nil, err
 		}
 		opts = []grpc.DialOption{
 			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
@@ -58,7 +63,7 @@ func getConnection() *grpc.ClientConn {
 
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
-		ExitWithError(ExitBadConnection, err)
+		return nil, err
 	}
-	return conn
+	return conn, nil
 }
