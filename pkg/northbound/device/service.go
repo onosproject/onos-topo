@@ -63,6 +63,16 @@ type Server struct {
 	deviceStore Store
 }
 
+// DeviceServiceClientFactory : Default DeviceServiceClient creation.
+var DeviceServiceClientFactory = func(cc *grpc.ClientConn) DeviceServiceClient {
+	return NewDeviceServiceClient(cc)
+}
+
+// CreateDeviceServiceClient creates and returns a new topo device client
+func CreateDeviceServiceClient(cc *grpc.ClientConn) DeviceServiceClient {
+	return DeviceServiceClientFactory(cc)
+}
+
 // validateDevice validates the given device
 func validateDevice(device *Device) error {
 	nameRegex := regexp.MustCompile(deviceNamePattern)

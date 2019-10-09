@@ -54,7 +54,7 @@ func TestLocalServer(t *testing.T) {
 		panic("Failed to dial bufnet")
 	}
 
-	client := NewDeviceServiceClient(conn)
+	client := CreateDeviceServiceClient(conn)
 
 	_, err = client.Get(context.Background(), &GetRequest{
 		ID: ID("none"),
