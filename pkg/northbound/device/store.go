@@ -23,6 +23,7 @@ import (
 	"github.com/atomix/atomix-go-node/pkg/atomix"
 	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
 	"github.com/gogo/protobuf/proto"
+	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
@@ -103,16 +104,16 @@ type Store interface {
 	io.Closer
 
 	// Load loads a device from the store
-	Load(deviceID ID) (*Device, error)
+	Load(deviceID deviceapi.ID) (*deviceapi.Device, error)
 
 	// Store stores a device in the store
-	Store(*Device) error
+	Store(*deviceapi.Device) error
 
 	// Delete deletes a device from the store
-	Delete(*Device) error
+	Delete(*deviceapi.Device) error
 
 	// List streams devices to the given channel
-	List(chan<- *Device) error
+	List(chan<- *deviceapi.Device) error
 
 	// Watch streams device events to the given channel
 	Watch(chan<- *Event) error
@@ -124,7 +125,7 @@ type atomixStore struct {
 	closer  io.Closer
 }
 
-func (s *atomixStore) Load(deviceID ID) (*Device, error) {
+func (s *atomixStore) Load(deviceID deviceapi.ID) (*deviceapi.Device, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -137,7 +138,7 @@ func (s *atomixStore) Load(deviceID ID) (*Device, error) {
 	return decodeDevice(entry)
 }
 
-func (s *atomixStore) Store(device *Device) error {
+func (s *atomixStore) Store(device *deviceapi.Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -159,11 +160,11 @@ func (s *atomixStore) Store(device *Device) error {
 	}
 
 	// Update the device metadata
-	device.Revision = Revision(entry.Version)
+	device.Revision = deviceapi.Revision(entry.Version)
 	return err
 }
 
-func (s *atomixStore) Delete(device *Device) error {
+func (s *atomixStore) Delete(device *deviceapi.Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -175,7 +176,7 @@ func (s *atomixStore) Delete(device *Device) error {
 	return err
 }
 
-func (s *atomixStore) List(ch chan<- *Device) error {
+func (s *atomixStore) List(ch chan<- *deviceapi.Device) error {
 	mapCh := make(chan *_map.Entry)
 	if err := s.devices.Entries(context.Background(), mapCh); err != nil {
 		return err
@@ -217,13 +218,13 @@ func (s *atomixStore) Close() error {
 	return s.closer.Close()
 }
 
-func decodeDevice(entry *_map.Entry) (*Device, error) {
-	device := &Device{}
+func decodeDevice(entry *_map.Entry) (*deviceapi.Device, error) {
+	device := &deviceapi.Device{}
 	if err := proto.Unmarshal(entry.Value, device); err != nil {
 		return nil, err
 	}
-	device.ID = ID(entry.Key)
-	device.Revision = Revision(entry.Version)
+	device.ID = deviceapi.ID(entry.Key)
+	device.Revision = deviceapi.Revision(entry.Version)
 	return device, nil
 }
 
@@ -244,5 +245,5 @@ const (
 // Event is a store event for a device
 type Event struct {
 	Type   EventType
-	Device *Device
+	Device *deviceapi.Device
 }

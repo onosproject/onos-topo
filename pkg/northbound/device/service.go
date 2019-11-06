@@ -17,6 +17,7 @@ package device
 
 import (
 	"context"
+	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/northbound"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -55,7 +56,7 @@ func (s Service) Register(r *grpc.Server) {
 	server := &Server{
 		deviceStore: s.store,
 	}
-	RegisterDeviceServiceServer(r, server)
+	deviceapi.RegisterDeviceServiceServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.
@@ -64,17 +65,17 @@ type Server struct {
 }
 
 // DeviceServiceClientFactory : Default DeviceServiceClient creation.
-var DeviceServiceClientFactory = func(cc *grpc.ClientConn) DeviceServiceClient {
-	return NewDeviceServiceClient(cc)
+var DeviceServiceClientFactory = func(cc *grpc.ClientConn) deviceapi.DeviceServiceClient {
+	return deviceapi.NewDeviceServiceClient(cc)
 }
 
 // CreateDeviceServiceClient creates and returns a new topo device client
-func CreateDeviceServiceClient(cc *grpc.ClientConn) DeviceServiceClient {
+func CreateDeviceServiceClient(cc *grpc.ClientConn) deviceapi.DeviceServiceClient {
 	return DeviceServiceClientFactory(cc)
 }
 
 // validateDevice validates the given device
-func validateDevice(device *Device) error {
+func validateDevice(device *deviceapi.Device) error {
 	nameRegex := regexp.MustCompile(deviceNamePattern)
 	if device.ID == "" {
 		return status.Error(codes.InvalidArgument, "device ID is required")
@@ -114,7 +115,7 @@ func validateDevice(device *Device) error {
 }
 
 // Add :
-func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, error) {
+func (s *Server) Add(ctx context.Context, request *deviceapi.AddRequest) (*deviceapi.AddResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
@@ -126,13 +127,13 @@ func (s *Server) Add(ctx context.Context, request *AddRequest) (*AddResponse, er
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	return &AddResponse{
+	return &deviceapi.AddResponse{
 		Device: device,
 	}, nil
 }
 
 // Update :
-func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateResponse, error) {
+func (s *Server) Update(ctx context.Context, request *deviceapi.UpdateRequest) (*deviceapi.UpdateResponse, error) {
 	device := request.Device
 	if device == nil {
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
@@ -145,26 +146,26 @@ func (s *Server) Update(ctx context.Context, request *UpdateRequest) (*UpdateRes
 		return nil, err
 	}
 	log.Info("Updated Device {}", device)
-	return &UpdateResponse{
+	return &deviceapi.UpdateResponse{
 		Device: device,
 	}, nil
 }
 
 // Get :
-func (s *Server) Get(ctx context.Context, request *GetRequest) (*GetResponse, error) {
+func (s *Server) Get(ctx context.Context, request *deviceapi.GetRequest) (*deviceapi.GetResponse, error) {
 	device, err := s.deviceStore.Load(request.ID)
 	if err != nil {
 		return nil, err
 	} else if device == nil {
 		return nil, status.Error(codes.NotFound, "device not found")
 	}
-	return &GetResponse{
+	return &deviceapi.GetResponse{
 		Device: device,
 	}, nil
 }
 
 // List :
-func (s *Server) List(request *ListRequest, server DeviceService_ListServer) error {
+func (s *Server) List(request *deviceapi.ListRequest, server deviceapi.DeviceService_ListServer) error {
 	if request.Subscribe {
 		ch := make(chan *Event)
 		if err := s.deviceStore.Watch(ch); err != nil {
@@ -172,18 +173,18 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 		}
 
 		for event := range ch {
-			var t ListResponse_Type
+			var t deviceapi.ListResponse_Type
 			switch event.Type {
 			case EventNone:
-				t = ListResponse_NONE
+				t = deviceapi.ListResponse_NONE
 			case EventInserted:
-				t = ListResponse_ADDED
+				t = deviceapi.ListResponse_ADDED
 			case EventUpdated:
-				t = ListResponse_UPDATED
+				t = deviceapi.ListResponse_UPDATED
 			case EventRemoved:
-				t = ListResponse_REMOVED
+				t = deviceapi.ListResponse_REMOVED
 			}
-			err := server.Send(&ListResponse{
+			err := server.Send(&deviceapi.ListResponse{
 				Type:   t,
 				Device: event.Device,
 			})
@@ -192,14 +193,14 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 			}
 		}
 	} else {
-		ch := make(chan *Device)
+		ch := make(chan *deviceapi.Device)
 		if err := s.deviceStore.List(ch); err != nil {
 			return err
 		}
 
 		for device := range ch {
-			err := server.Send(&ListResponse{
-				Type:   ListResponse_NONE,
+			err := server.Send(&deviceapi.ListResponse{
+				Type:   deviceapi.ListResponse_NONE,
 				Device: device,
 			})
 			if err != nil {
@@ -211,11 +212,11 @@ func (s *Server) List(request *ListRequest, server DeviceService_ListServer) err
 }
 
 // Remove :
-func (s *Server) Remove(ctx context.Context, request *RemoveRequest) (*RemoveResponse, error) {
+func (s *Server) Remove(ctx context.Context, request *deviceapi.RemoveRequest) (*deviceapi.RemoveResponse, error) {
 	device := request.Device
 	err := s.deviceStore.Delete(device)
 	if err != nil {
 		return nil, err
 	}
-	return &RemoveResponse{}, nil
+	return &deviceapi.RemoveResponse{}, nil
 }

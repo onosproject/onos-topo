@@ -14,6 +14,8 @@
 
 package device
 
+import "google.golang.org/grpc"
+
 // ID is a device ID
 type ID string
 
@@ -25,3 +27,13 @@ type Role string
 
 // Revision is the device revision number
 type Revision uint64
+
+// DeviceServiceClientFactory : Default DeviceServiceClient creation.
+var DeviceServiceClientFactory = func(cc *grpc.ClientConn) DeviceServiceClient {
+	return NewDeviceServiceClient(cc)
+}
+
+// CreateDeviceServiceClient creates and returns a new topo device client
+func CreateDeviceServiceClient(cc *grpc.ClientConn) DeviceServiceClient {
+	return DeviceServiceClientFactory(cc)
+}

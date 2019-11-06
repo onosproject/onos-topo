@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/onosproject/onos-topo/pkg/northbound/device"
+	"github.com/onosproject/onos-topo/api/device"
 	"github.com/spf13/cobra"
 	"io"
 	log "k8s.io/klog"
