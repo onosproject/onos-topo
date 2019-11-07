@@ -6,6 +6,10 @@ linters:
     - misspell
     - typecheck
     - errcheck
+    - dogsled
+    - unconvert
+    - nakedret
+    - scopelint
 issues:
   exclude-use-default: false
   exclude:
