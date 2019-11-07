@@ -18,7 +18,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"github.com/onosproject/onos-topo/pkg/northbound/device"
+	"github.com/onosproject/onos-topo/api/device"
 	"gotest.tools/assert"
 	"strings"
 	"testing"

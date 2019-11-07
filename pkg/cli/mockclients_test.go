@@ -17,7 +17,7 @@ package cli
 
 import (
 	"context"
-	"github.com/onosproject/onos-topo/pkg/northbound/device"
+	"github.com/onosproject/onos-topo/api/device"
 	"google.golang.org/grpc"
 )
 
