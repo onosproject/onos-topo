@@ -17,8 +17,10 @@ fullnameOverride: ""
 
 debug: false
 
+namespace: default
+
 store:
-  enabled: false
+  enabled: true
   controller: atomix-controller.default.svc.cluster.local:5679
   raft:
     partitions: 3

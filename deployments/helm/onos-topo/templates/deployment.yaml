@@ -46,7 +46,7 @@ spec:
             - name: ATOMIX_RAFT_GROUP
               value: {{ template "onos-topo.fullname" . }}-raft
             - name: ATOMIX_NAMESPACE
-              value: "default"
+              value: {{ .Values.namespace }}
           args:
             - "-caPath=/etc/onos-config/certs/tls.cacrt"
             - "-keyPath=/etc/onos-config/certs/tls.key"
