@@ -12,7 +12,12 @@ spec:
   template:
     metadata:
       labels:
+        app: onos
+        type: topo
+        resource: {{ template "onos-topo.fullname" . }}
         {{- include "onos-topo.selectorLabels" . | nindent 8 }}
+      annotations:
+        "seccomp.security.alpha.kubernetes.io/pod": "unconfined"
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -42,7 +47,7 @@ spec:
             - name: ATOMIX_CONTROLLER
               value: {{ .Values.store.controller | quote }}
             - name: ATOMIX_APP
-              value: onos
+              value: {{ include "onos-topo.fullname" . }}
             - name: ATOMIX_RAFT
               value: {{ .Values.store.raftgroup }}
             - name: ATOMIX_NAMESPACE
@@ -62,13 +67,13 @@ spec:
           livenessProbe:
             tcpSocket:
               port: 5150
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 15
+            periodSeconds: 20
           readinessProbe:
             tcpSocket:
               port: 5150
-            initialDelaySeconds: 15
-            periodSeconds: 20
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
             - name: secret
               mountPath: /etc/onos-topo/certs

@@ -50,14 +50,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "onos-topo.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "onos-topo.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "onos-topo.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
