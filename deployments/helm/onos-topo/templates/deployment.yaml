@@ -42,11 +42,11 @@ spec:
             - name: ATOMIX_CONTROLLER
               value: {{ .Values.store.controller | quote }}
             - name: ATOMIX_APP
-              value: {{ template "onos-topo.fullname" . }}
-            - name: ATOMIX_RAFT_GROUP
-              value: {{ template "onos-topo.fullname" . }}-raft
+              value: onos
+            - name: ATOMIX_RAFT
+              value: {{ .Values.store.raftgroup }}
             - name: ATOMIX_NAMESPACE
-              value: {{ .Values.namespace }}
+              value: {{ .Values.store.namespace }}
           args:
             - "-caPath=/etc/onos-config/certs/tls.cacrt"
             - "-keyPath=/etc/onos-config/certs/tls.key"
