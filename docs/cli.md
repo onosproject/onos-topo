@@ -9,7 +9,7 @@ The documentation about building and deploying the consolidate `onos` client or 
 is available in the `onos-cli` GitHub repository.
 
 ## Usage
-```
+```bash
 > onos topo --help
 ...
 ```
