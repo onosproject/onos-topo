@@ -31,7 +31,7 @@ linters: # @HELP examines Go source code and reports coding problems
 
 license_check: # @HELP examine and ensure license headers exist
 	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
-    ./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
+	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
 protos: # @HELP compile the protobuf files (using protoc-go Docker)
 	docker run -it -v `pwd`:/go/src/github.com/onosproject/onos-topo \
