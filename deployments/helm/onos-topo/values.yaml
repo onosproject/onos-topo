@@ -34,7 +34,7 @@ ingress:
 resources: {}
 
 service:
-  type: NodePort
+  type: ClusterIP
 
 nodeSelector: {}
 
