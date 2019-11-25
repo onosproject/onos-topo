@@ -9,6 +9,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
+      name: {{ template "onos-topo.fullname" . }}
       app: onos
       type: topo
       resource: {{ template "onos-topo.fullname" . }}
@@ -16,6 +17,7 @@ spec:
   template:
     metadata:
       labels:
+        name: {{ template "onos-topo.fullname" . }}
         app: onos
         type: topo
         resource: {{ template "onos-topo.fullname" . }}
