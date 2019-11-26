@@ -19,9 +19,9 @@ debug: false
 namespace: default
 
 store:
-  enabled: false
+  enabled: true
   namespace: default
-  raftgroup: raft
+  raftgroup: onos-topo
   controller: atomix-controller.default.svc.cluster.local:5679
   raft:
     partitions: 1
@@ -40,3 +40,4 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
