@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: onos-topo
-  namespace: default
+  name: {{ template "onos-topo.fullname" . }}
+  namespace: {{ .Values.namespace }}
   labels:
     {{- include "onos-topo.labels" . | nindent 4 }}
 spec:
