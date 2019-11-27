@@ -16,13 +16,10 @@ fullnameOverride: ""
 
 debug: false
 
-namespace: default
-
 store:
   enabled: true
-  namespace: default
-  raftgroup: onos-topo
-  controller: atomix-controller.default.svc.cluster.local:5679
+  raftgroup: onos-topo-raft
+  controller: atomix-controller.kube-system.svc.cluster.local:5679
   raft:
     partitions: 1
     partitionSize: 1
