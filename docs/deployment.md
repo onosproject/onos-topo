@@ -1,19 +1,19 @@
 # Deploying onos-topo
 
-This guide deploys `onos-topo` through it's [Helm] chart assumes you have a [Kubernets] cluster running 
-with an atomix controller deployed in a namespace.  
-If you dont' specify the `--namespace` in the commands below atomix controller must be deployed in the `default`
+This guide deploys `onos-topo` through it's [Helm] chart assumes you have a [Kubernetes] cluster running 
+with an atomix controller deployed in a namespace.
 `onos-topo` Helm chart is based on Helm 3.0 version, with no need for the Tiller pod to be present. 
 If you don't have a cluster running and want to try on your local machine please follow first 
 the [Kubernetes] setup steps outlined in [deploy with Helm](https://docs.onosproject.org/developers/deploy_with_helm/).
+The following steps assume you have the setup outlined in that page, including the `micro-onos` namespace configured. 
 
 ## Installing the Chart
 
-To install the chart, simply run `helm install deployments/helm/onos-topo` from
+To install the chart in the `micro-onos` namespace, simply run `helm install -n micro-onos onos-topo deployments/helm/onos-topo` from
 the root directory of this project:
 
 ```bash
-helm install onos-topo deployments/helm/onos-topo
+helm install -n micro-onos onos-topo deployments/helm/onos-topo
 NAME: onos-topo
 LAST DEPLOYED: Tue Nov 26 13:31:42 2019
 NAMESPACE: default
@@ -55,18 +55,15 @@ partitionSize: 1
 
 ### Installing the chart in a different namespace.
 
-To install the chart in a different namespace please modify the `default` occurances in the `values.yaml` file.   
-Please be aware to change also `atomix-controller.default.svc.cluster.local:5679` 
-to `atomix-controller.<your_name_space_here>.svc.cluster.local:5679`.  
-Then issue the `helm install` command
+Issue the `helm install` command substituting `micro-onos` with your namespace.
 ```bash
-helm install onos-topo --namespace <your_name_space> deployments/helm/onos-topo
+helm install -n <your_name_space> onos-topo deployments/helm/onos-topo
 ```
 ### Installing the chart with debug. 
 `onos-topo` offers the capability to open a debug port (4000) to the image.
 To enable the debug capabilities please set the debug flag to true in `values.yaml` or pass it to `helm install`
 ```bash
-helm install onos-topo deployments/helm/onos-topo --set debug=true
+helm install -n micro-onos onos-topo deployments/helm/onos-topo --set debug=true
 ```
 
 ### Troubleshoot
@@ -78,17 +75,17 @@ debug your chart:
 * `--debug` prints out more information about your chart
 
 ```bash
-helm install onos-topo --debug --dry-run ./deployments/helm/onos-topo/
+helm install -n micro-onos onos-topo --debug --dry-run ./deployments/helm/onos-topo/
 ```
 ## Uninstalling the chart.
 
 To remove the `onos-topo` pod issue
 ```bash
- helm delete onos-topo
+ helm delete -n micro-onos onos-topo
 ```
 ## Pod Information
 
-To view the pods that are deployed, run `kubectl get pods`.
+To view the pods that are deployed, run `kubectl -n micro-onos get pods`.
 
 [Helm]: https://helm.sh/
 [Kubernetes]: https://kubernetes.io/
