@@ -19,12 +19,14 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 const (
 	addressKey     = "address"
 	defaultAddress = "onos-topo:5150"
 
+	noTLSKey       = "no-tls"
 	tlsCertPathKey = "tls.certPath"
 	tlsKeyPathKey  = "tls.keyPath"
 )
@@ -33,28 +35,73 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
-var configOptions = []string{
-	addressKey,
-	tlsCertPathKey,
-	tlsKeyPathKey,
-}
+var (
+	configOptions = []string{
+		addressKey,
+		noTLSKey,
+		tlsCertPathKey,
+		tlsKeyPathKey,
+	}
+
+	configFile = ""
+)
 
 func addConfigFlags(cmd *cobra.Command) {
 	viper.SetDefault(addressKey, defaultAddress)
 	cmd.PersistentFlags().StringP("address", "a", viper.GetString(addressKey), "the onos-topo service address")
-	cmd.PersistentFlags().String("tls-key-path", viper.GetString(tlsKeyPathKey), "the path to the TLS key")
 	cmd.PersistentFlags().String("tls-cert-path", viper.GetString(tlsCertPathKey), "the path to the TLS certificate")
+	cmd.PersistentFlags().String("tls-key-path", viper.GetString(tlsKeyPathKey), "the path to the TLS key")
+	cmd.PersistentFlags().Bool("no-tls", viper.GetBool("no-tls"), "if present, do not use TLS")
+	cmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default: $HOME/.onos/topo.yaml)")
+
+	_ = viper.BindPFlag(addressKey, cmd.PersistentFlags().Lookup("address"))
+	_ = viper.BindPFlag(tlsCertPathKey, cmd.PersistentFlags().Lookup("tls-cert-path"))
+	_ = viper.BindPFlag(tlsKeyPathKey, cmd.PersistentFlags().Lookup("tls-key-path"))
+	_ = viper.BindPFlag(noTLSKey, cmd.PersistentFlags().Lookup("no-tls"))
 }
 
 func getConfigCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "config {set,get,delete} [args]",
+		Use:   "config {init,set,get,delete} [args]",
 		Short: "Manage the CLI configuration",
 	}
+	cmd.AddCommand(newConfigInitCommand())
 	cmd.AddCommand(newConfigGetCommand())
 	cmd.AddCommand(newConfigSetCommand())
 	cmd.AddCommand(newConfigDeleteCommand())
 	return cmd
+}
+
+func newConfigInitCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "init",
+		Short: "Initialize the onos topo CLI configuration",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := viper.ReadInConfig(); err == nil {
+				ExitWithSuccess()
+			}
+			home, err := homedir.Dir()
+			if err != nil {
+				ExitWithError(ExitError, err)
+			}
+			err = os.MkdirAll(home+"/.onos", 0777)
+			if err != nil {
+				ExitWithError(ExitError, err)
+			}
+			f, err := os.Create(home + "/.onos/topo.yaml")
+			if err != nil {
+				ExitWithError(ExitError, err)
+			} else {
+				f.Close()
+			}
+			err = viper.WriteConfig()
+			if err != nil {
+				ExitWithError(ExitError, err)
+			} else {
+				ExitWithOutput("Created ~/.onos/topo.yaml\n")
+			}
+		},
+	}
 }
 
 func newConfigGetCommand() *cobra.Command {
@@ -113,30 +160,37 @@ func runConfigDeleteCommand(_ *cobra.Command, args []string) error {
 }
 
 func getAddress(cmd *cobra.Command) string {
-	address, _ := cmd.PersistentFlags().GetString("address")
+	address, _ := cmd.Flags().GetString("address")
 	return address
 }
 
 func getCertPath(cmd *cobra.Command) string {
-	certPath, _ := cmd.PersistentFlags().GetString("tls-cert-path")
+	certPath, _ := cmd.Flags().GetString("tls-cert-path")
 	return certPath
 }
 
 func getKeyPath(cmd *cobra.Command) string {
-	keyPath, _ := cmd.PersistentFlags().GetString("tls-key-path")
+	keyPath, _ := cmd.Flags().GetString("tls-key-path")
 	return keyPath
 }
 
+func noTLS(cmd *cobra.Command) bool {
+	tls, _ := cmd.Flags().GetBool("no-tls")
+	return tls
+}
+
 func initConfig() {
-	home, err := homedir.Dir()
-	if err != nil {
-		panic(err)
+	if configFile != "" {
+		viper.SetConfigFile(configFile)
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			ExitWithError(ExitError, err)
+		}
+
+		viper.SetConfigName("topo")
+		viper.AddConfigPath(home + "/.onos")
+
+		_ = viper.ReadInConfig()
 	}
-
-	viper.SetConfigName("topo")
-	viper.AddConfigPath(home + "/.onos")
-	viper.AddConfigPath("/etc/onos")
-	viper.AddConfigPath(".")
-
-	_ = viper.ReadInConfig()
 }

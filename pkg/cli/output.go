@@ -54,3 +54,26 @@ func init() {
 func Output(msg string, args ...interface{}) {
 	_, _ = fmt.Fprintf(outputWriter, msg, args...)
 }
+
+// ExitWithOutput prints the specified entity and exits program with success.
+func ExitWithOutput(msg string, output ...interface{}) {
+	fmt.Fprintf(os.Stdout, msg, output...)
+	os.Exit(ExitSuccess)
+}
+
+// ExitWithSuccess exits program with success without any output.
+func ExitWithSuccess() {
+	os.Exit(ExitSuccess)
+}
+
+// ExitWithError prints the specified error and exits program with the given error code.
+func ExitWithError(code int, err error) {
+	fmt.Fprintln(os.Stderr, "Error:", err)
+	os.Exit(code)
+}
+
+// ExitWithErrorMessage prints the specified message and exits program with the given error code.
+func ExitWithErrorMessage(msg string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, msg, args...)
+	os.Exit(ExitError)
+}

@@ -21,7 +21,7 @@ import (
 // GetCommand returns the root command for the topo service
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "topo {get,add,update,remove,watch} [args]",
+		Use: "topo {config,get,add,update,remove,watch} [args]",
 	}
 
 	addConfigFlags(cmd)
