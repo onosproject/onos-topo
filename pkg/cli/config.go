@@ -21,10 +21,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	configFile = ""
-)
-
 const (
 	addressKey     = "address"
 	defaultAddress = "onos-topo:5150"
@@ -132,19 +128,15 @@ func getKeyPath(cmd *cobra.Command) string {
 }
 
 func initConfig() {
-	if configFile != "" {
-		viper.SetConfigFile(configFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			panic(err)
-		}
-
-		viper.SetConfigName("topo")
-		viper.AddConfigPath(home + "/.onos")
-		viper.AddConfigPath("/etc/onos")
-		viper.AddConfigPath(".")
+	home, err := homedir.Dir()
+	if err != nil {
+		panic(err)
 	}
 
-	viper.ReadInConfig()
+	viper.SetConfigName("topo")
+	viper.AddConfigPath(home + "/.onos")
+	viper.AddConfigPath("/etc/onos")
+	viper.AddConfigPath(".")
+
+	_ = viper.ReadInConfig()
 }
