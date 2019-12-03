@@ -49,7 +49,7 @@ func addConfigFlags(cmd *cobra.Command) {
 func getConfigCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config {set,get,delete} [args]",
-		Short: "Read and update CLI configuration options",
+		Short: "Manage the CLI configuration",
 	}
 	cmd.AddCommand(newConfigGetCommand())
 	cmd.AddCommand(newConfigSetCommand())

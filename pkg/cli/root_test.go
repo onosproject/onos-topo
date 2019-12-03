@@ -62,6 +62,7 @@ func Test_SubCommands(t *testing.T) {
 		commandName   string
 		expectedShort string
 	}{
+		{commandName: "config", expectedShort: "Manage the CLI configuration"},
 		{commandName: "add", expectedShort: "Add a topology resource"},
 		{commandName: "get", expectedShort: "Get topology resources"},
 		{commandName: "remove", expectedShort: "Remove a topology resource"},
