@@ -17,24 +17,16 @@ package cli
 import (
 	"crypto/tls"
 	"github.com/onosproject/onos-topo/pkg/certs"
-	"github.com/spf13/viper"
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-const (
-	defaultAddress = "onos-topo:5150"
-)
-
 // getConnection returns a gRPC client connection to the topo service
-func getConnection() (*grpc.ClientConn, error) {
-	addressObj := viper.Get("address")
-	if addressObj == nil {
-		addressObj = defaultAddress
-	}
-	address := addressObj.(string)
-	certPath := viper.GetString("tls.certPath")
-	keyPath := viper.GetString("tls.keyPath")
+func getConnection(cmd *cobra.Command) (*grpc.ClientConn, error) {
+	address := getAddress(cmd)
+	certPath := getCertPath(cmd)
+	keyPath := getKeyPath(cmd)
 	var opts []grpc.DialOption
 	if certPath != "" && keyPath != "" {
 		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
