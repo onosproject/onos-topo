@@ -16,7 +16,6 @@ package cli
 
 import (
 	"crypto/tls"
-	"fmt"
 	"github.com/onosproject/onos-topo/pkg/certs"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -31,13 +30,11 @@ func getConnection(cmd *cobra.Command) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 
 	if noTLS(cmd) {
-		fmt.Println("Insecure!")
 		opts = []grpc.DialOption{
 			grpc.WithInsecure(),
 		}
 	} else {
 		if certPath != "" && keyPath != "" {
-			fmt.Println("Secure!")
 			cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 			if err != nil {
 				return nil, err
@@ -49,7 +46,6 @@ func getConnection(cmd *cobra.Command) (*grpc.ClientConn, error) {
 				})),
 			}
 		} else {
-			fmt.Println("Secure with default certs!")
 			// Load default Certificates
 			cert, err := tls.X509KeyPair([]byte(certs.DefaultClientCrt), []byte(certs.DefaultClientKey))
 			if err != nil {
