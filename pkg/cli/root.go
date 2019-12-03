@@ -14,7 +14,9 @@
 
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 // GetCommand returns the root command for the topo service
 func GetCommand() *cobra.Command {
@@ -22,6 +24,9 @@ func GetCommand() *cobra.Command {
 		Use: "topo {get,add,update,remove,watch} [args]",
 	}
 
+	addConfigFlags(cmd)
+
+	cmd.AddCommand(getConfigCommand())
 	cmd.AddCommand(getGetCommand())
 	cmd.AddCommand(getAddCommand())
 	cmd.AddCommand(getUpdateCommand())
