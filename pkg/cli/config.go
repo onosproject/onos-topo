@@ -153,7 +153,7 @@ func runConfigInitCommand(_ *cobra.Command, _ []string) error {
 	if err := viper.WriteConfig(); err != nil {
 		return err
 	}
-	fmt.Fprintln(GetOutput(), "Created %s", filePath)
+	fmt.Fprintln(GetOutput(), "Created "+filePath)
 	return nil
 }
 
