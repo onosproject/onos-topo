@@ -16,7 +16,10 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
+	viperapi "github.com/spf13/viper"
 )
+
+var viper = viperapi.New()
 
 // GetCommand returns the root command for the topo service
 func GetCommand() *cobra.Command {
