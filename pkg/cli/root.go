@@ -21,8 +21,8 @@ import (
 
 var viper = viperapi.New()
 
-// Init initializes the command line
-func Init() {
+// init initializes the command line
+func init() {
 	initConfig()
 }
 
