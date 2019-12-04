@@ -18,19 +18,23 @@ import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 const (
+	configDir  = ".onos"
+	configName = "topo"
+
 	addressKey     = "address"
 	defaultAddress = "onos-topo:5150"
 
 	tlsCertPathKey = "tls.certPath"
 	tlsKeyPathKey  = "tls.keyPath"
-)
 
-func init() {
-	cobra.OnInitialize(initConfig)
-}
+	addressFlag     = "address"
+	tlsCertPathFlag = "tls-cert-path"
+	tlsKeyPathFlag  = "tls-key-path"
+)
 
 var configOptions = []string{
 	addressKey,
@@ -40,9 +44,14 @@ var configOptions = []string{
 
 func addConfigFlags(cmd *cobra.Command) {
 	viper.SetDefault(addressKey, defaultAddress)
-	cmd.PersistentFlags().StringP("address", "a", viper.GetString(addressKey), "the onos-topo service address")
-	cmd.PersistentFlags().String("tls-key-path", viper.GetString(tlsKeyPathKey), "the path to the TLS key")
-	cmd.PersistentFlags().String("tls-cert-path", viper.GetString(tlsCertPathKey), "the path to the TLS certificate")
+
+	cmd.PersistentFlags().StringP(addressFlag, "a", viper.GetString(addressKey), "the onos-topo service address")
+	cmd.PersistentFlags().String(tlsCertPathFlag, viper.GetString(tlsCertPathKey), "the path to the TLS certificate")
+	cmd.PersistentFlags().String(tlsKeyPathFlag, viper.GetString(tlsKeyPathKey), "the path to the TLS key")
+
+	_ = viper.BindPFlag(addressKey, cmd.PersistentFlags().Lookup(addressFlag))
+	_ = viper.BindPFlag(tlsCertPathKey, cmd.PersistentFlags().Lookup(tlsCertPathFlag))
+	_ = viper.BindPFlag(tlsKeyPathKey, cmd.PersistentFlags().Lookup(tlsKeyPathFlag))
 }
 
 func getConfigCommand() *cobra.Command {
@@ -50,13 +59,14 @@ func getConfigCommand() *cobra.Command {
 		Use:   "config {set,get,delete} [args]",
 		Short: "Manage the CLI configuration",
 	}
-	cmd.AddCommand(newConfigGetCommand())
-	cmd.AddCommand(newConfigSetCommand())
-	cmd.AddCommand(newConfigDeleteCommand())
+	cmd.AddCommand(getConfigGetCommand())
+	cmd.AddCommand(getConfigSetCommand())
+	cmd.AddCommand(getConfigDeleteCommand())
+	cmd.AddCommand(getConfigInitCommand())
 	return cmd
 }
 
-func newConfigGetCommand() *cobra.Command {
+func getConfigGetCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:       "get <key>",
 		Args:      cobra.ExactArgs(1),
@@ -71,7 +81,7 @@ func runConfigGetCommand(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func newConfigSetCommand() *cobra.Command {
+func getConfigSetCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:       "set <key> <value>",
 		Args:      cobra.ExactArgs(2),
@@ -91,7 +101,7 @@ func runConfigSetCommand(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func newConfigDeleteCommand() *cobra.Command {
+func getConfigDeleteCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:       "delete <key>",
 		Args:      cobra.ExactArgs(1),
@@ -111,8 +121,44 @@ func runConfigDeleteCommand(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+func getConfigInitCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "init",
+		Short: "Initialize the topo CLI configuration",
+		RunE:  runConfigInitCommand,
+	}
+}
+
+func runConfigInitCommand(_ *cobra.Command, _ []string) error {
+	if err := viper.ReadInConfig(); err == nil {
+		return nil
+	}
+
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(home+"/"+configDir, 0777); err != nil {
+		return err
+	}
+
+	filePath := home + "/" + configDir + "/" + configName + ".yaml"
+	f, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	f.Close()
+
+	if err := viper.WriteConfig(); err != nil {
+		return err
+	}
+	fmt.Fprintln(GetOutput(), "Created %s", filePath)
+	return nil
+}
+
 func getAddress(cmd *cobra.Command) string {
-	address, _ := cmd.PersistentFlags().GetString("address")
+	address, _ := cmd.Flags().GetString(addressFlag)
 	if address == "" {
 		return defaultAddress
 	}
@@ -120,12 +166,12 @@ func getAddress(cmd *cobra.Command) string {
 }
 
 func getCertPath(cmd *cobra.Command) string {
-	certPath, _ := cmd.PersistentFlags().GetString("tls-cert-path")
+	certPath, _ := cmd.Flags().GetString(tlsCertPathFlag)
 	return certPath
 }
 
 func getKeyPath(cmd *cobra.Command) string {
-	keyPath, _ := cmd.PersistentFlags().GetString("tls-key-path")
+	keyPath, _ := cmd.Flags().GetString(tlsKeyPathFlag)
 	return keyPath
 }
 
@@ -135,8 +181,8 @@ func initConfig() {
 		panic(err)
 	}
 
-	viper.SetConfigName("topo")
-	viper.AddConfigPath(home + "/.onos")
+	viper.SetConfigName(configName)
+	viper.AddConfigPath(home + "/" + configDir)
 	viper.AddConfigPath("/etc/onos")
 	viper.AddConfigPath(".")
 

@@ -21,6 +21,11 @@ import (
 
 var viper = viperapi.New()
 
+// Init initializes the command line
+func Init() {
+	initConfig()
+}
+
 // GetCommand returns the root command for the topo service
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
