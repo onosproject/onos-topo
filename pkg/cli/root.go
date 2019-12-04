@@ -26,6 +26,11 @@ func init() {
 	initConfig()
 }
 
+// Init is a hook called after cobra initialization
+func Init() {
+	// noop for now
+}
+
 // GetCommand returns the root command for the topo service
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
