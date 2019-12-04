@@ -28,28 +28,35 @@ func getConnection(cmd *cobra.Command) (*grpc.ClientConn, error) {
 	certPath := getCertPath(cmd)
 	keyPath := getKeyPath(cmd)
 	var opts []grpc.DialOption
-	if certPath != "" && keyPath != "" {
-		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
-		if err != nil {
-			return nil, err
-		}
+
+	if noTLS(cmd) {
 		opts = []grpc.DialOption{
-			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-				Certificates:       []tls.Certificate{cert},
-				InsecureSkipVerify: true,
-			})),
+			grpc.WithInsecure(),
 		}
 	} else {
-		// Load default Certificates
-		cert, err := tls.X509KeyPair([]byte(certs.DefaultClientCrt), []byte(certs.DefaultClientKey))
-		if err != nil {
-			return nil, err
-		}
-		opts = []grpc.DialOption{
-			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-				Certificates:       []tls.Certificate{cert},
-				InsecureSkipVerify: true,
-			})),
+		if certPath != "" && keyPath != "" {
+			cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+			if err != nil {
+				return nil, err
+			}
+			opts = []grpc.DialOption{
+				grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+					Certificates:       []tls.Certificate{cert},
+					InsecureSkipVerify: true,
+				})),
+			}
+		} else {
+			// Load default Certificates
+			cert, err := tls.X509KeyPair([]byte(certs.DefaultClientCrt), []byte(certs.DefaultClientKey))
+			if err != nil {
+				return nil, err
+			}
+			opts = []grpc.DialOption{
+				grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+					Certificates:       []tls.Certificate{cert},
+					InsecureSkipVerify: true,
+				})),
+			}
 		}
 	}
 

@@ -30,16 +30,19 @@ const (
 
 	tlsCertPathKey = "tls.certPath"
 	tlsKeyPathKey  = "tls.keyPath"
+	noTLSKey       = "no-tls"
 
 	addressFlag     = "address"
 	tlsCertPathFlag = "tls-cert-path"
 	tlsKeyPathFlag  = "tls-key-path"
+	noTLSFlag       = "no-tls"
 )
 
 var configOptions = []string{
 	addressKey,
 	tlsCertPathKey,
 	tlsKeyPathKey,
+	noTLSKey,
 }
 
 func addConfigFlags(cmd *cobra.Command) {
@@ -48,15 +51,12 @@ func addConfigFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringP(addressFlag, "a", viper.GetString(addressKey), "the onos-topo service address")
 	cmd.PersistentFlags().String(tlsCertPathFlag, viper.GetString(tlsCertPathKey), "the path to the TLS certificate")
 	cmd.PersistentFlags().String(tlsKeyPathFlag, viper.GetString(tlsKeyPathKey), "the path to the TLS key")
-
-	_ = viper.BindPFlag(addressKey, cmd.PersistentFlags().Lookup(addressFlag))
-	_ = viper.BindPFlag(tlsCertPathKey, cmd.PersistentFlags().Lookup(tlsCertPathFlag))
-	_ = viper.BindPFlag(tlsKeyPathKey, cmd.PersistentFlags().Lookup(tlsKeyPathFlag))
+	cmd.PersistentFlags().Bool(noTLSFlag, viper.GetBool(noTLSKey), "if present, do not use TLS")
 }
 
 func getConfigCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "config {set,get,delete} [args]",
+		Use:   "config {set,get,delete,init} [args]",
 		Short: "Manage the CLI configuration",
 	}
 	cmd.AddCommand(getConfigGetCommand())
@@ -173,6 +173,11 @@ func getCertPath(cmd *cobra.Command) string {
 func getKeyPath(cmd *cobra.Command) string {
 	keyPath, _ := cmd.Flags().GetString(tlsKeyPathFlag)
 	return keyPath
+}
+
+func noTLS(cmd *cobra.Command) bool {
+	tls, _ := cmd.Flags().GetBool("no-tls")
+	return tls
 }
 
 func initConfig() {
