@@ -161,6 +161,9 @@ func runConfigDeleteCommand(_ *cobra.Command, args []string) error {
 
 func getAddress(cmd *cobra.Command) string {
 	address, _ := cmd.Flags().GetString("address")
+	if address == "" {
+		return defaultAddress
+	}
 	return address
 }
 
