@@ -84,7 +84,7 @@ func Test_AddDevice(t *testing.T) {
 	err := addDevice.Execute()
 	assert.NilError(t, err)
 	output := outputBuffer.String()
-	assert.Equal(t, output, "Added device test-device-1")
+	assert.Assert(t, strings.Contains(output, "Added device test-device-1"))
 }
 
 func Test_UpdateDevice(t *testing.T) {
@@ -105,7 +105,7 @@ func Test_UpdateDevice(t *testing.T) {
 	err := updateDevice.Execute()
 	assert.NilError(t, err)
 	output := outputBuffer.String()
-	assert.Equal(t, output, "Updated device test-device-1")
+	assert.Assert(t, strings.Contains(output, "Updated device test-device-1"))
 }
 
 func Test_RemoveDevice(t *testing.T) {
@@ -120,5 +120,5 @@ func Test_RemoveDevice(t *testing.T) {
 	err := removeDevice.Execute()
 	assert.NilError(t, err)
 	output := outputBuffer.String()
-	assert.Equal(t, output, "Removed device test-device-1")
+	assert.Assert(t, strings.Contains(output, "Removed device test-device-1"))
 }

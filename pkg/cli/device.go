@@ -231,7 +231,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	Output("Added device %s", id)
+	Output("Added device %s \n", id)
 	return nil
 }
 
