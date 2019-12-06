@@ -23,45 +23,16 @@ type testSuite struct {
 	test.Suite
 }
 
-// SmokeTestSuite is the primary onos-config test suite
-type SmokeTestSuite struct {
-	testSuite
-}
-
-// SetupTestSuite sets up the onos-config test suite
-func (s *SmokeTestSuite) SetupTestSuite() {
-	setup.Atomix()
-	setup.Partitions().Raft()
-	setup.Topo().SetReplicas(2)
-	setup.Config().SetReplicas(2)
-	setup.SetupOrDie()
-}
-
-// TestSuite is the onos-config CLI test suite
+// TestSuite is the onos-topo test suite
 type TestSuite struct {
 	testSuite
 }
 
-// SetupTestSuite sets up the onos-config CLI test suite
+// SetupTestSuite sets up the onos-topo test suite
 func (s *TestSuite) SetupTestSuite() {
 	setup.Atomix()
 	setup.Partitions().Raft()
-	setup.CLI().SetEnabled()
 	setup.Topo().SetReplicas(2)
-	setup.Config().SetReplicas(2)
 	setup.SetupOrDie()
 }
 
-// HATestSuite is the onos-config HA test suite
-type HATestSuite struct {
-	testSuite
-}
-
-// SetupTestSuite sets up the onos-config CLI test suite
-func (s *HATestSuite) SetupTestSuite() {
-	setup.Atomix()
-	setup.Partitions().Raft()
-	setup.Topo().SetReplicas(2)
-	setup.Config().SetReplicas(2)
-	setup.SetupOrDie()
-}

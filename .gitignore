@@ -1,6 +1,6 @@
 cmd/onos-topo/onos-topo
 vendor
-build/_output
+**/_output
 *.DS_Store
 coverage.txt
 *.coverprofile
