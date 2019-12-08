@@ -35,4 +35,3 @@ func (s *TestSuite) SetupTestSuite() {
 	setup.Topo().SetReplicas(2)
 	setup.SetupOrDie()
 }
-
