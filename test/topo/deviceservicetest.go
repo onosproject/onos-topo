@@ -47,14 +47,14 @@ func (s *TestSuite) TestDeviceService(t *testing.T) {
 	assert.Equal(t, 0, count)
 
 	events := make(chan *device.ListResponse)
-	go func() {
-		list, err := client.List(context.Background(), &device.ListRequest{
-			Subscribe: true,
-		})
-		assert.NoError(t, err)
+	eventList, eventErr := client.List(context.Background(), &device.ListRequest{
+		Subscribe: true,
+	})
+	assert.NoError(t, eventErr)
 
+	go func() {
 		for {
-			response, err := list.Recv()
+			response, err := eventList.Recv()
 			if err != nil {
 				break
 			}
