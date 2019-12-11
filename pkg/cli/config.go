@@ -127,7 +127,7 @@ func runConfigDeleteCommand(_ *cobra.Command, args []string) error {
 func getConfigInitCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
-		Short: "Initialize the topo CLI configuration",
+		Short: "Initialize the onos-topo CLI configuration",
 		RunE:  runConfigInitCommand,
 	}
 }
