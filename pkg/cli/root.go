@@ -34,7 +34,8 @@ func Init() {
 // GetCommand returns the root command for the topo service
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "topo {get,add,update,remove,watch} [args]",
+		Use:   "topo {get,add,update,remove,watch} [args]",
+		Short: "ONOS topology subsystem commands",
 	}
 
 	addConfigFlags(cmd)
