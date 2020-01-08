@@ -57,13 +57,13 @@ func NewAtomixStore() (Store, error) {
 
 // NewLocalStore returns a new local device store
 func NewLocalStore() (Store, error) {
-	node, conn := startLocalNode()
+	node, _ := startLocalNode()
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "devices",
 	}
 
-	devices, err := _map.New(context.Background(), name, []*grpc.ClientConn{conn})
+	devices, err := _map.New(context.Background(), name, nil)
 	if err != nil {
 		return nil, err
 	}
