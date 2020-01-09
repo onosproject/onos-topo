@@ -19,16 +19,12 @@ import (
 	"github.com/atomix/atomix-go-client/pkg/client/map"
 	"github.com/atomix/atomix-go-client/pkg/client/primitive"
 	"github.com/atomix/atomix-go-client/pkg/client/session"
-	"github.com/atomix/atomix-go-local/pkg/atomix/local"
+	netutil "github.com/atomix/atomix-go-client/pkg/client/util/net"
 	"github.com/atomix/atomix-go-node/pkg/atomix"
-	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
 	"github.com/gogo/protobuf/proto"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/util"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/test/bufconn"
 	"io"
-	"net"
 	"time"
 )
 
@@ -57,13 +53,13 @@ func NewAtomixStore() (Store, error) {
 
 // NewLocalStore returns a new local device store
 func NewLocalStore() (Store, error) {
-	node, conn := startLocalNode()
+	node, address := util.StartLocalNode()
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "devices",
 	}
 
-	devices, err := _map.New(context.Background(), name, []*grpc.ClientConn{conn})
+	devices, err := _map.New(context.Background(), name, []netutil.Address{address})
 	if err != nil {
 		return nil, err
 	}
@@ -72,23 +68,6 @@ func NewLocalStore() (Store, error) {
 		devices: devices,
 		closer:  &nodeCloser{node},
 	}, nil
-}
-
-// startLocalNode starts a single local node
-func startLocalNode() (*atomix.Node, *grpc.ClientConn) {
-	lis := bufconn.Listen(1024 * 1024)
-	node := local.NewNode(lis, registry.Registry)
-	_ = node.Start()
-
-	dialer := func(ctx context.Context, address string) (net.Conn, error) {
-		return lis.Dial()
-	}
-
-	conn, err := grpc.DialContext(context.Background(), "devices", grpc.WithContextDialer(dialer), grpc.WithInsecure())
-	if err != nil {
-		panic("Failed to dial devices")
-	}
-	return node, conn
 }
 
 type nodeCloser struct {
