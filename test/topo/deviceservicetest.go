@@ -16,11 +16,12 @@ package topo
 
 import (
 	"context"
+	"io"
+	"testing"
+
 	"github.com/onosproject/onos-test/pkg/onit/env"
 	"github.com/onosproject/onos-topo/api/device"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"testing"
 )
 
 // TestDeviceService : test
@@ -84,7 +85,9 @@ func (s *TestSuite) TestDeviceService(t *testing.T) {
 	assert.Equal(t, addResponse.Device.Revision, getResponse.Device.Revision)
 
 	eventResponse := <-events
-	assert.Equal(t, device.ListResponse_ADDED, eventResponse.Type)
+
+	deviceEventTypes := []device.ListResponse_Type{device.ListResponse_NONE, device.ListResponse_ADDED}
+	assert.Contains(t, deviceEventTypes, eventResponse.Type)
 	assert.Equal(t, device.ID("test1"), eventResponse.Device.ID)
 	assert.Equal(t, addResponse.Device.Revision, eventResponse.Device.Revision)
 
