@@ -15,7 +15,13 @@
 package util
 
 import (
+	"fmt"
 	"github.com/atomix/atomix-go-client/pkg/client"
+	netutil "github.com/atomix/atomix-go-client/pkg/client/util/net"
+	"github.com/atomix/atomix-go-local/pkg/atomix/local"
+	"github.com/atomix/atomix-go-node/pkg/atomix"
+	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
+	"net"
 	"os"
 )
 
@@ -25,6 +31,23 @@ const (
 	atomixAppEnv        = "ATOMIX_APP"
 	atomixRaftGroup     = "ATOMIX_RAFT"
 )
+
+const basePort = 40000
+
+// StartLocalNode starts a single local Atomix node
+func StartLocalNode() (*atomix.Node, netutil.Address) {
+	for port := basePort; port < basePort+100; port++ {
+		address := netutil.Address(fmt.Sprintf("localhost:%d", port))
+		lis, err := net.Listen("tcp", string(address))
+		if err != nil {
+			continue
+		}
+		node := local.NewNode(lis, registry.Registry)
+		_ = node.Start()
+		return node, address
+	}
+	panic("cannot find open port")
+}
 
 func getAtomixController() string {
 	return os.Getenv(atomixControllerEnv)
