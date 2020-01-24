@@ -9,7 +9,7 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onosproject/onos-test v0.0.0-20200117203302-69acc92296a1
+	github.com/onosproject/onos-test v0.0.0-20200124000609-2c23d699896e
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.5.0
 	github.com/stretchr/testify v1.4.0
