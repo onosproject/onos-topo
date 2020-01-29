@@ -16,11 +16,11 @@ package device
 
 import (
 	"context"
-	"github.com/atomix/atomix-go-client/pkg/client/map"
-	"github.com/atomix/atomix-go-client/pkg/client/primitive"
-	"github.com/atomix/atomix-go-client/pkg/client/session"
-	netutil "github.com/atomix/atomix-go-client/pkg/client/util/net"
-	"github.com/atomix/atomix-go-node/pkg/atomix"
+	"github.com/atomix/go-client/pkg/client/map"
+	"github.com/atomix/go-client/pkg/client/primitive"
+	"github.com/atomix/go-client/pkg/client/session"
+	netutil "github.com/atomix/go-client/pkg/client/util/net"
+	"github.com/atomix/go-framework/pkg/atomix"
 	"github.com/gogo/protobuf/proto"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/util"
