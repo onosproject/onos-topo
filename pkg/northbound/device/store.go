@@ -19,7 +19,6 @@ import (
 	"github.com/atomix/go-client/pkg/client/map"
 	"github.com/atomix/go-client/pkg/client/primitive"
 	"github.com/atomix/go-client/pkg/client/session"
-	netutil "github.com/atomix/go-client/pkg/client/util/net"
 	"github.com/atomix/go-framework/pkg/atomix"
 	"github.com/gogo/protobuf/proto"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
@@ -35,7 +34,7 @@ func NewAtomixStore() (Store, error) {
 		return nil, err
 	}
 
-	group, err := client.GetGroup(context.Background(), util.GetAtomixRaftGroup())
+	group, err := client.GetDatabase(context.Background(), util.GetAtomixRaftGroup())
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +58,7 @@ func NewLocalStore() (Store, error) {
 		Name:      "devices",
 	}
 
-	devices, err := _map.New(context.Background(), name, []netutil.Address{address})
+	devices, err := _map.New(context.Background(), name, []primitive.Partition{{ID: 1, Address: address}})
 	if err != nil {
 		return nil, err
 	}

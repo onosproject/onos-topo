@@ -16,6 +16,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/atomix/api/proto/atomix/controller"
 	"github.com/atomix/go-client/pkg/client"
 	netutil "github.com/atomix/go-client/pkg/client/util/net"
 	"github.com/atomix/go-framework/pkg/atomix"
@@ -42,7 +43,11 @@ func StartLocalNode() (*atomix.Node, netutil.Address) {
 		if err != nil {
 			continue
 		}
-		node := local.NewNode(lis, registry.Registry)
+		node := local.NewNode(lis, registry.Registry, []*controller.PartitionId{
+			{
+				Partition: 1,
+			},
+		})
 		_ = node.Start()
 		return node, address
 	}
