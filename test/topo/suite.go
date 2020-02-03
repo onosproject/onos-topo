@@ -31,7 +31,7 @@ type TestSuite struct {
 // SetupTestSuite sets up the onos-topo test suite
 func (s *TestSuite) SetupTestSuite() {
 	setup.Atomix()
-	setup.Partitions().Raft()
+	setup.Database().Raft()
 	setup.Topo().SetReplicas(2)
 	setup.SetupOrDie()
 }
