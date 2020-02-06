@@ -33,7 +33,6 @@ func TestLocalServer(t *testing.T) {
 
 	store, err := NewLocalStore()
 	assert.NoError(t, err)
-	defer store.Close()
 	defer s.Stop()
 
 	deviceapi.RegisterDeviceServiceServer(s, &Server{

@@ -18,8 +18,6 @@ import (
 	"context"
 	"github.com/atomix/go-client/pkg/client/map"
 	"github.com/atomix/go-client/pkg/client/primitive"
-	"github.com/atomix/go-client/pkg/client/session"
-	"github.com/atomix/go-framework/pkg/atomix"
 	"github.com/gogo/protobuf/proto"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/util"
@@ -39,14 +37,13 @@ func NewAtomixStore() (Store, error) {
 		return nil, err
 	}
 
-	devices, err := group.GetMap(context.Background(), "devices", session.WithTimeout(30*time.Second))
+	devices, err := group.GetMap(context.Background(), "devices")
 	if err != nil {
 		return nil, err
 	}
 
 	return &atomixStore{
 		devices: devices,
-		closer:  devices,
 	}, nil
 }
 
@@ -58,23 +55,20 @@ func NewLocalStore() (Store, error) {
 		Name:      "devices",
 	}
 
-	devices, err := _map.New(context.Background(), name, []primitive.Partition{{ID: 1, Address: address}})
+	session, err := primitive.NewSession(context.TODO(), primitive.Partition{ID: 1, Address: address})
+	if err != nil {
+		return nil, err
+	}
+
+	devices, err := _map.New(context.Background(), name, []*primitive.Session{session})
 	if err != nil {
 		return nil, err
 	}
 
 	return &atomixStore{
 		devices: devices,
-		closer:  &nodeCloser{node},
+		closer:  node.Stop,
 	}, nil
-}
-
-type nodeCloser struct {
-	node *atomix.Node
-}
-
-func (c *nodeCloser) Close() error {
-	return c.node.Stop()
 }
 
 // Store stores topology information
@@ -100,7 +94,7 @@ type Store interface {
 // atomixStore is the device implementation of the Store
 type atomixStore struct {
 	devices _map.Map
-	closer  io.Closer
+	closer  func() error
 }
 
 func (s *atomixStore) Load(deviceID deviceapi.ID) (*deviceapi.Device, error) {
@@ -192,8 +186,13 @@ func (s *atomixStore) Watch(ch chan<- *Event) error {
 }
 
 func (s *atomixStore) Close() error {
-	_ = s.devices.Close()
-	return s.closer.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	_ = s.devices.Close(ctx)
+	cancel()
+	if s.closer != nil {
+		return s.closer()
+	}
+	return nil
 }
 
 func decodeDevice(entry *_map.Entry) (*deviceapi.Device, error) {
