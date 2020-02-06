@@ -18,7 +18,6 @@ import (
 	"context"
 	"github.com/atomix/go-client/pkg/client/map"
 	"github.com/atomix/go-client/pkg/client/primitive"
-	"github.com/atomix/go-framework/pkg/atomix"
 	"github.com/gogo/protobuf/proto"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/util"
@@ -70,14 +69,6 @@ func NewLocalStore() (Store, error) {
 		devices: devices,
 		closer:  node.Stop,
 	}, nil
-}
-
-type nodeCloser struct {
-	node *atomix.Node
-}
-
-func (c *nodeCloser) Close() error {
-	return c.node.Stop()
 }
 
 // Store stores topology information
