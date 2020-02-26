@@ -145,7 +145,7 @@ func (s *Server) Update(ctx context.Context, request *deviceapi.UpdateRequest) (
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	log.Info("Updated Device {}", device)
+	log.Infof("Updated Device %v", device)
 	return &deviceapi.UpdateResponse{
 		Device: device,
 	}, nil

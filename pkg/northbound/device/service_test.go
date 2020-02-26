@@ -61,44 +61,31 @@ func TestLocalServer(t *testing.T) {
 	})
 	assert.Error(t, err, "device not found")
 
-	_, err = client.Add(context.Background(), &deviceapi.AddRequest{
-		Device: &deviceapi.Device{
-			ID:      deviceapi.ID("foo"),
-			Type:    "test",
-			Address: "foo:1234",
-			Version: "1.0.0",
-		},
-	})
-	assert.Error(t, err, "device ID 'foo' is invalid")
+	// device name must match its regex re. length restrictions
+	_, err = invokeAdd(t, &client, "foo", "foo:1234", "1.0.0")
+	assert.Contains(t, err.Error(), "device ID 'foo' is invalid")
+	_, err = invokeAdd(t, &client, "this-string-has-a-length-of-41-characters", "foo:1234", "1.0.0")
+	assert.Contains(t, err.Error(), "device ID 'this-string-has-a-length-of-41-characters' is invalid")
 
-	_, err = client.Add(context.Background(), &deviceapi.AddRequest{
-		Device: &deviceapi.Device{
-			ID:      deviceapi.ID("foobar"),
-			Type:    "test",
-			Address: "baz",
-			Version: "1.0.0",
-		},
-	})
-	assert.Error(t, err, "device address 'baz' is invalid")
+	// device address must  match its regex
+	_, err = invokeAdd(t, &client, "foobar", "baz", "1.0.0")
+	assert.Contains(t, err.Error(), "device address 'baz' is invalid")
+	_, err = invokeAdd(t, &client, "foobar", "baz:", "1.0.0")
+	assert.Contains(t, err.Error(), "device address 'baz:' is invalid")
+	_, err = invokeAdd(t, &client, "foobar", ":1234", "1.0.0")
+	assert.Contains(t, err.Error(), "device address ':1234' is invalid")
 
-	_, err = client.Add(context.Background(), &deviceapi.AddRequest{
-		Device: &deviceapi.Device{
-			ID:      deviceapi.ID("foobar"),
-			Type:    "test",
-			Address: "baz:1234",
-			Version: "abc",
-		},
-	})
-	assert.Error(t, err, "device version 'abc' is invalid")
+	// device version must match its regex
+	_, err = invokeAdd(t, &client, "foobar", "foo:1234", "abc")
+	assert.Contains(t, err.Error(), "device version 'abc' is invalid")
+	_, err = invokeAdd(t, &client, "foobar", "foo:1234", "1.")
+	assert.Contains(t, err.Error(), "device version '1.' is invalid")
+	_, err = invokeAdd(t, &client, "foobar", "foo:1234", "1.2.3.4.5")
+	assert.Contains(t, err.Error(), "device version '1.2.3.4.5' is invalid")
+	_, err = invokeAdd(t, &client, "foobar", "foo:1234", "19.3.1.8")
+	assert.Contains(t, err.Error(), "device version '19.3.1.8' is invalid")
 
-	addResponse, err := client.Add(context.Background(), &deviceapi.AddRequest{
-		Device: &deviceapi.Device{
-			ID:      deviceapi.ID("device-foo"),
-			Type:    "test",
-			Address: "device-foo:1234",
-			Version: "1.0.0",
-		},
-	})
+	addResponse, err := invokeAdd(t, &client, "device-foo", "device-foo:1234", "1.0.0")
 	assert.NoError(t, err)
 	assert.NotEqual(t, deviceapi.Revision(0), addResponse.Device.Revision)
 
@@ -166,15 +153,7 @@ func TestLocalServer(t *testing.T) {
 		log.Error("Expected Update Response")
 		t.FailNow()
 	}
-
-	addResponse, err = client.Add(context.Background(), &deviceapi.AddRequest{
-		Device: &deviceapi.Device{
-			ID:      deviceapi.ID("device-bar"),
-			Type:    "test",
-			Address: "device-bar:1234",
-			Version: "1.0.0",
-		},
-	})
+	addResponse, err = invokeAdd(t, &client, "device-bar", "device-bar:1234", "1.0.0")
 	assert.NoError(t, err)
 	assert.Equal(t, deviceapi.ID("device-bar"), addResponse.Device.ID)
 	assert.Equal(t, "device-bar:1234", addResponse.Device.Address)
@@ -203,14 +182,17 @@ func TestLocalServer(t *testing.T) {
 		log.Error("Expected Update Response")
 		t.FailNow()
 	}
+	_, err = invokeAdd(t, &client, "good", "10.11.12.13:1234", "1.0.0")
+	assert.NoError(t, err, "device should be good")
+}
 
-	_, err = client.Add(context.Background(), &deviceapi.AddRequest{
+func invokeAdd(t *testing.T, client *deviceapi.DeviceServiceClient, id, address, version string) (*deviceapi.AddResponse, error) {
+	return (*client).Add(context.Background(), &deviceapi.AddRequest{
 		Device: &deviceapi.Device{
-			ID:      deviceapi.ID("good"),
+			ID:      deviceapi.ID(id),
 			Type:    "test",
-			Address: "10.11.12.13:1234",
-			Version: "1.0.0",
+			Address: address,
+			Version: version,
 		},
 	})
-	assert.NoError(t, err, "device should be good")
 }
