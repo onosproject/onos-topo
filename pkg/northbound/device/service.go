@@ -31,7 +31,7 @@ const (
 	defaultTimeout       = 5 * time.Second
 	deviceNamePattern    = `^[a-zA-Z0-9\-:_]{4,40}$`
 	deviceAddressPattern = `^[a-zA-Z0-9\-_\.]+:[0-9]+$`
-	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
+	deviceVersionPattern = `^(\d+(\.\d+){0,3})$`
 )
 
 // NewService returns a new device Service
