@@ -82,12 +82,13 @@ func TestLocalServer(t *testing.T) {
 	assert.Contains(t, err.Error(), "device version '1.' is invalid")
 	_, err = invokeAdd(t, &client, "foobar", "foo:1234", "1.2.3.4.5")
 	assert.Contains(t, err.Error(), "device version '1.2.3.4.5' is invalid")
+	_, err = invokeAdd(t, &client, "device-foo", "device-foo:1234", "1")
+	assert.Contains(t, err.Error(), "device version '1' is invalid")
 
 	// device version accepted if valid
 	_, err = invokeAdd(t, &client, "device-foo", "device-foo:1234", "19.3.1.8")
 	assert.NoError(t, err)
-	_, err = invokeAdd(t, &client, "device-foo", "device-foo:1234", "1")
-	assert.NoError(t, err)
+
 	addResponse, err := invokeAdd(t, &client, "device-foo", "device-foo:1234", "1.0.0")
 	assert.NoError(t, err)
 	assert.NotEqual(t, deviceapi.Revision(0), addResponse.Device.Revision)
