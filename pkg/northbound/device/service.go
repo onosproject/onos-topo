@@ -31,7 +31,7 @@ const (
 	defaultTimeout       = 5 * time.Second
 	deviceNamePattern    = `^[a-zA-Z0-9\-:_]{4,40}$`
 	deviceAddressPattern = `^[a-zA-Z0-9\-_\.]+:[0-9]+$`
-	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
+	deviceVersionPattern = `^(\d+(\.\d+){2,3})$`
 )
 
 // NewService returns a new device Service
@@ -145,7 +145,7 @@ func (s *Server) Update(ctx context.Context, request *deviceapi.UpdateRequest) (
 	if err := s.deviceStore.Store(device); err != nil {
 		return nil, err
 	}
-	log.Info("Updated Device {}", device)
+	log.Infof("Updated Device %v", device)
 	return &deviceapi.UpdateResponse{
 		Device: device,
 	}, nil

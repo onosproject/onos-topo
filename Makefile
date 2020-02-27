@@ -66,7 +66,7 @@ images: build onos-topo-docker onos-topo-debug-docker onos-topo-tests-docker
 kind: # @HELP build Docker images and add them to the currently configured kind cluster
 kind: images
 	@if [ "`kind get clusters`" = '' ]; then echo "no kind cluster found" && exit 1; fi
-	kind load docker-image onosproject/onos-topo:${ONOS_TOPO_DEBUG_VERSION}
+	kind load docker-image onosproject/onos-topo:${ONOS_TOPO_VERSION}
 	kind load docker-image onosproject/onos-topo-tests:${ONOS_TOPO_VERSION}
 
 all: build images
