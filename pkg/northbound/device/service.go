@@ -17,14 +17,15 @@ package device
 
 import (
 	"context"
+	"regexp"
+	"time"
+
+	"github.com/onosproject/onos-lib-go/pkg/logging"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/northbound"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	log "k8s.io/klog"
-	"regexp"
-	"time"
 )
 
 const (
@@ -33,6 +34,8 @@ const (
 	deviceAddressPattern = `^[a-zA-Z0-9\-_\.]+:[0-9]+$`
 	deviceVersionPattern = `^(\d+\.\d+\.\d+)$`
 )
+
+var log = logging.GetLogger("store")
 
 // NewService returns a new device Service
 func NewService() (northbound.Service, error) {
@@ -178,10 +181,13 @@ func (s *Server) List(request *deviceapi.ListRequest, server deviceapi.DeviceSer
 			case EventNone:
 				t = deviceapi.ListResponse_NONE
 			case EventInserted:
+				log.Info("Device is added")
 				t = deviceapi.ListResponse_ADDED
 			case EventUpdated:
+				log.Debug("device is updated")
 				t = deviceapi.ListResponse_UPDATED
 			case EventRemoved:
+				log.Warn("device is removed")
 				t = deviceapi.ListResponse_REMOVED
 			}
 			err := server.Send(&deviceapi.ListResponse{
@@ -213,6 +219,8 @@ func (s *Server) List(request *deviceapi.ListRequest, server deviceapi.DeviceSer
 
 // Remove :
 func (s *Server) Remove(ctx context.Context, request *deviceapi.RemoveRequest) (*deviceapi.RemoveResponse, error) {
+	log.Info("Info level device is removed")
+	log.Debug("Debug Level Device is removed")
 	device := request.Device
 	err := s.deviceStore.Delete(device)
 	if err != nil {
