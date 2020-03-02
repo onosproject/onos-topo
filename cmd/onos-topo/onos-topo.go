@@ -30,13 +30,16 @@ package main
 
 import (
 	"flag"
+
+	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-topo/pkg/manager"
 	"github.com/onosproject/onos-topo/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/northbound/admin"
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/onosproject/onos-topo/pkg/northbound/diags"
-	log "k8s.io/klog"
 )
+
+var log = logging.GetLogger("main")
 
 // The main entry point
 func main() {
@@ -55,17 +58,6 @@ func main() {
 	}
 	flag.Parse()
 
-	klogFlags := flag.NewFlagSet("klog", flag.ExitOnError)
-	log.InitFlags(klogFlags)
-
-	// Sync the glog and klog flags.
-	flag.CommandLine.VisitAll(func(f1 *flag.Flag) {
-		f2 := klogFlags.Lookup(f1.Name)
-		if f2 != nil {
-			value := f1.Value.String()
-			_ = f2.Value.Set(value)
-		}
-	})
 	log.Info("Starting onos-topo")
 
 	mgr, err := manager.NewManager()
@@ -85,6 +77,7 @@ func startServer(caPath string, keyPath string, certPath string) error {
 	s := northbound.NewServer(northbound.NewServerConfig(caPath, keyPath, certPath))
 	s.AddService(admin.Service{})
 	s.AddService(diags.Service{})
+	s.AddService(logging.Service{})
 
 	deviceService, err := device.NewService()
 	if err != nil {

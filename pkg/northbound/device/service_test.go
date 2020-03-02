@@ -16,15 +16,15 @@ package device
 
 import (
 	"context"
+	"io"
+	"net"
+	"testing"
+	"time"
+
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
-	"io"
-	log "k8s.io/klog"
-	"net"
-	"testing"
-	"time"
 )
 
 func TestLocalServer(t *testing.T) {

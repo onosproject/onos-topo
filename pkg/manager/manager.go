@@ -16,8 +16,10 @@
 package manager
 
 import (
-	log "k8s.io/klog"
+	"github.com/onosproject/onos-lib-go/pkg/logging"
 )
+
+var log = logging.GetLogger("manager")
 
 var mgr Manager
 

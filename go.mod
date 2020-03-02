@@ -13,7 +13,7 @@ require (
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.5.1
+	github.com/onosproject/onos-lib-go v0.0.0-20200302190914-1f7a2e625e9d
 	google.golang.org/grpc v1.27.1
 	gotest.tools v2.2.0+incompatible
-	k8s.io/klog v1.0.0
 )

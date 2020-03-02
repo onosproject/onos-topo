@@ -18,12 +18,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/onosproject/onos-topo/api/device"
-	"github.com/spf13/cobra"
 	"io"
-	log "k8s.io/klog"
 	"text/tabwriter"
 	"time"
+
+	"github.com/onosproject/onos-topo/api/device"
+	"github.com/spf13/cobra"
 )
 
 func getGetDeviceCommand() *cobra.Command {
