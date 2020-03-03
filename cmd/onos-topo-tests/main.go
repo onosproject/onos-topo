@@ -15,12 +15,12 @@
 package main
 
 import (
+	"github.com/onosproject/onos-test/pkg/registry"
 	"github.com/onosproject/onos-test/pkg/test"
 	"github.com/onosproject/onos-topo/test/topo"
 )
 
 func main() {
-	test.Register("topo", &topo.TestSuite{})
-
+	registry.RegisterTestSuite("topo", &topo.TestSuite{})
 	test.Main()
 }
