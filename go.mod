@@ -9,11 +9,11 @@ require (
 	github.com/atomix/go-local v0.0.0-20200211010611-c99e53e4c653
 	github.com/gogo/protobuf v1.3.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/onosproject/onos-lib-go v0.0.0-20200302190914-1f7a2e625e9d
 	github.com/onosproject/onos-test v0.0.0-20200303000010-770fcdc350a0
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.5.1
-	github.com/onosproject/onos-lib-go v0.0.0-20200302190914-1f7a2e625e9d
 	google.golang.org/grpc v1.27.1
 	gotest.tools v2.2.0+incompatible
 )
