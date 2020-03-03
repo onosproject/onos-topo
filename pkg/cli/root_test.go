@@ -16,9 +16,10 @@ package cli
 
 import (
 	"bytes"
-	"gotest.tools/assert"
 	"strings"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 // Test_RootUsage tests the creation of the root command and checks that the ONOS usage messages are included
@@ -68,6 +69,7 @@ func Test_SubCommands(t *testing.T) {
 		{commandName: "remove", expectedShort: "Remove a topology resource"},
 		{commandName: "update", expectedShort: "Update a topology resource"},
 		{commandName: "watch", expectedShort: "Watch for changes to a topology resource type"},
+		{commandName: "log", expectedShort: "logging api commands"},
 	}
 
 	var subCommandsFound = make(map[string]bool)

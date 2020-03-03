@@ -20,15 +20,19 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+
 	"io/ioutil"
 	"net"
 
+	"github.com/onosproject/onos-lib-go/pkg/logging"
+
 	"github.com/onosproject/onos-topo/pkg/certs"
 	"google.golang.org/grpc/credentials"
-	log "k8s.io/klog"
 
 	"google.golang.org/grpc"
 )
+
+var log = logging.GetLogger("northbound")
 
 // Service provides service-specific registration for grpc services.
 type Service interface {
@@ -130,7 +134,7 @@ func (s *Server) Serve(started func(string)) error {
 func getCertPoolDefault() *x509.CertPool {
 	certPool := x509.NewCertPool()
 	if ok := certPool.AppendCertsFromPEM([]byte(certs.OnfCaCrt)); !ok {
-		log.Warning("failed to append CA certificates")
+		log.Warn("failed to append CA certificates")
 	}
 	return certPool
 }
@@ -139,10 +143,10 @@ func getCertPool(CaPath string) *x509.CertPool {
 	certPool := x509.NewCertPool()
 	ca, err := ioutil.ReadFile(CaPath)
 	if err != nil {
-		log.Warning("could not read ", CaPath, err)
+		log.Warn("could not read ", CaPath, err)
 	}
 	if ok := certPool.AppendCertsFromPEM(ca); !ok {
-		log.Warning("failed to append CA certificates")
+		log.Warn("failed to append CA certificates")
 	}
 	return certPool
 }

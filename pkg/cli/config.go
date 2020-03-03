@@ -16,10 +16,14 @@ package cli
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/onosproject/onos-lib-go/pkg/logging"
+	"github.com/spf13/cobra"
 )
+
+var log = logging.GetLogger("cli")
 
 const (
 	configDir  = ".onos"

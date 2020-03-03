@@ -17,15 +17,20 @@ package device
 
 import (
 	"context"
+
+	"github.com/onosproject/onos-lib-go/pkg/logging"
+
 	deviceapi "github.com/onosproject/onos-topo/api/device"
 	"github.com/onosproject/onos-topo/pkg/northbound"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	log "k8s.io/klog"
+
 	"regexp"
 	"time"
 )
+
+var log = logging.GetLogger("northbound", "device")
 
 const (
 	defaultTimeout       = 5 * time.Second
