@@ -36,7 +36,8 @@ enum Protocol {
     // GNOI protocol reference
     GNOI = 3;
 
-    //TODO extend with needed protocols (e.g. for RAN)
+    // E2 Control Plane Protocol
+    E2AP = 4;
 }
 
 //ConnectivityState represents the L3 reachability of a device from the service container (e.g. enos-config), independently of gRPC or the service itself (e.g. gNMI)
