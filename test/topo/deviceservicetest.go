@@ -115,5 +115,5 @@ func (s *TestSuite) TestDeviceService(t *testing.T) {
 	eventResponse = <-events
 	assert.Equal(t, device.ListResponse_REMOVED, eventResponse.Type)
 	assert.Equal(t, device.ID("test1"), eventResponse.Device.ID)
-	assert.Equal(t, addResponse.Device.Revision, eventResponse.Device.Revision)
+	assert.True(t, eventResponse.Device.Revision > addResponse.Device.Revision)
 }
