@@ -10,7 +10,7 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onosproject/onos-lib-go v0.0.0-20200302190914-1f7a2e625e9d
-	github.com/onosproject/onos-test v0.0.0-20200303000010-770fcdc350a0
+	github.com/onosproject/onos-test v0.0.0-20200306000348-1f2c86fc76c6
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.5.1
