@@ -16,8 +16,8 @@
 package admin
 
 import (
+	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/api/admin"
-	"github.com/onosproject/onos-topo/pkg/northbound"
 	"google.golang.org/grpc"
 )
 
