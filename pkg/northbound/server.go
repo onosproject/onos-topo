@@ -20,16 +20,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-
+	"github.com/onosproject/onos-lib-go/pkg/certs"
+	"github.com/onosproject/onos-lib-go/pkg/logging"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"net"
-
-	"github.com/onosproject/onos-lib-go/pkg/logging"
-
-	"github.com/onosproject/onos-topo/pkg/certs"
-	"google.golang.org/grpc/credentials"
-
-	"google.golang.org/grpc"
 )
 
 var log = logging.GetLogger("northbound")
