@@ -32,8 +32,8 @@ import (
 	"flag"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
-	"github.com/onosproject/onos-topo/pkg/manager"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
+	"github.com/onosproject/onos-topo/pkg/manager"
 	"github.com/onosproject/onos-topo/pkg/northbound/admin"
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/onosproject/onos-topo/pkg/northbound/diags"
