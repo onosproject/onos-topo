@@ -54,25 +54,6 @@ type ServerConfig struct {
 	Insecure bool
 }
 
-// NewServer initializes gNMI server using the supplied configuration.
-func NewServer(cfg *ServerConfig) *Server {
-	return &Server{
-		services: []Service{},
-		cfg:      cfg,
-	}
-}
-
-// NewServerConfig creates a server config created with the specified end-point security details.
-func NewServerConfig(caPath string, keyPath string, certPath string) *ServerConfig {
-	return &ServerConfig{
-		Port:     5150,
-		Insecure: true,
-		CaPath:   &caPath,
-		KeyPath:  &keyPath,
-		CertPath: &certPath,
-	}
-}
-
 // AddService adds a Service to the server to be registered on Serve.
 func (s *Server) AddService(r Service) {
 	s.services = append(s.services, r)
