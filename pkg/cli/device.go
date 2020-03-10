@@ -22,6 +22,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-topo/api/device"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
-	conn, err := getConnection(cmd)
+	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return err
 	}
@@ -192,7 +193,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) error {
 		deviceTarget = id
 	}
 
-	conn, err := getConnection(cmd)
+	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return err
 	}
@@ -263,7 +264,7 @@ func getUpdateDeviceCommand() *cobra.Command {
 func runUpdateDeviceCommand(cmd *cobra.Command, args []string) error {
 	id := args[0]
 
-	conn, err := getConnection(cmd)
+	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return nil
 	}
@@ -366,7 +367,7 @@ func getRemoveDeviceCommand() *cobra.Command {
 func runRemoveDeviceCommand(cmd *cobra.Command, args []string) error {
 	id := args[0]
 
-	conn, err := getConnection(cmd)
+	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return err
 	}
@@ -411,7 +412,7 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
-	conn, err := getConnection(cmd)
+	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return err
 	}
