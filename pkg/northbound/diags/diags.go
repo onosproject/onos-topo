@@ -16,8 +16,8 @@
 package diags
 
 import (
+	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/api/diags"
-	"github.com/onosproject/onos-topo/pkg/northbound"
 	"google.golang.org/grpc"
 )
 

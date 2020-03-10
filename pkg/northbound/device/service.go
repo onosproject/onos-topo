@@ -20,8 +20,8 @@ import (
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
+	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
-	"github.com/onosproject/onos-topo/pkg/northbound"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
