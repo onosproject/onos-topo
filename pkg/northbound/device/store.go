@@ -19,20 +19,20 @@ import (
 	"github.com/atomix/go-client/pkg/client/map"
 	"github.com/atomix/go-client/pkg/client/primitive"
 	"github.com/gogo/protobuf/proto"
+	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
-	"github.com/onosproject/onos-topo/pkg/util"
 	"io"
 	"time"
 )
 
 // NewAtomixStore returns a new persistent Store
 func NewAtomixStore() (Store, error) {
-	client, err := util.GetAtomixClient()
+	client, err := atomix.GetAtomixClient()
 	if err != nil {
 		return nil, err
 	}
 
-	group, err := client.GetDatabase(context.Background(), util.GetAtomixRaftGroup())
+	group, err := client.GetDatabase(context.Background(), atomix.GetAtomixRaftGroup())
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func NewAtomixStore() (Store, error) {
 
 // NewLocalStore returns a new local device store
 func NewLocalStore() (Store, error) {
-	node, address := util.StartLocalNode()
+	node, address := atomix.StartLocalNode()
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "devices",
