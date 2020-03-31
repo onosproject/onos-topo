@@ -56,18 +56,13 @@ onos-topo-debug-docker: onos-topo-base-docker # @HELP build onos-topo Docker deb
 		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
 		-t onosproject/onos-topo:${ONOS_TOPO_DEBUG_VERSION}
 
-onos-topo-tests-docker: # @HELP build onos-topo tests Docker image
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o build/onos-topo-tests/_output/bin/onos-topo-tests ./cmd/onos-topo-tests
-	docker build . -f build/onos-topo-tests/Dockerfile -t onosproject/onos-topo-tests:${ONOS_TOPO_VERSION}
-
 images: # @HELP build all Docker images
-images: build onos-topo-docker onos-topo-debug-docker onos-topo-tests-docker
+images: build onos-topo-docker onos-topo-debug-docker
 
 kind: # @HELP build Docker images and add them to the currently configured kind cluster
 kind: images
 	@if [ "`kind get clusters`" = '' ]; then echo "no kind cluster found" && exit 1; fi
 	kind load docker-image onosproject/onos-topo:${ONOS_TOPO_VERSION}
-	kind load docker-image onosproject/onos-topo-tests:${ONOS_TOPO_VERSION}
 
 all: build images
 
