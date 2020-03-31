@@ -15,8 +15,8 @@
 package main
 
 import (
-	"github.com/onosproject/onos-test/pkg/registry"
-	"github.com/onosproject/onos-test/pkg/test"
+	"github.com/onosproject/helmit/pkg/registry"
+	"github.com/onosproject/helmit/pkg/test"
 	"github.com/onosproject/onos-topo/test/topo"
 )
 

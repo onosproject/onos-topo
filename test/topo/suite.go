@@ -15,8 +15,8 @@
 package topo
 
 import (
-	"github.com/onosproject/onos-test/pkg/onit/setup"
-	"github.com/onosproject/onos-test/pkg/test"
+	"github.com/onosproject/helmit/pkg/helm"
+	"github.com/onosproject/helmit/pkg/test"
 )
 
 type testSuite struct {
@@ -29,9 +29,21 @@ type TestSuite struct {
 }
 
 // SetupTestSuite sets up the onos-topo test suite
-func (s *TestSuite) SetupTestSuite() {
-	setup.Atomix()
-	setup.Database().Raft()
-	setup.Topo().SetReplicas(2)
-	setup.SetupOrDie()
+func (s *TestSuite) SetupTestSuite() error {
+	err := helm.Chart("atomix-controller").
+		Release("atomix-controller").
+		Set("scope", "Namespace").
+		Install(true)
+	if err != nil {
+		return err
+	}
+
+	err = helm.Chart("onos-topo").
+		Release("onos-topo").
+		Set("store.controller", "atomix-controller:5679").
+		Install(true)
+	if err != nil {
+		return err
+	}
+	return nil
 }
