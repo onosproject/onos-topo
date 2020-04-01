@@ -21,23 +21,24 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	deviceapi "github.com/onosproject/onos-topo/api/device"
+	"github.com/onosproject/onos-topo/pkg/config"
 	"io"
 	"time"
 )
 
 // NewAtomixStore returns a new persistent Store
 func NewAtomixStore() (Store, error) {
-	client, err := atomix.GetAtomixClient()
+	ricConfig, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	group, err := client.GetDatabase(context.Background(), atomix.GetAtomixRaftGroup())
+	database, err := atomix.GetDatabase(ricConfig.Atomix, ricConfig.Atomix.GetDatabase(atomix.DatabaseTypeConsensus))
 	if err != nil {
 		return nil, err
 	}
 
-	devices, err := group.GetMap(context.Background(), "devices")
+	devices, err := database.GetMap(context.Background(), "devices")
 	if err != nil {
 		return nil, err
 	}
