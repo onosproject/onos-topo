@@ -15,16 +15,19 @@
 package cli
 
 import (
+	clilib "github.com/onosproject/onos-lib-go/pkg/cli"
 	loglib "github.com/onosproject/onos-lib-go/pkg/logging/cli"
 	"github.com/spf13/cobra"
-	viperapi "github.com/spf13/viper"
 )
 
-var viper = viperapi.New()
+const (
+	configName     = "topo"
+	defaultAddress = "onos-topo:5150"
+)
 
 // init initializes the command line
 func init() {
-	initConfig()
+	clilib.InitConfig(configName)
 }
 
 // Init is a hook called after cobra initialization
@@ -39,9 +42,9 @@ func GetCommand() *cobra.Command {
 		Short: "ONOS topology subsystem commands",
 	}
 
-	addConfigFlags(cmd)
+	clilib.AddConfigFlags(cmd, defaultAddress)
 
-	cmd.AddCommand(getConfigCommand())
+	cmd.AddCommand(clilib.GetConfigCommand())
 	cmd.AddCommand(getGetCommand())
 	cmd.AddCommand(getAddCommand())
 	cmd.AddCommand(getUpdateCommand())

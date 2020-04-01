@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -49,7 +50,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	defer conn.Close()
-	outputWriter := GetOutput()
+	outputWriter := cli.GetOutput()
 
 	client := device.CreateDeviceServiceClient(conn)
 
@@ -58,7 +59,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
 		stream, err := client.List(ctx, &device.ListRequest{})
 		if err != nil {
-			log.Error("list error ", err)
+			cli.Output("list error")
 			return err
 		}
 		writer := new(tabwriter.Writer)
@@ -66,9 +67,9 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 
 		if !noHeaders {
 			if verbose {
-				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tSTATE\tUSER\tPASSWORD\tATTRIBUTES")
+				_, _ = fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tTYPE\tSTATE\tUSER\tPASSWORD\tATTRIBUTES")
 			} else {
-				fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tSTATE")
+				_, _ = fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tTYPE\tSTATE")
 			}
 		}
 
@@ -77,7 +78,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 			if err == io.EOF {
 				break
 			} else if err != nil {
-				log.Error("rcv error ", err)
+				cli.Output("recv error")
 				return err
 			}
 
@@ -91,19 +92,19 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 					attributesBuf.WriteString(attribute)
 					attributesBuf.WriteString(", ")
 				}
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, state,
-					dev.Credentials.User, dev.Credentials.Password, attributesBuf.String()))
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Address, dev.Version, dev.Type,
+					state, dev.Credentials.User, dev.Credentials.Password, attributesBuf.String())
 			} else {
-				fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", dev.ID, dev.Address, dev.Version, state))
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Address, dev.Version, dev.Type, state)
 			}
 		}
-		writer.Flush()
+		return writer.Flush()
 	} else {
 		response, err := client.Get(ctx, &device.GetRequest{
 			ID: device.ID(args[0]),
 		})
 		if err != nil {
-			log.Error("get error ", err)
+			cli.Output("get error")
 			return err
 		}
 
@@ -112,17 +113,20 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 		writer := new(tabwriter.Writer)
 		writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 		state := stateString(dev)
-		fmt.Fprintln(writer, fmt.Sprintf("ID\t%s", dev.ID))
-		fmt.Fprintln(writer, fmt.Sprintf("ADDRESS\t%s", dev.Address))
-		fmt.Fprintln(writer, fmt.Sprintf("VERSION\t%s", dev.Version))
-		fmt.Fprintln(writer, fmt.Sprintf("STATE\t%s", state))
+		_, _ = fmt.Fprintf(writer, "ID\t%s\n", dev.ID)
+		_, _ = fmt.Fprintf(writer, "ADDRESS\t%s\n", dev.Address)
+		_, _ = fmt.Fprintf(writer, "VERSION\t%s\n", dev.Version)
+		_, _ = fmt.Fprintf(writer, "TYPE\t%s\n", dev.Type)
+		_, _ = fmt.Fprintf(writer, "STATE\t%s\n", state)
 		if verbose {
-			fmt.Fprintln(writer, fmt.Sprintf("USER\t%s", dev.Credentials.User))
-			fmt.Fprintln(writer, fmt.Sprintf("PASSWORD\t%s", dev.Credentials.Password))
+			_, _ = fmt.Fprintf(writer, "USER\t%s\n", dev.Credentials.User)
+			_, _ = fmt.Fprintf(writer, "PASSWORD\t%s\n", dev.Credentials.Password)
+			for key, attribute := range dev.Attributes {
+				_, _ = fmt.Fprintf(writer, "%s\t%s\n", strings.ToUpper(key), attribute)
+			}
 		}
-		writer.Flush()
+		return writer.Flush()
 	}
-	return nil
 }
 
 func stateString(dev *device.Device) string {
@@ -232,7 +236,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	Output("Added device %s \n", id)
+	cli.Output("Added device %s \n", id)
 	return nil
 }
 
@@ -350,7 +354,7 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	Output("Updated device %s", id)
+	cli.Output("Updated device %s", id)
 	return nil
 }
 
@@ -386,7 +390,7 @@ func runRemoveDeviceCommand(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	Output("Removed device %s", id)
+	cli.Output("Removed device %s", id)
 	return nil
 }
 
@@ -428,15 +432,15 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	writer := new(tabwriter.Writer)
-	writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
+	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
 
 	if !noHeaders {
 		if verbose {
-			fmt.Fprintln(writer, "EVENT\tID\tADDRESS\tVERSION\tUSER\tPASSWORD")
+			_, _ = fmt.Fprintln(writer, "EVENT\tID\tADDRESS\tVERSION\tUSER\tPASSWORD")
 		} else {
-			fmt.Fprintln(writer, "EVENT\tID\tADDRESS\tVERSION")
+			_, _ = fmt.Fprintln(writer, "EVENT\tID\tADDRESS\tVERSION")
 		}
-		writer.Flush()
+		_ = writer.Flush()
 	}
 
 	for {
@@ -453,10 +457,10 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		if verbose {
-			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password))
+			_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n", response.Type, dev.ID, dev.Address, dev.Version, dev.Credentials.User, dev.Credentials.Password)
 		} else {
-			fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t%s", response.Type, dev.ID, dev.Address, dev.Version))
+			_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\n", response.Type, dev.ID, dev.Address, dev.Version)
 		}
-		writer.Flush()
+		_ = writer.Flush()
 	}
 }
