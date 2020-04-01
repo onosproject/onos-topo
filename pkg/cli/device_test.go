@@ -18,6 +18,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-topo/api/device"
 	"gotest.tools/assert"
 	"strings"
@@ -53,7 +54,7 @@ func generateDeviceData(count int) []*device.Device {
 
 func Test_GetDevice(t *testing.T) {
 	outputBuffer := bytes.NewBufferString("")
-	CaptureOutput(outputBuffer)
+	cli.CaptureOutput(outputBuffer)
 
 	setUpMockClients()
 	getDevices := getGetDeviceCommand()
@@ -68,7 +69,7 @@ func Test_GetDevice(t *testing.T) {
 
 func Test_AddDevice(t *testing.T) {
 	outputBuffer := bytes.NewBufferString("")
-	CaptureOutput(outputBuffer)
+	cli.CaptureOutput(outputBuffer)
 
 	setUpMockClients()
 	addDevice := getAddDeviceCommand()
@@ -89,7 +90,7 @@ func Test_AddDevice(t *testing.T) {
 
 func Test_UpdateDevice(t *testing.T) {
 	outputBuffer := bytes.NewBufferString("")
-	CaptureOutput(outputBuffer)
+	cli.CaptureOutput(outputBuffer)
 
 	setUpMockClients()
 	updateDevice := getUpdateDeviceCommand()
@@ -110,7 +111,7 @@ func Test_UpdateDevice(t *testing.T) {
 
 func Test_RemoveDevice(t *testing.T) {
 	outputBuffer := bytes.NewBufferString("")
-	CaptureOutput(outputBuffer)
+	cli.CaptureOutput(outputBuffer)
 
 	setUpMockClients()
 	removeDevice := getRemoveDeviceCommand()
