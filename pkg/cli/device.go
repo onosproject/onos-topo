@@ -51,6 +51,8 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 	}
 	defer conn.Close()
 	outputWriter := cli.GetOutput()
+	writer := new(tabwriter.Writer)
+	writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 
 	client := device.CreateDeviceServiceClient(conn)
 
@@ -62,8 +64,6 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 			cli.Output("list error")
 			return err
 		}
-		writer := new(tabwriter.Writer)
-		writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 
 		if !noHeaders {
 			if verbose {
@@ -98,7 +98,6 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Address, dev.Version, dev.Type, state)
 			}
 		}
-		return writer.Flush()
 	} else {
 		response, err := client.Get(ctx, &device.GetRequest{
 			ID: device.ID(args[0]),
@@ -110,8 +109,6 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 
 		dev := response.Device
 
-		writer := new(tabwriter.Writer)
-		writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
 		state := stateString(dev)
 		_, _ = fmt.Fprintf(writer, "ID\t%s\n", dev.ID)
 		_, _ = fmt.Fprintf(writer, "ADDRESS\t%s\n", dev.Address)
@@ -125,8 +122,8 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 				_, _ = fmt.Fprintf(writer, "%s\t%s\n", strings.ToUpper(key), attribute)
 			}
 		}
-		return writer.Flush()
 	}
+	return writer.Flush()
 }
 
 func stateString(dev *device.Device) string {
