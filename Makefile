@@ -4,13 +4,11 @@ export GO111MODULE=on
 .PHONY: build
 
 ONOS_TOPO_VERSION := latest
-ONOS_TOPO_DEBUG_VERSION := debug
 ONOS_BUILD_VERSION := stable
 
 build: # @HELP build the Go binaries and run all validations (default)
 build:
 	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos-topo
-	CGO_ENABLED=1 go build -gcflags "all=-N -l" -o build/_output/onos-topo-debug ./cmd/onos-topo
 
 test: # @HELP run the unit tests and source code validation
 test: build deps license_check linters
@@ -51,13 +49,8 @@ onos-topo-docker: onos-topo-base-docker # @HELP build onos-topo Docker image
 		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
 		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
 
-onos-topo-debug-docker: onos-topo-base-docker # @HELP build onos-topo Docker debug image
-	docker build . -f build/onos-topo-debug/Dockerfile \
-		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
-		-t onosproject/onos-topo:${ONOS_TOPO_DEBUG_VERSION}
-
 images: # @HELP build all Docker images
-images: build onos-topo-docker onos-topo-debug-docker
+images: build onos-topo-docker
 
 kind: # @HELP build Docker images and add them to the currently configured kind cluster
 kind: images
