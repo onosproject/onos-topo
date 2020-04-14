@@ -4,7 +4,8 @@ export GO111MODULE=on
 .PHONY: build
 
 ONOS_TOPO_VERSION := latest
-ONOS_BUILD_VERSION := stable
+ONOS_BUILD_VERSION := v0.5.0
+ONOS_PROTOC_VERSION := v0.5.0
 
 build: # @HELP build the Go binaries and run all validations (default)
 build:
@@ -35,7 +36,7 @@ protos: # @HELP compile the protobuf files (using protoc-go Docker)
 	docker run -it -v `pwd`:/go/src/github.com/onosproject/onos-topo \
 		-w /go/src/github.com/onosproject/onos-topo \
 		--entrypoint build/bin/compile-protos.sh \
-		onosproject/protoc-go:stable
+		onosproject/protoc-go:${ONOS_PROTOC_VERSION}
 
 onos-topo-base-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
