@@ -20,7 +20,7 @@ import (
 	"github.com/onosproject/onos-topo/api/admin"
 	"google.golang.org/grpc"
 )
-
+X
 // Service is a Service implementation for administration.
 type Service struct {
 	northbound.Service
