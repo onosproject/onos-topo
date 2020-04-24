@@ -41,7 +41,7 @@ func (s *TestSuite) SetupTestSuite() error {
 	err = helm.Chart("raft-storage-controller", "https://charts.atomix.io").
 		Release("onos-topo-raft").
 		Set("scope", "Namespace").
-	    Install(true)
+		Install(true)
 	if err != nil {
 		return err
 	}
