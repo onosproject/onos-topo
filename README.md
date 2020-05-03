@@ -5,4 +5,4 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gojp/goreportcard/blob/master/LICENSE)
 [![GoDoc](https://godoc.org/github.com/onosproject/onos-topo?status.svg)](https://godoc.org/github.com/onosproject/onos-topo)
 
-Topology subsystem for ONOS (µONOS Architecture)
+Topology subsystem for ONOS (µONOS Architecture) 
