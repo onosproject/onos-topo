@@ -60,3 +60,12 @@ func getWatchCommand() *cobra.Command {
 	cmd.AddCommand(getWatchDeviceCommand())
 	return cmd
 }
+
+func getLoadCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "load {topofile}",
+		Short: "Bulk load topo data from a file",
+	}
+	cmd.AddCommand(getLoadYamlCommand())
+	return cmd
+}

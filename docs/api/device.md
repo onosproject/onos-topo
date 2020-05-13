@@ -26,10 +26,8 @@
     - [Protocol](#topo.device.Protocol)
     - [ServiceState](#topo.device.ServiceState)
   
-  
     - [DeviceService](#topo.device.DeviceService)
   
-
 - [Scalar Value Types](#scalar-value-types)
 
 
@@ -107,6 +105,7 @@ Device contains information about a device
 | role | [string](#string) |  | role is a role for the device |
 | attributes | [Device.AttributesEntry](#topo.device.Device.AttributesEntry) | repeated | attributes is an arbitrary mapping of attribute keys/values |
 | protocols | [ProtocolState](#topo.device.ProtocolState) | repeated |  |
+| displayname | [string](#string) |  | displayname is a user friendly tag |
 
 
 

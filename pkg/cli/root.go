@@ -50,6 +50,7 @@ func GetCommand() *cobra.Command {
 	cmd.AddCommand(getUpdateCommand())
 	cmd.AddCommand(getRemoveCommand())
 	cmd.AddCommand(getWatchCommand())
+	cmd.AddCommand(getLoadCommand())
 	cmd.AddCommand(loglib.GetCommand())
 	return cmd
 }

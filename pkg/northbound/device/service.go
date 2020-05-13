@@ -37,6 +37,8 @@ const (
 	deviceNamePattern    = `^[a-zA-Z0-9\-:_]{4,40}$`
 	deviceAddressPattern = `^[a-zA-Z0-9\-_\.]+:[0-9]+$`
 	deviceVersionPattern = `^(\d+(\.\d+){2,3})$`
+	deviceAttrKeyPattern = `^[a-zA-Z0-9\-_\.]{1,40}$`
+	displayNameMaxLength = 80
 )
 
 // NewService returns a new device Service
@@ -79,8 +81,8 @@ func CreateDeviceServiceClient(cc *grpc.ClientConn) deviceapi.DeviceServiceClien
 	return DeviceServiceClientFactory(cc)
 }
 
-// validateDevice validates the given device
-func validateDevice(device *deviceapi.Device) error {
+// ValidateDevice validates the given device
+func ValidateDevice(device *deviceapi.Device) error {
 	nameRegex := regexp.MustCompile(deviceNamePattern)
 	if device.ID == "" {
 		return status.Error(codes.InvalidArgument, "device ID is required")
@@ -112,6 +114,20 @@ func validateDevice(device *deviceapi.Device) error {
 		return status.Errorf(codes.InvalidArgument, "device version '%s' is invalid", device.Version)
 	}
 
+	if len(device.Displayname) > displayNameMaxLength {
+		return status.Errorf(codes.InvalidArgument,
+			"device displayname '%s' is too long. (>%d)", device.Displayname, displayNameMaxLength)
+	}
+
+	attrKeyRegex := regexp.MustCompile(deviceAttrKeyPattern)
+	if device.Attributes != nil {
+		for key := range device.Attributes {
+			if !attrKeyRegex.MatchString(key) {
+				return status.Errorf(codes.InvalidArgument, "attribute name '%s' is invalid", key)
+			}
+		}
+	}
+
 	if device.Timeout == nil {
 		timeout := defaultTimeout
 		device.Timeout = &timeout
@@ -126,7 +142,7 @@ func (s *Server) Add(ctx context.Context, request *deviceapi.AddRequest) (*devic
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision > 0 {
 		return nil, status.Error(codes.InvalidArgument, "device revision is already set")
-	} else if err := validateDevice(device); err != nil {
+	} else if err := ValidateDevice(device); err != nil {
 		return nil, err
 	}
 	if err := s.deviceStore.Store(device); err != nil {
@@ -144,7 +160,7 @@ func (s *Server) Update(ctx context.Context, request *deviceapi.UpdateRequest) (
 		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	} else if device.Revision == 0 {
 		return nil, status.Error(codes.InvalidArgument, "device revision not set")
-	} else if err := validateDevice(device); err != nil {
+	} else if err := ValidateDevice(device); err != nil {
 		return nil, err
 	}
 	if err := s.deviceStore.Store(device); err != nil {

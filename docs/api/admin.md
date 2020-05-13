@@ -4,12 +4,8 @@
 ## Table of Contents
 
 - [api/admin/admin.proto](#api/admin/admin.proto)
-  
-  
-  
     - [TopoAdminService](#topo.admin.TopoAdminService)
   
-
 - [Scalar Value Types](#scalar-value-types)
 
 
