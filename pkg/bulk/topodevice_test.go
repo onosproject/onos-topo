@@ -22,10 +22,10 @@ import (
 func Test_LoadConfig1(t *testing.T) {
 	deviceConfig = nil
 	config, err := GetDeviceConfig("topo-load-example.yaml")
-	assert.NilError(t, err, "Unexpected error loading towerConfig")
-	assert.Equal(t, 2, len(config.Devices), "Unexpected number of towers")
+	assert.NilError(t, err, "Unexpected error loading topo devices")
+	assert.Equal(t, 2, len(config.TopoDevices), "Unexpected number of topo devices")
 
-	tower1 := config.Devices[0]
+	tower1 := config.TopoDevices[0]
 	assert.Equal(t, "315010-0001420", string(tower1.ID))
 	assert.Equal(t, 6, len(tower1.Attributes))
 }

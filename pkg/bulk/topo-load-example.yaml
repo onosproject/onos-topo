@@ -1,4 +1,4 @@
-devices:
+topodevices:
   - id: "315010-0001420"
     displayname: "Tower-1 Cell-1"
     address: "ran-simulator:5152"

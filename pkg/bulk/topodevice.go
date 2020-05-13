@@ -25,7 +25,7 @@ var deviceConfig *DeviceConfig
 
 // DeviceConfig - a wrapper around multiple devices
 type DeviceConfig struct {
-	Devices []device.Device
+	TopoDevices []device.Device
 }
 
 // Clear - reset the config - needed for tests
@@ -49,11 +49,11 @@ func GetDeviceConfig(location string) (DeviceConfig, error) {
 
 // Checker - check everything is within bounds
 func Checker(config *DeviceConfig) error {
-	if len(config.Devices) == 0 {
+	if len(config.TopoDevices) == 0 {
 		return fmt.Errorf("no devices found")
 	}
 
-	for _, dev := range config.Devices {
+	for _, dev := range config.TopoDevices {
 		dev := dev // pin
 		err := deviceservice.ValidateDevice(&dev)
 		if err != nil {

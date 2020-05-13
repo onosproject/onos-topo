@@ -38,7 +38,7 @@ onos topo load yaml topo-load-example.yaml --attr createdby="bulk loader"
 
 YAML files are expected to be in the format
 ```yaml
-devices:
+topodevices:
   - id: "315010-0001420"
     displayname: "Tower-1 Cell-1"
     address: "ran-simulator:5152"

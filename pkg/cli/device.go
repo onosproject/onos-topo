@@ -515,7 +515,7 @@ func runLoadYamlCommand(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	for _, dev := range deviceConfig.Devices {
+	for _, dev := range deviceConfig.TopoDevices {
 		if dev.Attributes == nil {
 			dev.Attributes = make(map[string]string)
 		}
@@ -536,7 +536,7 @@ func runLoadYamlCommand(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Printf("Loaded %d topo devices from %s\n", len(deviceConfig.Devices), filename)
+	fmt.Printf("Loaded %d topo devices from %s\n", len(deviceConfig.TopoDevices), filename)
 
 	return nil
 }
