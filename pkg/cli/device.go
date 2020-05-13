@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/onosproject/onos-topo/pkg/bulk"
 	"io"
 	"strings"
 	"text/tabwriter"
@@ -67,9 +68,9 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 
 		if !noHeaders {
 			if verbose {
-				_, _ = fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tTYPE\tSTATE\tUSER\tPASSWORD\tATTRIBUTES")
+				_, _ = fmt.Fprintln(writer, "ID\tDISPLAYNAME\tADDRESS\tVERSION\tTYPE\tSTATE\tUSER\tPASSWORD\tATTRIBUTES")
 			} else {
-				_, _ = fmt.Fprintln(writer, "ID\tADDRESS\tVERSION\tTYPE\tSTATE")
+				_, _ = fmt.Fprintln(writer, "ID\tDISPLAYNAME\tADDRESS\tVERSION\tTYPE\tSTATE")
 			}
 		}
 
@@ -92,10 +93,10 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 					attributesBuf.WriteString(attribute)
 					attributesBuf.WriteString(", ")
 				}
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Address, dev.Version, dev.Type,
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Displayname, dev.Address, dev.Version, dev.Type,
 					state, dev.Credentials.User, dev.Credentials.Password, attributesBuf.String())
 			} else {
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Address, dev.Version, dev.Type, state)
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n", dev.ID, dev.Displayname, dev.Address, dev.Version, dev.Type, state)
 			}
 		}
 	} else {
@@ -111,6 +112,7 @@ func runGetDeviceCommand(cmd *cobra.Command, args []string) error {
 
 		state := stateString(dev)
 		_, _ = fmt.Fprintf(writer, "ID\t%s\n", dev.ID)
+		_, _ = fmt.Fprintf(writer, "DisplayName\t%s\n", dev.Displayname)
 		_, _ = fmt.Fprintf(writer, "ADDRESS\t%s\n", dev.Address)
 		_, _ = fmt.Fprintf(writer, "VERSION\t%s\n", dev.Version)
 		_, _ = fmt.Fprintf(writer, "TYPE\t%s\n", dev.Type)
@@ -159,6 +161,7 @@ func getAddDeviceCommand() *cobra.Command {
 	cmd.Flags().StringP("user", "u", "", "the device username")
 	cmd.Flags().StringP("password", "p", "", "the device password")
 	cmd.Flags().StringP("version", "v", "", "the device software version")
+	cmd.Flags().StringP("displayname", "d", "", "A user friendly display name")
 	cmd.Flags().String("key", "", "the TLS key")
 	cmd.Flags().String("cert", "", "the TLS certificate")
 	cmd.Flags().String("ca-cert", "", "the TLS CA certificate")
@@ -181,6 +184,7 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) error {
 	user, _ := cmd.Flags().GetString("user")
 	password, _ := cmd.Flags().GetString("password")
 	version, _ := cmd.Flags().GetString("version")
+	displayName, _ := cmd.Flags().GetString("displayname")
 	key, _ := cmd.Flags().GetString("key")
 	cert, _ := cmd.Flags().GetString("cert")
 	caCert, _ := cmd.Flags().GetString("ca-cert")
@@ -203,13 +207,14 @@ func runAddDeviceCommand(cmd *cobra.Command, args []string) error {
 	client := device.CreateDeviceServiceClient(conn)
 
 	dev := &device.Device{
-		ID:      device.ID(id),
-		Type:    device.Type(deviceType),
-		Role:    device.Role(deviceRole),
-		Address: address,
-		Target:  deviceTarget,
-		Version: version,
-		Timeout: &timeout,
+		ID:          device.ID(id),
+		Type:        device.Type(deviceType),
+		Role:        device.Role(deviceRole),
+		Address:     address,
+		Target:      deviceTarget,
+		Version:     version,
+		Displayname: displayName,
+		Timeout:     &timeout,
 		Credentials: device.Credentials{
 			User:     user,
 			Password: password,
@@ -252,6 +257,7 @@ func getUpdateDeviceCommand() *cobra.Command {
 	cmd.Flags().StringP("user", "u", "", "the device username")
 	cmd.Flags().StringP("password", "p", "", "the device password")
 	cmd.Flags().StringP("version", "v", "", "the device software version")
+	cmd.Flags().StringP("displayname", "d", "", "A user friendly display name")
 	cmd.Flags().String("key", "", "the TLS key")
 	cmd.Flags().String("cert", "", "the TLS certificate")
 	cmd.Flags().String("ca-cert", "", "the TLS CA certificate")
@@ -312,6 +318,10 @@ func runUpdateDeviceCommand(cmd *cobra.Command, args []string) error {
 	if cmd.Flags().Changed("version") {
 		version, _ := cmd.Flags().GetString("version")
 		dvc.Version = version
+	}
+	if cmd.Flags().Changed("displayname") {
+		displayName, _ := cmd.Flags().GetString("displayname")
+		dvc.Displayname = displayName
 	}
 	if cmd.Flags().Changed("key") {
 		key, _ := cmd.Flags().GetString("key")
@@ -460,4 +470,73 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 		}
 		_ = writer.Flush()
 	}
+}
+
+func getLoadYamlCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "yaml {file}",
+		Args:  cobra.ExactArgs(1),
+		Short: "Load topo data from a YAML file",
+		RunE:  runLoadYamlCommand,
+	}
+	cmd.Flags().StringArray("attr", []string{""}, "Extra attributes to add to each device in k=v format")
+	return cmd
+}
+
+func runLoadYamlCommand(cmd *cobra.Command, args []string) error {
+	var filename string
+	if len(args) > 0 {
+		filename = args[0]
+	}
+
+	extraAttrs, err := cmd.Flags().GetStringArray("attr")
+	if err != nil {
+		return err
+	}
+	for _, x := range extraAttrs {
+		split := strings.Split(x, "=")
+		if len(split) != 2 {
+			return fmt.Errorf("expect extra args to be in the format a=b. Rejected: %s", x)
+		}
+	}
+
+	deviceConfig, err := bulk.GetDeviceConfig(filename)
+	if err != nil {
+		return err
+	}
+
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	client := device.CreateDeviceServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	for _, dev := range deviceConfig.Devices {
+		if dev.Attributes == nil {
+			dev.Attributes = make(map[string]string)
+		}
+		for _, x := range extraAttrs {
+			split := strings.Split(x, "=")
+			dev.Attributes[split[0]] = split[1]
+		}
+
+		dev := dev // pin
+		resp, err := client.Add(ctx, &device.AddRequest{
+			Device: &dev,
+		})
+		if err != nil {
+			return err
+		}
+		if resp.Device.ID != dev.ID {
+			return fmt.Errorf("error loading %s in to topo", dev.ID)
+		}
+	}
+
+	fmt.Printf("Loaded %d topo devices from %s\n", len(deviceConfig.Devices), filename)
+
+	return nil
 }

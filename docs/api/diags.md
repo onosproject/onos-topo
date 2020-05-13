@@ -4,12 +4,8 @@
 ## Table of Contents
 
 - [api/diags/diags.proto](#api/diags/diags.proto)
-  
-  
-  
     - [TopoDiags](#topo.diags.TopoDiags)
   
-
 - [Scalar Value Types](#scalar-value-types)
 
 

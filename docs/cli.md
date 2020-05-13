@@ -29,6 +29,26 @@ as follows:
 Subsequent usages of the `onos` command can then abstain from using the `--address` 
 option to indicate the server address, resulting in easier usage.
 
+## Adding devices in bulk
+The CLI command `onos topo load yaml` allows several devices to be loaded at once
+from a YAML file. e.g.
+```bash
+onos topo load yaml topo-load-example.yaml --attr createdby="bulk loader"
+```
+
+YAML files are expected to be in the format
+```yaml
+devices:
+  - id: "315010-0001420"
+    displayname: "Tower-1 Cell-1"
+    address: "ran-simulator:5152"
+    type: "E2Node"
+    version: "1.0.0"
+    attributes:
+      azimuth: 0
+      arc: 120
+```
+
 ## Example Commands
 
 ### Adding, Removing and Listing Devices
@@ -57,20 +77,9 @@ Removed device device-2
 If you do not specify any options, the command will list all the devices currently in the inventory:
 ```bash
 > onos topo get devices -v
-NAME			ADDRESS			VERSION
-localhost-3             localhost:10163         1.0.0
-	USER		PASSWORD	TIMEOUT	PLAIN	INSECURE
-	                                5       false	false
-
-stratum-sim-1           localhost:50001         1.0.0
-	USER		PASSWORD	TIMEOUT	PLAIN	INSECURE
-	                                5       true	false
-
-localhost-1             localhost:10161         1.0.0
-	USER		PASSWORD	TIMEOUT	PLAIN	INSECURE
-	devicesim       notused         5       false	false
-
-localhost-2             localhost:10162         1.0.0
-	USER		PASSWORD	TIMEOUT	PLAIN	INSECURE
-	                                5       false	false
+ID               DISPLAYNAME           ADDRESS              VERSION   TYPE        STATE   USER           PASSWORD   ATTRIBUTES
+localhost-3      Local device 1        localhost:10163      1.0.0     TestDevice                                    createdby: test
+stratum-sim-1    Stratum simulator 1   localhost:50001      1.0.0     Stratum
+localhost-1      Local 1               localhost:10161      1.0.0     TestDevice          devicesim      notused
+localhost-2      Local 2               localhost:10162      1.0.0     TestDevice
 ```

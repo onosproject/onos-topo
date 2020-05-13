@@ -199,6 +199,9 @@ message Device {
     map<string, string> attributes = 11;
 
     repeated ProtocolState protocols = 12;
+
+    // displayname is a user friendly tag
+    string displayname = 13;
 }
 
 // Credentials is the device credentials
