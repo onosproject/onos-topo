@@ -23,10 +23,6 @@ before_script:
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.7
   - pushd .. && git clone https://github.com/onosproject/build-tools.git && popd
 
-before_install:
-  - if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]] ; then openssl aes-256-cbc -K $encrypted_83d143b79455_key -iv $encrypted_83d143b79455_iv -in .ssh/id_rsa.enc -out ~/.ssh/id_rsa -d && chmod 600 ~/.ssh/id_rsa; fi
-
-
 jobs:
   include:
     - stage: tests
