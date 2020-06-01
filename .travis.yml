@@ -32,7 +32,7 @@ jobs:
       script:
         - make test
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./build/bin/push-images; fi'
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git remote add upstream https://github.com/onosproject/onos-topo.git && bash -x ../build-tools/release-merge-commit; fi'
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then git remote add upstream https://github.com/onosproject/onos-topo.git && git remote set-url origin git@github.com:onosproject/onos-topo.git && bash -x ../build-tools/release-merge-commit; fi'
     - stage: integration tests
       if: type != pull_request
       script:
