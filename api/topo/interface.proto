@@ -19,15 +19,10 @@ syntax = "proto3";
 // Package topo.interface defines the api for managing interfaces.
 package topo;
 
-import "google/protobuf/any.proto";
-
 message Interfaces {
     repeated Interface ifaces = 1;
 }
 
 // Interface contains information about a interface
 message Interface {
-    // device is the actual device type (e.g. E2 Node, RIC)
-    google.protobuf.Any iface = 14;
-
 }

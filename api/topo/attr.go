@@ -8,36 +8,32 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY etype, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package topo
 
 import "errors"
 
-// ID is an Entity ID
-type ID string
-
-// EntityType is an Entity type
-type EntityType string
+// AttrKind ...
+type AttrKind string
 
 const (
-	// EtE2Interface represent an E2 Interface
-	EtE2Interface EntityType = "ET_E2_INTERFACE"
+	// Role is the role of an entity
+	Role AttrKind = "AK_ROLE"
+	// Revision is the revision of an entity
+	Revision AttrKind = "AK_REVISION"
 )
 
-// IsEntityTypeValid validates Entity Type
-func (et EntityType) IsEntityTypeValid() error {
-	switch et {
-	case EtE2Interface:
+// AttrVal ...
+type AttrVal string
+
+// IsAttrKindValid validates Entity Type
+func (ak AttrKind) IsAttrKindValid() error {
+	switch ak {
+	case Role, Revision:
 		return nil
 	}
 	return errors.New("Inalid entity type")
 }
-
-// Role is an Entity role
-type Role string
-
-// Revision is the Entity revision number
-type Revision uint64

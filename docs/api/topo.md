@@ -14,20 +14,15 @@
     - [EndPoint](#topo.EndPoint)
   
 - [api/topo/entity.proto](#api/topo/entity.proto)
-    - [AddRequest](#topo.AddRequest)
-    - [AddResponse](#topo.AddResponse)
-    - [Entity](#topo.Entity)
-    - [Entity.ContainsEntry](#topo.Entity.ContainsEntry)
-    - [GetRequest](#topo.GetRequest)
-    - [GetResponse](#topo.GetResponse)
-    - [ListRequest](#topo.ListRequest)
-    - [ListResponse](#topo.ListResponse)
-    - [RemoveRequest](#topo.RemoveRequest)
-    - [RemoveResponse](#topo.RemoveResponse)
-    - [UpdateRequest](#topo.UpdateRequest)
-    - [UpdateResponse](#topo.UpdateResponse)
-  
-    - [ListResponse.Type](#topo.ListResponse.Type)
+    - [AddEntityReq](#topo.AddEntityReq)
+    - [AddEntityRespose](#topo.AddEntityRespose)
+    - [GetAttrReq](#topo.GetAttrReq)
+    - [GetAttrResp](#topo.GetAttrResp)
+    - [GetAttrResp.AttrEntry](#topo.GetAttrResp.AttrEntry)
+    - [RemoveEntityReq](#topo.RemoveEntityReq)
+    - [RemoveEntityResp](#topo.RemoveEntityResp)
+    - [UpdateEntityReq](#topo.UpdateEntityReq)
+    - [UpdateEntityResp](#topo.UpdateEntityResp)
   
     - [entityService](#topo.entityService)
   
@@ -147,56 +142,69 @@ EndPoint represents the endpoint of a link
 
 
 
-<a name="topo.AddRequest"></a>
+<a name="topo.AddEntityReq"></a>
 
-### AddRequest
-AddRequest adds a entity to the topology
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| entity | [Entity](#topo.Entity) |  | entity is the entity to add |
-
-
-
-
-
-
-<a name="topo.AddResponse"></a>
-
-### AddResponse
-AddResponse is sent in response to an AddEntityRequest
+### AddEntityReq
+AddEntityReq adds a entity to the topology
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| entity | [Entity](#topo.Entity) |  | entity is the entity with a revision number |
+| kind | [string](#string) |  |  |
+| id | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="topo.Entity"></a>
+<a name="topo.AddEntityRespose"></a>
 
-### Entity
-Entity represents &#34;things&#34; in a network topology like devices or links
+### AddEntityRespose
+AddEntityRespose is sent in response to an AddEntityReq
+
+
+
+
+
+
+<a name="topo.GetAttrReq"></a>
+
+### GetAttrReq
+GetAttrReq ...
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  | id is a globally unique entity identifier |
-| type | [string](#string) |  | type is the type of the entity |
-| contains | [Entity.ContainsEntry](#topo.Entity.ContainsEntry) | repeated |  |
+| kind | [string](#string) |  |  |
+| id | [string](#string) |  |  |
+| attrKind | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="topo.Entity.ContainsEntry"></a>
+<a name="topo.GetAttrResp"></a>
 
-### Entity.ContainsEntry
+### GetAttrResp
+GetAttrsResp carries a entity
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| kind | [string](#string) |  |  |
+| id | [string](#string) |  |  |
+| attr | [GetAttrResp.AttrEntry](#topo.GetAttrResp.AttrEntry) | repeated |  |
+
+
+
+
+
+
+<a name="topo.GetAttrResp.AttrEntry"></a>
+
+### GetAttrResp.AttrEntry
 
 
 
@@ -210,140 +218,58 @@ Entity represents &#34;things&#34; in a network topology like devices or links
 
 
 
-<a name="topo.GetRequest"></a>
+<a name="topo.RemoveEntityReq"></a>
 
-### GetRequest
-GetRequest gets a entity by ID
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  | id is the unique entity ID with which to lookup the entity |
-
-
-
-
-
-
-<a name="topo.GetResponse"></a>
-
-### GetResponse
-GetResponse carries a entity
+### RemoveEntityReq
+RemoveEntityReq removes a entity by ID
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| entity | [Entity](#topo.Entity) |  | entity is the entity object |
+| kind | [string](#string) |  |  |
+| id | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="topo.ListRequest"></a>
+<a name="topo.RemoveEntityResp"></a>
 
-### ListRequest
-ListRequest requests a stream of entities and changes
-By default, the request requests a stream of all entities that are present in the topology when
-the request is received by the service. However, if `subscribe` is `true`, the stream will remain
-open after all entities have been sent and events that occur following the last entity will be
-streamed to the client until the stream is closed.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| subscribe | [bool](#bool) |  | subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur after all entities have been streamed to the client |
+### RemoveEntityResp
+RemoveEntityResp is sent in response to a RemoveEntityReq
 
 
 
 
 
 
-<a name="topo.ListResponse"></a>
+<a name="topo.UpdateEntityReq"></a>
 
-### ListResponse
-ListResponse carries a single entity event
+### UpdateEntityReq
+UpdateEntityReq updates a entity
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [ListResponse.Type](#topo.ListResponse.Type) |  | type is the type of the event |
-| entity | [Entity](#topo.Entity) |  | entity is the entity on which the event occurred |
+| kind | [string](#string) |  |  |
+| id | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="topo.RemoveRequest"></a>
+<a name="topo.UpdateEntityResp"></a>
 
-### RemoveRequest
-RemoveRequest removes a entity by ID
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| entity | [Entity](#topo.Entity) |  | entity is the entity to remove |
-
-
-
-
-
-
-<a name="topo.RemoveResponse"></a>
-
-### RemoveResponse
-RemoveResponse is sent in response to a RemoveEntityRequest
-
-
-
-
-
-
-<a name="topo.UpdateRequest"></a>
-
-### UpdateRequest
-UpdateRequest updates a entity
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| entity | [Entity](#topo.Entity) |  | entity is the updated entity |
-
-
-
-
-
-
-<a name="topo.UpdateResponse"></a>
-
-### UpdateResponse
-UpdateResponse is sent in response to an UpdateEntityRequest
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| entity | [Entity](#topo.Entity) |  | entity is the entity with updated revision |
+### UpdateEntityResp
+UpdateEntityResp is sent in response to an UpdateEntityReq
 
 
 
 
 
  
-
-
-<a name="topo.ListResponse.Type"></a>
-
-### ListResponse.Type
-Entity event type
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| NONE | 0 | NONE indicates this response does not represent a state change |
-| ADDED | 1 | ADDED is an event which occurs when a entity is added to the topology |
-| UPDATED | 2 | UPDATED is an event which occurs when a entity is updated |
-| REMOVED | 3 | REMOVED is an event which occurs when a entity is removed from the topology |
-
 
  
 
@@ -357,11 +283,10 @@ EntityService provides an API for managing entities.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Add | [AddRequest](#topo.AddRequest) | [AddResponse](#topo.AddResponse) | Add adds a entity to the topology |
-| Update | [UpdateRequest](#topo.UpdateRequest) | [UpdateResponse](#topo.UpdateResponse) | Update updates a entity |
-| Get | [GetRequest](#topo.GetRequest) | [GetResponse](#topo.GetResponse) | Get gets a entity by ID |
-| List | [ListRequest](#topo.ListRequest) | [ListResponse](#topo.ListResponse) stream | List gets a stream of entity add/update/remove events |
-| Remove | [RemoveRequest](#topo.RemoveRequest) | [RemoveResponse](#topo.RemoveResponse) | Remove removes a entity from the topology |
+| Add | [AddEntityReq](#topo.AddEntityReq) | [AddEntityRespose](#topo.AddEntityRespose) | Add adds a entity to the topology |
+| Update | [UpdateEntityReq](#topo.UpdateEntityReq) | [UpdateEntityResp](#topo.UpdateEntityResp) | Update updates a entity |
+| GetAttr | [GetAttrReq](#topo.GetAttrReq) | [GetAttrResp](#topo.GetAttrResp) | Get gets a entity by ID |
+| RemoveEntity | [RemoveEntityReq](#topo.RemoveEntityReq) | [RemoveEntityResp](#topo.RemoveEntityResp) | Remove removes a entity from the topology |
 
  
 
@@ -378,11 +303,6 @@ EntityService provides an API for managing entities.
 
 ### Interface
 Interface contains information about a interface
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| iface | [google.protobuf.Any](#google.protobuf.Any) |  | device is the actual device type (e.g. E2 Node, RIC) |
 
 
 
