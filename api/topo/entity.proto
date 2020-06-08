@@ -1,0 +1,143 @@
+/*
+Copyright 2019-present Open Networking Foundation.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+syntax = "proto3";
+
+// Package topo defines interfaces for managing entities.
+package topo;
+
+import "gogoproto/gogo.proto";
+
+// Entity represents "things" in a network topology like devices or links
+message Entity {
+
+    // id is a globally unique entity identifier
+    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+
+    // type is the type of the entity
+    string type = 2 [(gogoproto.casttype) = "Type"];
+
+    map<string, string> contains = 14 [(gogoproto.castkey) = "Type", (gogoproto.castvalue) = "ID"];
+}
+
+// AddRequest adds a entity to the topology
+message AddRequest {
+    // entity is the entity to add
+    Entity entity = 1;
+}
+
+// AddResponse is sent in response to an AddEntityRequest
+message AddResponse {
+    // entity is the entity with a revision number
+    Entity entity = 1;
+}
+
+// UpdateRequest updates a entity
+message UpdateRequest {
+    // entity is the updated entity
+    Entity entity = 1;
+}
+
+// UpdateResponse is sent in response to an UpdateEntityRequest
+message UpdateResponse {
+    // entity is the entity with updated revision
+    Entity entity = 1;
+}
+
+// GetRequest gets a entity by ID
+message GetRequest {
+
+    // id is the unique entity ID with which to lookup the entity
+    string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+}
+
+// GetResponse carries a entity
+message GetResponse {
+    // entity is the entity object
+    Entity entity = 1;
+}
+
+// ListRequest requests a stream of entities and changes
+// By default, the request requests a stream of all entities that are present in the topology when
+// the request is received by the service. However, if `subscribe` is `true`, the stream will remain
+// open after all entities have been sent and events that occur following the last entity will be
+// streamed to the client until the stream is closed.
+message ListRequest {
+
+    // subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur
+    // after all entities have been streamed to the client
+    bool subscribe = 1;
+}
+
+// ListResponse carries a single entity event
+message ListResponse {
+
+    // type is the type of the event
+    Type type = 1;
+
+    // entity is the entity on which the event occurred
+    Entity entity = 2;
+
+    // Entity event type
+    enum Type {
+        // NONE indicates this response does not represent a state change
+        NONE = 0;
+
+        // ADDED is an event which occurs when a entity is added to the topology
+        ADDED = 1;
+
+        // UPDATED is an event which occurs when a entity is updated
+        UPDATED = 2;
+
+        // REMOVED is an event which occurs when a entity is removed from the topology
+        REMOVED = 3;
+    }
+}
+
+// RemoveRequest removes a entity by ID
+message RemoveRequest {
+    // entity is the entity to remove
+    Entity entity = 1;
+}
+
+// RemoveResponse is sent in response to a RemoveEntityRequest
+message RemoveResponse {
+
+}
+
+// EntityService provides an API for managing entities.
+service entityService {
+
+    // Add adds a entity to the topology
+    rpc Add (AddRequest) returns (AddResponse) {
+    }
+
+    // Update updates a entity
+    rpc Update (UpdateRequest) returns (UpdateResponse) {
+    }
+
+    // Get gets a entity by ID
+    rpc Get (GetRequest) returns (GetResponse) {
+    }
+
+    // List gets a stream of entity add/update/remove events
+    rpc List (ListRequest) returns (stream ListResponse) {
+    }
+
+    // Remove removes a entity from the topology
+    rpc Remove (RemoveRequest) returns (RemoveResponse) {
+    }
+}
