@@ -29,24 +29,60 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// AddEntityReq adds a entity to the topology
-type AddEntityReq struct {
+// Device event type
+type ListResponse_Type int32
+
+const (
+	// NONE indicates this response does not represent a state change
+	ListResponse_NONE ListResponse_Type = 0
+	// ADDED is an event which occurs when a device is added to the topology
+	ListResponse_ADDED ListResponse_Type = 1
+	// UPDATED is an event which occurs when a device is updated
+	ListResponse_UPDATED ListResponse_Type = 2
+	// REMOVED is an event which occurs when a device is removed from the topology
+	ListResponse_REMOVED ListResponse_Type = 3
+)
+
+var ListResponse_Type_name = map[int32]string{
+	0: "NONE",
+	1: "ADDED",
+	2: "UPDATED",
+	3: "REMOVED",
+}
+
+var ListResponse_Type_value = map[string]int32{
+	"NONE":    0,
+	"ADDED":   1,
+	"UPDATED": 2,
+	"REMOVED": 3,
+}
+
+func (x ListResponse_Type) String() string {
+	return proto.EnumName(ListResponse_Type_name, int32(x))
+}
+
+func (ListResponse_Type) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{7, 0}
+}
+
+// AddRequest adds a entity to the topology
+type AddRequest struct {
 	Kind EntityKind `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
 	Id   EntityID   `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
 }
 
-func (m *AddEntityReq) Reset()         { *m = AddEntityReq{} }
-func (m *AddEntityReq) String() string { return proto.CompactTextString(m) }
-func (*AddEntityReq) ProtoMessage()    {}
-func (*AddEntityReq) Descriptor() ([]byte, []int) {
+func (m *AddRequest) Reset()         { *m = AddRequest{} }
+func (m *AddRequest) String() string { return proto.CompactTextString(m) }
+func (*AddRequest) ProtoMessage()    {}
+func (*AddRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_68b7f5f1cb9f621b, []int{0}
 }
-func (m *AddEntityReq) XXX_Unmarshal(b []byte) error {
+func (m *AddRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *AddEntityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AddRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_AddEntityReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_AddRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -56,48 +92,48 @@ func (m *AddEntityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)
 		return b[:n], nil
 	}
 }
-func (m *AddEntityReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddEntityReq.Merge(m, src)
+func (m *AddRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddRequest.Merge(m, src)
 }
-func (m *AddEntityReq) XXX_Size() int {
+func (m *AddRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *AddEntityReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddEntityReq.DiscardUnknown(m)
+func (m *AddRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddEntityReq proto.InternalMessageInfo
+var xxx_messageInfo_AddRequest proto.InternalMessageInfo
 
-func (m *AddEntityReq) GetKind() EntityKind {
+func (m *AddRequest) GetKind() EntityKind {
 	if m != nil {
 		return m.Kind
 	}
 	return ""
 }
 
-func (m *AddEntityReq) GetId() EntityID {
+func (m *AddRequest) GetId() EntityID {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-// AddEntityRespose is sent in response to an AddEntityReq
-type AddEntityRespose struct {
+// AddResponseose is sent in response to an AddRequest
+type AddResponse struct {
 }
 
-func (m *AddEntityRespose) Reset()         { *m = AddEntityRespose{} }
-func (m *AddEntityRespose) String() string { return proto.CompactTextString(m) }
-func (*AddEntityRespose) ProtoMessage()    {}
-func (*AddEntityRespose) Descriptor() ([]byte, []int) {
+func (m *AddResponse) Reset()         { *m = AddResponse{} }
+func (m *AddResponse) String() string { return proto.CompactTextString(m) }
+func (*AddResponse) ProtoMessage()    {}
+func (*AddResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_68b7f5f1cb9f621b, []int{1}
 }
-func (m *AddEntityRespose) XXX_Unmarshal(b []byte) error {
+func (m *AddResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *AddEntityRespose) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AddResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_AddEntityRespose.Marshal(b, m, deterministic)
+		return xxx_messageInfo_AddResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -107,188 +143,37 @@ func (m *AddEntityRespose) XXX_Marshal(b []byte, deterministic bool) ([]byte, er
 		return b[:n], nil
 	}
 }
-func (m *AddEntityRespose) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddEntityRespose.Merge(m, src)
+func (m *AddResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddResponse.Merge(m, src)
 }
-func (m *AddEntityRespose) XXX_Size() int {
+func (m *AddResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *AddEntityRespose) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddEntityRespose.DiscardUnknown(m)
+func (m *AddResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddEntityRespose proto.InternalMessageInfo
+var xxx_messageInfo_AddResponse proto.InternalMessageInfo
 
-// UpdateEntityReq updates a entity
-type UpdateEntityReq struct {
-	Kind EntityKind `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
-	Id   EntityID   `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
-}
-
-func (m *UpdateEntityReq) Reset()         { *m = UpdateEntityReq{} }
-func (m *UpdateEntityReq) String() string { return proto.CompactTextString(m) }
-func (*UpdateEntityReq) ProtoMessage()    {}
-func (*UpdateEntityReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_68b7f5f1cb9f621b, []int{2}
-}
-func (m *UpdateEntityReq) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateEntityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateEntityReq.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateEntityReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateEntityReq.Merge(m, src)
-}
-func (m *UpdateEntityReq) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateEntityReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateEntityReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateEntityReq proto.InternalMessageInfo
-
-func (m *UpdateEntityReq) GetKind() EntityKind {
-	if m != nil {
-		return m.Kind
-	}
-	return ""
-}
-
-func (m *UpdateEntityReq) GetId() EntityID {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-// UpdateEntityResp is sent in response to an UpdateEntityReq
-type UpdateEntityResp struct {
-}
-
-func (m *UpdateEntityResp) Reset()         { *m = UpdateEntityResp{} }
-func (m *UpdateEntityResp) String() string { return proto.CompactTextString(m) }
-func (*UpdateEntityResp) ProtoMessage()    {}
-func (*UpdateEntityResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_68b7f5f1cb9f621b, []int{3}
-}
-func (m *UpdateEntityResp) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UpdateEntityResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UpdateEntityResp.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UpdateEntityResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateEntityResp.Merge(m, src)
-}
-func (m *UpdateEntityResp) XXX_Size() int {
-	return m.Size()
-}
-func (m *UpdateEntityResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateEntityResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateEntityResp proto.InternalMessageInfo
-
-// GetAttrReq ...
-type GetAttrReq struct {
-	Kind     EntityKind `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
-	Id       EntityID   `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
-	AttrKind AttrKind   `protobuf:"bytes,3,opt,name=attrKind,proto3,casttype=AttrKind" json:"attrKind,omitempty"`
-}
-
-func (m *GetAttrReq) Reset()         { *m = GetAttrReq{} }
-func (m *GetAttrReq) String() string { return proto.CompactTextString(m) }
-func (*GetAttrReq) ProtoMessage()    {}
-func (*GetAttrReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_68b7f5f1cb9f621b, []int{4}
-}
-func (m *GetAttrReq) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GetAttrReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GetAttrReq.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GetAttrReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAttrReq.Merge(m, src)
-}
-func (m *GetAttrReq) XXX_Size() int {
-	return m.Size()
-}
-func (m *GetAttrReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAttrReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetAttrReq proto.InternalMessageInfo
-
-func (m *GetAttrReq) GetKind() EntityKind {
-	if m != nil {
-		return m.Kind
-	}
-	return ""
-}
-
-func (m *GetAttrReq) GetId() EntityID {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-func (m *GetAttrReq) GetAttrKind() AttrKind {
-	if m != nil {
-		return m.AttrKind
-	}
-	return ""
-}
-
-// GetAttrsResp carries a entity
-type GetAttrResp struct {
+// UpdateRequest updates a entity
+type UpdateRequest struct {
 	Kind EntityKind           `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
 	Id   EntityID             `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
 	Attr map[AttrKind]AttrVal `protobuf:"bytes,3,rep,name=attr,proto3,castkey=AttrKind,castvalue=AttrVal" json:"attr,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
-func (m *GetAttrResp) Reset()         { *m = GetAttrResp{} }
-func (m *GetAttrResp) String() string { return proto.CompactTextString(m) }
-func (*GetAttrResp) ProtoMessage()    {}
-func (*GetAttrResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_68b7f5f1cb9f621b, []int{5}
+func (m *UpdateRequest) Reset()         { *m = UpdateRequest{} }
+func (m *UpdateRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateRequest) ProtoMessage()    {}
+func (*UpdateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{2}
 }
-func (m *GetAttrResp) XXX_Unmarshal(b []byte) error {
+func (m *UpdateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GetAttrResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *UpdateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GetAttrResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_UpdateRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -298,57 +183,55 @@ func (m *GetAttrResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) 
 		return b[:n], nil
 	}
 }
-func (m *GetAttrResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAttrResp.Merge(m, src)
+func (m *UpdateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateRequest.Merge(m, src)
 }
-func (m *GetAttrResp) XXX_Size() int {
+func (m *UpdateRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *GetAttrResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAttrResp.DiscardUnknown(m)
+func (m *UpdateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetAttrResp proto.InternalMessageInfo
+var xxx_messageInfo_UpdateRequest proto.InternalMessageInfo
 
-func (m *GetAttrResp) GetKind() EntityKind {
+func (m *UpdateRequest) GetKind() EntityKind {
 	if m != nil {
 		return m.Kind
 	}
 	return ""
 }
 
-func (m *GetAttrResp) GetId() EntityID {
+func (m *UpdateRequest) GetId() EntityID {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-func (m *GetAttrResp) GetAttr() map[AttrKind]AttrVal {
+func (m *UpdateRequest) GetAttr() map[AttrKind]AttrVal {
 	if m != nil {
 		return m.Attr
 	}
 	return nil
 }
 
-// RemoveEntityReq removes a entity by ID
-type RemoveEntityReq struct {
-	Kind EntityKind `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
-	Id   EntityID   `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
+// UpdateResponse is sent in response to an UpdateRequest
+type UpdateResponse struct {
 }
 
-func (m *RemoveEntityReq) Reset()         { *m = RemoveEntityReq{} }
-func (m *RemoveEntityReq) String() string { return proto.CompactTextString(m) }
-func (*RemoveEntityReq) ProtoMessage()    {}
-func (*RemoveEntityReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_68b7f5f1cb9f621b, []int{6}
+func (m *UpdateResponse) Reset()         { *m = UpdateResponse{} }
+func (m *UpdateResponse) String() string { return proto.CompactTextString(m) }
+func (*UpdateResponse) ProtoMessage()    {}
+func (*UpdateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{3}
 }
-func (m *RemoveEntityReq) XXX_Unmarshal(b []byte) error {
+func (m *UpdateResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *RemoveEntityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *UpdateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_RemoveEntityReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_UpdateResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -358,48 +241,96 @@ func (m *RemoveEntityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return b[:n], nil
 	}
 }
-func (m *RemoveEntityReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveEntityReq.Merge(m, src)
+func (m *UpdateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateResponse.Merge(m, src)
 }
-func (m *RemoveEntityReq) XXX_Size() int {
+func (m *UpdateResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *RemoveEntityReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_RemoveEntityReq.DiscardUnknown(m)
+func (m *UpdateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RemoveEntityReq proto.InternalMessageInfo
+var xxx_messageInfo_UpdateResponse proto.InternalMessageInfo
 
-func (m *RemoveEntityReq) GetKind() EntityKind {
+// GetRequest ...
+type GetRequest struct {
+	Kind     EntityKind `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
+	Id       EntityID   `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
+	AttrKind AttrKind   `protobuf:"bytes,3,opt,name=attrKind,proto3,casttype=AttrKind" json:"attrKind,omitempty"`
+}
+
+func (m *GetRequest) Reset()         { *m = GetRequest{} }
+func (m *GetRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRequest) ProtoMessage()    {}
+func (*GetRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{4}
+}
+func (m *GetRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequest.Merge(m, src)
+}
+func (m *GetRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequest proto.InternalMessageInfo
+
+func (m *GetRequest) GetKind() EntityKind {
 	if m != nil {
 		return m.Kind
 	}
 	return ""
 }
 
-func (m *RemoveEntityReq) GetId() EntityID {
+func (m *GetRequest) GetId() EntityID {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-// RemoveEntityResp is sent in response to a RemoveEntityReq
-type RemoveEntityResp struct {
+func (m *GetRequest) GetAttrKind() AttrKind {
+	if m != nil {
+		return m.AttrKind
+	}
+	return ""
 }
 
-func (m *RemoveEntityResp) Reset()         { *m = RemoveEntityResp{} }
-func (m *RemoveEntityResp) String() string { return proto.CompactTextString(m) }
-func (*RemoveEntityResp) ProtoMessage()    {}
-func (*RemoveEntityResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_68b7f5f1cb9f621b, []int{7}
+// GetRequestsResp carries a entity
+type GetResponse struct {
+	Attr map[AttrKind]AttrVal `protobuf:"bytes,3,rep,name=attr,proto3,castkey=AttrKind,castvalue=AttrVal" json:"attr,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
-func (m *RemoveEntityResp) XXX_Unmarshal(b []byte) error {
+
+func (m *GetResponse) Reset()         { *m = GetResponse{} }
+func (m *GetResponse) String() string { return proto.CompactTextString(m) }
+func (*GetResponse) ProtoMessage()    {}
+func (*GetResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{5}
+}
+func (m *GetResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *RemoveEntityResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *GetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_RemoveEntityResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_GetResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -409,60 +340,296 @@ func (m *RemoveEntityResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, er
 		return b[:n], nil
 	}
 }
-func (m *RemoveEntityResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveEntityResp.Merge(m, src)
+func (m *GetResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetResponse.Merge(m, src)
 }
-func (m *RemoveEntityResp) XXX_Size() int {
+func (m *GetResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *RemoveEntityResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_RemoveEntityResp.DiscardUnknown(m)
+func (m *GetResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RemoveEntityResp proto.InternalMessageInfo
+var xxx_messageInfo_GetResponse proto.InternalMessageInfo
+
+func (m *GetResponse) GetAttr() map[AttrKind]AttrVal {
+	if m != nil {
+		return m.Attr
+	}
+	return nil
+}
+
+// ListRequest requests a stream of entities and changes
+// By default, the request requests a stream of all entities that are present in the topology when
+// the request is received by the service. However, if `subscribe` is `true`, the stream will remain
+// open after all entities have been sent and events that occur following the last entity will be
+// streamed to the client until the stream is closed.
+type ListRequest struct {
+	// subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur
+	// after all entities have been streamed to the client
+	Subscribe bool `protobuf:"varint,1,opt,name=subscribe,proto3" json:"subscribe,omitempty"`
+}
+
+func (m *ListRequest) Reset()         { *m = ListRequest{} }
+func (m *ListRequest) String() string { return proto.CompactTextString(m) }
+func (*ListRequest) ProtoMessage()    {}
+func (*ListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{6}
+}
+func (m *ListRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListRequest.Merge(m, src)
+}
+func (m *ListRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListRequest proto.InternalMessageInfo
+
+func (m *ListRequest) GetSubscribe() bool {
+	if m != nil {
+		return m.Subscribe
+	}
+	return false
+}
+
+// ListResponse carries a single device event
+type ListResponse struct {
+	// type is the type of the event
+	Type ListResponse_Type `protobuf:"varint,1,opt,name=type,proto3,enum=topo.ListResponse_Type" json:"type,omitempty"`
+	// kind of the entity on which the event occurred
+	Kind EntityKind `protobuf:"bytes,2,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
+	// id of the entity on which the event occurred
+	Id EntityID `protobuf:"bytes,3,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
+	// attr is the map of attributes on which this event occurred
+	Attr map[AttrKind]AttrVal `protobuf:"bytes,4,rep,name=attr,proto3,castkey=AttrKind,castvalue=AttrVal" json:"attr,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (m *ListResponse) Reset()         { *m = ListResponse{} }
+func (m *ListResponse) String() string { return proto.CompactTextString(m) }
+func (*ListResponse) ProtoMessage()    {}
+func (*ListResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{7}
+}
+func (m *ListResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListResponse.Merge(m, src)
+}
+func (m *ListResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListResponse proto.InternalMessageInfo
+
+func (m *ListResponse) GetType() ListResponse_Type {
+	if m != nil {
+		return m.Type
+	}
+	return ListResponse_NONE
+}
+
+func (m *ListResponse) GetKind() EntityKind {
+	if m != nil {
+		return m.Kind
+	}
+	return ""
+}
+
+func (m *ListResponse) GetId() EntityID {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *ListResponse) GetAttr() map[AttrKind]AttrVal {
+	if m != nil {
+		return m.Attr
+	}
+	return nil
+}
+
+// RemoveRequest removes a entity by ID
+type RemoveRequest struct {
+	Kind EntityKind `protobuf:"bytes,1,opt,name=kind,proto3,casttype=EntityKind" json:"kind,omitempty"`
+	Id   EntityID   `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
+}
+
+func (m *RemoveRequest) Reset()         { *m = RemoveRequest{} }
+func (m *RemoveRequest) String() string { return proto.CompactTextString(m) }
+func (*RemoveRequest) ProtoMessage()    {}
+func (*RemoveRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{8}
+}
+func (m *RemoveRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RemoveRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_RemoveRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *RemoveRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveRequest.Merge(m, src)
+}
+func (m *RemoveRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *RemoveRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveRequest proto.InternalMessageInfo
+
+func (m *RemoveRequest) GetKind() EntityKind {
+	if m != nil {
+		return m.Kind
+	}
+	return ""
+}
+
+func (m *RemoveRequest) GetId() EntityID {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+// RemoveResponse is sent in response to a RemoveRequest
+type RemoveResponse struct {
+}
+
+func (m *RemoveResponse) Reset()         { *m = RemoveResponse{} }
+func (m *RemoveResponse) String() string { return proto.CompactTextString(m) }
+func (*RemoveResponse) ProtoMessage()    {}
+func (*RemoveResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_68b7f5f1cb9f621b, []int{9}
+}
+func (m *RemoveResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RemoveResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_RemoveResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *RemoveResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveResponse.Merge(m, src)
+}
+func (m *RemoveResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *RemoveResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*AddEntityReq)(nil), "topo.AddEntityReq")
-	proto.RegisterType((*AddEntityRespose)(nil), "topo.AddEntityRespose")
-	proto.RegisterType((*UpdateEntityReq)(nil), "topo.UpdateEntityReq")
-	proto.RegisterType((*UpdateEntityResp)(nil), "topo.UpdateEntityResp")
-	proto.RegisterType((*GetAttrReq)(nil), "topo.GetAttrReq")
-	proto.RegisterType((*GetAttrResp)(nil), "topo.GetAttrResp")
-	proto.RegisterMapType((map[AttrKind]AttrVal)(nil), "topo.GetAttrResp.AttrEntry")
-	proto.RegisterType((*RemoveEntityReq)(nil), "topo.RemoveEntityReq")
-	proto.RegisterType((*RemoveEntityResp)(nil), "topo.RemoveEntityResp")
+	proto.RegisterEnum("topo.ListResponse_Type", ListResponse_Type_name, ListResponse_Type_value)
+	proto.RegisterType((*AddRequest)(nil), "topo.AddRequest")
+	proto.RegisterType((*AddResponse)(nil), "topo.AddResponse")
+	proto.RegisterType((*UpdateRequest)(nil), "topo.UpdateRequest")
+	proto.RegisterMapType((map[AttrKind]AttrVal)(nil), "topo.UpdateRequest.AttrEntry")
+	proto.RegisterType((*UpdateResponse)(nil), "topo.UpdateResponse")
+	proto.RegisterType((*GetRequest)(nil), "topo.GetRequest")
+	proto.RegisterType((*GetResponse)(nil), "topo.GetResponse")
+	proto.RegisterMapType((map[AttrKind]AttrVal)(nil), "topo.GetResponse.AttrEntry")
+	proto.RegisterType((*ListRequest)(nil), "topo.ListRequest")
+	proto.RegisterType((*ListResponse)(nil), "topo.ListResponse")
+	proto.RegisterMapType((map[AttrKind]AttrVal)(nil), "topo.ListResponse.AttrEntry")
+	proto.RegisterType((*RemoveRequest)(nil), "topo.RemoveRequest")
+	proto.RegisterType((*RemoveResponse)(nil), "topo.RemoveResponse")
 }
 
 func init() { proto.RegisterFile("api/topo/entity.proto", fileDescriptor_68b7f5f1cb9f621b) }
 
 var fileDescriptor_68b7f5f1cb9f621b = []byte{
-	// 415 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x53, 0xbb, 0x8e, 0xd3, 0x40,
-	0x14, 0xf5, 0xd8, 0x61, 0x1f, 0x77, 0x03, 0x84, 0xd1, 0x2e, 0x58, 0x06, 0x39, 0xab, 0xa9, 0x52,
-	0x39, 0x68, 0x53, 0xf0, 0x68, 0x90, 0x23, 0x22, 0x40, 0x34, 0x68, 0x22, 0xe8, 0x0d, 0x33, 0x8a,
-	0xac, 0x04, 0xcf, 0xc4, 0x1e, 0x22, 0xd2, 0x52, 0x52, 0xf1, 0x59, 0x94, 0x11, 0x15, 0x55, 0x82,
-	0x92, 0x3f, 0xa0, 0x4c, 0xb5, 0x1a, 0x4f, 0x1e, 0x8e, 0xd3, 0xba, 0xbb, 0xbe, 0xf7, 0xf8, 0x9c,
-	0xfb, 0x38, 0x03, 0x57, 0x91, 0x8c, 0xdb, 0x4a, 0x48, 0xd1, 0xe6, 0x89, 0x8a, 0xd5, 0x34, 0x90,
-	0xa9, 0x50, 0x02, 0xd7, 0x74, 0xca, 0xbb, 0x1c, 0x88, 0x81, 0xc8, 0x13, 0x6d, 0x1d, 0x99, 0x1a,
-	0xf9, 0x00, 0xf5, 0x90, 0xb1, 0x5e, 0x0e, 0xa7, 0x7c, 0x8c, 0x09, 0xd4, 0x86, 0x71, 0xc2, 0x5c,
-	0x74, 0x8d, 0x5a, 0xe7, 0xdd, 0x7b, 0xeb, 0x79, 0x13, 0x4c, 0xf1, 0x7d, 0x9c, 0x30, 0x9a, 0xd7,
-	0xf0, 0x13, 0xb0, 0x63, 0xe6, 0xda, 0x39, 0xa2, 0xbe, 0x9e, 0x37, 0xcf, 0x0c, 0xe2, 0xdd, 0x6b,
-	0x6a, 0xc7, 0x8c, 0x60, 0x68, 0x14, 0x18, 0x33, 0x29, 0x32, 0x4e, 0xfa, 0x70, 0xff, 0xa3, 0x64,
-	0x91, 0xe2, 0x15, 0x0b, 0x1d, 0x92, 0x66, 0x92, 0x7c, 0x07, 0x78, 0xc3, 0x55, 0xa8, 0x54, 0x5a,
-	0x89, 0x06, 0x6e, 0xc1, 0x59, 0xa4, 0x54, 0xaa, 0xf1, 0xae, 0xb3, 0xc7, 0x84, 0x9b, 0x1c, 0xdd,
-	0x55, 0xc9, 0x1f, 0x04, 0x17, 0x3b, 0xe9, 0x4c, 0x56, 0xa0, 0xfd, 0x16, 0x6a, 0x9a, 0xdd, 0x75,
-	0xae, 0x9d, 0xd6, 0xc5, 0xcd, 0xe3, 0x40, 0x5f, 0x31, 0x28, 0x48, 0x04, 0x3a, 0xe8, 0x25, 0x2a,
-	0x9d, 0x76, 0x1f, 0xfd, 0x58, 0xec, 0x9b, 0xfa, 0xb9, 0x68, 0x9e, 0xea, 0xf8, 0x53, 0x34, 0xa2,
-	0x39, 0x83, 0xf7, 0x0c, 0xce, 0x77, 0x58, 0xdc, 0x00, 0x67, 0xc8, 0xa7, 0xa6, 0x2f, 0xaa, 0x43,
-	0x7c, 0x09, 0x77, 0x26, 0xd1, 0xe8, 0x1b, 0x37, 0x9d, 0x50, 0xf3, 0xf1, 0xd2, 0x7e, 0x8e, 0xf4,
-	0xdd, 0x28, 0xff, 0x2a, 0x26, 0x55, 0xdf, 0xed, 0x90, 0x34, 0x93, 0x37, 0xff, 0x11, 0xdc, 0x35,
-	0x9e, 0xed, 0xf3, 0x74, 0x12, 0x7f, 0xe1, 0xb8, 0x03, 0x4e, 0xc8, 0x18, 0xc6, 0x66, 0xec, 0xa2,
-	0x47, 0xbd, 0x87, 0x47, 0x39, 0xe3, 0x32, 0x0b, 0xbf, 0x80, 0x13, 0x63, 0x09, 0x7c, 0x65, 0x30,
-	0x25, 0xd7, 0x6d, 0x7f, 0x3d, 0xf2, 0x8d, 0x85, 0x9f, 0xc2, 0xe9, 0x66, 0xb7, 0xb8, 0x51, 0x5a,
-	0xf5, 0xd8, 0x7b, 0x70, 0xb4, 0x7c, 0x62, 0xe1, 0x57, 0x50, 0x2f, 0xce, 0xb1, 0x95, 0x2c, 0x2d,
-	0x6c, 0x2b, 0x59, 0x1e, 0x99, 0x58, 0x5d, 0xf7, 0xf7, 0xd2, 0x47, 0xb3, 0xa5, 0x8f, 0xfe, 0x2d,
-	0x7d, 0xf4, 0x6b, 0xe5, 0x5b, 0xb3, 0x95, 0x6f, 0xfd, 0x5d, 0xf9, 0xd6, 0xe7, 0x93, 0xfc, 0x71,
-	0x76, 0x6e, 0x03, 0x00, 0x00, 0xff, 0xff, 0xe1, 0x1c, 0x55, 0x11, 0xd1, 0x03, 0x00, 0x00,
+	// 567 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x54, 0x4d, 0x6f, 0xd3, 0x30,
+	0x18, 0x8e, 0x93, 0x6c, 0x6b, 0xdf, 0xae, 0x55, 0x66, 0x8a, 0x56, 0x95, 0x92, 0x4e, 0x3e, 0x55,
+	0xda, 0xd4, 0x42, 0xd1, 0x04, 0xe2, 0xd6, 0x2a, 0xd1, 0x18, 0x1f, 0x1d, 0x98, 0x6d, 0xf7, 0x74,
+	0xb1, 0xa6, 0x68, 0xa3, 0x09, 0x89, 0x5b, 0xd1, 0x2b, 0x47, 0xc4, 0x61, 0x3f, 0x87, 0x9f, 0xc0,
+	0x71, 0x27, 0xc4, 0x69, 0x43, 0xed, 0xbf, 0xd8, 0x09, 0xd9, 0x6e, 0xfa, 0x21, 0x86, 0xb8, 0x94,
+	0xdd, 0xec, 0xd7, 0x4f, 0xde, 0xe7, 0xc3, 0x79, 0x0d, 0xf7, 0xbd, 0x28, 0x68, 0xf0, 0x30, 0x0a,
+	0x1b, 0xac, 0xc7, 0x03, 0x3e, 0xac, 0x47, 0x71, 0xc8, 0x43, 0x6c, 0x8a, 0x52, 0xb9, 0x78, 0x1a,
+	0x9e, 0x86, 0xb2, 0xd0, 0x10, 0x2b, 0x75, 0x46, 0x3a, 0x00, 0x2d, 0xdf, 0xa7, 0xec, 0x63, 0x9f,
+	0x25, 0x1c, 0x13, 0x30, 0xcf, 0x82, 0x9e, 0x5f, 0x42, 0x5b, 0xa8, 0x96, 0x6d, 0x17, 0x6e, 0xae,
+	0xaa, 0xe0, 0xca, 0x4e, 0xaf, 0x82, 0x9e, 0x4f, 0xe5, 0x19, 0xae, 0x80, 0x1e, 0xf8, 0x25, 0x5d,
+	0x22, 0xd6, 0x6f, 0xae, 0xaa, 0x19, 0x85, 0xd8, 0x77, 0xa8, 0x1e, 0xf8, 0x24, 0x0f, 0x39, 0xd9,
+	0x2f, 0x89, 0xc2, 0x5e, 0xc2, 0xc8, 0x0f, 0x04, 0xf9, 0xa3, 0xc8, 0xf7, 0x38, 0x5b, 0x1a, 0x05,
+	0x7e, 0x09, 0xa6, 0xc7, 0x79, 0x5c, 0x32, 0xb6, 0x8c, 0x5a, 0xae, 0xf9, 0xb0, 0x2e, 0xdc, 0xd5,
+	0x17, 0x48, 0xea, 0x2d, 0xce, 0x63, 0xb7, 0xc7, 0xe3, 0x61, 0x7b, 0xf3, 0xf3, 0x75, 0x35, 0x23,
+	0xb6, 0xa2, 0xfd, 0x97, 0xeb, 0xea, 0x9a, 0x58, 0x1f, 0x7b, 0xe7, 0x54, 0xf6, 0x28, 0x3f, 0x85,
+	0xec, 0x14, 0x8b, 0x2d, 0x30, 0xce, 0xd8, 0x50, 0x29, 0xa3, 0x62, 0x89, 0x8b, 0xb0, 0x32, 0xf0,
+	0xce, 0xfb, 0x4c, 0x69, 0xa1, 0x6a, 0xf3, 0x5c, 0x7f, 0x86, 0x88, 0x05, 0x85, 0x94, 0x72, 0x62,
+	0xf5, 0x13, 0xc0, 0x1e, 0xe3, 0xcb, 0xb3, 0x59, 0x83, 0x8c, 0x37, 0xd1, 0x5d, 0x32, 0x66, 0x98,
+	0xd4, 0x0b, 0x9d, 0x9e, 0x92, 0x0b, 0x04, 0x39, 0x49, 0xad, 0x94, 0xe0, 0x17, 0x0b, 0x01, 0x3d,
+	0x50, 0x01, 0xcd, 0x01, 0xee, 0x20, 0x9e, 0x6d, 0xc8, 0xbd, 0x0e, 0x92, 0x69, 0x1a, 0x15, 0xc8,
+	0x26, 0xfd, 0x6e, 0x72, 0x12, 0x07, 0x5d, 0x26, 0x1b, 0x64, 0xe8, 0xac, 0x40, 0xbe, 0xe9, 0xb0,
+	0xae, 0xd0, 0x13, 0x03, 0xdb, 0x60, 0xf2, 0x61, 0xa4, 0x90, 0x85, 0xe6, 0xa6, 0x32, 0x30, 0x8f,
+	0xa8, 0x1f, 0x0e, 0x23, 0x46, 0x25, 0x68, 0x9a, 0xb4, 0xfe, 0xcf, 0xa4, 0x8d, 0xbf, 0x24, 0xbd,
+	0x3f, 0xc9, 0xcb, 0x94, 0x79, 0x55, 0x6e, 0xa1, 0xfb, 0xff, 0x81, 0xed, 0x82, 0x29, 0x3c, 0xe1,
+	0x0c, 0x98, 0x9d, 0x83, 0x8e, 0x6b, 0x69, 0x38, 0x0b, 0x2b, 0x2d, 0xc7, 0x71, 0x1d, 0x0b, 0xe1,
+	0x1c, 0xac, 0x1d, 0xbd, 0x75, 0x5a, 0x87, 0xae, 0x63, 0xe9, 0x62, 0x43, 0xdd, 0x37, 0x07, 0xc7,
+	0xae, 0x63, 0x19, 0xe4, 0x1d, 0xe4, 0x29, 0xfb, 0x10, 0x0e, 0x96, 0x37, 0x5e, 0xe2, 0xcf, 0x4e,
+	0x5b, 0x2a, 0xf7, 0xcd, 0xaf, 0x3a, 0xe4, 0xd5, 0x83, 0xf2, 0x9e, 0xc5, 0x83, 0xe0, 0x84, 0xe1,
+	0x1d, 0x30, 0x5a, 0xbe, 0x8f, 0x2d, 0x15, 0xd5, 0xec, 0x01, 0x29, 0x6f, 0xcc, 0x55, 0x26, 0x73,
+	0xa1, 0xe1, 0x5d, 0x58, 0x55, 0xb3, 0x82, 0xef, 0xdd, 0x32, 0xac, 0xe5, 0xe2, 0x62, 0x71, 0xfa,
+	0xd9, 0x0e, 0x18, 0x7b, 0x8c, 0xa7, 0x24, 0xb3, 0xd9, 0x4a, 0x49, 0xe6, 0xfe, 0x68, 0xa2, 0xe1,
+	0xc7, 0x60, 0x8a, 0x2b, 0xc3, 0x1b, 0xf3, 0xd7, 0xa7, 0xf0, 0xf8, 0xcf, 0x1b, 0x25, 0xda, 0x23,
+	0x24, 0x74, 0x29, 0xa7, 0xa9, 0xae, 0x85, 0x28, 0x53, 0x5d, 0x8b, 0x61, 0x10, 0xad, 0x5d, 0xfa,
+	0x3e, 0xb2, 0xd1, 0xe5, 0xc8, 0x46, 0xbf, 0x46, 0x36, 0xba, 0x18, 0xdb, 0xda, 0xe5, 0xd8, 0xd6,
+	0x7e, 0x8e, 0x6d, 0xad, 0xbb, 0x2a, 0xdf, 0xd4, 0x27, 0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0xfd,
+	0x45, 0xda, 0x19, 0x88, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -478,13 +645,15 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type EntityServiceClient interface {
 	// Add adds a entity to the topology
-	Add(ctx context.Context, in *AddEntityReq, opts ...grpc.CallOption) (*AddEntityRespose, error)
-	// Update updates a entity
-	Update(ctx context.Context, in *UpdateEntityReq, opts ...grpc.CallOption) (*UpdateEntityResp, error)
-	// Get gets a entity by ID
-	GetAttr(ctx context.Context, in *GetAttrReq, opts ...grpc.CallOption) (*GetAttrResp, error)
+	Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error)
+	// Update adds/updates an entity's attributes
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
+	// Get gets an entity's attributes
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	// List gets a stream of entity add/update/remove events
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (EntityService_ListClient, error)
 	// Remove removes a entity from the topology
-	RemoveEntity(ctx context.Context, in *RemoveEntityReq, opts ...grpc.CallOption) (*RemoveEntityResp, error)
+	Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error)
 }
 
 type entityServiceClient struct {
@@ -495,8 +664,8 @@ func NewEntityServiceClient(cc *grpc.ClientConn) EntityServiceClient {
 	return &entityServiceClient{cc}
 }
 
-func (c *entityServiceClient) Add(ctx context.Context, in *AddEntityReq, opts ...grpc.CallOption) (*AddEntityRespose, error) {
-	out := new(AddEntityRespose)
+func (c *entityServiceClient) Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*AddResponse, error) {
+	out := new(AddResponse)
 	err := c.cc.Invoke(ctx, "/topo.entityService/Add", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -504,8 +673,8 @@ func (c *entityServiceClient) Add(ctx context.Context, in *AddEntityReq, opts ..
 	return out, nil
 }
 
-func (c *entityServiceClient) Update(ctx context.Context, in *UpdateEntityReq, opts ...grpc.CallOption) (*UpdateEntityResp, error) {
-	out := new(UpdateEntityResp)
+func (c *entityServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error) {
+	out := new(UpdateResponse)
 	err := c.cc.Invoke(ctx, "/topo.entityService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -513,18 +682,50 @@ func (c *entityServiceClient) Update(ctx context.Context, in *UpdateEntityReq, o
 	return out, nil
 }
 
-func (c *entityServiceClient) GetAttr(ctx context.Context, in *GetAttrReq, opts ...grpc.CallOption) (*GetAttrResp, error) {
-	out := new(GetAttrResp)
-	err := c.cc.Invoke(ctx, "/topo.entityService/GetAttr", in, out, opts...)
+func (c *entityServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
+	err := c.cc.Invoke(ctx, "/topo.entityService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *entityServiceClient) RemoveEntity(ctx context.Context, in *RemoveEntityReq, opts ...grpc.CallOption) (*RemoveEntityResp, error) {
-	out := new(RemoveEntityResp)
-	err := c.cc.Invoke(ctx, "/topo.entityService/RemoveEntity", in, out, opts...)
+func (c *entityServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (EntityService_ListClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_EntityService_serviceDesc.Streams[0], "/topo.entityService/List", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &entityServiceListClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type EntityService_ListClient interface {
+	Recv() (*ListResponse, error)
+	grpc.ClientStream
+}
+
+type entityServiceListClient struct {
+	grpc.ClientStream
+}
+
+func (x *entityServiceListClient) Recv() (*ListResponse, error) {
+	m := new(ListResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *entityServiceClient) Remove(ctx context.Context, in *RemoveRequest, opts ...grpc.CallOption) (*RemoveResponse, error) {
+	out := new(RemoveResponse)
+	err := c.cc.Invoke(ctx, "/topo.entityService/Remove", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -534,30 +735,35 @@ func (c *entityServiceClient) RemoveEntity(ctx context.Context, in *RemoveEntity
 // EntityServiceServer is the server API for EntityService service.
 type EntityServiceServer interface {
 	// Add adds a entity to the topology
-	Add(context.Context, *AddEntityReq) (*AddEntityRespose, error)
-	// Update updates a entity
-	Update(context.Context, *UpdateEntityReq) (*UpdateEntityResp, error)
-	// Get gets a entity by ID
-	GetAttr(context.Context, *GetAttrReq) (*GetAttrResp, error)
+	Add(context.Context, *AddRequest) (*AddResponse, error)
+	// Update adds/updates an entity's attributes
+	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
+	// Get gets an entity's attributes
+	Get(context.Context, *GetRequest) (*GetResponse, error)
+	// List gets a stream of entity add/update/remove events
+	List(*ListRequest, EntityService_ListServer) error
 	// Remove removes a entity from the topology
-	RemoveEntity(context.Context, *RemoveEntityReq) (*RemoveEntityResp, error)
+	Remove(context.Context, *RemoveRequest) (*RemoveResponse, error)
 }
 
 // UnimplementedEntityServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedEntityServiceServer struct {
 }
 
-func (*UnimplementedEntityServiceServer) Add(ctx context.Context, req *AddEntityReq) (*AddEntityRespose, error) {
+func (*UnimplementedEntityServiceServer) Add(ctx context.Context, req *AddRequest) (*AddResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
 }
-func (*UnimplementedEntityServiceServer) Update(ctx context.Context, req *UpdateEntityReq) (*UpdateEntityResp, error) {
+func (*UnimplementedEntityServiceServer) Update(ctx context.Context, req *UpdateRequest) (*UpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (*UnimplementedEntityServiceServer) GetAttr(ctx context.Context, req *GetAttrReq) (*GetAttrResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAttr not implemented")
+func (*UnimplementedEntityServiceServer) Get(ctx context.Context, req *GetRequest) (*GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (*UnimplementedEntityServiceServer) RemoveEntity(ctx context.Context, req *RemoveEntityReq) (*RemoveEntityResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveEntity not implemented")
+func (*UnimplementedEntityServiceServer) List(req *ListRequest, srv EntityService_ListServer) error {
+	return status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (*UnimplementedEntityServiceServer) Remove(ctx context.Context, req *RemoveRequest) (*RemoveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
 
 func RegisterEntityServiceServer(s *grpc.Server, srv EntityServiceServer) {
@@ -565,7 +771,7 @@ func RegisterEntityServiceServer(s *grpc.Server, srv EntityServiceServer) {
 }
 
 func _EntityService_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddEntityReq)
+	in := new(AddRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -577,13 +783,13 @@ func _EntityService_Add_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/topo.entityService/Add",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EntityServiceServer).Add(ctx, req.(*AddEntityReq))
+		return srv.(EntityServiceServer).Add(ctx, req.(*AddRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _EntityService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateEntityReq)
+	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -595,43 +801,64 @@ func _EntityService_Update_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/topo.entityService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EntityServiceServer).Update(ctx, req.(*UpdateEntityReq))
+		return srv.(EntityServiceServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EntityService_GetAttr_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAttrReq)
+func _EntityService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EntityServiceServer).GetAttr(ctx, in)
+		return srv.(EntityServiceServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/topo.entityService/GetAttr",
+		FullMethod: "/topo.entityService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EntityServiceServer).GetAttr(ctx, req.(*GetAttrReq))
+		return srv.(EntityServiceServer).Get(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EntityService_RemoveEntity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveEntityReq)
+func _EntityService_List_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ListRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(EntityServiceServer).List(m, &entityServiceListServer{stream})
+}
+
+type EntityService_ListServer interface {
+	Send(*ListResponse) error
+	grpc.ServerStream
+}
+
+type entityServiceListServer struct {
+	grpc.ServerStream
+}
+
+func (x *entityServiceListServer) Send(m *ListResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _EntityService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EntityServiceServer).RemoveEntity(ctx, in)
+		return srv.(EntityServiceServer).Remove(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/topo.entityService/RemoveEntity",
+		FullMethod: "/topo.entityService/Remove",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EntityServiceServer).RemoveEntity(ctx, req.(*RemoveEntityReq))
+		return srv.(EntityServiceServer).Remove(ctx, req.(*RemoveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -649,19 +876,25 @@ var _EntityService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _EntityService_Update_Handler,
 		},
 		{
-			MethodName: "GetAttr",
-			Handler:    _EntityService_GetAttr_Handler,
+			MethodName: "Get",
+			Handler:    _EntityService_Get_Handler,
 		},
 		{
-			MethodName: "RemoveEntity",
-			Handler:    _EntityService_RemoveEntity_Handler,
+			MethodName: "Remove",
+			Handler:    _EntityService_Remove_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "List",
+			Handler:       _EntityService_List_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "api/topo/entity.proto",
 }
 
-func (m *AddEntityReq) Marshal() (dAtA []byte, err error) {
+func (m *AddRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -671,12 +904,12 @@ func (m *AddEntityReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AddEntityReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *AddRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *AddEntityReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AddRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -698,7 +931,7 @@ func (m *AddEntityReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *AddEntityRespose) Marshal() (dAtA []byte, err error) {
+func (m *AddResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -708,12 +941,12 @@ func (m *AddEntityRespose) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AddEntityRespose) MarshalTo(dAtA []byte) (int, error) {
+func (m *AddResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *AddEntityRespose) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AddResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -721,7 +954,7 @@ func (m *AddEntityRespose) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *UpdateEntityReq) Marshal() (dAtA []byte, err error) {
+func (m *UpdateRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -731,116 +964,12 @@ func (m *UpdateEntityReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *UpdateEntityReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *UpdateRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *UpdateEntityReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarintEntity(dAtA, i, uint64(len(m.Id)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Kind) > 0 {
-		i -= len(m.Kind)
-		copy(dAtA[i:], m.Kind)
-		i = encodeVarintEntity(dAtA, i, uint64(len(m.Kind)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UpdateEntityResp) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UpdateEntityResp) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UpdateEntityResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *GetAttrReq) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetAttrReq) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetAttrReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AttrKind) > 0 {
-		i -= len(m.AttrKind)
-		copy(dAtA[i:], m.AttrKind)
-		i = encodeVarintEntity(dAtA, i, uint64(len(m.AttrKind)))
-		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarintEntity(dAtA, i, uint64(len(m.Id)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Kind) > 0 {
-		i -= len(m.Kind)
-		copy(dAtA[i:], m.Kind)
-		i = encodeVarintEntity(dAtA, i, uint64(len(m.Kind)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *GetAttrResp) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GetAttrResp) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetAttrResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *UpdateRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -881,7 +1010,7 @@ func (m *GetAttrResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *RemoveEntityReq) Marshal() (dAtA []byte, err error) {
+func (m *UpdateResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -891,12 +1020,215 @@ func (m *RemoveEntityReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *RemoveEntityReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *UpdateResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *RemoveEntityReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *UpdateResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *GetRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AttrKind) > 0 {
+		i -= len(m.AttrKind)
+		copy(dAtA[i:], m.AttrKind)
+		i = encodeVarintEntity(dAtA, i, uint64(len(m.AttrKind)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintEntity(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Kind) > 0 {
+		i -= len(m.Kind)
+		copy(dAtA[i:], m.Kind)
+		i = encodeVarintEntity(dAtA, i, uint64(len(m.Kind)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Attr) > 0 {
+		for k := range m.Attr {
+			v := m.Attr[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintEntity(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintEntity(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintEntity(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Subscribe {
+		i--
+		if m.Subscribe {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Attr) > 0 {
+		for k := range m.Attr {
+			v := m.Attr[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintEntity(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintEntity(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintEntity(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintEntity(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Kind) > 0 {
+		i -= len(m.Kind)
+		copy(dAtA[i:], m.Kind)
+		i = encodeVarintEntity(dAtA, i, uint64(len(m.Kind)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Type != 0 {
+		i = encodeVarintEntity(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RemoveRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *RemoveRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RemoveRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -918,7 +1250,7 @@ func (m *RemoveEntityReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *RemoveEntityResp) Marshal() (dAtA []byte, err error) {
+func (m *RemoveResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -928,12 +1260,12 @@ func (m *RemoveEntityResp) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *RemoveEntityResp) MarshalTo(dAtA []byte) (int, error) {
+func (m *RemoveResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *RemoveEntityResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *RemoveResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -952,7 +1284,7 @@ func encodeVarintEntity(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *AddEntityReq) Size() (n int) {
+func (m *AddRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -969,7 +1301,7 @@ func (m *AddEntityReq) Size() (n int) {
 	return n
 }
 
-func (m *AddEntityRespose) Size() (n int) {
+func (m *AddResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -978,54 +1310,7 @@ func (m *AddEntityRespose) Size() (n int) {
 	return n
 }
 
-func (m *UpdateEntityReq) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Kind)
-	if l > 0 {
-		n += 1 + l + sovEntity(uint64(l))
-	}
-	l = len(m.Id)
-	if l > 0 {
-		n += 1 + l + sovEntity(uint64(l))
-	}
-	return n
-}
-
-func (m *UpdateEntityResp) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *GetAttrReq) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Kind)
-	if l > 0 {
-		n += 1 + l + sovEntity(uint64(l))
-	}
-	l = len(m.Id)
-	if l > 0 {
-		n += 1 + l + sovEntity(uint64(l))
-	}
-	l = len(m.AttrKind)
-	if l > 0 {
-		n += 1 + l + sovEntity(uint64(l))
-	}
-	return n
-}
-
-func (m *GetAttrResp) Size() (n int) {
+func (m *UpdateRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1050,7 +1335,94 @@ func (m *GetAttrResp) Size() (n int) {
 	return n
 }
 
-func (m *RemoveEntityReq) Size() (n int) {
+func (m *UpdateResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *GetRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Kind)
+	if l > 0 {
+		n += 1 + l + sovEntity(uint64(l))
+	}
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovEntity(uint64(l))
+	}
+	l = len(m.AttrKind)
+	if l > 0 {
+		n += 1 + l + sovEntity(uint64(l))
+	}
+	return n
+}
+
+func (m *GetResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Attr) > 0 {
+		for k, v := range m.Attr {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovEntity(uint64(len(k))) + 1 + len(v) + sovEntity(uint64(len(v)))
+			n += mapEntrySize + 1 + sovEntity(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *ListRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Subscribe {
+		n += 2
+	}
+	return n
+}
+
+func (m *ListResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Type != 0 {
+		n += 1 + sovEntity(uint64(m.Type))
+	}
+	l = len(m.Kind)
+	if l > 0 {
+		n += 1 + l + sovEntity(uint64(l))
+	}
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovEntity(uint64(l))
+	}
+	if len(m.Attr) > 0 {
+		for k, v := range m.Attr {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovEntity(uint64(len(k))) + 1 + len(v) + sovEntity(uint64(len(v)))
+			n += mapEntrySize + 1 + sovEntity(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *RemoveRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1067,7 +1439,7 @@ func (m *RemoveEntityReq) Size() (n int) {
 	return n
 }
 
-func (m *RemoveEntityResp) Size() (n int) {
+func (m *RemoveResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1082,7 +1454,7 @@ func sovEntity(x uint64) (n int) {
 func sozEntity(x uint64) (n int) {
 	return sovEntity(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *AddEntityReq) Unmarshal(dAtA []byte) error {
+func (m *AddRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1105,10 +1477,10 @@ func (m *AddEntityReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AddEntityReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: AddRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AddEntityReq: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AddRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1199,7 +1571,7 @@ func (m *AddEntityReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *AddEntityRespose) Unmarshal(dAtA []byte) error {
+func (m *AddResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1222,10 +1594,10 @@ func (m *AddEntityRespose) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AddEntityRespose: wiretype end group for non-group")
+			return fmt.Errorf("proto: AddResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AddEntityRespose: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AddResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -1252,7 +1624,7 @@ func (m *AddEntityRespose) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *UpdateEntityReq) Unmarshal(dAtA []byte) error {
+func (m *UpdateRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1275,329 +1647,10 @@ func (m *UpdateEntityReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateEntityReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: UpdateRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateEntityReq: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowEntity
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthEntity
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Kind = EntityKind(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowEntity
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthEntity
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Id = EntityID(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipEntity(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UpdateEntityResp) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowEntity
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UpdateEntityResp: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UpdateEntityResp: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipEntity(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GetAttrReq) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowEntity
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetAttrReq: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetAttrReq: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowEntity
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthEntity
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Kind = EntityKind(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowEntity
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthEntity
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Id = EntityID(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AttrKind", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowEntity
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthEntity
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AttrKind = AttrKind(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipEntity(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthEntity
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GetAttrResp) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowEntity
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GetAttrResp: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GetAttrResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: UpdateRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1815,7 +1868,7 @@ func (m *GetAttrResp) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *RemoveEntityReq) Unmarshal(dAtA []byte) error {
+func (m *UpdateResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1838,10 +1891,728 @@ func (m *RemoveEntityReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: RemoveEntityReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: UpdateResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RemoveEntityReq: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: UpdateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntity(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntity
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Kind = EntityKind(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = EntityID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AttrKind", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AttrKind = AttrKind(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntity(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntity
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Attr", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Attr == nil {
+				m.Attr = make(map[AttrKind]AttrVal)
+			}
+			var mapkey AttrKind
+			var mapvalue AttrVal
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowEntity
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowEntity
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthEntity
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthEntity
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = AttrKind(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowEntity
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthEntity
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthEntity
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = AttrVal(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipEntity(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthEntity
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Attr[AttrKind(mapkey)] = ((AttrVal)(mapvalue))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntity(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntity
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Subscribe", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Subscribe = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntity(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntity
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+			}
+			m.Type = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Type |= ListResponse_Type(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Kind = EntityKind(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = EntityID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Attr", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntity
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthEntity
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Attr == nil {
+				m.Attr = make(map[AttrKind]AttrVal)
+			}
+			var mapkey AttrKind
+			var mapvalue AttrVal
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowEntity
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowEntity
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthEntity
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthEntity
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = AttrKind(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowEntity
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthEntity
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthEntity
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = AttrVal(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipEntity(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthEntity
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Attr[AttrKind(mapkey)] = ((AttrVal)(mapvalue))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntity(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEntity
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *RemoveRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntity
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RemoveRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RemoveRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1932,7 +2703,7 @@ func (m *RemoveEntityReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *RemoveEntityResp) Unmarshal(dAtA []byte) error {
+func (m *RemoveResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1955,10 +2726,10 @@ func (m *RemoveEntityResp) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: RemoveEntityResp: wiretype end group for non-group")
+			return fmt.Errorf("proto: RemoveResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RemoveEntityResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: RemoveResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

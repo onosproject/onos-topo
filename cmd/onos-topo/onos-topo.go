@@ -37,6 +37,7 @@ import (
 	"github.com/onosproject/onos-topo/pkg/northbound/admin"
 	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/onosproject/onos-topo/pkg/northbound/diags"
+	"github.com/onosproject/onos-topo/pkg/northbound/topo"
 )
 
 var log = logging.GetLogger("main")
@@ -74,6 +75,12 @@ func startServer(caPath string, keyPath string, certPath string) error {
 		return err
 	}
 	s.AddService(deviceService)
+
+	topoService, err := topo.NewService()
+	if err != nil {
+		return err
+	}
+	s.AddService(topoService)
 
 	return s.Serve(func(started string) {
 		log.Info("Started NBI on ", started)

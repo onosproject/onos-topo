@@ -14,38 +14,54 @@
 
 package topo
 
-import "errors"
+import (
+	"errors"
 
-// EntityKind ...
+	grpc "google.golang.org/grpc"
+)
+
+// EntityKind represents an entity's "kind" or "type"
 type EntityKind string
-
-// EntityID is a unique ID used as primary key for entities
-type EntityID string
 
 const (
 	// EKE2Interface represent an 'E2 Interface' Entity etype
 	EKE2Interface EntityKind = "ET_E2_INTERFACE"
 )
 
-// Entity ...
+// EntityID is a unique ID used as primary key for entities
+type EntityID string
+
+// Entity represent "things"
 type Entity struct {
-	// kind is the ...
+	// Entities have "kinds" or "types"
 	kind EntityKind
 
-	// id is the entity's UUID
+	// id is a opaque universally unique identifiers (UUID) used as the entity's primary key
 	id EntityID
 
+	// attr maps the attributes for this entity. Each entity has a set of attributes.
 	attr map[AttrKind][]AttrVal
 
-	// rkContains stores the RKCONTAINS relationship kind
+	// rkContains maps the CONTAINS relationship for this entity
+	// An entity can "contain" other entities, e.g. a switch contains ports.
 	rkContains map[EntityKind][]EntityID
 }
 
-// IsEntityKindValid validates Entity Type
+// IsEntityKindValid validates EntityKind
 func (ek EntityKind) IsEntityKindValid() error {
 	switch ek {
 	case EKE2Interface:
 		return nil
 	}
 	return errors.New("Inalid entity type")
+}
+
+// EntityServiceClientFactory : Default EntityServiceClient creation.
+var EntityServiceClientFactory = func(cc *grpc.ClientConn) EntityServiceClient {
+	return NewEntityServiceClient(cc)
+}
+
+// CreateEntityServiceClient creates and returns a new topo device client
+func CreateEntityServiceClient(cc *grpc.ClientConn) EntityServiceClient {
+	return EntityServiceClientFactory(cc)
 }
