@@ -21,22 +21,12 @@ import (
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
+	"github.com/onosproject/onos-topo/api/topo"
 	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"google.golang.org/grpc"
-
-	"time"
 )
 
 var log = logging.GetLogger("northbound", "topo")
-
-const (
-	defaultTimeout       = 5 * time.Second
-	entityNamePattern    = `^[a-zA-Z0-9\-:_]{4,40}$`
-	entityAddressPattern = `^[a-zA-Z0-9\-_\.]+:[0-9]+$`
-	entityVersionPattern = `^(\d+(\.\d+){2,3})$`
-	entityAttrKeyPattern = `^[a-zA-Z0-9\-_\.]{1,40}$`
-	displayNameMaxLength = 80
-)
 
 // NewService returns a new topo Service
 func NewService() (northbound.Service, error) {
@@ -51,21 +41,21 @@ type Service struct {
 // Register registers the Service with the gRPC server.
 func (s Service) Register(r *grpc.Server) {
 	server := &Server{}
-	topoapi.RegisterEntityServiceServer(r, server)
+	topoapi.RegisterTopoServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
 }
 
-// EntityServiceClientFactory : Default EntityServiceClient creation.
-var EntityServiceClientFactory = func(cc *grpc.ClientConn) topoapi.EntityServiceClient {
-	return topoapi.NewEntityServiceClient(cc)
+// TopoClientFactory : Default TopoClient creation.
+var TopoClientFactory = func(cc *grpc.ClientConn) topoapi.TopoClient {
+	return topoapi.NewTopoClient(cc)
 }
 
-// CreateEntityServiceClient creates and returns a new topo entity client
-func CreateEntityServiceClient(cc *grpc.ClientConn) topoapi.EntityServiceClient {
-	return EntityServiceClientFactory(cc)
+// CreateTopoClient creates and returns a new topo entity client
+func CreateTopoClient(cc *grpc.ClientConn) topoapi.TopoClient {
+	return TopoClientFactory(cc)
 }
 
 // ValidateEntity validates the given entity
@@ -73,27 +63,17 @@ func ValidateEntity(entity *topoapi.Entity) error {
 	return nil
 }
 
-// Add :
-func (s *Server) Add(ctx context.Context, request *topoapi.AddRequest) (*topoapi.AddResponse, error) {
-	return &topoapi.AddResponse{}, nil
+// Write :
+func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*topoapi.WriteResponse, error) {
+	return &topoapi.WriteResponse{}, nil
 }
 
-// Update :
-func (s *Server) Update(ctx context.Context, request *topoapi.UpdateRequest) (*topoapi.UpdateResponse, error) {
-	return &topoapi.UpdateResponse{}, nil
+// Read :
+func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoapi.ReadResponse, error) {
+	return &topoapi.ReadResponse{}, nil
 }
 
-// Get :
-func (s *Server) Get(ctx context.Context, request *topoapi.GetRequest) (*topoapi.GetResponse, error) {
-	return &topoapi.GetResponse{}, nil
-}
-
-// List :
-func (s *Server) List(request *topoapi.ListRequest, server topoapi.EntityService_ListServer) error {
+// StreamChannel :
+func (s *Server) StreamChannel(topo.Topo_StreamChannelServer) error {
 	return nil
-}
-
-// Remove :
-func (s *Server) Remove(ctx context.Context, request *topoapi.RemoveRequest) (*topoapi.RemoveResponse, error) {
-	return &topoapi.RemoveResponse{}, nil
 }

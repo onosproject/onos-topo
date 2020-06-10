@@ -3,341 +3,225 @@
 
 ## Table of Contents
 
-- [api/topo/e2interface.proto](#api/topo/e2interface.proto)
-    - [E2Interface](#topo.E2Interface)
+- [api/topo/topo.proto](#api/topo/topo.proto)
+    - [Entity](#topo.Entity)
+    - [Entity.E2Interface](#topo.Entity.E2Interface)
+    - [Entity.E2Node](#topo.Entity.E2Node)
+    - [Entity.Ric](#topo.Entity.Ric)
+    - [Entity.XnInterface](#topo.Entity.XnInterface)
+    - [ReadRequest](#topo.ReadRequest)
+    - [ReadResponse](#topo.ReadResponse)
+    - [Relationship](#topo.Relationship)
+    - [Relationship.Aggregates](#topo.Relationship.Aggregates)
+    - [Relationship.Contains](#topo.Relationship.Contains)
+    - [StreamMessageRequest](#topo.StreamMessageRequest)
+    - [StreamMessageResponse](#topo.StreamMessageResponse)
+    - [Update](#topo.Update)
+    - [WriteRequest](#topo.WriteRequest)
+    - [WriteResponse](#topo.WriteResponse)
   
-- [api/topo/e2node.proto](#api/topo/e2node.proto)
-    - [E2Node](#topo.E2Node)
-    - [E2Node.Interfaces](#topo.E2Node.Interfaces)
+    - [Entity.Kind](#topo.Entity.Kind)
+    - [Relationship.Kind](#topo.Relationship.Kind)
+    - [Update.Type](#topo.Update.Type)
   
-- [api/topo/endpoint.proto](#api/topo/endpoint.proto)
-    - [EndPoint](#topo.EndPoint)
-  
-- [api/topo/entity.proto](#api/topo/entity.proto)
-    - [AddRequest](#topo.AddRequest)
-    - [AddResponse](#topo.AddResponse)
-    - [GetRequest](#topo.GetRequest)
-    - [GetResponse](#topo.GetResponse)
-    - [GetResponse.AttrEntry](#topo.GetResponse.AttrEntry)
-    - [ListRequest](#topo.ListRequest)
-    - [ListResponse](#topo.ListResponse)
-    - [ListResponse.AttrEntry](#topo.ListResponse.AttrEntry)
-    - [RemoveRequest](#topo.RemoveRequest)
-    - [RemoveResponse](#topo.RemoveResponse)
-    - [UpdateRequest](#topo.UpdateRequest)
-    - [UpdateRequest.AttrEntry](#topo.UpdateRequest.AttrEntry)
-    - [UpdateResponse](#topo.UpdateResponse)
-  
-    - [ListResponse.Type](#topo.ListResponse.Type)
-  
-    - [entityService](#topo.entityService)
-  
-- [api/topo/interface.proto](#api/topo/interface.proto)
-    - [Interface](#topo.Interface)
-    - [Interfaces](#topo.Interfaces)
-  
-- [api/topo/link.proto](#api/topo/link.proto)
-    - [Link](#topo.Link)
+    - [topo](#topo.topo)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="api/topo/e2interface.proto"></a>
+<a name="api/topo/topo.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## api/topo/e2interface.proto
+## api/topo/topo.proto
 
 
 
-<a name="topo.E2Interface"></a>
+<a name="topo.Entity"></a>
 
-### E2Interface
-E2Interface contains information about a E2 Interface
-
-
+### Entity
+Entity represent &#34;things&#34;
 
 
-
- 
-
- 
-
- 
-
- 
-
-
-
-<a name="api/topo/e2node.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## api/topo/e2node.proto
-
-
-
-<a name="topo.E2Node"></a>
-
-### E2Node
-E2Node contains information about a E2 Node device
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| kind | [Entity.Kind](#topo.Entity.Kind) |  |  |
+| ric | [Entity.Ric](#topo.Entity.Ric) |  |  |
+| e2_node | [Entity.E2Node](#topo.Entity.E2Node) |  |  |
+| e2_interface | [Entity.E2Interface](#topo.Entity.E2Interface) |  |  |
+| xn_interface | [Entity.XnInterface](#topo.Entity.XnInterface) |  |  |
+| relationships | [Relationship](#topo.Relationship) | repeated |  |
 
 
 
 
 
 
-<a name="topo.E2Node.Interfaces"></a>
+<a name="topo.Entity.E2Interface"></a>
 
-### E2Node.Interfaces
+### Entity.E2Interface
+
+
+
+
+
+
+
+<a name="topo.Entity.E2Node"></a>
+
+### Entity.E2Node
+
+
+
+
+
+
+
+<a name="topo.Entity.Ric"></a>
+
+### Entity.Ric
+
+
+
+
+
+
+
+<a name="topo.Entity.XnInterface"></a>
+
+### Entity.XnInterface
+
+
+
+
+
+
+
+<a name="topo.ReadRequest"></a>
+
+### ReadRequest
+
+
+
+
+
+
+
+<a name="topo.ReadResponse"></a>
+
+### ReadResponse
+
+
+
+
+
+
+
+<a name="topo.Relationship"></a>
+
+### Relationship
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| e2 | [E2Interface](#topo.E2Interface) | repeated |  |
+| kind | [Relationship.Kind](#topo.Relationship.Kind) |  |  |
+| contains | [Relationship.Contains](#topo.Relationship.Contains) |  |  |
+| aggregates | [Relationship.Aggregates](#topo.Relationship.Aggregates) |  |  |
 
 
 
 
 
- 
 
- 
+<a name="topo.Relationship.Aggregates"></a>
 
- 
+### Relationship.Aggregates
 
- 
-
-
-
-<a name="api/topo/endpoint.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## api/topo/endpoint.proto
-
-
-
-<a name="topo.EndPoint"></a>
-
-### EndPoint
-EndPoint represents the endpoint of a link
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| link | [Link](#topo.Link) |  |  |
+| AggregatorId | [string](#string) |  |  |
+| AggregateeId | [string](#string) |  |  |
 
 
 
 
 
- 
 
- 
+<a name="topo.Relationship.Contains"></a>
 
- 
+### Relationship.Contains
 
- 
-
-
-
-<a name="api/topo/entity.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## api/topo/entity.proto
-
-
-
-<a name="topo.AddRequest"></a>
-
-### AddRequest
-AddRequest adds a entity to the topology
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| kind | [string](#string) |  |  |
+| ContainerId | [string](#string) |  |  |
+| ContaineeId | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="topo.StreamMessageRequest"></a>
+
+### StreamMessageRequest
+
+
+
+
+
+
+
+<a name="topo.StreamMessageResponse"></a>
+
+### StreamMessageResponse
+
+
+
+
+
+
+
+<a name="topo.Update"></a>
+
+### Update
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| type | [Update.Type](#topo.Update.Type) |  |  |
+| entity | [Entity](#topo.Entity) |  |  |
+
+
+
+
+
+
+<a name="topo.WriteRequest"></a>
+
+### WriteRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
 | id | [string](#string) |  |  |
+| updates | [Update](#topo.Update) | repeated | The write batch, comprising a list of Update operations |
 
 
 
 
 
 
-<a name="topo.AddResponse"></a>
+<a name="topo.WriteResponse"></a>
 
-### AddResponse
-AddResponseose is sent in response to an AddRequest
+### WriteResponse
 
-
-
-
-
-
-<a name="topo.GetRequest"></a>
-
-### GetRequest
-GetRequest ...
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| kind | [string](#string) |  |  |
-| id | [string](#string) |  |  |
-| attrKind | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="topo.GetResponse"></a>
-
-### GetResponse
-GetRequestsResp carries a entity
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| attr | [GetResponse.AttrEntry](#topo.GetResponse.AttrEntry) | repeated |  |
-
-
-
-
-
-
-<a name="topo.GetResponse.AttrEntry"></a>
-
-### GetResponse.AttrEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="topo.ListRequest"></a>
-
-### ListRequest
-ListRequest requests a stream of entities and changes
-By default, the request requests a stream of all entities that are present in the topology when
-the request is received by the service. However, if `subscribe` is `true`, the stream will remain
-open after all entities have been sent and events that occur following the last entity will be
-streamed to the client until the stream is closed.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| subscribe | [bool](#bool) |  | subscribe indicates whether to subscribe to events (e.g. ADD, UPDATE, and REMOVE) that occur after all entities have been streamed to the client |
-
-
-
-
-
-
-<a name="topo.ListResponse"></a>
-
-### ListResponse
-ListResponse carries a single device event
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| type | [ListResponse.Type](#topo.ListResponse.Type) |  | type is the type of the event |
-| kind | [string](#string) |  | kind of the entity on which the event occurred |
-| id | [string](#string) |  | id of the entity on which the event occurred |
-| attr | [ListResponse.AttrEntry](#topo.ListResponse.AttrEntry) | repeated | attr is the map of attributes on which this event occurred |
-
-
-
-
-
-
-<a name="topo.ListResponse.AttrEntry"></a>
-
-### ListResponse.AttrEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="topo.RemoveRequest"></a>
-
-### RemoveRequest
-RemoveRequest removes a entity by ID
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| kind | [string](#string) |  |  |
-| id | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="topo.RemoveResponse"></a>
-
-### RemoveResponse
-RemoveResponse is sent in response to a RemoveRequest
-
-
-
-
-
-
-<a name="topo.UpdateRequest"></a>
-
-### UpdateRequest
-UpdateRequest updates a entity
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| kind | [string](#string) |  |  |
-| id | [string](#string) |  |  |
-| attr | [UpdateRequest.AttrEntry](#topo.UpdateRequest.AttrEntry) | repeated |  |
-
-
-
-
-
-
-<a name="topo.UpdateRequest.AttrEntry"></a>
-
-### UpdateRequest.AttrEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="topo.UpdateResponse"></a>
-
-### UpdateResponse
-UpdateResponse is sent in response to an UpdateRequest
 
 
 
@@ -346,17 +230,43 @@ UpdateResponse is sent in response to an UpdateRequest
  
 
 
-<a name="topo.ListResponse.Type"></a>
+<a name="topo.Entity.Kind"></a>
 
-### ListResponse.Type
-Device event type
+### Entity.Kind
+
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| NONE | 0 | NONE indicates this response does not represent a state change |
-| ADDED | 1 | ADDED is an event which occurs when a device is added to the topology |
-| UPDATED | 2 | UPDATED is an event which occurs when a device is updated |
-| REMOVED | 3 | REMOVED is an event which occurs when a device is removed from the topology |
+| RIC | 0 |  |
+| E2NODE | 1 |  |
+| E2INTERFACE | 2 |  |
+| XNINTERFACE | 3 |  |
+
+
+
+<a name="topo.Relationship.Kind"></a>
+
+### Relationship.Kind
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| CONTAINS | 0 |  |
+| AGGREGATES | 1 |  |
+
+
+
+<a name="topo.Update.Type"></a>
+
+### Update.Type
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UNSPECIFIED | 0 |  |
+| INSERT | 1 |  |
+| MODIFY | 2 |  |
+| DELETE | 3 |  |
 
 
  
@@ -364,85 +274,16 @@ Device event type
  
 
 
-<a name="topo.entityService"></a>
+<a name="topo.topo"></a>
 
-### entityService
+### topo
 EntityService provides an API for managing entities.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Add | [AddRequest](#topo.AddRequest) | [AddResponse](#topo.AddResponse) | Add adds a entity to the topology |
-| Update | [UpdateRequest](#topo.UpdateRequest) | [UpdateResponse](#topo.UpdateResponse) | Update adds/updates an entity&#39;s attributes |
-| Get | [GetRequest](#topo.GetRequest) | [GetResponse](#topo.GetResponse) | Get gets an entity&#39;s attributes |
-| List | [ListRequest](#topo.ListRequest) | [ListResponse](#topo.ListResponse) stream | List gets a stream of entity add/update/remove events |
-| Remove | [RemoveRequest](#topo.RemoveRequest) | [RemoveResponse](#topo.RemoveResponse) | Remove removes a entity from the topology |
-
- 
-
-
-
-<a name="api/topo/interface.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## api/topo/interface.proto
-
-
-
-<a name="topo.Interface"></a>
-
-### Interface
-Interface contains information about a interface
-
-
-
-
-
-
-<a name="topo.Interfaces"></a>
-
-### Interfaces
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| ifaces | [Interface](#topo.Interface) | repeated |  |
-
-
-
-
-
- 
-
- 
-
- 
-
- 
-
-
-
-<a name="api/topo/link.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## api/topo/link.proto
-
-
-
-<a name="topo.Link"></a>
-
-### Link
-Interface contains information about a interface
-
-
-
-
-
- 
-
- 
-
- 
+| Write | [WriteRequest](#topo.WriteRequest) | [WriteResponse](#topo.WriteResponse) | Update one or more entities to the topology |
+| Read | [ReadRequest](#topo.ReadRequest) | [ReadResponse](#topo.ReadResponse) | Read one or more entities from topology |
+| StreamChannel | [StreamMessageRequest](#topo.StreamMessageRequest) stream | [StreamMessageResponse](#topo.StreamMessageResponse) stream | Represents the bidirectional stream between onos-topo and a client for the purpose of - streaming notifications |
 
  
 

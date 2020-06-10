@@ -1,0 +1,126 @@
+/*
+Copyright 2019-present Open Networking Foundation.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+syntax = "proto3";
+
+// Package topo defines interfaces for managing network top
+package topo;
+
+import "gogoproto/gogo.proto";
+
+// EntityService provides an API for managing entities.
+service topo {
+  // Update one or more entities to the topology
+  rpc Write (WriteRequest) returns (WriteResponse) {
+  }
+
+  // Read one or more entities from topology
+  rpc Read (ReadRequest) returns (ReadResponse) {
+  }
+
+  // Represents the bidirectional stream between
+  // onos-topo and a client for the purpose of
+  // - streaming notifications
+  rpc StreamChannel (stream StreamMessageRequest) returns (stream StreamMessageResponse) {
+  }
+}
+
+message WriteRequest {
+  string id = 2 [(gogoproto.casttype) = "EntityID"];
+  // The write batch, comprising a list of Update operations
+  repeated Update updates = 3;
+}
+
+message WriteResponse {
+}
+
+message ReadRequest {
+}
+
+message ReadResponse {
+}
+
+message StreamMessageRequest {
+}
+
+message StreamMessageResponse {
+}
+
+message Update {
+  enum Type {
+    UNSPECIFIED = 0;
+    INSERT = 1;
+    MODIFY = 2;
+    DELETE = 3;
+  }
+  Type type = 1;
+  Entity entity = 2;
+}
+
+// Entity represent "things"
+message Entity {
+  enum Kind {
+    RIC = 0;
+    E2NODE = 1;
+    E2INTERFACE = 2;
+    XNINTERFACE = 3;
+  }
+  Kind kind = 1;
+
+  oneof entity {
+    Ric ric = 2;
+    E2Node  e2_node = 3;
+    E2Interface e2_interface = 4;
+    XnInterface xn_interface = 5;
+  }
+
+  repeated Relationship relationships = 6;
+
+  message Ric {
+  }
+
+  message E2Node {
+  }
+
+  message E2Interface {
+  }
+
+  message XnInterface {
+  }
+}
+
+message Relationship {
+  enum Kind {
+    CONTAINS = 0;
+    AGGREGATES = 1;
+  }
+  Kind kind = 1;
+
+  oneof relationship {
+    Contains contains = 2;
+    Aggregates aggregates = 4;
+  }
+
+  message Contains {
+    string ContainerId = 1;
+    string ContaineeId = 2;
+  }
+
+  message Aggregates {
+    string AggregatorId = 1;
+    string AggregateeId = 2;
+  }
+}

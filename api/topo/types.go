@@ -31,6 +31,7 @@ const (
 // EntityID is a unique ID used as primary key for entities
 type EntityID string
 
+/*
 // Entity represent "things"
 type Entity struct {
 	// Entities have "kinds" or "types"
@@ -46,6 +47,7 @@ type Entity struct {
 	// An entity can "contain" other entities, e.g. a switch contains ports.
 	rkContains map[EntityKind][]EntityID
 }
+*/
 
 // IsEntityKindValid validates EntityKind
 func (ek EntityKind) IsEntityKindValid() error {
@@ -56,12 +58,12 @@ func (ek EntityKind) IsEntityKindValid() error {
 	return errors.New("Inalid entity type")
 }
 
-// EntityServiceClientFactory : Default EntityServiceClient creation.
-var EntityServiceClientFactory = func(cc *grpc.ClientConn) EntityServiceClient {
-	return NewEntityServiceClient(cc)
+// TopoClientFactory : Default EntityServiceClient creation.
+var TopoClientFactory = func(cc *grpc.ClientConn) TopoClient {
+	return NewTopoClient(cc)
 }
 
-// CreateEntityServiceClient creates and returns a new topo device client
-func CreateEntityServiceClient(cc *grpc.ClientConn) EntityServiceClient {
-	return EntityServiceClientFactory(cc)
+// CreateTopoClient creates and returns a new topo device client
+func CreateTopoClient(cc *grpc.ClientConn) TopoClient {
+	return TopoClientFactory(cc)
 }
