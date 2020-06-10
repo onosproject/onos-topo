@@ -15,48 +15,8 @@
 package topo
 
 import (
-	"errors"
-
 	grpc "google.golang.org/grpc"
 )
-
-// EntityKind represents an entity's "kind" or "type"
-type EntityKind string
-
-const (
-	// EKE2Interface represent an 'E2 Interface' Entity etype
-	EKE2Interface EntityKind = "ET_E2_INTERFACE"
-)
-
-// EntityID is a unique ID used as primary key for entities
-type EntityID string
-
-/*
-// Entity represent "things"
-type Entity struct {
-	// Entities have "kinds" or "types"
-	kind EntityKind
-
-	// id is a opaque universally unique identifiers (UUID) used as the entity's primary key
-	id EntityID
-
-	// attr maps the attributes for this entity. Each entity has a set of attributes.
-	attr map[AttrKind][]AttrVal
-
-	// rkContains maps the CONTAINS relationship for this entity
-	// An entity can "contain" other entities, e.g. a switch contains ports.
-	rkContains map[EntityKind][]EntityID
-}
-*/
-
-// IsEntityKindValid validates EntityKind
-func (ek EntityKind) IsEntityKindValid() error {
-	switch ek {
-	case EKE2Interface:
-		return nil
-	}
-	return errors.New("Inalid entity type")
-}
 
 // TopoClientFactory : Default EntityServiceClient creation.
 var TopoClientFactory = func(cc *grpc.ClientConn) TopoClient {

@@ -9,19 +9,21 @@
     - [Entity.E2Node](#topo.Entity.E2Node)
     - [Entity.Ric](#topo.Entity.Ric)
     - [Entity.XnInterface](#topo.Entity.XnInterface)
+    - [Object](#topo.Object)
     - [ReadRequest](#topo.ReadRequest)
     - [ReadResponse](#topo.ReadResponse)
     - [Relationship](#topo.Relationship)
-    - [Relationship.Aggregates](#topo.Relationship.Aggregates)
-    - [Relationship.Contains](#topo.Relationship.Contains)
     - [StreamMessageRequest](#topo.StreamMessageRequest)
     - [StreamMessageResponse](#topo.StreamMessageResponse)
     - [Update](#topo.Update)
     - [WriteRequest](#topo.WriteRequest)
     - [WriteResponse](#topo.WriteResponse)
   
-    - [Entity.Kind](#topo.Entity.Kind)
-    - [Relationship.Kind](#topo.Relationship.Kind)
+    - [Entity.Type](#topo.Entity.Type)
+    - [Object.Type](#topo.Object.Type)
+    - [Relationship.Directionality](#topo.Relationship.Directionality)
+    - [Relationship.Multiplicity](#topo.Relationship.Multiplicity)
+    - [Relationship.Type](#topo.Relationship.Type)
     - [Update.Type](#topo.Update.Type)
   
     - [topo](#topo.topo)
@@ -40,17 +42,16 @@
 <a name="topo.Entity"></a>
 
 ### Entity
-Entity represent &#34;things&#34;
+Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| kind | [Entity.Kind](#topo.Entity.Kind) |  |  |
+| type | [Entity.Type](#topo.Entity.Type) |  |  |
 | ric | [Entity.Ric](#topo.Entity.Ric) |  |  |
 | e2_node | [Entity.E2Node](#topo.Entity.E2Node) |  |  |
 | e2_interface | [Entity.E2Interface](#topo.Entity.E2Interface) |  |  |
 | xn_interface | [Entity.XnInterface](#topo.Entity.XnInterface) |  |  |
-| relationships | [Relationship](#topo.Relationship) | repeated |  |
 
 
 
@@ -97,10 +98,33 @@ Entity represent &#34;things&#34;
 
 
 
+<a name="topo.Object"></a>
+
+### Object
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  |  |
+| type | [Object.Type](#topo.Object.Type) |  |  |
+| entity | [Entity](#topo.Entity) |  |  |
+| relationship | [Relationship](#topo.Relationship) |  |  |
+
+
+
+
+
+
 <a name="topo.ReadRequest"></a>
 
 ### ReadRequest
 
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| objects | [Object](#topo.Object) | repeated |  |
 
 
 
@@ -111,6 +135,11 @@ Entity represent &#34;things&#34;
 
 ### ReadResponse
 
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| objects | [Object](#topo.Object) | repeated |  |
 
 
 
@@ -125,41 +154,11 @@ Entity represent &#34;things&#34;
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| kind | [Relationship.Kind](#topo.Relationship.Kind) |  |  |
-| contains | [Relationship.Contains](#topo.Relationship.Contains) |  |  |
-| aggregates | [Relationship.Aggregates](#topo.Relationship.Aggregates) |  |  |
-
-
-
-
-
-
-<a name="topo.Relationship.Aggregates"></a>
-
-### Relationship.Aggregates
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| AggregatorId | [string](#string) |  |  |
-| AggregateeId | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="topo.Relationship.Contains"></a>
-
-### Relationship.Contains
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| ContainerId | [string](#string) |  |  |
-| ContaineeId | [string](#string) |  |  |
+| directionality | [Relationship.Directionality](#topo.Relationship.Directionality) |  |  |
+| multiplicity | [Relationship.Multiplicity](#topo.Relationship.Multiplicity) |  |  |
+| type | [Relationship.Type](#topo.Relationship.Type) |  |  |
+| source_object | [Object](#topo.Object) | repeated | The two object(s) that the relationship binds |
+| target_object | [Object](#topo.Object) | repeated |  |
 
 
 
@@ -195,7 +194,7 @@ Entity represent &#34;things&#34;
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | type | [Update.Type](#topo.Update.Type) |  |  |
-| entity | [Entity](#topo.Entity) |  |  |
+| object | [Object](#topo.Object) |  |  |
 
 
 
@@ -210,7 +209,6 @@ Entity represent &#34;things&#34;
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  |  |
 | updates | [Update](#topo.Update) | repeated | The write batch, comprising a list of Update operations |
 
 
@@ -230,9 +228,9 @@ Entity represent &#34;things&#34;
  
 
 
-<a name="topo.Entity.Kind"></a>
+<a name="topo.Entity.Type"></a>
 
-### Entity.Kind
+### Entity.Type
 
 
 | Name | Number | Description |
@@ -244,15 +242,61 @@ Entity represent &#34;things&#34;
 
 
 
-<a name="topo.Relationship.Kind"></a>
+<a name="topo.Object.Type"></a>
 
-### Relationship.Kind
+### Object.Type
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UNSPECIFIED_TYPE | 0 |  |
+| ENTITY | 1 |  |
+| RELATIONSHIP | 2 |  |
+
+
+
+<a name="topo.Relationship.Directionality"></a>
+
+### Relationship.Directionality
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UNSPECIFIED_DIRECTIONALITY | 0 |  |
+| DIRECTED | 1 |  |
+| BIDIRECTIONAL | 2 |  |
+
+
+
+<a name="topo.Relationship.Multiplicity"></a>
+
+### Relationship.Multiplicity
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UNSPECIFIED_MULTIPLICITY | 0 |  |
+| ONE_TO_ONE | 1 |  |
+| ONE_TO_MANY | 2 |  |
+| MANY_TO_ONE | 3 |  |
+| MANY_TO_MANY | 4 |  |
+
+
+
+<a name="topo.Relationship.Type"></a>
+
+### Relationship.Type
 
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
 | CONTAINS | 0 |  |
-| AGGREGATES | 1 |  |
+| CONTROLS | 1 |  |
+| AGGREGATES | 2 |  |
+| ORIGINATES | 3 |  |
+| TERMINATES | 4 |  |
+| TRAVERSES | 5 |  |
+| REALIZED_BY | 6 |  |
 
 
 
@@ -263,7 +307,7 @@ Entity represent &#34;things&#34;
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| UNSPECIFIED | 0 |  |
+| UNSPECIFIED_TYPE | 0 |  |
 | INSERT | 1 |  |
 | MODIFY | 2 |  |
 | DELETE | 3 |  |

@@ -8,7 +8,6 @@ package topo
 import (
 	context "context"
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -32,24 +31,24 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type Update_Type int32
 
 const (
-	Update_UNSPECIFIED Update_Type = 0
-	Update_INSERT      Update_Type = 1
-	Update_MODIFY      Update_Type = 2
-	Update_DELETE      Update_Type = 3
+	Update_UNSPECIFIED_TYPE Update_Type = 0
+	Update_INSERT           Update_Type = 1
+	Update_MODIFY           Update_Type = 2
+	Update_DELETE           Update_Type = 3
 )
 
 var Update_Type_name = map[int32]string{
-	0: "UNSPECIFIED",
+	0: "UNSPECIFIED_TYPE",
 	1: "INSERT",
 	2: "MODIFY",
 	3: "DELETE",
 }
 
 var Update_Type_value = map[string]int32{
-	"UNSPECIFIED": 0,
-	"INSERT":      1,
-	"MODIFY":      2,
-	"DELETE":      3,
+	"UNSPECIFIED_TYPE": 0,
+	"INSERT":           1,
+	"MODIFY":           2,
+	"DELETE":           3,
 }
 
 func (x Update_Type) String() string {
@@ -60,66 +59,170 @@ func (Update_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_5823f9f54b50fd8c, []int{6, 0}
 }
 
-type Entity_Kind int32
+type Object_Type int32
 
 const (
-	Entity_RIC         Entity_Kind = 0
-	Entity_E2NODE      Entity_Kind = 1
-	Entity_E2INTERFACE Entity_Kind = 2
-	Entity_XNINTERFACE Entity_Kind = 3
+	Object_UNSPECIFIED_TYPE Object_Type = 0
+	Object_ENTITY           Object_Type = 1
+	Object_RELATIONSHIP     Object_Type = 2
 )
 
-var Entity_Kind_name = map[int32]string{
+var Object_Type_name = map[int32]string{
+	0: "UNSPECIFIED_TYPE",
+	1: "ENTITY",
+	2: "RELATIONSHIP",
+}
+
+var Object_Type_value = map[string]int32{
+	"UNSPECIFIED_TYPE": 0,
+	"ENTITY":           1,
+	"RELATIONSHIP":     2,
+}
+
+func (x Object_Type) String() string {
+	return proto.EnumName(Object_Type_name, int32(x))
+}
+
+func (Object_Type) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{7, 0}
+}
+
+type Entity_Type int32
+
+const (
+	Entity_RIC         Entity_Type = 0
+	Entity_E2NODE      Entity_Type = 1
+	Entity_E2INTERFACE Entity_Type = 2
+	Entity_XNINTERFACE Entity_Type = 3
+)
+
+var Entity_Type_name = map[int32]string{
 	0: "RIC",
 	1: "E2NODE",
 	2: "E2INTERFACE",
 	3: "XNINTERFACE",
 }
 
-var Entity_Kind_value = map[string]int32{
+var Entity_Type_value = map[string]int32{
 	"RIC":         0,
 	"E2NODE":      1,
 	"E2INTERFACE": 2,
 	"XNINTERFACE": 3,
 }
 
-func (x Entity_Kind) String() string {
-	return proto.EnumName(Entity_Kind_name, int32(x))
+func (x Entity_Type) String() string {
+	return proto.EnumName(Entity_Type_name, int32(x))
 }
 
-func (Entity_Kind) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7, 0}
-}
-
-type Relationship_Kind int32
-
-const (
-	Relationship_CONTAINS   Relationship_Kind = 0
-	Relationship_AGGREGATES Relationship_Kind = 1
-)
-
-var Relationship_Kind_name = map[int32]string{
-	0: "CONTAINS",
-	1: "AGGREGATES",
-}
-
-var Relationship_Kind_value = map[string]int32{
-	"CONTAINS":   0,
-	"AGGREGATES": 1,
-}
-
-func (x Relationship_Kind) String() string {
-	return proto.EnumName(Relationship_Kind_name, int32(x))
-}
-
-func (Relationship_Kind) EnumDescriptor() ([]byte, []int) {
+func (Entity_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_5823f9f54b50fd8c, []int{8, 0}
 }
 
+type Relationship_Directionality int32
+
+const (
+	Relationship_UNSPECIFIED_DIRECTIONALITY Relationship_Directionality = 0
+	Relationship_DIRECTED                   Relationship_Directionality = 1
+	Relationship_BIDIRECTIONAL              Relationship_Directionality = 2
+)
+
+var Relationship_Directionality_name = map[int32]string{
+	0: "UNSPECIFIED_DIRECTIONALITY",
+	1: "DIRECTED",
+	2: "BIDIRECTIONAL",
+}
+
+var Relationship_Directionality_value = map[string]int32{
+	"UNSPECIFIED_DIRECTIONALITY": 0,
+	"DIRECTED":                   1,
+	"BIDIRECTIONAL":              2,
+}
+
+func (x Relationship_Directionality) String() string {
+	return proto.EnumName(Relationship_Directionality_name, int32(x))
+}
+
+func (Relationship_Directionality) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{9, 0}
+}
+
+type Relationship_Multiplicity int32
+
+const (
+	Relationship_UNSPECIFIED_MULTIPLICITY Relationship_Multiplicity = 0
+	Relationship_ONE_TO_ONE               Relationship_Multiplicity = 1
+	Relationship_ONE_TO_MANY              Relationship_Multiplicity = 2
+	Relationship_MANY_TO_ONE              Relationship_Multiplicity = 3
+	Relationship_MANY_TO_MANY             Relationship_Multiplicity = 4
+)
+
+var Relationship_Multiplicity_name = map[int32]string{
+	0: "UNSPECIFIED_MULTIPLICITY",
+	1: "ONE_TO_ONE",
+	2: "ONE_TO_MANY",
+	3: "MANY_TO_ONE",
+	4: "MANY_TO_MANY",
+}
+
+var Relationship_Multiplicity_value = map[string]int32{
+	"UNSPECIFIED_MULTIPLICITY": 0,
+	"ONE_TO_ONE":               1,
+	"ONE_TO_MANY":              2,
+	"MANY_TO_ONE":              3,
+	"MANY_TO_MANY":             4,
+}
+
+func (x Relationship_Multiplicity) String() string {
+	return proto.EnumName(Relationship_Multiplicity_name, int32(x))
+}
+
+func (Relationship_Multiplicity) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{9, 1}
+}
+
+type Relationship_Type int32
+
+const (
+	Relationship_CONTAINS    Relationship_Type = 0
+	Relationship_CONTROLS    Relationship_Type = 1
+	Relationship_AGGREGATES  Relationship_Type = 2
+	Relationship_ORIGINATES  Relationship_Type = 3
+	Relationship_TERMINATES  Relationship_Type = 4
+	Relationship_TRAVERSES   Relationship_Type = 5
+	Relationship_REALIZED_BY Relationship_Type = 6
+)
+
+var Relationship_Type_name = map[int32]string{
+	0: "CONTAINS",
+	1: "CONTROLS",
+	2: "AGGREGATES",
+	3: "ORIGINATES",
+	4: "TERMINATES",
+	5: "TRAVERSES",
+	6: "REALIZED_BY",
+}
+
+var Relationship_Type_value = map[string]int32{
+	"CONTAINS":    0,
+	"CONTROLS":    1,
+	"AGGREGATES":  2,
+	"ORIGINATES":  3,
+	"TERMINATES":  4,
+	"TRAVERSES":   5,
+	"REALIZED_BY": 6,
+}
+
+func (x Relationship_Type) String() string {
+	return proto.EnumName(Relationship_Type_name, int32(x))
+}
+
+func (Relationship_Type) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{9, 2}
+}
+
 type WriteRequest struct {
-	Id EntityID `protobuf:"bytes,2,opt,name=id,proto3,casttype=EntityID" json:"id,omitempty"`
 	// The write batch, comprising a list of Update operations
-	Updates []*Update `protobuf:"bytes,3,rep,name=updates,proto3" json:"updates,omitempty"`
+	Updates []*Update `protobuf:"bytes,1,rep,name=updates,proto3" json:"updates,omitempty"`
 }
 
 func (m *WriteRequest) Reset()         { *m = WriteRequest{} }
@@ -154,13 +257,6 @@ func (m *WriteRequest) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_WriteRequest proto.InternalMessageInfo
-
-func (m *WriteRequest) GetId() EntityID {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
 
 func (m *WriteRequest) GetUpdates() []*Update {
 	if m != nil {
@@ -206,6 +302,7 @@ func (m *WriteResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_WriteResponse proto.InternalMessageInfo
 
 type ReadRequest struct {
+	Objects []*Object `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (m *ReadRequest) Reset()         { *m = ReadRequest{} }
@@ -241,7 +338,15 @@ func (m *ReadRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReadRequest proto.InternalMessageInfo
 
+func (m *ReadRequest) GetObjects() []*Object {
+	if m != nil {
+		return m.Objects
+	}
+	return nil
+}
+
 type ReadResponse struct {
+	Objects []*Object `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
 }
 
 func (m *ReadResponse) Reset()         { *m = ReadResponse{} }
@@ -276,6 +381,13 @@ func (m *ReadResponse) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_ReadResponse proto.InternalMessageInfo
+
+func (m *ReadResponse) GetObjects() []*Object {
+	if m != nil {
+		return m.Objects
+	}
+	return nil
+}
 
 type StreamMessageRequest struct {
 }
@@ -350,8 +462,8 @@ func (m *StreamMessageResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_StreamMessageResponse proto.InternalMessageInfo
 
 type Update struct {
-	Type   Update_Type `protobuf:"varint,1,opt,name=type,proto3,enum=topo.Update_Type" json:"type,omitempty"`
-	Entity *Entity     `protobuf:"bytes,2,opt,name=entity,proto3" json:"entity,omitempty"`
+	Type   Update_Type `protobuf:"varint,2,opt,name=type,proto3,enum=topo.Update_Type" json:"type,omitempty"`
+	Object *Object     `protobuf:"bytes,3,opt,name=object,proto3" json:"object,omitempty"`
 }
 
 func (m *Update) Reset()         { *m = Update{} }
@@ -391,33 +503,133 @@ func (m *Update) GetType() Update_Type {
 	if m != nil {
 		return m.Type
 	}
-	return Update_UNSPECIFIED
+	return Update_UNSPECIFIED_TYPE
 }
 
-func (m *Update) GetEntity() *Entity {
+func (m *Update) GetObject() *Object {
 	if m != nil {
-		return m.Entity
+		return m.Object
 	}
 	return nil
 }
 
-// Entity represent "things"
+type Object struct {
+	Id   string      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Type Object_Type `protobuf:"varint,2,opt,name=type,proto3,enum=topo.Object_Type" json:"type,omitempty"`
+	// Types that are valid to be assigned to Obj:
+	//	*Object_Entity
+	//	*Object_Relationship
+	Obj isObject_Obj `protobuf_oneof:"obj"`
+}
+
+func (m *Object) Reset()         { *m = Object{} }
+func (m *Object) String() string { return proto.CompactTextString(m) }
+func (*Object) ProtoMessage()    {}
+func (*Object) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{7}
+}
+func (m *Object) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Object) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Object.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Object) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Object.Merge(m, src)
+}
+func (m *Object) XXX_Size() int {
+	return m.Size()
+}
+func (m *Object) XXX_DiscardUnknown() {
+	xxx_messageInfo_Object.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Object proto.InternalMessageInfo
+
+type isObject_Obj interface {
+	isObject_Obj()
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type Object_Entity struct {
+	Entity *Entity `protobuf:"bytes,3,opt,name=entity,proto3,oneof" json:"entity,omitempty"`
+}
+type Object_Relationship struct {
+	Relationship *Relationship `protobuf:"bytes,4,opt,name=relationship,proto3,oneof" json:"relationship,omitempty"`
+}
+
+func (*Object_Entity) isObject_Obj()       {}
+func (*Object_Relationship) isObject_Obj() {}
+
+func (m *Object) GetObj() isObject_Obj {
+	if m != nil {
+		return m.Obj
+	}
+	return nil
+}
+
+func (m *Object) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *Object) GetType() Object_Type {
+	if m != nil {
+		return m.Type
+	}
+	return Object_UNSPECIFIED_TYPE
+}
+
+func (m *Object) GetEntity() *Entity {
+	if x, ok := m.GetObj().(*Object_Entity); ok {
+		return x.Entity
+	}
+	return nil
+}
+
+func (m *Object) GetRelationship() *Relationship {
+	if x, ok := m.GetObj().(*Object_Relationship); ok {
+		return x.Relationship
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Object) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Object_Entity)(nil),
+		(*Object_Relationship)(nil),
+	}
+}
+
+// Entity represents any "thing" that is represented in the topology
 type Entity struct {
-	Kind Entity_Kind `protobuf:"varint,1,opt,name=kind,proto3,enum=topo.Entity_Kind" json:"kind,omitempty"`
+	Type Entity_Type `protobuf:"varint,1,opt,name=type,proto3,enum=topo.Entity_Type" json:"type,omitempty"`
 	// Types that are valid to be assigned to Entity:
 	//	*Entity_Ric_
 	//	*Entity_E2Node_
 	//	*Entity_E2Interface_
 	//	*Entity_XnInterface_
-	Entity        isEntity_Entity `protobuf_oneof:"entity"`
-	Relationships []*Relationship `protobuf:"bytes,6,rep,name=relationships,proto3" json:"relationships,omitempty"`
+	Entity isEntity_Entity `protobuf_oneof:"entity"`
 }
 
 func (m *Entity) Reset()         { *m = Entity{} }
 func (m *Entity) String() string { return proto.CompactTextString(m) }
 func (*Entity) ProtoMessage()    {}
 func (*Entity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8}
 }
 func (m *Entity) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -477,9 +689,9 @@ func (m *Entity) GetEntity() isEntity_Entity {
 	return nil
 }
 
-func (m *Entity) GetKind() Entity_Kind {
+func (m *Entity) GetType() Entity_Type {
 	if m != nil {
-		return m.Kind
+		return m.Type
 	}
 	return Entity_RIC
 }
@@ -512,13 +724,6 @@ func (m *Entity) GetXnInterface() *Entity_XnInterface {
 	return nil
 }
 
-func (m *Entity) GetRelationships() []*Relationship {
-	if m != nil {
-		return m.Relationships
-	}
-	return nil
-}
-
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*Entity) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -536,7 +741,7 @@ func (m *Entity_Ric) Reset()         { *m = Entity_Ric{} }
 func (m *Entity_Ric) String() string { return proto.CompactTextString(m) }
 func (*Entity_Ric) ProtoMessage()    {}
 func (*Entity_Ric) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7, 0}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8, 0}
 }
 func (m *Entity_Ric) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -572,7 +777,7 @@ func (m *Entity_E2Node) Reset()         { *m = Entity_E2Node{} }
 func (m *Entity_E2Node) String() string { return proto.CompactTextString(m) }
 func (*Entity_E2Node) ProtoMessage()    {}
 func (*Entity_E2Node) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7, 1}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8, 1}
 }
 func (m *Entity_E2Node) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -608,7 +813,7 @@ func (m *Entity_E2Interface) Reset()         { *m = Entity_E2Interface{} }
 func (m *Entity_E2Interface) String() string { return proto.CompactTextString(m) }
 func (*Entity_E2Interface) ProtoMessage()    {}
 func (*Entity_E2Interface) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7, 2}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8, 2}
 }
 func (m *Entity_E2Interface) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -644,7 +849,7 @@ func (m *Entity_XnInterface) Reset()         { *m = Entity_XnInterface{} }
 func (m *Entity_XnInterface) String() string { return proto.CompactTextString(m) }
 func (*Entity_XnInterface) ProtoMessage()    {}
 func (*Entity_XnInterface) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7, 3}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8, 3}
 }
 func (m *Entity_XnInterface) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -674,18 +879,19 @@ func (m *Entity_XnInterface) XXX_DiscardUnknown() {
 var xxx_messageInfo_Entity_XnInterface proto.InternalMessageInfo
 
 type Relationship struct {
-	Kind Relationship_Kind `protobuf:"varint,1,opt,name=kind,proto3,enum=topo.Relationship_Kind" json:"kind,omitempty"`
-	// Types that are valid to be assigned to Relationship:
-	//	*Relationship_Contains_
-	//	*Relationship_Aggregates_
-	Relationship isRelationship_Relationship `protobuf_oneof:"relationship"`
+	Directionality Relationship_Directionality `protobuf:"varint,1,opt,name=directionality,proto3,enum=topo.Relationship_Directionality" json:"directionality,omitempty"`
+	Multiplicity   Relationship_Multiplicity   `protobuf:"varint,2,opt,name=multiplicity,proto3,enum=topo.Relationship_Multiplicity" json:"multiplicity,omitempty"`
+	Type           Relationship_Type           `protobuf:"varint,3,opt,name=type,proto3,enum=topo.Relationship_Type" json:"type,omitempty"`
+	// The two object(s) that the relationship binds
+	SourceObject []*Object `protobuf:"bytes,4,rep,name=source_object,json=sourceObject,proto3" json:"source_object,omitempty"`
+	TargetObject []*Object `protobuf:"bytes,5,rep,name=target_object,json=targetObject,proto3" json:"target_object,omitempty"`
 }
 
 func (m *Relationship) Reset()         { *m = Relationship{} }
 func (m *Relationship) String() string { return proto.CompactTextString(m) }
 func (*Relationship) ProtoMessage()    {}
 func (*Relationship) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8}
+	return fileDescriptor_5823f9f54b50fd8c, []int{9}
 }
 func (m *Relationship) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -714,166 +920,48 @@ func (m *Relationship) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Relationship proto.InternalMessageInfo
 
-type isRelationship_Relationship interface {
-	isRelationship_Relationship()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type Relationship_Contains_ struct {
-	Contains *Relationship_Contains `protobuf:"bytes,2,opt,name=contains,proto3,oneof" json:"contains,omitempty"`
-}
-type Relationship_Aggregates_ struct {
-	Aggregates *Relationship_Aggregates `protobuf:"bytes,4,opt,name=aggregates,proto3,oneof" json:"aggregates,omitempty"`
-}
-
-func (*Relationship_Contains_) isRelationship_Relationship()   {}
-func (*Relationship_Aggregates_) isRelationship_Relationship() {}
-
-func (m *Relationship) GetRelationship() isRelationship_Relationship {
+func (m *Relationship) GetDirectionality() Relationship_Directionality {
 	if m != nil {
-		return m.Relationship
+		return m.Directionality
 	}
-	return nil
+	return Relationship_UNSPECIFIED_DIRECTIONALITY
 }
 
-func (m *Relationship) GetKind() Relationship_Kind {
+func (m *Relationship) GetMultiplicity() Relationship_Multiplicity {
 	if m != nil {
-		return m.Kind
+		return m.Multiplicity
+	}
+	return Relationship_UNSPECIFIED_MULTIPLICITY
+}
+
+func (m *Relationship) GetType() Relationship_Type {
+	if m != nil {
+		return m.Type
 	}
 	return Relationship_CONTAINS
 }
 
-func (m *Relationship) GetContains() *Relationship_Contains {
-	if x, ok := m.GetRelationship().(*Relationship_Contains_); ok {
-		return x.Contains
+func (m *Relationship) GetSourceObject() []*Object {
+	if m != nil {
+		return m.SourceObject
 	}
 	return nil
 }
 
-func (m *Relationship) GetAggregates() *Relationship_Aggregates {
-	if x, ok := m.GetRelationship().(*Relationship_Aggregates_); ok {
-		return x.Aggregates
+func (m *Relationship) GetTargetObject() []*Object {
+	if m != nil {
+		return m.TargetObject
 	}
 	return nil
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*Relationship) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*Relationship_Contains_)(nil),
-		(*Relationship_Aggregates_)(nil),
-	}
-}
-
-type Relationship_Contains struct {
-	ContainerId string `protobuf:"bytes,1,opt,name=ContainerId,proto3" json:"ContainerId,omitempty"`
-	ContaineeId string `protobuf:"bytes,2,opt,name=ContaineeId,proto3" json:"ContaineeId,omitempty"`
-}
-
-func (m *Relationship_Contains) Reset()         { *m = Relationship_Contains{} }
-func (m *Relationship_Contains) String() string { return proto.CompactTextString(m) }
-func (*Relationship_Contains) ProtoMessage()    {}
-func (*Relationship_Contains) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 0}
-}
-func (m *Relationship_Contains) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Relationship_Contains) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Relationship_Contains.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Relationship_Contains) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Relationship_Contains.Merge(m, src)
-}
-func (m *Relationship_Contains) XXX_Size() int {
-	return m.Size()
-}
-func (m *Relationship_Contains) XXX_DiscardUnknown() {
-	xxx_messageInfo_Relationship_Contains.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Relationship_Contains proto.InternalMessageInfo
-
-func (m *Relationship_Contains) GetContainerId() string {
-	if m != nil {
-		return m.ContainerId
-	}
-	return ""
-}
-
-func (m *Relationship_Contains) GetContaineeId() string {
-	if m != nil {
-		return m.ContaineeId
-	}
-	return ""
-}
-
-type Relationship_Aggregates struct {
-	AggregatorId string `protobuf:"bytes,1,opt,name=AggregatorId,proto3" json:"AggregatorId,omitempty"`
-	AggregateeId string `protobuf:"bytes,2,opt,name=AggregateeId,proto3" json:"AggregateeId,omitempty"`
-}
-
-func (m *Relationship_Aggregates) Reset()         { *m = Relationship_Aggregates{} }
-func (m *Relationship_Aggregates) String() string { return proto.CompactTextString(m) }
-func (*Relationship_Aggregates) ProtoMessage()    {}
-func (*Relationship_Aggregates) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 1}
-}
-func (m *Relationship_Aggregates) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Relationship_Aggregates) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Relationship_Aggregates.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Relationship_Aggregates) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Relationship_Aggregates.Merge(m, src)
-}
-func (m *Relationship_Aggregates) XXX_Size() int {
-	return m.Size()
-}
-func (m *Relationship_Aggregates) XXX_DiscardUnknown() {
-	xxx_messageInfo_Relationship_Aggregates.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Relationship_Aggregates proto.InternalMessageInfo
-
-func (m *Relationship_Aggregates) GetAggregatorId() string {
-	if m != nil {
-		return m.AggregatorId
-	}
-	return ""
-}
-
-func (m *Relationship_Aggregates) GetAggregateeId() string {
-	if m != nil {
-		return m.AggregateeId
-	}
-	return ""
 }
 
 func init() {
 	proto.RegisterEnum("topo.Update_Type", Update_Type_name, Update_Type_value)
-	proto.RegisterEnum("topo.Entity_Kind", Entity_Kind_name, Entity_Kind_value)
-	proto.RegisterEnum("topo.Relationship_Kind", Relationship_Kind_name, Relationship_Kind_value)
+	proto.RegisterEnum("topo.Object_Type", Object_Type_name, Object_Type_value)
+	proto.RegisterEnum("topo.Entity_Type", Entity_Type_name, Entity_Type_value)
+	proto.RegisterEnum("topo.Relationship_Directionality", Relationship_Directionality_name, Relationship_Directionality_value)
+	proto.RegisterEnum("topo.Relationship_Multiplicity", Relationship_Multiplicity_name, Relationship_Multiplicity_value)
+	proto.RegisterEnum("topo.Relationship_Type", Relationship_Type_name, Relationship_Type_value)
 	proto.RegisterType((*WriteRequest)(nil), "topo.WriteRequest")
 	proto.RegisterType((*WriteResponse)(nil), "topo.WriteResponse")
 	proto.RegisterType((*ReadRequest)(nil), "topo.ReadRequest")
@@ -881,66 +969,76 @@ func init() {
 	proto.RegisterType((*StreamMessageRequest)(nil), "topo.StreamMessageRequest")
 	proto.RegisterType((*StreamMessageResponse)(nil), "topo.StreamMessageResponse")
 	proto.RegisterType((*Update)(nil), "topo.Update")
+	proto.RegisterType((*Object)(nil), "topo.Object")
 	proto.RegisterType((*Entity)(nil), "topo.Entity")
 	proto.RegisterType((*Entity_Ric)(nil), "topo.Entity.Ric")
 	proto.RegisterType((*Entity_E2Node)(nil), "topo.Entity.E2Node")
 	proto.RegisterType((*Entity_E2Interface)(nil), "topo.Entity.E2Interface")
 	proto.RegisterType((*Entity_XnInterface)(nil), "topo.Entity.XnInterface")
 	proto.RegisterType((*Relationship)(nil), "topo.Relationship")
-	proto.RegisterType((*Relationship_Contains)(nil), "topo.Relationship.Contains")
-	proto.RegisterType((*Relationship_Aggregates)(nil), "topo.Relationship.Aggregates")
 }
 
 func init() { proto.RegisterFile("api/topo/topo.proto", fileDescriptor_5823f9f54b50fd8c) }
 
 var fileDescriptor_5823f9f54b50fd8c = []byte{
-	// 728 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x54, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xb6, 0xe3, 0xd4, 0x4d, 0x27, 0x4e, 0xea, 0x6e, 0x0b, 0xb5, 0x5c, 0x08, 0x91, 0x55, 0x50,
-	0x24, 0xa4, 0x14, 0x99, 0x0b, 0x08, 0x55, 0x28, 0x3f, 0x6e, 0x63, 0x41, 0x5d, 0xb4, 0x71, 0x45,
-	0x39, 0x55, 0x26, 0x5e, 0x52, 0x8b, 0x62, 0x1b, 0xdb, 0x95, 0xda, 0xb7, 0x40, 0xf0, 0x2c, 0x9c,
-	0x78, 0x01, 0x8e, 0x3d, 0x72, 0x42, 0xa8, 0x7d, 0x0b, 0x4e, 0xc8, 0x6b, 0x3b, 0x59, 0x97, 0x5c,
-	0xa2, 0xd9, 0xef, 0x9b, 0x6f, 0xf6, 0xdb, 0xcc, 0x78, 0x60, 0xdd, 0x09, 0xbd, 0x9d, 0x24, 0x08,
-	0x03, 0xfa, 0xd3, 0x0d, 0xa3, 0x20, 0x09, 0x50, 0x35, 0x8d, 0xd5, 0x8d, 0x69, 0x30, 0x0d, 0x28,
-	0xb0, 0x93, 0x46, 0x19, 0xa7, 0xd9, 0x20, 0xbd, 0x8d, 0xbc, 0x84, 0x60, 0xf2, 0xf9, 0x9c, 0xc4,
-	0x09, 0xba, 0x07, 0x15, 0xcf, 0x55, 0x2a, 0x6d, 0xbe, 0xb3, 0xd2, 0x97, 0xfe, 0xfe, 0x7e, 0x50,
-	0x33, 0xfc, 0xc4, 0x4b, 0x2e, 0xcd, 0x21, 0xae, 0x78, 0x2e, 0x7a, 0x04, 0xcb, 0xe7, 0xa1, 0xeb,
-	0x24, 0x24, 0x56, 0x84, 0xb6, 0xd0, 0xa9, 0xeb, 0x52, 0x97, 0xde, 0x73, 0x44, 0x41, 0x5c, 0x90,
-	0xda, 0x2a, 0x34, 0xf2, 0xaa, 0x71, 0x18, 0xf8, 0x31, 0xd1, 0x1a, 0x50, 0xc7, 0xc4, 0x71, 0xf3,
-	0x5b, 0xb4, 0x26, 0x48, 0xd9, 0x31, 0xa7, 0xef, 0xc2, 0xc6, 0x38, 0x89, 0x88, 0xf3, 0xe9, 0x80,
-	0xc4, 0xb1, 0x33, 0x2d, 0xdc, 0x68, 0x9b, 0x70, 0xe7, 0x16, 0x9e, 0x0b, 0xbe, 0xf2, 0x20, 0x66,
-	0x97, 0xa2, 0x87, 0x50, 0x4d, 0x2e, 0x43, 0xa2, 0xf0, 0x6d, 0xbe, 0xd3, 0xd4, 0xd7, 0x58, 0x43,
-	0x5d, 0xfb, 0x32, 0x24, 0x98, 0xd2, 0x68, 0x1b, 0x44, 0x42, 0x9f, 0x42, 0x1f, 0x37, 0x73, 0x9e,
-	0x3d, 0x0f, 0xe7, 0x9c, 0xf6, 0x02, 0xaa, 0xa9, 0x06, 0xad, 0x42, 0xfd, 0xc8, 0x1a, 0xbf, 0x31,
-	0x06, 0xe6, 0x9e, 0x69, 0x0c, 0x65, 0x0e, 0x01, 0x88, 0xa6, 0x35, 0x36, 0xb0, 0x2d, 0xf3, 0x69,
-	0x7c, 0x70, 0x38, 0x34, 0xf7, 0xde, 0xc9, 0x95, 0x34, 0x1e, 0x1a, 0xaf, 0x0d, 0xdb, 0x90, 0x05,
-	0xed, 0xbb, 0x00, 0x62, 0x56, 0x2f, 0x35, 0xf5, 0xd1, 0xf3, 0xdd, 0xb2, 0xa9, 0x8c, 0xeb, 0xbe,
-	0xf2, 0x7c, 0x17, 0x53, 0x1a, 0x6d, 0x83, 0x10, 0x79, 0x93, 0xdc, 0x91, 0x5c, 0xca, 0xc2, 0xde,
-	0x64, 0xc4, 0xe1, 0x94, 0x46, 0x5d, 0x58, 0x26, 0xfa, 0x89, 0x1f, 0xb8, 0x44, 0x11, 0x68, 0xe6,
-	0x7a, 0x29, 0xd3, 0xd0, 0xad, 0xc0, 0x25, 0x23, 0x0e, 0x8b, 0x84, 0x46, 0x68, 0x17, 0x24, 0xa2,
-	0x9f, 0x78, 0x7e, 0x42, 0xa2, 0x0f, 0xce, 0x84, 0x28, 0x55, 0x2a, 0x52, 0x6e, 0x89, 0xcc, 0x82,
-	0x1f, 0x71, 0xb8, 0x4e, 0xe6, 0xc7, 0x54, 0x7e, 0xe1, 0x33, 0xf2, 0xa5, 0x05, 0xf2, 0x63, 0xbf,
-	0x24, 0xbf, 0x98, 0x1f, 0xd1, 0x33, 0x68, 0x44, 0xe4, 0xcc, 0x49, 0xbc, 0xc0, 0x8f, 0x4f, 0xbd,
-	0x30, 0x56, 0x44, 0x3a, 0x29, 0x28, 0xd3, 0x63, 0x86, 0xc2, 0xe5, 0x44, 0x75, 0x09, 0x04, 0xec,
-	0x4d, 0xd4, 0x1a, 0x88, 0xd9, 0x93, 0xd4, 0x06, 0xd4, 0x19, 0x9f, 0xe9, 0x91, 0xb9, 0x57, 0xdb,
-	0x85, 0x6a, 0xfa, 0x57, 0xa2, 0x65, 0x10, 0xb0, 0x39, 0xc8, 0x7a, 0x64, 0xe8, 0xd6, 0xe1, 0xd0,
-	0x90, 0xf9, 0xb4, 0x81, 0x86, 0x6e, 0x5a, 0xb6, 0x81, 0xf7, 0x7a, 0x03, 0x43, 0xae, 0xa4, 0xc0,
-	0xb1, 0x35, 0x07, 0x84, 0x7e, 0xad, 0x18, 0x08, 0xed, 0x9b, 0x90, 0x8e, 0xe3, 0xdc, 0x09, 0x7a,
-	0x5c, 0xea, 0xde, 0xe6, 0xff, 0xce, 0xd9, 0x1e, 0x3e, 0x87, 0xda, 0x24, 0xf0, 0x13, 0xc7, 0xf3,
-	0xe3, 0xbc, 0x91, 0x5b, 0x0b, 0x04, 0x83, 0x3c, 0x65, 0xc4, 0xe1, 0x59, 0x3a, 0x7a, 0x09, 0xe0,
-	0x4c, 0xa7, 0x11, 0x99, 0xd2, 0x2f, 0x2a, 0x6b, 0xd3, 0xfd, 0x05, 0xe2, 0xde, 0x2c, 0x69, 0xc4,
-	0x61, 0x46, 0xa2, 0x5a, 0x50, 0x2b, 0x0a, 0xa3, 0x36, 0xd4, 0xf3, 0x98, 0x44, 0x66, 0xe6, 0x7d,
-	0x05, 0xb3, 0x10, 0x9b, 0x41, 0xcc, 0xfc, 0x23, 0xc7, 0x2c, 0xa4, 0xda, 0x00, 0xf3, 0xbb, 0x90,
-	0x06, 0x52, 0x71, 0x0a, 0xe6, 0x25, 0x4b, 0x18, 0x9b, 0xc3, 0x14, 0x2d, 0x61, 0xda, 0x76, 0xde,
-	0x28, 0x09, 0x6a, 0x83, 0x43, 0xcb, 0xee, 0x99, 0xd6, 0x58, 0xe6, 0x50, 0x13, 0xa0, 0xb7, 0xbf,
-	0x8f, 0x8d, 0xfd, 0x9e, 0x6d, 0x8c, 0x65, 0xbe, 0xdf, 0x04, 0x89, 0x1d, 0x07, 0xfd, 0x07, 0x0f,
-	0x74, 0x71, 0x21, 0x1d, 0x96, 0xe8, 0x32, 0x41, 0xf9, 0x08, 0xb1, 0xfb, 0x4a, 0x5d, 0x2f, 0x61,
-	0xf9, 0x76, 0xe0, 0xd0, 0x0e, 0x54, 0xd3, 0x05, 0x83, 0xd6, 0x8a, 0x7f, 0x73, 0xb6, 0x7b, 0x54,
-	0xc4, 0x42, 0x33, 0x81, 0x05, 0x8d, 0x6c, 0xd3, 0x0c, 0x4e, 0x1d, 0xdf, 0x27, 0x67, 0x48, 0xcd,
-	0xd2, 0x16, 0xad, 0x25, 0x75, 0x6b, 0x21, 0x57, 0xd4, 0xea, 0xf0, 0x4f, 0xf8, 0xbe, 0xf2, 0xf3,
-	0xba, 0xc5, 0x5f, 0x5d, 0xb7, 0xf8, 0x3f, 0xd7, 0x2d, 0xfe, 0xcb, 0x4d, 0x8b, 0xbb, 0xba, 0x69,
-	0x71, 0xbf, 0x6e, 0x5a, 0xdc, 0x7b, 0x91, 0x2e, 0xde, 0xa7, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff,
-	0x14, 0x5b, 0xe2, 0xd7, 0xab, 0x05, 0x00, 0x00,
+	// 897 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x55, 0x41, 0x8f, 0xdb, 0x44,
+	0x14, 0xf6, 0xc4, 0x49, 0xba, 0x7d, 0x71, 0x52, 0xef, 0x6c, 0xa1, 0x51, 0x40, 0x61, 0xb1, 0xa0,
+	0x5a, 0x09, 0x29, 0xa5, 0x41, 0x20, 0x84, 0x54, 0x09, 0x27, 0x99, 0xdd, 0x8c, 0x94, 0xd8, 0xcb,
+	0xd8, 0x0b, 0x0d, 0x97, 0xc8, 0x9b, 0x0c, 0xad, 0xab, 0xd4, 0x36, 0x8e, 0x57, 0xea, 0xfe, 0x0b,
+	0x6e, 0xfc, 0x18, 0xfe, 0x00, 0xc7, 0x1e, 0x39, 0xa2, 0x5d, 0x4e, 0xfc, 0x05, 0x2e, 0x68, 0x66,
+	0xec, 0x5d, 0x7b, 0x1b, 0x09, 0x2e, 0xd6, 0xbc, 0xf7, 0xbe, 0xef, 0xcd, 0x7b, 0x33, 0x9f, 0xe7,
+	0xc1, 0x41, 0x90, 0x84, 0x4f, 0xb2, 0x38, 0x89, 0xe5, 0x67, 0x90, 0xa4, 0x71, 0x16, 0xe3, 0xba,
+	0x58, 0x5b, 0x5f, 0x81, 0xf1, 0x43, 0x1a, 0x66, 0x9c, 0xf1, 0x9f, 0x2f, 0xf8, 0x36, 0xc3, 0x8f,
+	0xe1, 0xde, 0x45, 0xb2, 0x0e, 0x32, 0xbe, 0xed, 0xa2, 0x43, 0xfd, 0xa8, 0x35, 0x34, 0x06, 0x92,
+	0x73, 0x26, 0x9d, 0xac, 0x08, 0x5a, 0x0f, 0xa0, 0x9d, 0xf3, 0xb6, 0x49, 0x1c, 0x6d, 0xb9, 0xf5,
+	0x25, 0xb4, 0x18, 0x0f, 0xd6, 0xa5, 0x3c, 0xf1, 0xf9, 0x2b, 0xbe, 0xca, 0xee, 0xe4, 0x71, 0xa5,
+	0x93, 0x15, 0x41, 0xb1, 0xbf, 0xa2, 0xa9, 0x34, 0xff, 0x9b, 0xf7, 0x3e, 0x3c, 0xf4, 0xb2, 0x94,
+	0x07, 0xaf, 0xe7, 0x7c, 0xbb, 0x0d, 0x5e, 0x14, 0xf5, 0x5b, 0x8f, 0xe0, 0xbd, 0x3b, 0xfe, 0xbc,
+	0xbe, 0x5f, 0x11, 0x34, 0x55, 0x13, 0xf8, 0x53, 0xa8, 0x67, 0x97, 0x09, 0xef, 0xd6, 0x0e, 0xd1,
+	0x51, 0x67, 0xb8, 0x5f, 0x6e, 0x70, 0xe0, 0x5f, 0x26, 0x9c, 0xc9, 0x30, 0xfe, 0x04, 0x9a, 0x6a,
+	0xb7, 0xae, 0x7e, 0x88, 0xde, 0xa9, 0x24, 0x8f, 0x59, 0xdf, 0x42, 0x5d, 0x70, 0xf0, 0x43, 0x30,
+	0xcf, 0x1c, 0xef, 0x94, 0x8c, 0xe9, 0x31, 0x25, 0x93, 0xa5, 0xbf, 0x38, 0x25, 0xa6, 0x86, 0x01,
+	0x9a, 0xd4, 0xf1, 0x08, 0xf3, 0x4d, 0x24, 0xd6, 0x73, 0x77, 0x42, 0x8f, 0x17, 0x66, 0x4d, 0xac,
+	0x27, 0x64, 0x46, 0x7c, 0x62, 0xea, 0xd6, 0x5f, 0x08, 0x9a, 0x2a, 0x29, 0xee, 0x40, 0x2d, 0x5c,
+	0x77, 0xd1, 0x21, 0x3a, 0xba, 0xcf, 0x6a, 0xe1, 0x7a, 0x77, 0xa5, 0x0a, 0x5b, 0xae, 0xf4, 0x31,
+	0x34, 0x79, 0x94, 0x85, 0xd9, 0x65, 0xb5, 0x52, 0x22, 0x7d, 0x53, 0x8d, 0xe5, 0x51, 0xfc, 0x35,
+	0x18, 0x29, 0xdf, 0x04, 0x59, 0x18, 0x47, 0xdb, 0x97, 0x61, 0xd2, 0xad, 0x4b, 0x34, 0x56, 0x68,
+	0x56, 0x8a, 0x4c, 0x35, 0x56, 0x41, 0x5a, 0xdf, 0xfc, 0x57, 0x97, 0xc4, 0xf1, 0xa9, 0xbf, 0x30,
+	0x11, 0x36, 0xc1, 0x60, 0x64, 0x66, 0xfb, 0xd4, 0x75, 0xbc, 0x29, 0x3d, 0x35, 0x6b, 0xa3, 0x06,
+	0xe8, 0xf1, 0xf9, 0x2b, 0xeb, 0x9f, 0x1a, 0x34, 0x55, 0x45, 0x37, 0x6d, 0xa1, 0x72, 0x5b, 0x2a,
+	0x56, 0xbd, 0x00, 0x3d, 0x0d, 0x57, 0xb2, 0xf9, 0xd6, 0xd0, 0xac, 0xa0, 0x58, 0xb8, 0x9a, 0x6a,
+	0x4c, 0x84, 0xf1, 0x00, 0xee, 0xf1, 0xe1, 0x32, 0x8a, 0xd7, 0x3c, 0xef, 0xfe, 0xa0, 0x82, 0x24,
+	0x43, 0x27, 0x5e, 0x73, 0x79, 0x08, 0x72, 0x85, 0x9f, 0x81, 0xc1, 0x87, 0xcb, 0x30, 0xca, 0x78,
+	0xfa, 0x53, 0xb0, 0xe2, 0xf9, 0x21, 0x74, 0xef, 0x90, 0x68, 0x11, 0x9f, 0x6a, 0xac, 0xc5, 0x6f,
+	0x4d, 0x41, 0x7f, 0x13, 0x95, 0xe8, 0x8d, 0x1d, 0xf4, 0xe7, 0x51, 0x85, 0xfe, 0xe6, 0xd6, 0xec,
+	0x35, 0x40, 0x67, 0xe1, 0xaa, 0xb7, 0x07, 0x4d, 0x55, 0x58, 0xaf, 0x0d, 0xad, 0xd2, 0x6e, 0xc2,
+	0x2c, 0xb1, 0xad, 0x67, 0xf9, 0xb9, 0xdf, 0x03, 0x9d, 0xd1, 0x71, 0x7e, 0xd4, 0x43, 0xc7, 0x9d,
+	0x10, 0x13, 0xe1, 0x07, 0x92, 0xea, 0xf8, 0x84, 0x1d, 0xdb, 0x63, 0x62, 0xd6, 0x84, 0xe3, 0xb9,
+	0x73, 0xeb, 0xd0, 0x47, 0x7b, 0x85, 0x30, 0xac, 0xbf, 0xeb, 0xe2, 0x47, 0xbb, 0xbd, 0x51, 0x4c,
+	0xa1, 0xb3, 0x0e, 0x53, 0xbe, 0x12, 0x8e, 0x60, 0x23, 0xb4, 0xa3, 0x6e, 0xe3, 0xe3, 0x77, 0xd5,
+	0x30, 0x98, 0x54, 0x80, 0xec, 0x0e, 0x11, 0x8f, 0xc1, 0x78, 0x7d, 0xb1, 0xc9, 0xc2, 0x64, 0x13,
+	0xae, 0x44, 0x22, 0xa5, 0xd6, 0x8f, 0x76, 0x24, 0x9a, 0x97, 0x60, 0xac, 0x42, 0xc2, 0x9f, 0xe5,
+	0x9a, 0xd0, 0x25, 0xf9, 0xd1, 0x0e, 0x72, 0x49, 0x19, 0x4f, 0xa1, 0xbd, 0x8d, 0x2f, 0xd2, 0x15,
+	0x5f, 0xe6, 0x7f, 0x68, 0x7d, 0xc7, 0x5b, 0x61, 0x28, 0x48, 0xfe, 0x6b, 0x3d, 0x85, 0x76, 0x16,
+	0xa4, 0x2f, 0x78, 0x56, 0x50, 0x1a, 0xbb, 0x28, 0x0a, 0xa2, 0x2c, 0xeb, 0x3b, 0xe8, 0x54, 0x3b,
+	0xc7, 0x7d, 0xe8, 0x95, 0xe5, 0x3f, 0xa1, 0x8c, 0x8c, 0x85, 0xd2, 0xed, 0x99, 0x10, 0xbf, 0x86,
+	0x0d, 0xd8, 0x53, 0x3e, 0x32, 0x31, 0x11, 0xde, 0x87, 0xf6, 0x88, 0x96, 0x30, 0x66, 0xcd, 0x4a,
+	0xc0, 0x28, 0x9f, 0x01, 0xfe, 0x10, 0xba, 0xe5, 0x84, 0xf3, 0xb3, 0x99, 0x4f, 0x4f, 0x67, 0x74,
+	0xac, 0xd2, 0x75, 0x00, 0x5c, 0x87, 0x2c, 0x7d, 0x77, 0xe9, 0x3a, 0xf9, 0x85, 0xe7, 0xf6, 0xdc,
+	0x76, 0x16, 0xea, 0xc2, 0xc5, 0xaa, 0x40, 0xe8, 0xe2, 0xef, 0x2b, 0x1c, 0x12, 0x52, 0xb7, 0xd2,
+	0x5c, 0x41, 0x06, 0xec, 0x8d, 0x5d, 0xc7, 0xb7, 0xa9, 0xe3, 0xa9, 0x42, 0x85, 0xc5, 0xdc, 0x99,
+	0x67, 0x22, 0xb1, 0x8f, 0x7d, 0x72, 0xc2, 0xc8, 0x89, 0xed, 0x13, 0xcf, 0xac, 0xc9, 0x7d, 0x19,
+	0x3d, 0xa1, 0x8e, 0xb4, 0x75, 0x61, 0xfb, 0x84, 0xcd, 0x73, 0xbb, 0x8e, 0xdb, 0x70, 0xdf, 0x67,
+	0xf6, 0xf7, 0x84, 0x79, 0xc4, 0x33, 0x1b, 0xa2, 0x0a, 0x46, 0xec, 0x19, 0xfd, 0x91, 0x4c, 0x96,
+	0xa3, 0x85, 0xd9, 0x1c, 0xfe, 0x86, 0x40, 0x4e, 0x17, 0x3c, 0x84, 0x86, 0x9c, 0x12, 0x38, 0x7f,
+	0x63, 0xca, 0xa3, 0xa6, 0x77, 0x50, 0xf1, 0xe5, 0xcf, 0xb4, 0x86, 0x9f, 0x40, 0x5d, 0x4c, 0x04,
+	0xbc, 0x5f, 0x48, 0xe0, 0x66, 0xa8, 0xf4, 0x70, 0xd9, 0x75, 0x43, 0x70, 0xa0, 0xad, 0x9e, 0xfc,
+	0xf1, 0xcb, 0x20, 0x8a, 0xf8, 0x06, 0xf7, 0x14, 0x6c, 0xd7, 0x7c, 0xe8, 0x7d, 0xb0, 0x33, 0x56,
+	0xe4, 0x3a, 0x42, 0x9f, 0xa3, 0x51, 0xf7, 0xf7, 0xab, 0x3e, 0x7a, 0x7b, 0xd5, 0x47, 0x7f, 0x5e,
+	0xf5, 0xd1, 0x2f, 0xd7, 0x7d, 0xed, 0xed, 0x75, 0x5f, 0xfb, 0xe3, 0xba, 0xaf, 0x9d, 0x37, 0xe5,
+	0xe4, 0xfc, 0xe2, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc6, 0xb7, 0x5e, 0x82, 0x50, 0x07, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1169,15 +1267,8 @@ func (m *WriteRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTopo(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0xa
 		}
-	}
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarintTopo(dAtA, i, uint64(len(m.Id)))
-		i--
-		dAtA[i] = 0x12
 	}
 	return len(dAtA) - i, nil
 }
@@ -1225,6 +1316,20 @@ func (m *ReadRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Objects) > 0 {
+		for iNdEx := len(m.Objects) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Objects[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTopo(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -1248,6 +1353,20 @@ func (m *ReadResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Objects) > 0 {
+		for iNdEx := len(m.Objects) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Objects[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTopo(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -1317,6 +1436,77 @@ func (m *Update) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Object != nil {
+		{
+			size, err := m.Object.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTopo(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Type != 0 {
+		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x10
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Object) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Object) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Object) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Obj != nil {
+		{
+			size := m.Obj.Size()
+			i -= size
+			if _, err := m.Obj.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.Type != 0 {
+		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintTopo(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Object_Entity) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Object_Entity) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	if m.Entity != nil {
 		{
 			size, err := m.Entity.MarshalToSizedBuffer(dAtA[:i])
@@ -1327,16 +1517,31 @@ func (m *Update) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintTopo(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x12
-	}
-	if m.Type != 0 {
-		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
-		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0x1a
 	}
 	return len(dAtA) - i, nil
 }
+func (m *Object_Relationship) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
 
+func (m *Object_Relationship) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Relationship != nil {
+		{
+			size, err := m.Relationship.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTopo(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	return len(dAtA) - i, nil
+}
 func (m *Entity) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1357,20 +1562,6 @@ func (m *Entity) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Relationships) > 0 {
-		for iNdEx := len(m.Relationships) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Relationships[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTopo(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x32
-		}
-	}
 	if m.Entity != nil {
 		{
 			size := m.Entity.Size()
@@ -1380,8 +1571,8 @@ func (m *Entity) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 		}
 	}
-	if m.Kind != 0 {
-		i = encodeVarintTopo(dAtA, i, uint64(m.Kind))
+	if m.Type != 0 {
+		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -1584,135 +1775,48 @@ func (m *Relationship) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Relationship != nil {
-		{
-			size := m.Relationship.Size()
-			i -= size
-			if _, err := m.Relationship.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
+	if len(m.TargetObject) > 0 {
+		for iNdEx := len(m.TargetObject) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.TargetObject[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTopo(dAtA, i, uint64(size))
 			}
+			i--
+			dAtA[i] = 0x2a
 		}
 	}
-	if m.Kind != 0 {
-		i = encodeVarintTopo(dAtA, i, uint64(m.Kind))
+	if len(m.SourceObject) > 0 {
+		for iNdEx := len(m.SourceObject) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SourceObject[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTopo(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if m.Type != 0 {
+		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Multiplicity != 0 {
+		i = encodeVarintTopo(dAtA, i, uint64(m.Multiplicity))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Directionality != 0 {
+		i = encodeVarintTopo(dAtA, i, uint64(m.Directionality))
 		i--
 		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *Relationship_Contains_) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Relationship_Contains_) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Contains != nil {
-		{
-			size, err := m.Contains.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	return len(dAtA) - i, nil
-}
-func (m *Relationship_Aggregates_) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Relationship_Aggregates_) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Aggregates != nil {
-		{
-			size, err := m.Aggregates.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
-func (m *Relationship_Contains) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Relationship_Contains) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Relationship_Contains) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.ContaineeId) > 0 {
-		i -= len(m.ContaineeId)
-		copy(dAtA[i:], m.ContaineeId)
-		i = encodeVarintTopo(dAtA, i, uint64(len(m.ContaineeId)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.ContainerId) > 0 {
-		i -= len(m.ContainerId)
-		copy(dAtA[i:], m.ContainerId)
-		i = encodeVarintTopo(dAtA, i, uint64(len(m.ContainerId)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *Relationship_Aggregates) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Relationship_Aggregates) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Relationship_Aggregates) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.AggregateeId) > 0 {
-		i -= len(m.AggregateeId)
-		copy(dAtA[i:], m.AggregateeId)
-		i = encodeVarintTopo(dAtA, i, uint64(len(m.AggregateeId)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.AggregatorId) > 0 {
-		i -= len(m.AggregatorId)
-		copy(dAtA[i:], m.AggregatorId)
-		i = encodeVarintTopo(dAtA, i, uint64(len(m.AggregatorId)))
-		i--
-		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1734,10 +1838,6 @@ func (m *WriteRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Id)
-	if l > 0 {
-		n += 1 + l + sovTopo(uint64(l))
-	}
 	if len(m.Updates) > 0 {
 		for _, e := range m.Updates {
 			l = e.Size()
@@ -1762,6 +1862,12 @@ func (m *ReadRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
+	if len(m.Objects) > 0 {
+		for _, e := range m.Objects {
+			l = e.Size()
+			n += 1 + l + sovTopo(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -1771,6 +1877,12 @@ func (m *ReadResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	if len(m.Objects) > 0 {
+		for _, e := range m.Objects {
+			l = e.Size()
+			n += 1 + l + sovTopo(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -1801,30 +1913,67 @@ func (m *Update) Size() (n int) {
 	if m.Type != 0 {
 		n += 1 + sovTopo(uint64(m.Type))
 	}
+	if m.Object != nil {
+		l = m.Object.Size()
+		n += 1 + l + sovTopo(uint64(l))
+	}
+	return n
+}
+
+func (m *Object) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovTopo(uint64(l))
+	}
+	if m.Type != 0 {
+		n += 1 + sovTopo(uint64(m.Type))
+	}
+	if m.Obj != nil {
+		n += m.Obj.Size()
+	}
+	return n
+}
+
+func (m *Object_Entity) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	if m.Entity != nil {
 		l = m.Entity.Size()
 		n += 1 + l + sovTopo(uint64(l))
 	}
 	return n
 }
-
+func (m *Object_Relationship) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Relationship != nil {
+		l = m.Relationship.Size()
+		n += 1 + l + sovTopo(uint64(l))
+	}
+	return n
+}
 func (m *Entity) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Kind != 0 {
-		n += 1 + sovTopo(uint64(m.Kind))
+	if m.Type != 0 {
+		n += 1 + sovTopo(uint64(m.Type))
 	}
 	if m.Entity != nil {
 		n += m.Entity.Size()
-	}
-	if len(m.Relationships) > 0 {
-		for _, e := range m.Relationships {
-			l = e.Size()
-			n += 1 + l + sovTopo(uint64(l))
-		}
 	}
 	return n
 }
@@ -1919,69 +2068,26 @@ func (m *Relationship) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Kind != 0 {
-		n += 1 + sovTopo(uint64(m.Kind))
+	if m.Directionality != 0 {
+		n += 1 + sovTopo(uint64(m.Directionality))
 	}
-	if m.Relationship != nil {
-		n += m.Relationship.Size()
+	if m.Multiplicity != 0 {
+		n += 1 + sovTopo(uint64(m.Multiplicity))
 	}
-	return n
-}
-
-func (m *Relationship_Contains_) Size() (n int) {
-	if m == nil {
-		return 0
+	if m.Type != 0 {
+		n += 1 + sovTopo(uint64(m.Type))
 	}
-	var l int
-	_ = l
-	if m.Contains != nil {
-		l = m.Contains.Size()
-		n += 1 + l + sovTopo(uint64(l))
+	if len(m.SourceObject) > 0 {
+		for _, e := range m.SourceObject {
+			l = e.Size()
+			n += 1 + l + sovTopo(uint64(l))
+		}
 	}
-	return n
-}
-func (m *Relationship_Aggregates_) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Aggregates != nil {
-		l = m.Aggregates.Size()
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	return n
-}
-func (m *Relationship_Contains) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.ContainerId)
-	if l > 0 {
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	l = len(m.ContaineeId)
-	if l > 0 {
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	return n
-}
-
-func (m *Relationship_Aggregates) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.AggregatorId)
-	if l > 0 {
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	l = len(m.AggregateeId)
-	if l > 0 {
-		n += 1 + l + sovTopo(uint64(l))
+	if len(m.TargetObject) > 0 {
+		for _, e := range m.TargetObject {
+			l = e.Size()
+			n += 1 + l + sovTopo(uint64(l))
+		}
 	}
 	return n
 }
@@ -2021,39 +2127,7 @@ func (m *WriteRequest) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: WriteRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Id = EntityID(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
+		case 1:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Updates", wireType)
 			}
@@ -2193,6 +2267,40 @@ func (m *ReadRequest) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: ReadRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Objects", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Objects = append(m.Objects, &Object{})
+			if err := m.Objects[len(m.Objects)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTopo(dAtA[iNdEx:])
@@ -2246,6 +2354,40 @@ func (m *ReadResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: ReadResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Objects", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Objects = append(m.Objects, &Object{})
+			if err := m.Objects[len(m.Objects)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTopo(dAtA[iNdEx:])
@@ -2405,7 +2547,7 @@ func (m *Update) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Update: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
+		case 2:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
@@ -2424,7 +2566,147 @@ func (m *Update) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Object", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Object == nil {
+				m.Object = &Object{}
+			}
+			if err := m.Object.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTopo(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Object) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTopo
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Object: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Object: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+			}
+			m.Type = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Type |= Object_Type(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Entity", wireType)
 			}
@@ -2453,12 +2735,46 @@ func (m *Update) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Entity == nil {
-				m.Entity = &Entity{}
-			}
-			if err := m.Entity.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			v := &Entity{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			m.Obj = &Object_Entity{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Relationship", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &Relationship{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Obj = &Object_Relationship{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2515,9 +2831,9 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
-			m.Kind = 0
+			m.Type = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTopo
@@ -2527,7 +2843,7 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Kind |= Entity_Kind(b&0x7F) << shift
+				m.Type |= Entity_Type(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2671,40 +2987,6 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.Entity = &Entity_XnInterface_{v}
-			iNdEx = postIndex
-		case 6:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Relationships", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Relationships = append(m.Relationships, &Relationship{})
-			if err := m.Relationships[len(m.Relationships)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2973,9 +3255,9 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Kind", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Directionality", wireType)
 			}
-			m.Kind = 0
+			m.Directionality = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTopo
@@ -2985,16 +3267,16 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Kind |= Relationship_Kind(b&0x7F) << shift
+				m.Directionality |= Relationship_Directionality(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Contains", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Multiplicity", wireType)
 			}
-			var msglen int
+			m.Multiplicity = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTopo
@@ -3004,30 +3286,33 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				m.Multiplicity |= Relationship_Multiplicity(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
-				return ErrInvalidLengthTopo
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
+			m.Type = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Type |= Relationship_Type(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
 			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &Relationship_Contains{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Relationship = &Relationship_Contains_{v}
-			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Aggregates", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceObject", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3054,245 +3339,44 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Relationship_Aggregates{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.SourceObject = append(m.SourceObject, &Object{})
+			if err := m.SourceObject[len(m.SourceObject)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Relationship = &Relationship_Aggregates_{v}
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetObject", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TargetObject = append(m.TargetObject, &Object{})
+			if err := m.TargetObject[len(m.TargetObject)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Relationship_Contains) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: Contains: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Contains: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ContainerId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ContainerId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ContaineeId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ContaineeId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Relationship_Aggregates) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: Aggregates: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Aggregates: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AggregatorId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AggregatorId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AggregateeId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.AggregateeId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

@@ -19,8 +19,6 @@ syntax = "proto3";
 // Package topo defines interfaces for managing network top
 package topo;
 
-import "gogoproto/gogo.proto";
-
 // EntityService provides an API for managing entities.
 service topo {
   // Update one or more entities to the topology
@@ -39,18 +37,19 @@ service topo {
 }
 
 message WriteRequest {
-  string id = 2 [(gogoproto.casttype) = "EntityID"];
   // The write batch, comprising a list of Update operations
-  repeated Update updates = 3;
+  repeated Update updates = 1;
 }
 
 message WriteResponse {
 }
 
 message ReadRequest {
+  repeated Object objects = 1;
 }
 
 message ReadResponse {
+  repeated Object objects = 1;
 }
 
 message StreamMessageRequest {
@@ -61,24 +60,41 @@ message StreamMessageResponse {
 
 message Update {
   enum Type {
-    UNSPECIFIED = 0;
+    UNSPECIFIED_TYPE = 0;
     INSERT = 1;
     MODIFY = 2;
     DELETE = 3;
   }
-  Type type = 1;
-  Entity entity = 2;
+  Type type = 2;
+
+  Object object = 3;
 }
 
-// Entity represent "things"
+message Object {
+  string id = 1;
+
+  enum Type {
+    UNSPECIFIED_TYPE = 0;
+    ENTITY = 1;
+    RELATIONSHIP = 2;
+  }
+  Type type = 2;
+
+  oneof obj {
+    Entity entity = 3;
+    Relationship relationship = 4;
+  }
+}
+
+// Entity represents any "thing" that is represented in the topology
 message Entity {
-  enum Kind {
+  enum Type {
     RIC = 0;
     E2NODE = 1;
     E2INTERFACE = 2;
     XNINTERFACE = 3;
   }
-  Kind kind = 1;
+  Type type = 1;
 
   oneof entity {
     Ric ric = 2;
@@ -86,8 +102,6 @@ message Entity {
     E2Interface e2_interface = 4;
     XnInterface xn_interface = 5;
   }
-
-  repeated Relationship relationships = 6;
 
   message Ric {
   }
@@ -103,24 +117,34 @@ message Entity {
 }
 
 message Relationship {
-  enum Kind {
+  enum Directionality {
+    UNSPECIFIED_DIRECTIONALITY = 0;
+    DIRECTED = 1;
+    BIDIRECTIONAL = 2;
+  }
+  Directionality directionality = 1;
+
+  enum Multiplicity {
+    UNSPECIFIED_MULTIPLICITY = 0;
+    ONE_TO_ONE = 1;
+    ONE_TO_MANY = 2;
+    MANY_TO_ONE = 3;
+    MANY_TO_MANY = 4;
+  }
+  Multiplicity multiplicity = 2;
+
+  enum Type {
     CONTAINS = 0;
-    AGGREGATES = 1;
+    CONTROLS = 1;
+    AGGREGATES = 2;
+    ORIGINATES = 3;
+    TERMINATES = 4;
+    TRAVERSES = 5;
+    REALIZED_BY = 6;
   }
-  Kind kind = 1;
+  Type type = 3;
 
-  oneof relationship {
-    Contains contains = 2;
-    Aggregates aggregates = 4;
-  }
-
-  message Contains {
-    string ContainerId = 1;
-    string ContaineeId = 2;
-  }
-
-  message Aggregates {
-    string AggregatorId = 1;
-    string AggregateeId = 2;
-  }
+  // The two sets of objects that the relationship binds
+  repeated Object source_object = 4;
+  repeated Object target_object = 5;
 }
