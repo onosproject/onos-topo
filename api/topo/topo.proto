@@ -19,6 +19,8 @@ syntax = "proto3";
 // Package topo defines interfaces for managing network top
 package topo;
 
+import "google/protobuf/any.proto";
+
 // EntityService provides an API for managing entities.
 service topo {
   // Update one or more entities to the topology
@@ -88,32 +90,11 @@ message Object {
 
 // Entity represents any "thing" that is represented in the topology
 message Entity {
-  enum Type {
-    RIC = 0;
-    E2NODE = 1;
-    E2INTERFACE = 2;
-    XNINTERFACE = 3;
-  }
-  Type type = 1;
+  string type = 1;
 
-  oneof entity {
-    Ric ric = 2;
-    E2Node  e2_node = 3;
-    E2Interface e2_interface = 4;
-    XnInterface xn_interface = 5;
-  }
+  // attributes is an arbitrary mapping of attribute keys (strings) to values (any)
+  map<string, google.protobuf.Any> attributes = 2;
 
-  message Ric {
-  }
-
-  message E2Node {
-  }
-
-  message E2Interface {
-  }
-
-  message XnInterface {
-  }
 }
 
 message Relationship {
@@ -134,13 +115,14 @@ message Relationship {
   Multiplicity multiplicity = 2;
 
   enum Type {
-    CONTAINS = 0;
-    CONTROLS = 1;
-    AGGREGATES = 2;
-    ORIGINATES = 3;
-    TERMINATES = 4;
-    TRAVERSES = 5;
-    REALIZED_BY = 6;
+    UNSPECIFIED_TYPE = 0;
+    CONTAINS = 1;
+    CONTROLS = 2;
+    AGGREGATES = 3;
+    ORIGINATES = 4;
+    TERMINATES = 5;
+    TRAVERSES = 6;
+    REALIZED_BY = 7;
   }
   Type type = 3;
 

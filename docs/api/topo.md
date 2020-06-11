@@ -5,10 +5,7 @@
 
 - [api/topo/topo.proto](#api/topo/topo.proto)
     - [Entity](#topo.Entity)
-    - [Entity.E2Interface](#topo.Entity.E2Interface)
-    - [Entity.E2Node](#topo.Entity.E2Node)
-    - [Entity.Ric](#topo.Entity.Ric)
-    - [Entity.XnInterface](#topo.Entity.XnInterface)
+    - [Entity.AttributesEntry](#topo.Entity.AttributesEntry)
     - [Object](#topo.Object)
     - [ReadRequest](#topo.ReadRequest)
     - [ReadResponse](#topo.ReadResponse)
@@ -19,7 +16,6 @@
     - [WriteRequest](#topo.WriteRequest)
     - [WriteResponse](#topo.WriteResponse)
   
-    - [Entity.Type](#topo.Entity.Type)
     - [Object.Type](#topo.Object.Type)
     - [Relationship.Directionality](#topo.Relationship.Directionality)
     - [Relationship.Multiplicity](#topo.Relationship.Multiplicity)
@@ -47,51 +43,24 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [Entity.Type](#topo.Entity.Type) |  |  |
-| ric | [Entity.Ric](#topo.Entity.Ric) |  |  |
-| e2_node | [Entity.E2Node](#topo.Entity.E2Node) |  |  |
-| e2_interface | [Entity.E2Interface](#topo.Entity.E2Interface) |  |  |
-| xn_interface | [Entity.XnInterface](#topo.Entity.XnInterface) |  |  |
+| type | [string](#string) |  |  |
+| attributes | [Entity.AttributesEntry](#topo.Entity.AttributesEntry) | repeated | attributes is an arbitrary mapping of attribute keys (strings) to values (any) |
 
 
 
 
 
 
-<a name="topo.Entity.E2Interface"></a>
+<a name="topo.Entity.AttributesEntry"></a>
 
-### Entity.E2Interface
-
-
+### Entity.AttributesEntry
 
 
 
-
-
-<a name="topo.Entity.E2Node"></a>
-
-### Entity.E2Node
-
-
-
-
-
-
-
-<a name="topo.Entity.Ric"></a>
-
-### Entity.Ric
-
-
-
-
-
-
-
-<a name="topo.Entity.XnInterface"></a>
-
-### Entity.XnInterface
-
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [google.protobuf.Any](#google.protobuf.Any) |  |  |
 
 
 
@@ -157,7 +126,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | directionality | [Relationship.Directionality](#topo.Relationship.Directionality) |  |  |
 | multiplicity | [Relationship.Multiplicity](#topo.Relationship.Multiplicity) |  |  |
 | type | [Relationship.Type](#topo.Relationship.Type) |  |  |
-| source_object | [Object](#topo.Object) | repeated | The two object(s) that the relationship binds |
+| source_object | [Object](#topo.Object) | repeated | The two sets of objects that the relationship binds |
 | target_object | [Object](#topo.Object) | repeated |  |
 
 
@@ -228,20 +197,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
  
 
 
-<a name="topo.Entity.Type"></a>
-
-### Entity.Type
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| RIC | 0 |  |
-| E2NODE | 1 |  |
-| E2INTERFACE | 2 |  |
-| XNINTERFACE | 3 |  |
-
-
-
 <a name="topo.Object.Type"></a>
 
 ### Object.Type
@@ -290,13 +245,14 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| CONTAINS | 0 |  |
-| CONTROLS | 1 |  |
-| AGGREGATES | 2 |  |
-| ORIGINATES | 3 |  |
-| TERMINATES | 4 |  |
-| TRAVERSES | 5 |  |
-| REALIZED_BY | 6 |  |
+| UNSPECIFIED_TYPE | 0 |  |
+| CONTAINS | 1 |  |
+| CONTROLS | 2 |  |
+| AGGREGATES | 3 |  |
+| ORIGINATES | 4 |  |
+| TERMINATES | 5 |  |
+| TRAVERSES | 6 |  |
+| REALIZED_BY | 7 |  |
 
 
 

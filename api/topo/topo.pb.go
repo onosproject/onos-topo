@@ -9,6 +9,7 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -87,37 +88,6 @@ func (Object_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_5823f9f54b50fd8c, []int{7, 0}
 }
 
-type Entity_Type int32
-
-const (
-	Entity_RIC         Entity_Type = 0
-	Entity_E2NODE      Entity_Type = 1
-	Entity_E2INTERFACE Entity_Type = 2
-	Entity_XNINTERFACE Entity_Type = 3
-)
-
-var Entity_Type_name = map[int32]string{
-	0: "RIC",
-	1: "E2NODE",
-	2: "E2INTERFACE",
-	3: "XNINTERFACE",
-}
-
-var Entity_Type_value = map[string]int32{
-	"RIC":         0,
-	"E2NODE":      1,
-	"E2INTERFACE": 2,
-	"XNINTERFACE": 3,
-}
-
-func (x Entity_Type) String() string {
-	return proto.EnumName(Entity_Type_name, int32(x))
-}
-
-func (Entity_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 0}
-}
-
 type Relationship_Directionality int32
 
 const (
@@ -183,33 +153,36 @@ func (Relationship_Multiplicity) EnumDescriptor() ([]byte, []int) {
 type Relationship_Type int32
 
 const (
-	Relationship_CONTAINS    Relationship_Type = 0
-	Relationship_CONTROLS    Relationship_Type = 1
-	Relationship_AGGREGATES  Relationship_Type = 2
-	Relationship_ORIGINATES  Relationship_Type = 3
-	Relationship_TERMINATES  Relationship_Type = 4
-	Relationship_TRAVERSES   Relationship_Type = 5
-	Relationship_REALIZED_BY Relationship_Type = 6
+	Relationship_UNSPECIFIED_TYPE Relationship_Type = 0
+	Relationship_CONTAINS         Relationship_Type = 1
+	Relationship_CONTROLS         Relationship_Type = 2
+	Relationship_AGGREGATES       Relationship_Type = 3
+	Relationship_ORIGINATES       Relationship_Type = 4
+	Relationship_TERMINATES       Relationship_Type = 5
+	Relationship_TRAVERSES        Relationship_Type = 6
+	Relationship_REALIZED_BY      Relationship_Type = 7
 )
 
 var Relationship_Type_name = map[int32]string{
-	0: "CONTAINS",
-	1: "CONTROLS",
-	2: "AGGREGATES",
-	3: "ORIGINATES",
-	4: "TERMINATES",
-	5: "TRAVERSES",
-	6: "REALIZED_BY",
+	0: "UNSPECIFIED_TYPE",
+	1: "CONTAINS",
+	2: "CONTROLS",
+	3: "AGGREGATES",
+	4: "ORIGINATES",
+	5: "TERMINATES",
+	6: "TRAVERSES",
+	7: "REALIZED_BY",
 }
 
 var Relationship_Type_value = map[string]int32{
-	"CONTAINS":    0,
-	"CONTROLS":    1,
-	"AGGREGATES":  2,
-	"ORIGINATES":  3,
-	"TERMINATES":  4,
-	"TRAVERSES":   5,
-	"REALIZED_BY": 6,
+	"UNSPECIFIED_TYPE": 0,
+	"CONTAINS":         1,
+	"CONTROLS":         2,
+	"AGGREGATES":       3,
+	"ORIGINATES":       4,
+	"TERMINATES":       5,
+	"TRAVERSES":        6,
+	"REALIZED_BY":      7,
 }
 
 func (x Relationship_Type) String() string {
@@ -616,13 +589,9 @@ func (*Object) XXX_OneofWrappers() []interface{} {
 
 // Entity represents any "thing" that is represented in the topology
 type Entity struct {
-	Type Entity_Type `protobuf:"varint,1,opt,name=type,proto3,enum=topo.Entity_Type" json:"type,omitempty"`
-	// Types that are valid to be assigned to Entity:
-	//	*Entity_Ric_
-	//	*Entity_E2Node_
-	//	*Entity_E2Interface_
-	//	*Entity_XnInterface_
-	Entity isEntity_Entity `protobuf_oneof:"entity"`
+	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	// attributes is an arbitrary mapping of attribute keys (strings) to values (any)
+	Attributes map[string]*types.Any `protobuf:"bytes,2,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (m *Entity) Reset()         { *m = Entity{} }
@@ -658,231 +627,25 @@ func (m *Entity) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Entity proto.InternalMessageInfo
 
-type isEntity_Entity interface {
-	isEntity_Entity()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type Entity_Ric_ struct {
-	Ric *Entity_Ric `protobuf:"bytes,2,opt,name=ric,proto3,oneof" json:"ric,omitempty"`
-}
-type Entity_E2Node_ struct {
-	E2Node *Entity_E2Node `protobuf:"bytes,3,opt,name=e2_node,json=e2Node,proto3,oneof" json:"e2_node,omitempty"`
-}
-type Entity_E2Interface_ struct {
-	E2Interface *Entity_E2Interface `protobuf:"bytes,4,opt,name=e2_interface,json=e2Interface,proto3,oneof" json:"e2_interface,omitempty"`
-}
-type Entity_XnInterface_ struct {
-	XnInterface *Entity_XnInterface `protobuf:"bytes,5,opt,name=xn_interface,json=xnInterface,proto3,oneof" json:"xn_interface,omitempty"`
-}
-
-func (*Entity_Ric_) isEntity_Entity()         {}
-func (*Entity_E2Node_) isEntity_Entity()      {}
-func (*Entity_E2Interface_) isEntity_Entity() {}
-func (*Entity_XnInterface_) isEntity_Entity() {}
-
-func (m *Entity) GetEntity() isEntity_Entity {
-	if m != nil {
-		return m.Entity
-	}
-	return nil
-}
-
-func (m *Entity) GetType() Entity_Type {
+func (m *Entity) GetType() string {
 	if m != nil {
 		return m.Type
 	}
-	return Entity_RIC
+	return ""
 }
 
-func (m *Entity) GetRic() *Entity_Ric {
-	if x, ok := m.GetEntity().(*Entity_Ric_); ok {
-		return x.Ric
+func (m *Entity) GetAttributes() map[string]*types.Any {
+	if m != nil {
+		return m.Attributes
 	}
 	return nil
 }
-
-func (m *Entity) GetE2Node() *Entity_E2Node {
-	if x, ok := m.GetEntity().(*Entity_E2Node_); ok {
-		return x.E2Node
-	}
-	return nil
-}
-
-func (m *Entity) GetE2Interface() *Entity_E2Interface {
-	if x, ok := m.GetEntity().(*Entity_E2Interface_); ok {
-		return x.E2Interface
-	}
-	return nil
-}
-
-func (m *Entity) GetXnInterface() *Entity_XnInterface {
-	if x, ok := m.GetEntity().(*Entity_XnInterface_); ok {
-		return x.XnInterface
-	}
-	return nil
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*Entity) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*Entity_Ric_)(nil),
-		(*Entity_E2Node_)(nil),
-		(*Entity_E2Interface_)(nil),
-		(*Entity_XnInterface_)(nil),
-	}
-}
-
-type Entity_Ric struct {
-}
-
-func (m *Entity_Ric) Reset()         { *m = Entity_Ric{} }
-func (m *Entity_Ric) String() string { return proto.CompactTextString(m) }
-func (*Entity_Ric) ProtoMessage()    {}
-func (*Entity_Ric) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 0}
-}
-func (m *Entity_Ric) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Entity_Ric) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Entity_Ric.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Entity_Ric) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Entity_Ric.Merge(m, src)
-}
-func (m *Entity_Ric) XXX_Size() int {
-	return m.Size()
-}
-func (m *Entity_Ric) XXX_DiscardUnknown() {
-	xxx_messageInfo_Entity_Ric.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Entity_Ric proto.InternalMessageInfo
-
-type Entity_E2Node struct {
-}
-
-func (m *Entity_E2Node) Reset()         { *m = Entity_E2Node{} }
-func (m *Entity_E2Node) String() string { return proto.CompactTextString(m) }
-func (*Entity_E2Node) ProtoMessage()    {}
-func (*Entity_E2Node) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 1}
-}
-func (m *Entity_E2Node) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Entity_E2Node) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Entity_E2Node.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Entity_E2Node) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Entity_E2Node.Merge(m, src)
-}
-func (m *Entity_E2Node) XXX_Size() int {
-	return m.Size()
-}
-func (m *Entity_E2Node) XXX_DiscardUnknown() {
-	xxx_messageInfo_Entity_E2Node.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Entity_E2Node proto.InternalMessageInfo
-
-type Entity_E2Interface struct {
-}
-
-func (m *Entity_E2Interface) Reset()         { *m = Entity_E2Interface{} }
-func (m *Entity_E2Interface) String() string { return proto.CompactTextString(m) }
-func (*Entity_E2Interface) ProtoMessage()    {}
-func (*Entity_E2Interface) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 2}
-}
-func (m *Entity_E2Interface) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Entity_E2Interface) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Entity_E2Interface.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Entity_E2Interface) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Entity_E2Interface.Merge(m, src)
-}
-func (m *Entity_E2Interface) XXX_Size() int {
-	return m.Size()
-}
-func (m *Entity_E2Interface) XXX_DiscardUnknown() {
-	xxx_messageInfo_Entity_E2Interface.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Entity_E2Interface proto.InternalMessageInfo
-
-type Entity_XnInterface struct {
-}
-
-func (m *Entity_XnInterface) Reset()         { *m = Entity_XnInterface{} }
-func (m *Entity_XnInterface) String() string { return proto.CompactTextString(m) }
-func (*Entity_XnInterface) ProtoMessage()    {}
-func (*Entity_XnInterface) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8, 3}
-}
-func (m *Entity_XnInterface) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Entity_XnInterface) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Entity_XnInterface.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Entity_XnInterface) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Entity_XnInterface.Merge(m, src)
-}
-func (m *Entity_XnInterface) XXX_Size() int {
-	return m.Size()
-}
-func (m *Entity_XnInterface) XXX_DiscardUnknown() {
-	xxx_messageInfo_Entity_XnInterface.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Entity_XnInterface proto.InternalMessageInfo
 
 type Relationship struct {
 	Directionality Relationship_Directionality `protobuf:"varint,1,opt,name=directionality,proto3,enum=topo.Relationship_Directionality" json:"directionality,omitempty"`
 	Multiplicity   Relationship_Multiplicity   `protobuf:"varint,2,opt,name=multiplicity,proto3,enum=topo.Relationship_Multiplicity" json:"multiplicity,omitempty"`
 	Type           Relationship_Type           `protobuf:"varint,3,opt,name=type,proto3,enum=topo.Relationship_Type" json:"type,omitempty"`
-	// The two object(s) that the relationship binds
+	// The two sets of objects that the relationship binds
 	SourceObject []*Object `protobuf:"bytes,4,rep,name=source_object,json=sourceObject,proto3" json:"source_object,omitempty"`
 	TargetObject []*Object `protobuf:"bytes,5,rep,name=target_object,json=targetObject,proto3" json:"target_object,omitempty"`
 }
@@ -938,7 +701,7 @@ func (m *Relationship) GetType() Relationship_Type {
 	if m != nil {
 		return m.Type
 	}
-	return Relationship_CONTAINS
+	return Relationship_UNSPECIFIED_TYPE
 }
 
 func (m *Relationship) GetSourceObject() []*Object {
@@ -958,7 +721,6 @@ func (m *Relationship) GetTargetObject() []*Object {
 func init() {
 	proto.RegisterEnum("topo.Update_Type", Update_Type_name, Update_Type_value)
 	proto.RegisterEnum("topo.Object_Type", Object_Type_name, Object_Type_value)
-	proto.RegisterEnum("topo.Entity_Type", Entity_Type_name, Entity_Type_value)
 	proto.RegisterEnum("topo.Relationship_Directionality", Relationship_Directionality_name, Relationship_Directionality_value)
 	proto.RegisterEnum("topo.Relationship_Multiplicity", Relationship_Multiplicity_name, Relationship_Multiplicity_value)
 	proto.RegisterEnum("topo.Relationship_Type", Relationship_Type_name, Relationship_Type_value)
@@ -971,74 +733,68 @@ func init() {
 	proto.RegisterType((*Update)(nil), "topo.Update")
 	proto.RegisterType((*Object)(nil), "topo.Object")
 	proto.RegisterType((*Entity)(nil), "topo.Entity")
-	proto.RegisterType((*Entity_Ric)(nil), "topo.Entity.Ric")
-	proto.RegisterType((*Entity_E2Node)(nil), "topo.Entity.E2Node")
-	proto.RegisterType((*Entity_E2Interface)(nil), "topo.Entity.E2Interface")
-	proto.RegisterType((*Entity_XnInterface)(nil), "topo.Entity.XnInterface")
+	proto.RegisterMapType((map[string]*types.Any)(nil), "topo.Entity.AttributesEntry")
 	proto.RegisterType((*Relationship)(nil), "topo.Relationship")
 }
 
 func init() { proto.RegisterFile("api/topo/topo.proto", fileDescriptor_5823f9f54b50fd8c) }
 
 var fileDescriptor_5823f9f54b50fd8c = []byte{
-	// 897 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x55, 0x41, 0x8f, 0xdb, 0x44,
-	0x14, 0xf6, 0xc4, 0x49, 0xba, 0x7d, 0x71, 0x52, 0xef, 0x6c, 0xa1, 0x51, 0x40, 0x61, 0xb1, 0xa0,
-	0x5a, 0x09, 0x29, 0xa5, 0x41, 0x20, 0x84, 0x54, 0x09, 0x27, 0x99, 0xdd, 0x8c, 0x94, 0xd8, 0xcb,
-	0xd8, 0x0b, 0x0d, 0x97, 0xc8, 0x9b, 0x0c, 0xad, 0xab, 0xd4, 0x36, 0x8e, 0x57, 0xea, 0xfe, 0x0b,
-	0x6e, 0xfc, 0x18, 0xfe, 0x00, 0xc7, 0x1e, 0x39, 0xa2, 0x5d, 0x4e, 0xfc, 0x05, 0x2e, 0x68, 0x66,
-	0xec, 0x5d, 0x7b, 0x1b, 0x09, 0x2e, 0xd6, 0xbc, 0xf7, 0xbe, 0xef, 0xcd, 0x7b, 0x33, 0x9f, 0xe7,
-	0xc1, 0x41, 0x90, 0x84, 0x4f, 0xb2, 0x38, 0x89, 0xe5, 0x67, 0x90, 0xa4, 0x71, 0x16, 0xe3, 0xba,
-	0x58, 0x5b, 0x5f, 0x81, 0xf1, 0x43, 0x1a, 0x66, 0x9c, 0xf1, 0x9f, 0x2f, 0xf8, 0x36, 0xc3, 0x8f,
-	0xe1, 0xde, 0x45, 0xb2, 0x0e, 0x32, 0xbe, 0xed, 0xa2, 0x43, 0xfd, 0xa8, 0x35, 0x34, 0x06, 0x92,
-	0x73, 0x26, 0x9d, 0xac, 0x08, 0x5a, 0x0f, 0xa0, 0x9d, 0xf3, 0xb6, 0x49, 0x1c, 0x6d, 0xb9, 0xf5,
-	0x25, 0xb4, 0x18, 0x0f, 0xd6, 0xa5, 0x3c, 0xf1, 0xf9, 0x2b, 0xbe, 0xca, 0xee, 0xe4, 0x71, 0xa5,
-	0x93, 0x15, 0x41, 0xb1, 0xbf, 0xa2, 0xa9, 0x34, 0xff, 0x9b, 0xf7, 0x3e, 0x3c, 0xf4, 0xb2, 0x94,
-	0x07, 0xaf, 0xe7, 0x7c, 0xbb, 0x0d, 0x5e, 0x14, 0xf5, 0x5b, 0x8f, 0xe0, 0xbd, 0x3b, 0xfe, 0xbc,
-	0xbe, 0x5f, 0x11, 0x34, 0x55, 0x13, 0xf8, 0x53, 0xa8, 0x67, 0x97, 0x09, 0xef, 0xd6, 0x0e, 0xd1,
-	0x51, 0x67, 0xb8, 0x5f, 0x6e, 0x70, 0xe0, 0x5f, 0x26, 0x9c, 0xc9, 0x30, 0xfe, 0x04, 0x9a, 0x6a,
-	0xb7, 0xae, 0x7e, 0x88, 0xde, 0xa9, 0x24, 0x8f, 0x59, 0xdf, 0x42, 0x5d, 0x70, 0xf0, 0x43, 0x30,
-	0xcf, 0x1c, 0xef, 0x94, 0x8c, 0xe9, 0x31, 0x25, 0x93, 0xa5, 0xbf, 0x38, 0x25, 0xa6, 0x86, 0x01,
-	0x9a, 0xd4, 0xf1, 0x08, 0xf3, 0x4d, 0x24, 0xd6, 0x73, 0x77, 0x42, 0x8f, 0x17, 0x66, 0x4d, 0xac,
-	0x27, 0x64, 0x46, 0x7c, 0x62, 0xea, 0xd6, 0x5f, 0x08, 0x9a, 0x2a, 0x29, 0xee, 0x40, 0x2d, 0x5c,
-	0x77, 0xd1, 0x21, 0x3a, 0xba, 0xcf, 0x6a, 0xe1, 0x7a, 0x77, 0xa5, 0x0a, 0x5b, 0xae, 0xf4, 0x31,
-	0x34, 0x79, 0x94, 0x85, 0xd9, 0x65, 0xb5, 0x52, 0x22, 0x7d, 0x53, 0x8d, 0xe5, 0x51, 0xfc, 0x35,
-	0x18, 0x29, 0xdf, 0x04, 0x59, 0x18, 0x47, 0xdb, 0x97, 0x61, 0xd2, 0xad, 0x4b, 0x34, 0x56, 0x68,
-	0x56, 0x8a, 0x4c, 0x35, 0x56, 0x41, 0x5a, 0xdf, 0xfc, 0x57, 0x97, 0xc4, 0xf1, 0xa9, 0xbf, 0x30,
-	0x11, 0x36, 0xc1, 0x60, 0x64, 0x66, 0xfb, 0xd4, 0x75, 0xbc, 0x29, 0x3d, 0x35, 0x6b, 0xa3, 0x06,
-	0xe8, 0xf1, 0xf9, 0x2b, 0xeb, 0x9f, 0x1a, 0x34, 0x55, 0x45, 0x37, 0x6d, 0xa1, 0x72, 0x5b, 0x2a,
-	0x56, 0xbd, 0x00, 0x3d, 0x0d, 0x57, 0xb2, 0xf9, 0xd6, 0xd0, 0xac, 0xa0, 0x58, 0xb8, 0x9a, 0x6a,
-	0x4c, 0x84, 0xf1, 0x00, 0xee, 0xf1, 0xe1, 0x32, 0x8a, 0xd7, 0x3c, 0xef, 0xfe, 0xa0, 0x82, 0x24,
-	0x43, 0x27, 0x5e, 0x73, 0x79, 0x08, 0x72, 0x85, 0x9f, 0x81, 0xc1, 0x87, 0xcb, 0x30, 0xca, 0x78,
-	0xfa, 0x53, 0xb0, 0xe2, 0xf9, 0x21, 0x74, 0xef, 0x90, 0x68, 0x11, 0x9f, 0x6a, 0xac, 0xc5, 0x6f,
-	0x4d, 0x41, 0x7f, 0x13, 0x95, 0xe8, 0x8d, 0x1d, 0xf4, 0xe7, 0x51, 0x85, 0xfe, 0xe6, 0xd6, 0xec,
-	0x35, 0x40, 0x67, 0xe1, 0xaa, 0xb7, 0x07, 0x4d, 0x55, 0x58, 0xaf, 0x0d, 0xad, 0xd2, 0x6e, 0xc2,
-	0x2c, 0xb1, 0xad, 0x67, 0xf9, 0xb9, 0xdf, 0x03, 0x9d, 0xd1, 0x71, 0x7e, 0xd4, 0x43, 0xc7, 0x9d,
-	0x10, 0x13, 0xe1, 0x07, 0x92, 0xea, 0xf8, 0x84, 0x1d, 0xdb, 0x63, 0x62, 0xd6, 0x84, 0xe3, 0xb9,
-	0x73, 0xeb, 0xd0, 0x47, 0x7b, 0x85, 0x30, 0xac, 0xbf, 0xeb, 0xe2, 0x47, 0xbb, 0xbd, 0x51, 0x4c,
-	0xa1, 0xb3, 0x0e, 0x53, 0xbe, 0x12, 0x8e, 0x60, 0x23, 0xb4, 0xa3, 0x6e, 0xe3, 0xe3, 0x77, 0xd5,
-	0x30, 0x98, 0x54, 0x80, 0xec, 0x0e, 0x11, 0x8f, 0xc1, 0x78, 0x7d, 0xb1, 0xc9, 0xc2, 0x64, 0x13,
-	0xae, 0x44, 0x22, 0xa5, 0xd6, 0x8f, 0x76, 0x24, 0x9a, 0x97, 0x60, 0xac, 0x42, 0xc2, 0x9f, 0xe5,
-	0x9a, 0xd0, 0x25, 0xf9, 0xd1, 0x0e, 0x72, 0x49, 0x19, 0x4f, 0xa1, 0xbd, 0x8d, 0x2f, 0xd2, 0x15,
-	0x5f, 0xe6, 0x7f, 0x68, 0x7d, 0xc7, 0x5b, 0x61, 0x28, 0x48, 0xfe, 0x6b, 0x3d, 0x85, 0x76, 0x16,
-	0xa4, 0x2f, 0x78, 0x56, 0x50, 0x1a, 0xbb, 0x28, 0x0a, 0xa2, 0x2c, 0xeb, 0x3b, 0xe8, 0x54, 0x3b,
-	0xc7, 0x7d, 0xe8, 0x95, 0xe5, 0x3f, 0xa1, 0x8c, 0x8c, 0x85, 0xd2, 0xed, 0x99, 0x10, 0xbf, 0x86,
-	0x0d, 0xd8, 0x53, 0x3e, 0x32, 0x31, 0x11, 0xde, 0x87, 0xf6, 0x88, 0x96, 0x30, 0x66, 0xcd, 0x4a,
-	0xc0, 0x28, 0x9f, 0x01, 0xfe, 0x10, 0xba, 0xe5, 0x84, 0xf3, 0xb3, 0x99, 0x4f, 0x4f, 0x67, 0x74,
-	0xac, 0xd2, 0x75, 0x00, 0x5c, 0x87, 0x2c, 0x7d, 0x77, 0xe9, 0x3a, 0xf9, 0x85, 0xe7, 0xf6, 0xdc,
-	0x76, 0x16, 0xea, 0xc2, 0xc5, 0xaa, 0x40, 0xe8, 0xe2, 0xef, 0x2b, 0x1c, 0x12, 0x52, 0xb7, 0xd2,
-	0x5c, 0x41, 0x06, 0xec, 0x8d, 0x5d, 0xc7, 0xb7, 0xa9, 0xe3, 0xa9, 0x42, 0x85, 0xc5, 0xdc, 0x99,
-	0x67, 0x22, 0xb1, 0x8f, 0x7d, 0x72, 0xc2, 0xc8, 0x89, 0xed, 0x13, 0xcf, 0xac, 0xc9, 0x7d, 0x19,
-	0x3d, 0xa1, 0x8e, 0xb4, 0x75, 0x61, 0xfb, 0x84, 0xcd, 0x73, 0xbb, 0x8e, 0xdb, 0x70, 0xdf, 0x67,
-	0xf6, 0xf7, 0x84, 0x79, 0xc4, 0x33, 0x1b, 0xa2, 0x0a, 0x46, 0xec, 0x19, 0xfd, 0x91, 0x4c, 0x96,
-	0xa3, 0x85, 0xd9, 0x1c, 0xfe, 0x86, 0x40, 0x4e, 0x17, 0x3c, 0x84, 0x86, 0x9c, 0x12, 0x38, 0x7f,
-	0x63, 0xca, 0xa3, 0xa6, 0x77, 0x50, 0xf1, 0xe5, 0xcf, 0xb4, 0x86, 0x9f, 0x40, 0x5d, 0x4c, 0x04,
-	0xbc, 0x5f, 0x48, 0xe0, 0x66, 0xa8, 0xf4, 0x70, 0xd9, 0x75, 0x43, 0x70, 0xa0, 0xad, 0x9e, 0xfc,
-	0xf1, 0xcb, 0x20, 0x8a, 0xf8, 0x06, 0xf7, 0x14, 0x6c, 0xd7, 0x7c, 0xe8, 0x7d, 0xb0, 0x33, 0x56,
-	0xe4, 0x3a, 0x42, 0x9f, 0xa3, 0x51, 0xf7, 0xf7, 0xab, 0x3e, 0x7a, 0x7b, 0xd5, 0x47, 0x7f, 0x5e,
-	0xf5, 0xd1, 0x2f, 0xd7, 0x7d, 0xed, 0xed, 0x75, 0x5f, 0xfb, 0xe3, 0xba, 0xaf, 0x9d, 0x37, 0xe5,
-	0xe4, 0xfc, 0xe2, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc6, 0xb7, 0x5e, 0x82, 0x50, 0x07, 0x00,
-	0x00,
+	// 853 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x54, 0x4f, 0x6f, 0x1b, 0x45,
+	0x14, 0xf7, 0xac, 0xff, 0xb4, 0x7d, 0x5e, 0x3b, 0x93, 0x69, 0xa0, 0xc6, 0x54, 0x26, 0xac, 0xa0,
+	0x8a, 0x40, 0x72, 0xa8, 0x11, 0xa8, 0xaa, 0x38, 0xb0, 0xb1, 0xa7, 0xc9, 0x48, 0xf6, 0x3a, 0xcc,
+	0x6e, 0x40, 0xe1, 0x62, 0xad, 0xe3, 0x21, 0xdd, 0xe2, 0x7a, 0x97, 0xf5, 0x18, 0xc9, 0x47, 0x6e,
+	0x1c, 0xb9, 0xf1, 0x31, 0xf8, 0x00, 0x7c, 0x01, 0x8e, 0x3d, 0x72, 0x44, 0x09, 0x1f, 0x04, 0xcd,
+	0xcc, 0x6e, 0x58, 0xa7, 0x16, 0xf4, 0xb2, 0x9a, 0x79, 0xef, 0xf7, 0x7b, 0xf3, 0xde, 0xdb, 0xdf,
+	0x7b, 0x70, 0x3f, 0x4c, 0xa2, 0x43, 0x19, 0x27, 0xb1, 0xfe, 0x74, 0x93, 0x34, 0x96, 0x31, 0xa9,
+	0xa8, 0x73, 0xfb, 0x9d, 0xcb, 0x38, 0xbe, 0x9c, 0x8b, 0x43, 0x6d, 0x9b, 0xae, 0xbe, 0x3b, 0x0c,
+	0x17, 0x6b, 0x03, 0x70, 0x3e, 0x07, 0xfb, 0x9b, 0x34, 0x92, 0x82, 0x8b, 0x1f, 0x56, 0x62, 0x29,
+	0xc9, 0x23, 0xb8, 0xb3, 0x4a, 0x66, 0xa1, 0x14, 0xcb, 0x16, 0xda, 0x2f, 0x1f, 0xd4, 0x7b, 0x76,
+	0x57, 0x87, 0x3b, 0xd3, 0x46, 0x9e, 0x3b, 0x9d, 0x1d, 0x68, 0x64, 0xbc, 0x65, 0x12, 0x2f, 0x96,
+	0xc2, 0xf9, 0x0c, 0xea, 0x5c, 0x84, 0xb3, 0x42, 0x9c, 0x78, 0xfa, 0x42, 0x5c, 0xc8, 0x5b, 0x71,
+	0xc6, 0xda, 0xc8, 0x73, 0xa7, 0x7a, 0xdf, 0xd0, 0x4c, 0x98, 0x37, 0xe6, 0xbd, 0x0d, 0x7b, 0xbe,
+	0x4c, 0x45, 0xf8, 0x72, 0x24, 0x96, 0xcb, 0xf0, 0x32, 0xcf, 0xdf, 0x79, 0x00, 0x6f, 0xdd, 0xb2,
+	0x67, 0xf9, 0xfd, 0x8a, 0xa0, 0x66, 0x8a, 0x20, 0x1f, 0x42, 0x45, 0xae, 0x13, 0xd1, 0xb2, 0xf6,
+	0xd1, 0x41, 0xb3, 0xb7, 0x5b, 0x2c, 0xb0, 0x1b, 0xac, 0x13, 0xc1, 0xb5, 0x9b, 0x7c, 0x00, 0x35,
+	0xf3, 0x5a, 0xab, 0xbc, 0x8f, 0x5e, 0xcb, 0x24, 0xf3, 0x39, 0x5f, 0x42, 0x45, 0x71, 0xc8, 0x1e,
+	0xe0, 0x33, 0xcf, 0x3f, 0xa5, 0x7d, 0xf6, 0x8c, 0xd1, 0xc1, 0x24, 0x38, 0x3f, 0xa5, 0xb8, 0x44,
+	0x00, 0x6a, 0xcc, 0xf3, 0x29, 0x0f, 0x30, 0x52, 0xe7, 0xd1, 0x78, 0xc0, 0x9e, 0x9d, 0x63, 0x4b,
+	0x9d, 0x07, 0x74, 0x48, 0x03, 0x8a, 0xcb, 0xce, 0xdf, 0x08, 0x6a, 0x26, 0x28, 0x69, 0x82, 0x15,
+	0xcd, 0x5a, 0x68, 0x1f, 0x1d, 0xdc, 0xe3, 0x56, 0x34, 0xdb, 0x9e, 0xa9, 0xc1, 0x16, 0x33, 0x7d,
+	0x04, 0x35, 0xb1, 0x90, 0x91, 0x5c, 0x6f, 0x66, 0x4a, 0xb5, 0xed, 0xa4, 0xc4, 0x33, 0x2f, 0x79,
+	0x02, 0x76, 0x2a, 0xe6, 0xa1, 0x8c, 0xe2, 0xc5, 0xf2, 0x79, 0x94, 0xb4, 0x2a, 0x1a, 0x4d, 0x0c,
+	0x9a, 0x17, 0x3c, 0x27, 0x25, 0xbe, 0x81, 0x74, 0x9e, 0xfe, 0x5f, 0x95, 0xd4, 0x0b, 0x58, 0x70,
+	0x8e, 0x11, 0xc1, 0x60, 0x73, 0x3a, 0x74, 0x03, 0x36, 0xf6, 0xfc, 0x13, 0x76, 0x8a, 0xad, 0xa3,
+	0x2a, 0x94, 0xe3, 0xe9, 0x0b, 0xe7, 0x37, 0x04, 0x35, 0x93, 0x11, 0x21, 0x59, 0x59, 0xa6, 0x50,
+	0x53, 0xc3, 0x17, 0x00, 0xa1, 0x94, 0x69, 0x34, 0x5d, 0x29, 0xed, 0x59, 0xfa, 0xdf, 0x3f, 0x2c,
+	0xd6, 0xd1, 0x75, 0x6f, 0xdc, 0x74, 0x21, 0xd3, 0x35, 0x2f, 0xe0, 0xdb, 0x3e, 0xec, 0xdc, 0x72,
+	0x13, 0x0c, 0xe5, 0xef, 0xc5, 0x3a, 0x7b, 0x43, 0x1d, 0xc9, 0x47, 0x50, 0xfd, 0x31, 0x9c, 0xaf,
+	0x4c, 0x3b, 0xeb, 0xbd, 0xbd, 0xae, 0x19, 0x8b, 0x6e, 0x3e, 0x16, 0x5d, 0x77, 0xb1, 0xe6, 0x06,
+	0xf2, 0xd4, 0x7a, 0x82, 0x9c, 0x9f, 0xaa, 0x4a, 0x9c, 0xff, 0x76, 0x81, 0x30, 0x68, 0xce, 0xa2,
+	0x54, 0x5c, 0x28, 0x43, 0x38, 0x57, 0xfd, 0x46, 0xfa, 0xc7, 0xbc, 0xff, 0x7a, 0x07, 0xbb, 0x83,
+	0x0d, 0x20, 0xbf, 0x45, 0x24, 0x7d, 0xb0, 0x5f, 0xae, 0xe6, 0x32, 0x4a, 0xe6, 0xd1, 0x85, 0x0a,
+	0x64, 0xfe, 0xf0, 0x7b, 0x5b, 0x02, 0x8d, 0x0a, 0x30, 0xbe, 0x41, 0x22, 0x1f, 0x67, 0x7d, 0x2c,
+	0x6b, 0xf2, 0x83, 0x2d, 0xe4, 0x82, 0x48, 0x1e, 0x43, 0x63, 0x19, 0xaf, 0xd2, 0x0b, 0x31, 0xc9,
+	0x54, 0x5d, 0xd9, 0x32, 0x5f, 0xb6, 0x81, 0x64, 0x72, 0x7c, 0x0c, 0x0d, 0x19, 0xa6, 0x97, 0x42,
+	0xe6, 0x94, 0xea, 0x36, 0x8a, 0x81, 0x98, 0x9b, 0xf3, 0x15, 0x34, 0x37, 0x2b, 0x27, 0x1d, 0x68,
+	0x17, 0x25, 0x33, 0x60, 0x9c, 0xf6, 0x95, 0x3a, 0xdc, 0xa1, 0x12, 0x4c, 0x89, 0xd8, 0x70, 0xd7,
+	0xd8, 0xe8, 0x00, 0x23, 0xb2, 0x0b, 0x8d, 0x23, 0x56, 0xc0, 0x60, 0xcb, 0x49, 0xc0, 0x2e, 0xf6,
+	0x80, 0x3c, 0x84, 0x56, 0x31, 0xe0, 0xe8, 0x6c, 0x18, 0xb0, 0xd3, 0x21, 0xeb, 0x9b, 0x70, 0x4d,
+	0x80, 0xb1, 0x47, 0x27, 0xc1, 0x78, 0x32, 0xf6, 0x28, 0x46, 0x64, 0x07, 0xea, 0xd9, 0x7d, 0xe4,
+	0x7a, 0x6a, 0xf4, 0x76, 0xa0, 0xae, 0x4e, 0x39, 0xa2, 0xac, 0x14, 0x9b, 0x1b, 0x34, 0xa4, 0xe2,
+	0xfc, 0x8c, 0xfe, 0x53, 0xee, 0x36, 0xdc, 0xed, 0x8f, 0xbd, 0xc0, 0x65, 0x9e, 0x8f, 0x51, 0x7e,
+	0xe3, 0xe3, 0xa1, 0x8f, 0x2d, 0xf5, 0xbc, 0x7b, 0x7c, 0xcc, 0xe9, 0xb1, 0x1b, 0x50, 0x1f, 0x97,
+	0x75, 0x3a, 0x9c, 0x1d, 0x33, 0x4f, 0xdf, 0x2b, 0xea, 0x1e, 0x50, 0x3e, 0xca, 0xee, 0x55, 0xd2,
+	0x80, 0x7b, 0x01, 0x77, 0xbf, 0xa6, 0xdc, 0xa7, 0x3e, 0xae, 0xa9, 0xe4, 0x38, 0x75, 0x87, 0xec,
+	0x5b, 0x3a, 0x98, 0x1c, 0x9d, 0xe3, 0x3b, 0xbd, 0xdf, 0x11, 0xe8, 0x1d, 0x4e, 0x7a, 0x50, 0xd5,
+	0x0b, 0x97, 0x64, 0xe3, 0x5a, 0xdc, 0xda, 0xed, 0xfb, 0x1b, 0xb6, 0x6c, 0xe3, 0x95, 0xc8, 0x21,
+	0x54, 0xd4, 0x72, 0x25, 0xbb, 0xb9, 0x32, 0x6e, 0xf6, 0x73, 0x9b, 0x14, 0x4d, 0x37, 0x04, 0x0f,
+	0x1a, 0x66, 0x7b, 0xf6, 0x9f, 0x87, 0x8b, 0x85, 0x98, 0x93, 0xb6, 0x81, 0x6d, 0x5b, 0xb5, 0xed,
+	0x77, 0xb7, 0xfa, 0xf2, 0x58, 0x07, 0xe8, 0x13, 0x74, 0xd4, 0xfa, 0xe3, 0xaa, 0x83, 0x5e, 0x5d,
+	0x75, 0xd0, 0x5f, 0x57, 0x1d, 0xf4, 0xcb, 0x75, 0xa7, 0xf4, 0xea, 0xba, 0x53, 0xfa, 0xf3, 0xba,
+	0x53, 0x9a, 0xd6, 0xf4, 0xd0, 0x7d, 0xfa, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xfe, 0x47, 0x36,
+	0x14, 0xb6, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1562,196 +1318,39 @@ func (m *Entity) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Entity != nil {
-		{
-			size := m.Entity.Size()
-			i -= size
-			if _, err := m.Entity.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
+	if len(m.Attributes) > 0 {
+		for k := range m.Attributes {
+			v := m.Attributes[k]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintTopo(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
 			}
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintTopo(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintTopo(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x12
 		}
 	}
-	if m.Type != 0 {
-		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
+	if len(m.Type) > 0 {
+		i -= len(m.Type)
+		copy(dAtA[i:], m.Type)
+		i = encodeVarintTopo(dAtA, i, uint64(len(m.Type)))
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0xa
 	}
-	return len(dAtA) - i, nil
-}
-
-func (m *Entity_Ric_) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_Ric_) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Ric != nil {
-		{
-			size, err := m.Ric.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	return len(dAtA) - i, nil
-}
-func (m *Entity_E2Node_) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_E2Node_) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.E2Node != nil {
-		{
-			size, err := m.E2Node.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *Entity_E2Interface_) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_E2Interface_) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.E2Interface != nil {
-		{
-			size, err := m.E2Interface.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
-func (m *Entity_XnInterface_) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_XnInterface_) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.XnInterface != nil {
-		{
-			size, err := m.XnInterface.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x2a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *Entity_Ric) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Entity_Ric) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_Ric) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *Entity_E2Node) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Entity_E2Node) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_E2Node) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *Entity_E2Interface) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Entity_E2Interface) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_E2Interface) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *Entity_XnInterface) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Entity_XnInterface) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Entity_XnInterface) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
 	return len(dAtA) - i, nil
 }
 
@@ -1969,96 +1568,23 @@ func (m *Entity) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Type != 0 {
-		n += 1 + sovTopo(uint64(m.Type))
-	}
-	if m.Entity != nil {
-		n += m.Entity.Size()
-	}
-	return n
-}
-
-func (m *Entity_Ric_) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Ric != nil {
-		l = m.Ric.Size()
+	l = len(m.Type)
+	if l > 0 {
 		n += 1 + l + sovTopo(uint64(l))
 	}
-	return n
-}
-func (m *Entity_E2Node_) Size() (n int) {
-	if m == nil {
-		return 0
+	if len(m.Attributes) > 0 {
+		for k, v := range m.Attributes {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovTopo(uint64(l))
+			}
+			mapEntrySize := 1 + len(k) + sovTopo(uint64(len(k))) + l
+			n += mapEntrySize + 1 + sovTopo(uint64(mapEntrySize))
+		}
 	}
-	var l int
-	_ = l
-	if m.E2Node != nil {
-		l = m.E2Node.Size()
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	return n
-}
-func (m *Entity_E2Interface_) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.E2Interface != nil {
-		l = m.E2Interface.Size()
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	return n
-}
-func (m *Entity_XnInterface_) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.XnInterface != nil {
-		l = m.XnInterface.Size()
-		n += 1 + l + sovTopo(uint64(l))
-	}
-	return n
-}
-func (m *Entity_Ric) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *Entity_E2Node) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *Entity_E2Interface) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *Entity_XnInterface) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
 	return n
 }
 
@@ -2830,10 +2356,10 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
-			m.Type = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTopo
@@ -2843,14 +2369,27 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Type |= Entity_Type(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Type = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Ric", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Attributes", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2877,329 +2416,106 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Entity_Ric{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
+			if m.Attributes == nil {
+				m.Attributes = make(map[string]*types.Any)
 			}
-			m.Entity = &Entity_Ric_{v}
+			var mapkey string
+			var mapvalue *types.Any
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowTopo
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &types.Any{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipTopo(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Attributes[mapkey] = mapvalue
 			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field E2Node", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &Entity_E2Node{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Entity = &Entity_E2Node_{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field E2Interface", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &Entity_E2Interface{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Entity = &Entity_E2Interface_{v}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field XnInterface", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &Entity_XnInterface{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Entity = &Entity_XnInterface_{v}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Entity_Ric) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: Ric: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Ric: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Entity_E2Node) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: E2Node: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: E2Node: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Entity_E2Interface) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: E2Interface: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: E2Interface: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Entity_XnInterface) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: XnInterface: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: XnInterface: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTopo(dAtA[iNdEx:])
