@@ -18,6 +18,9 @@ import (
 	grpc "google.golang.org/grpc"
 )
 
+// ID ...
+type ID string
+
 // TopoClientFactory : Default EntityServiceClient creation.
 var TopoClientFactory = func(cc *grpc.ClientConn) TopoClient {
 	return NewTopoClient(cc)

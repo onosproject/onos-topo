@@ -20,6 +20,7 @@ syntax = "proto3";
 package topo;
 
 import "google/protobuf/any.proto";
+import "gogoproto/gogo.proto";
 
 // EntityService provides an API for managing entities.
 service topo {
@@ -73,7 +74,7 @@ message Update {
 }
 
 message Object {
-  string id = 1;
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
 
   enum Type {
     UNSPECIFIED_TYPE = 0;
