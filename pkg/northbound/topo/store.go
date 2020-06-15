@@ -122,7 +122,7 @@ func (s *atomixStore) Store(object *topoapi.Object) error {
 	}
 
 	// Put the object in the map using an optimistic lock if this is an update
-	_, err = s.objects.Put(ctx, string(object.ID), bytes)
+	_, err = s.objects.Put(ctx, string(object.Ref.ID), bytes)
 
 	if err != nil {
 		return err
@@ -135,7 +135,7 @@ func (s *atomixStore) Delete(object *topoapi.Object) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := s.objects.Remove(ctx, string(object.ID))
+	_, err := s.objects.Remove(ctx, string(object.Ref.ID))
 	return err
 }
 
@@ -191,7 +191,7 @@ func decodeObject(entry *_map.Entry) (*topoapi.Object, error) {
 	if err := proto.Unmarshal(entry.Value, object); err != nil {
 		return nil, err
 	}
-	object.ID = topoapi.ID(entry.Key)
+	object.Ref.ID = topoapi.ID(entry.Key)
 	return object, nil
 }
 

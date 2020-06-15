@@ -4,11 +4,13 @@
 ## Table of Contents
 
 - [api/topo/topo.proto](#api/topo/topo.proto)
+    - [Attributes](#topo.Attributes)
+    - [Attributes.AttrsEntry](#topo.Attributes.AttrsEntry)
     - [Entity](#topo.Entity)
-    - [Entity.AttributesEntry](#topo.Entity.AttributesEntry)
     - [Object](#topo.Object)
     - [ReadRequest](#topo.ReadRequest)
     - [ReadResponse](#topo.ReadResponse)
+    - [Reference](#topo.Reference)
     - [Relationship](#topo.Relationship)
     - [StreamMessageRequest](#topo.StreamMessageRequest)
     - [StreamMessageResponse](#topo.StreamMessageResponse)
@@ -35,6 +37,37 @@
 
 
 
+<a name="topo.Attributes"></a>
+
+### Attributes
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| attrs | [Attributes.AttrsEntry](#topo.Attributes.AttrsEntry) | repeated |  |
+
+
+
+
+
+
+<a name="topo.Attributes.AttrsEntry"></a>
+
+### Attributes.AttrsEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="topo.Entity"></a>
 
 ### Entity
@@ -44,23 +77,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | type | [string](#string) |  |  |
-| attributes | [Entity.AttributesEntry](#topo.Entity.AttributesEntry) | repeated | attributes is an arbitrary mapping of attribute keys (strings) to values (any) |
-
-
-
-
-
-
-<a name="topo.Entity.AttributesEntry"></a>
-
-### Entity.AttributesEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [google.protobuf.Any](#google.protobuf.Any) |  |  |
+| attrs | [Attributes](#topo.Attributes) |  |  |
 
 
 
@@ -75,7 +92,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  |  |
+| ref | [Reference](#topo.Reference) |  |  |
 | type | [Object.Type](#topo.Object.Type) |  |  |
 | entity | [Entity](#topo.Entity) |  |  |
 | relationship | [Relationship](#topo.Relationship) |  |  |
@@ -93,7 +110,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| objects | [Object](#topo.Object) | repeated |  |
+| refs | [Reference](#topo.Reference) | repeated |  |
 
 
 
@@ -115,6 +132,21 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
+<a name="topo.Reference"></a>
+
+### Reference
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="topo.Relationship"></a>
 
 ### Relationship
@@ -126,8 +158,9 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | directionality | [Relationship.Directionality](#topo.Relationship.Directionality) |  |  |
 | multiplicity | [Relationship.Multiplicity](#topo.Relationship.Multiplicity) |  |  |
 | type | [Relationship.Type](#topo.Relationship.Type) |  |  |
-| source_object | [Object](#topo.Object) | repeated | The two sets of objects that the relationship binds |
-| target_object | [Object](#topo.Object) | repeated |  |
+| attrs | [Attributes](#topo.Attributes) |  |  |
+| source_refs | [Reference](#topo.Reference) | repeated | The two sets of objects that the relationship binds |
+| target_refs | [Reference](#topo.Reference) | repeated |  |
 
 
 

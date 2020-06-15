@@ -10,7 +10,6 @@ import (
 	fmt "fmt"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -86,7 +85,7 @@ func (x Object_Type) String() string {
 }
 
 func (Object_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7, 0}
+	return fileDescriptor_5823f9f54b50fd8c, []int{9, 0}
 }
 
 type Relationship_Directionality int32
@@ -114,7 +113,7 @@ func (x Relationship_Directionality) String() string {
 }
 
 func (Relationship_Directionality) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{9, 0}
+	return fileDescriptor_5823f9f54b50fd8c, []int{11, 0}
 }
 
 type Relationship_Multiplicity int32
@@ -148,7 +147,7 @@ func (x Relationship_Multiplicity) String() string {
 }
 
 func (Relationship_Multiplicity) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{9, 1}
+	return fileDescriptor_5823f9f54b50fd8c, []int{11, 1}
 }
 
 type Relationship_Type int32
@@ -191,7 +190,7 @@ func (x Relationship_Type) String() string {
 }
 
 func (Relationship_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{9, 2}
+	return fileDescriptor_5823f9f54b50fd8c, []int{11, 2}
 }
 
 type WriteRequest struct {
@@ -276,7 +275,7 @@ func (m *WriteResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_WriteResponse proto.InternalMessageInfo
 
 type ReadRequest struct {
-	Objects []*Object `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	Refs []*Reference `protobuf:"bytes,1,rep,name=refs,proto3" json:"refs,omitempty"`
 }
 
 func (m *ReadRequest) Reset()         { *m = ReadRequest{} }
@@ -312,9 +311,9 @@ func (m *ReadRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReadRequest proto.InternalMessageInfo
 
-func (m *ReadRequest) GetObjects() []*Object {
+func (m *ReadRequest) GetRefs() []*Reference {
 	if m != nil {
-		return m.Objects
+		return m.Refs
 	}
 	return nil
 }
@@ -487,8 +486,96 @@ func (m *Update) GetObject() *Object {
 	return nil
 }
 
+type Reference struct {
+	ID ID `protobuf:"bytes,1,opt,name=id,proto3,casttype=ID" json:"id,omitempty"`
+}
+
+func (m *Reference) Reset()         { *m = Reference{} }
+func (m *Reference) String() string { return proto.CompactTextString(m) }
+func (*Reference) ProtoMessage()    {}
+func (*Reference) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{7}
+}
+func (m *Reference) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Reference) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Reference.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Reference) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Reference.Merge(m, src)
+}
+func (m *Reference) XXX_Size() int {
+	return m.Size()
+}
+func (m *Reference) XXX_DiscardUnknown() {
+	xxx_messageInfo_Reference.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Reference proto.InternalMessageInfo
+
+func (m *Reference) GetID() ID {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+type Attributes struct {
+	Attrs map[string]string `protobuf:"bytes,1,rep,name=attrs,proto3" json:"attrs,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (m *Attributes) Reset()         { *m = Attributes{} }
+func (m *Attributes) String() string { return proto.CompactTextString(m) }
+func (*Attributes) ProtoMessage()    {}
+func (*Attributes) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5823f9f54b50fd8c, []int{8}
+}
+func (m *Attributes) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Attributes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Attributes.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Attributes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Attributes.Merge(m, src)
+}
+func (m *Attributes) XXX_Size() int {
+	return m.Size()
+}
+func (m *Attributes) XXX_DiscardUnknown() {
+	xxx_messageInfo_Attributes.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Attributes proto.InternalMessageInfo
+
+func (m *Attributes) GetAttrs() map[string]string {
+	if m != nil {
+		return m.Attrs
+	}
+	return nil
+}
+
 type Object struct {
-	ID   ID          `protobuf:"bytes,1,opt,name=id,proto3,casttype=ID" json:"id,omitempty"`
+	Ref  *Reference  `protobuf:"bytes,1,opt,name=ref,proto3" json:"ref,omitempty"`
 	Type Object_Type `protobuf:"varint,2,opt,name=type,proto3,enum=topo.Object_Type" json:"type,omitempty"`
 	// Types that are valid to be assigned to Obj:
 	//	*Object_Entity
@@ -500,7 +587,7 @@ func (m *Object) Reset()         { *m = Object{} }
 func (m *Object) String() string { return proto.CompactTextString(m) }
 func (*Object) ProtoMessage()    {}
 func (*Object) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{7}
+	return fileDescriptor_5823f9f54b50fd8c, []int{9}
 }
 func (m *Object) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -552,11 +639,11 @@ func (m *Object) GetObj() isObject_Obj {
 	return nil
 }
 
-func (m *Object) GetID() ID {
+func (m *Object) GetRef() *Reference {
 	if m != nil {
-		return m.ID
+		return m.Ref
 	}
-	return ""
+	return nil
 }
 
 func (m *Object) GetType() Object_Type {
@@ -590,16 +677,15 @@ func (*Object) XXX_OneofWrappers() []interface{} {
 
 // Entity represents any "thing" that is represented in the topology
 type Entity struct {
-	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	// attributes is an arbitrary mapping of attribute keys (strings) to values (any)
-	Attributes map[string]*types.Any `protobuf:"bytes,2,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Type  string      `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Attrs *Attributes `protobuf:"bytes,3,opt,name=attrs,proto3" json:"attrs,omitempty"`
 }
 
 func (m *Entity) Reset()         { *m = Entity{} }
 func (m *Entity) String() string { return proto.CompactTextString(m) }
 func (*Entity) ProtoMessage()    {}
 func (*Entity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8}
+	return fileDescriptor_5823f9f54b50fd8c, []int{10}
 }
 func (m *Entity) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -635,9 +721,9 @@ func (m *Entity) GetType() string {
 	return ""
 }
 
-func (m *Entity) GetAttributes() map[string]*types.Any {
+func (m *Entity) GetAttrs() *Attributes {
 	if m != nil {
-		return m.Attributes
+		return m.Attrs
 	}
 	return nil
 }
@@ -646,16 +732,17 @@ type Relationship struct {
 	Directionality Relationship_Directionality `protobuf:"varint,1,opt,name=directionality,proto3,enum=topo.Relationship_Directionality" json:"directionality,omitempty"`
 	Multiplicity   Relationship_Multiplicity   `protobuf:"varint,2,opt,name=multiplicity,proto3,enum=topo.Relationship_Multiplicity" json:"multiplicity,omitempty"`
 	Type           Relationship_Type           `protobuf:"varint,3,opt,name=type,proto3,enum=topo.Relationship_Type" json:"type,omitempty"`
+	Attrs          *Attributes                 `protobuf:"bytes,4,opt,name=attrs,proto3" json:"attrs,omitempty"`
 	// The two sets of objects that the relationship binds
-	SourceObject []*Object `protobuf:"bytes,4,rep,name=source_object,json=sourceObject,proto3" json:"source_object,omitempty"`
-	TargetObject []*Object `protobuf:"bytes,5,rep,name=target_object,json=targetObject,proto3" json:"target_object,omitempty"`
+	SourceRefs []*Reference `protobuf:"bytes,5,rep,name=source_refs,json=sourceRefs,proto3" json:"source_refs,omitempty"`
+	TargetRefs []*Reference `protobuf:"bytes,6,rep,name=target_refs,json=targetRefs,proto3" json:"target_refs,omitempty"`
 }
 
 func (m *Relationship) Reset()         { *m = Relationship{} }
 func (m *Relationship) String() string { return proto.CompactTextString(m) }
 func (*Relationship) ProtoMessage()    {}
 func (*Relationship) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{9}
+	return fileDescriptor_5823f9f54b50fd8c, []int{11}
 }
 func (m *Relationship) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -705,16 +792,23 @@ func (m *Relationship) GetType() Relationship_Type {
 	return Relationship_UNSPECIFIED_TYPE
 }
 
-func (m *Relationship) GetSourceObject() []*Object {
+func (m *Relationship) GetAttrs() *Attributes {
 	if m != nil {
-		return m.SourceObject
+		return m.Attrs
 	}
 	return nil
 }
 
-func (m *Relationship) GetTargetObject() []*Object {
+func (m *Relationship) GetSourceRefs() []*Reference {
 	if m != nil {
-		return m.TargetObject
+		return m.SourceRefs
+	}
+	return nil
+}
+
+func (m *Relationship) GetTargetRefs() []*Reference {
+	if m != nil {
+		return m.TargetRefs
 	}
 	return nil
 }
@@ -732,71 +826,75 @@ func init() {
 	proto.RegisterType((*StreamMessageRequest)(nil), "topo.StreamMessageRequest")
 	proto.RegisterType((*StreamMessageResponse)(nil), "topo.StreamMessageResponse")
 	proto.RegisterType((*Update)(nil), "topo.Update")
+	proto.RegisterType((*Reference)(nil), "topo.Reference")
+	proto.RegisterType((*Attributes)(nil), "topo.Attributes")
+	proto.RegisterMapType((map[string]string)(nil), "topo.Attributes.AttrsEntry")
 	proto.RegisterType((*Object)(nil), "topo.Object")
 	proto.RegisterType((*Entity)(nil), "topo.Entity")
-	proto.RegisterMapType((map[string]*types.Any)(nil), "topo.Entity.AttributesEntry")
 	proto.RegisterType((*Relationship)(nil), "topo.Relationship")
 }
 
 func init() { proto.RegisterFile("api/topo/topo.proto", fileDescriptor_5823f9f54b50fd8c) }
 
 var fileDescriptor_5823f9f54b50fd8c = []byte{
-	// 876 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x54, 0xcd, 0x8e, 0xe3, 0x44,
-	0x10, 0x4e, 0x3b, 0x3f, 0xbb, 0x5b, 0x71, 0x66, 0x3c, 0xbd, 0x03, 0x1b, 0xc2, 0x28, 0x3b, 0x58,
-	0xb0, 0x1a, 0x81, 0x94, 0xb0, 0x41, 0xa0, 0xd5, 0x8a, 0x03, 0x4e, 0xd2, 0x3b, 0xd3, 0x52, 0xe2,
-	0x0c, 0x6d, 0x0f, 0x68, 0xb8, 0x44, 0xce, 0xa4, 0xc9, 0x7a, 0xc9, 0xc6, 0xc6, 0xe9, 0x20, 0xe5,
-	0xc8, 0x8d, 0x23, 0x37, 0x1e, 0x83, 0x07, 0xe0, 0x05, 0x38, 0xee, 0x91, 0x13, 0x42, 0x33, 0x6f,
-	0xc0, 0x91, 0x13, 0xea, 0x6e, 0x7b, 0x70, 0xb2, 0x11, 0x70, 0xb1, 0xaa, 0xab, 0xbe, 0xaf, 0xba,
-	0xaa, 0xfd, 0x55, 0xc1, 0xfd, 0x20, 0x0e, 0xdb, 0x22, 0x8a, 0x23, 0xf5, 0x69, 0xc5, 0x49, 0x24,
-	0x22, 0x5c, 0x92, 0x76, 0xe3, 0xad, 0x59, 0x14, 0xcd, 0xe6, 0xbc, 0xad, 0x7c, 0x93, 0xd5, 0xd7,
-	0xed, 0x60, 0xb1, 0xd6, 0x80, 0xc6, 0xe1, 0x2c, 0x9a, 0x45, 0xca, 0x6c, 0x4b, 0x4b, 0x7b, 0xed,
-	0x4f, 0xc0, 0xfc, 0x32, 0x09, 0x05, 0x67, 0xfc, 0xdb, 0x15, 0x5f, 0x0a, 0xfc, 0x08, 0xee, 0xac,
-	0xe2, 0x69, 0x20, 0xf8, 0xb2, 0x8e, 0x8e, 0x8b, 0x27, 0xd5, 0x8e, 0xd9, 0x52, 0x97, 0x5c, 0x28,
-	0x27, 0xcb, 0x82, 0xf6, 0x3e, 0xd4, 0x52, 0xde, 0x32, 0x8e, 0x16, 0x4b, 0x6e, 0x7f, 0x0c, 0x55,
-	0xc6, 0x83, 0x69, 0x2e, 0x4f, 0x34, 0x79, 0xc1, 0xaf, 0xc4, 0x56, 0x9e, 0x91, 0x72, 0xb2, 0x2c,
-	0x28, 0xef, 0xd7, 0x34, 0x9d, 0xe6, 0x7f, 0xf3, 0xde, 0x84, 0x43, 0x4f, 0x24, 0x3c, 0x78, 0x39,
-	0xe4, 0xcb, 0x65, 0x30, 0xcb, 0xea, 0xb7, 0x1f, 0xc0, 0x1b, 0x5b, 0xfe, 0xb4, 0xbe, 0x9f, 0x10,
-	0x54, 0x74, 0x13, 0xf8, 0x3d, 0x28, 0x89, 0x75, 0xcc, 0xeb, 0xc6, 0x31, 0x3a, 0xd9, 0xeb, 0x1c,
-	0xe4, 0x1b, 0x6c, 0xf9, 0xeb, 0x98, 0x33, 0x15, 0xc6, 0xef, 0x42, 0x45, 0xdf, 0x56, 0x2f, 0x1e,
-	0xa3, 0xd7, 0x2a, 0x49, 0x63, 0xf6, 0x67, 0x50, 0x92, 0x1c, 0x7c, 0x08, 0xd6, 0x85, 0xeb, 0x9d,
-	0x93, 0x1e, 0x7d, 0x46, 0x49, 0x7f, 0xec, 0x5f, 0x9e, 0x13, 0xab, 0x80, 0x01, 0x2a, 0xd4, 0xf5,
-	0x08, 0xf3, 0x2d, 0x24, 0xed, 0xe1, 0xa8, 0x4f, 0x9f, 0x5d, 0x5a, 0x86, 0xb4, 0xfb, 0x64, 0x40,
-	0x7c, 0x62, 0x15, 0xed, 0x3f, 0x11, 0x54, 0x74, 0x52, 0x7c, 0x04, 0x46, 0x38, 0xad, 0xa3, 0x63,
-	0x74, 0x72, 0xaf, 0x6b, 0x5e, 0xff, 0xfe, 0xd0, 0xa0, 0xfd, 0xbf, 0xd4, 0x97, 0x19, 0xe1, 0x74,
-	0x77, 0xdd, 0x9a, 0x99, 0xaf, 0xfb, 0x11, 0x54, 0xf8, 0x42, 0x84, 0x62, 0xbd, 0x59, 0x37, 0x51,
-	0xbe, 0xb3, 0x02, 0x4b, 0xa3, 0xf8, 0x09, 0x98, 0x09, 0x9f, 0x07, 0x22, 0x8c, 0x16, 0xcb, 0xe7,
-	0x61, 0x5c, 0x2f, 0x29, 0x34, 0xd6, 0x68, 0x96, 0x8b, 0x9c, 0x15, 0xd8, 0x06, 0xd2, 0x7e, 0xfa,
-	0x5f, 0x3d, 0x13, 0xd7, 0xa7, 0xfe, 0xa5, 0x85, 0xb0, 0x05, 0x26, 0x23, 0x03, 0xc7, 0xa7, 0x23,
-	0xd7, 0x3b, 0xa3, 0xe7, 0x96, 0xd1, 0x2d, 0x43, 0x31, 0x9a, 0xbc, 0xb0, 0x7f, 0x46, 0x50, 0xd1,
-	0x15, 0x61, 0x9c, 0xb6, 0xa5, 0xda, 0x4e, 0x7b, 0xf8, 0x14, 0x20, 0x10, 0x22, 0x09, 0x27, 0x2b,
-	0xa9, 0x44, 0x43, 0x29, 0xe1, 0x28, 0xdf, 0x47, 0xcb, 0xb9, 0x0d, 0x93, 0x85, 0x48, 0xd6, 0x2c,
-	0x87, 0x6f, 0x78, 0xb0, 0xbf, 0x15, 0xc6, 0x16, 0x14, 0xbf, 0xe1, 0xeb, 0xf4, 0x0e, 0x69, 0xe2,
-	0xf7, 0xa1, 0xfc, 0x5d, 0x30, 0x5f, 0xe9, 0xe7, 0xac, 0x76, 0x0e, 0x5b, 0x7a, 0x74, 0x5a, 0xd9,
-	0xe8, 0xb4, 0x9c, 0xc5, 0x9a, 0x69, 0xc8, 0x53, 0xe3, 0x09, 0xb2, 0xbf, 0x2f, 0x4b, 0xa9, 0xfe,
-	0xf3, 0x0a, 0x98, 0xc2, 0xde, 0x34, 0x4c, 0xf8, 0x95, 0x74, 0x04, 0x73, 0xf9, 0xde, 0x48, 0xfd,
-	0x98, 0x77, 0x5e, 0x7f, 0xc1, 0x56, 0x7f, 0x03, 0xc8, 0xb6, 0x88, 0xb8, 0x07, 0xe6, 0xcb, 0xd5,
-	0x5c, 0x84, 0xf1, 0x3c, 0xbc, 0x92, 0x89, 0xf4, 0x1f, 0x7e, 0xb8, 0x23, 0xd1, 0x30, 0x07, 0x63,
-	0x1b, 0x24, 0xfc, 0x41, 0xfa, 0x8e, 0x45, 0x45, 0x7e, 0xb0, 0x83, 0x9c, 0x13, 0xc9, 0x63, 0xa8,
-	0x2d, 0xa3, 0x55, 0x72, 0xc5, 0xc7, 0xa9, 0xc6, 0x4b, 0x3b, 0xa6, 0xcd, 0xd4, 0x90, 0x54, 0x9c,
-	0x8f, 0xa1, 0x26, 0x82, 0x64, 0xc6, 0x45, 0x46, 0x29, 0xef, 0xa2, 0x68, 0x88, 0x3e, 0xd9, 0x9f,
-	0xc3, 0xde, 0x66, 0xe7, 0xb8, 0x09, 0x8d, 0xbc, 0x64, 0xfa, 0x94, 0x91, 0x9e, 0x54, 0x87, 0x33,
-	0x90, 0x82, 0x29, 0x60, 0x13, 0xee, 0x6a, 0x1f, 0xe9, 0x5b, 0x08, 0x1f, 0x40, 0xad, 0x4b, 0x73,
-	0x18, 0xcb, 0xb0, 0x63, 0x30, 0xf3, 0x6f, 0x80, 0x8f, 0xa0, 0x9e, 0x4f, 0x38, 0xbc, 0x18, 0xf8,
-	0xf4, 0x7c, 0x40, 0x7b, 0x3a, 0xdd, 0x1e, 0xc0, 0xc8, 0x25, 0x63, 0x7f, 0x34, 0x1e, 0xb9, 0xc4,
-	0x42, 0x78, 0x1f, 0xaa, 0xe9, 0x79, 0xe8, 0xb8, 0x72, 0x10, 0xf7, 0xa1, 0x2a, 0xad, 0x0c, 0x51,
-	0x94, 0x8a, 0xcd, 0x1c, 0x0a, 0x52, 0xb2, 0x7f, 0x40, 0xff, 0x2a, 0x77, 0x13, 0xee, 0xf6, 0x46,
-	0xae, 0xef, 0x50, 0xd7, 0xb3, 0x50, 0x76, 0x62, 0xa3, 0x81, 0x67, 0x19, 0xf2, 0x7a, 0xe7, 0xf4,
-	0x94, 0x91, 0x53, 0xc7, 0x27, 0x9e, 0x55, 0x54, 0xe5, 0x30, 0x7a, 0x4a, 0x5d, 0x75, 0x2e, 0xc9,
-	0xb3, 0x4f, 0xd8, 0x30, 0x3d, 0x97, 0x71, 0x0d, 0xee, 0xf9, 0xcc, 0xf9, 0x82, 0x30, 0x8f, 0x78,
-	0x56, 0x45, 0x16, 0xc7, 0x88, 0x33, 0xa0, 0x5f, 0x91, 0xfe, 0xb8, 0x7b, 0x69, 0xdd, 0xe9, 0xfc,
-	0x82, 0x40, 0xed, 0x79, 0xdc, 0x81, 0xb2, 0x5a, 0xbf, 0x38, 0x1d, 0xd7, 0xfc, 0x0e, 0x6f, 0xdc,
-	0xdf, 0xf0, 0xa5, 0xfb, 0xaf, 0x80, 0xdb, 0x50, 0x92, 0xab, 0x16, 0x1f, 0x64, 0xca, 0xb8, 0xdd,
-	0xd6, 0x0d, 0x9c, 0x77, 0xdd, 0x12, 0x5c, 0xa8, 0xe9, 0x5d, 0xda, 0x7b, 0x1e, 0x2c, 0x16, 0x7c,
-	0x8e, 0x1b, 0x1a, 0xb6, 0x6b, 0xf1, 0x36, 0xde, 0xde, 0x19, 0xcb, 0x72, 0x9d, 0xa0, 0x0f, 0x51,
-	0xb7, 0xfe, 0xeb, 0x75, 0x13, 0xbd, 0xba, 0x6e, 0xa2, 0x3f, 0xae, 0x9b, 0xe8, 0xc7, 0x9b, 0x66,
-	0xe1, 0xd5, 0x4d, 0xb3, 0xf0, 0xdb, 0x4d, 0xb3, 0x30, 0xa9, 0xa8, 0xa1, 0xfb, 0xe8, 0xef, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0x7e, 0x6e, 0xbc, 0xe2, 0xda, 0x06, 0x00, 0x00,
+	// 900 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x55, 0xcd, 0x6e, 0xdb, 0x46,
+	0x10, 0xd6, 0xea, 0x2f, 0xd1, 0x88, 0xb6, 0xd7, 0x1b, 0xb7, 0x11, 0x94, 0x40, 0x71, 0xd8, 0x36,
+	0x70, 0x51, 0xc0, 0x4e, 0x55, 0xa0, 0x30, 0x72, 0x2a, 0x25, 0x6e, 0x6c, 0x02, 0x12, 0xe5, 0x2e,
+	0xe9, 0x16, 0xee, 0x45, 0xa0, 0xa5, 0xb5, 0xc3, 0x54, 0x11, 0x59, 0x72, 0x55, 0x40, 0x6f, 0xd0,
+	0x63, 0x6f, 0x7d, 0x84, 0x3e, 0x44, 0x5f, 0xa0, 0xc7, 0x1c, 0x7b, 0x2a, 0x0a, 0xfb, 0x21, 0x0a,
+	0xf4, 0x54, 0xec, 0x2e, 0x69, 0x53, 0x8e, 0x9a, 0x5e, 0x88, 0xd9, 0x99, 0xf9, 0xe6, 0xe7, 0x9b,
+	0xe5, 0x2c, 0x3c, 0x08, 0xe2, 0xf0, 0x40, 0x44, 0x71, 0xa4, 0x3e, 0xfb, 0x71, 0x12, 0x89, 0x88,
+	0x54, 0xa5, 0xdc, 0xde, 0xb9, 0x8c, 0x2e, 0x23, 0xa5, 0x38, 0x90, 0x92, 0xb6, 0x99, 0x5f, 0x82,
+	0xf1, 0x6d, 0x12, 0x0a, 0xce, 0xf8, 0x0f, 0x0b, 0x9e, 0x0a, 0xf2, 0x0c, 0xee, 0x2d, 0xe2, 0x69,
+	0x20, 0x78, 0xda, 0x42, 0xbb, 0x95, 0xbd, 0x66, 0xd7, 0xd8, 0x57, 0x91, 0x4e, 0x95, 0x92, 0xe5,
+	0x46, 0x73, 0x0b, 0x36, 0x32, 0x5c, 0x1a, 0x47, 0xf3, 0x94, 0x9b, 0x5d, 0x68, 0x32, 0x1e, 0x4c,
+	0xf3, 0x38, 0x1f, 0x41, 0x35, 0xe1, 0x17, 0x79, 0x90, 0x2d, 0x1d, 0x84, 0xf1, 0x0b, 0x9e, 0xf0,
+	0xf9, 0x84, 0x33, 0x65, 0x94, 0xc9, 0x35, 0x46, 0xc7, 0x90, 0xc9, 0xa3, 0xf3, 0xd7, 0x7c, 0x22,
+	0xee, 0x24, 0x1f, 0x29, 0x25, 0xcb, 0x8d, 0xe6, 0x87, 0xb0, 0xe3, 0x89, 0x84, 0x07, 0x6f, 0x86,
+	0x3c, 0x4d, 0x83, 0xcb, 0xbc, 0x78, 0xf3, 0x21, 0x7c, 0x70, 0x47, 0x9f, 0x15, 0xf7, 0x0b, 0x82,
+	0xba, 0xee, 0x80, 0x7c, 0x02, 0x55, 0xb1, 0x8c, 0x79, 0xab, 0xbc, 0x8b, 0xf6, 0x36, 0xbb, 0xdb,
+	0xc5, 0xee, 0xf6, 0xfd, 0x65, 0xcc, 0x99, 0x32, 0x93, 0x8f, 0xa1, 0xae, 0xb3, 0xb5, 0x2a, 0xbb,
+	0xe8, 0x9d, 0x4a, 0x32, 0x9b, 0xf9, 0x15, 0x54, 0x25, 0x86, 0xec, 0x00, 0x3e, 0x75, 0xbd, 0x13,
+	0xda, 0x77, 0x5e, 0x3a, 0xd4, 0x1e, 0xfb, 0x67, 0x27, 0x14, 0x97, 0x08, 0x40, 0xdd, 0x71, 0x3d,
+	0xca, 0x7c, 0x8c, 0xa4, 0x3c, 0x1c, 0xd9, 0xce, 0xcb, 0x33, 0x5c, 0x96, 0xb2, 0x4d, 0x07, 0xd4,
+	0xa7, 0xb8, 0x62, 0x7e, 0x0a, 0x8d, 0x1b, 0x56, 0xc8, 0x63, 0x28, 0x87, 0xd3, 0x16, 0xda, 0x45,
+	0x7b, 0x8d, 0x9e, 0x71, 0xf5, 0xe7, 0x93, 0xb2, 0x63, 0xff, 0xa3, 0xbe, 0xac, 0x1c, 0x4e, 0xcd,
+	0x25, 0x80, 0x25, 0x44, 0x12, 0x9e, 0x2f, 0x04, 0x4f, 0xc9, 0xe7, 0x50, 0x0b, 0x84, 0x48, 0x72,
+	0xa6, 0x1e, 0xe9, 0xfa, 0x6e, 0x1d, 0x94, 0x98, 0xd2, 0xb9, 0x48, 0x96, 0x4c, 0x7b, 0xb6, 0x0f,
+	0x75, 0x00, 0xad, 0x24, 0x18, 0x2a, 0xdf, 0xf3, 0xa5, 0xce, 0xc6, 0xa4, 0x48, 0x76, 0xa0, 0xf6,
+	0x63, 0x30, 0x5b, 0x68, 0x6e, 0x1a, 0x4c, 0x1f, 0x5e, 0x94, 0x0f, 0x91, 0xf9, 0x37, 0x82, 0xba,
+	0x6e, 0x9d, 0x3c, 0x85, 0x4a, 0xc2, 0x2f, 0x14, 0x6c, 0xcd, 0x5c, 0xa5, 0x6d, 0x3d, 0xc5, 0x1a,
+	0x5e, 0xa4, 0xf8, 0x19, 0xd4, 0xf9, 0x5c, 0x84, 0x62, 0xb9, 0x4a, 0x31, 0x55, 0xba, 0xe3, 0x12,
+	0xcb, 0xac, 0xe4, 0x10, 0x8c, 0x84, 0xcf, 0x02, 0x11, 0x46, 0xf3, 0xf4, 0x55, 0x18, 0xb7, 0xaa,
+	0xca, 0x9b, 0xe4, 0xa9, 0x6f, 0x2d, 0xc7, 0x25, 0xb6, 0xe2, 0x69, 0xbe, 0xf8, 0xbf, 0xf1, 0x50,
+	0xd7, 0x77, 0xfc, 0x33, 0x8c, 0x08, 0x06, 0x83, 0xd1, 0x81, 0xe5, 0x3b, 0x23, 0xd7, 0x3b, 0x76,
+	0x4e, 0x70, 0xb9, 0x57, 0x83, 0x4a, 0x74, 0xfe, 0xda, 0xb4, 0xa1, 0xae, 0x0b, 0x22, 0xa4, 0xd0,
+	0x55, 0xe3, 0xa6, 0x85, 0x6c, 0x08, 0xba, 0x03, 0x7c, 0x77, 0x08, 0x19, 0xf3, 0xe6, 0xaf, 0x35,
+	0x79, 0xd3, 0x6f, 0x2b, 0x23, 0x0e, 0x6c, 0x4e, 0xc3, 0x84, 0x4f, 0xa4, 0x22, 0x98, 0x49, 0x0e,
+	0x90, 0x22, 0xeb, 0xe9, 0xbb, 0x5d, 0xed, 0xdb, 0x2b, 0x8e, 0xec, 0x0e, 0x90, 0xf4, 0xc1, 0x78,
+	0xb3, 0x98, 0x89, 0x30, 0x9e, 0x85, 0x13, 0x19, 0x48, 0xb3, 0xfe, 0x64, 0x4d, 0xa0, 0x61, 0xc1,
+	0x8d, 0xad, 0x80, 0xc8, 0x67, 0x59, 0x73, 0x15, 0x05, 0x7e, 0xb8, 0x06, 0xbc, 0x32, 0xb8, 0xac,
+	0xeb, 0xea, 0x7b, 0xbb, 0x26, 0xcf, 0xa1, 0x99, 0x46, 0x8b, 0x64, 0xc2, 0xc7, 0x6a, 0x15, 0xd4,
+	0xd6, 0xaf, 0x02, 0xd0, 0x3e, 0x8c, 0x5f, 0x28, 0x84, 0x08, 0x92, 0x4b, 0x2e, 0x34, 0xa2, 0xfe,
+	0x1f, 0x08, 0xed, 0x23, 0x11, 0xe6, 0xd7, 0xb0, 0xb9, 0xca, 0x0f, 0xe9, 0x40, 0xbb, 0x38, 0x6c,
+	0xdb, 0x61, 0xb4, 0x2f, 0xe7, 0x6a, 0x0d, 0xe4, 0xa8, 0x4b, 0xc4, 0x80, 0xfb, 0x5a, 0x47, 0x6d,
+	0x8c, 0xc8, 0x36, 0x6c, 0xf4, 0x9c, 0x82, 0x0f, 0x2e, 0x9b, 0x31, 0x18, 0x45, 0xa6, 0xc8, 0x63,
+	0x68, 0x15, 0x03, 0x0e, 0x4f, 0x07, 0xbe, 0x73, 0x32, 0x70, 0xfa, 0x3a, 0xdc, 0x26, 0xc0, 0xc8,
+	0xa5, 0x63, 0x7f, 0x34, 0x1e, 0xb9, 0x14, 0x23, 0xb2, 0x05, 0xcd, 0xec, 0x3c, 0xb4, 0x5c, 0xf9,
+	0xb7, 0x6f, 0x41, 0x53, 0x4a, 0xb9, 0x47, 0x45, 0xde, 0xb5, 0x5c, 0xa1, 0x5c, 0xaa, 0xe6, 0x4f,
+	0xe8, 0xbd, 0x17, 0xd5, 0x80, 0xfb, 0xfd, 0x91, 0xeb, 0x5b, 0x8e, 0xeb, 0x61, 0x94, 0x9f, 0xd8,
+	0x68, 0xe0, 0xe1, 0xb2, 0x4c, 0x6f, 0x1d, 0x1d, 0x31, 0x7a, 0x64, 0xf9, 0xd4, 0xc3, 0x15, 0x55,
+	0x0e, 0x73, 0x8e, 0x1c, 0x57, 0x9d, 0xab, 0xf2, 0xec, 0x53, 0x36, 0xcc, 0xce, 0x35, 0xb2, 0x01,
+	0x0d, 0x9f, 0x59, 0xdf, 0x50, 0xe6, 0x51, 0x0f, 0xd7, 0x65, 0x71, 0x8c, 0x5a, 0x03, 0xe7, 0x3b,
+	0x6a, 0x8f, 0x7b, 0x67, 0xf8, 0x5e, 0xf7, 0x37, 0x04, 0xea, 0xb9, 0x20, 0x5d, 0xa8, 0xa9, 0x05,
+	0x4f, 0xb2, 0x1f, 0xad, 0xf8, 0x4a, 0xb4, 0x1f, 0xac, 0xe8, 0xb2, 0x25, 0x5b, 0x22, 0x07, 0x50,
+	0x95, 0xfb, 0x9c, 0x6c, 0xe7, 0x13, 0xbb, 0x79, 0x0f, 0xda, 0xa4, 0xa8, 0xba, 0x01, 0xb8, 0xb0,
+	0xa1, 0x17, 0x76, 0xff, 0x55, 0x30, 0x9f, 0xf3, 0x19, 0x69, 0x6b, 0xb7, 0x75, 0xdb, 0xbd, 0xfd,
+	0x68, 0xad, 0x2d, 0x8f, 0xb5, 0x87, 0x9e, 0xa3, 0x5e, 0xeb, 0xf7, 0xab, 0x0e, 0x7a, 0x7b, 0xd5,
+	0x41, 0x7f, 0x5d, 0x75, 0xd0, 0xcf, 0xd7, 0x9d, 0xd2, 0xdb, 0xeb, 0x4e, 0xe9, 0x8f, 0xeb, 0x4e,
+	0xe9, 0xbc, 0xae, 0x9e, 0xbb, 0x2f, 0xfe, 0x0d, 0x00, 0x00, 0xff, 0xff, 0xe8, 0x31, 0xc7, 0xf2,
+	0x21, 0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1074,10 +1172,10 @@ func (m *ReadRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Objects) > 0 {
-		for iNdEx := len(m.Objects) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.Refs) > 0 {
+		for iNdEx := len(m.Refs) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Objects[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Refs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -1214,6 +1312,78 @@ func (m *Update) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *Reference) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Reference) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Reference) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintTopo(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Attributes) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Attributes) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Attributes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Attrs) > 0 {
+		for k := range m.Attrs {
+			v := m.Attrs[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintTopo(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintTopo(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintTopo(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *Object) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1248,10 +1418,15 @@ func (m *Object) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x10
 	}
-	if len(m.ID) > 0 {
-		i -= len(m.ID)
-		copy(dAtA[i:], m.ID)
-		i = encodeVarintTopo(dAtA, i, uint64(len(m.ID)))
+	if m.Ref != nil {
+		{
+			size, err := m.Ref.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTopo(dAtA, i, uint64(size))
+		}
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1320,38 +1495,24 @@ func (m *Entity) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Attributes) > 0 {
-		for k := range m.Attributes {
-			v := m.Attributes[k]
-			baseI := i
-			if v != nil {
-				{
-					size, err := v.MarshalToSizedBuffer(dAtA[:i])
-					if err != nil {
-						return 0, err
-					}
-					i -= size
-					i = encodeVarintTopo(dAtA, i, uint64(size))
-				}
-				i--
-				dAtA[i] = 0x12
+	if m.Attrs != nil {
+		{
+			size, err := m.Attrs.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
 			}
-			i -= len(k)
-			copy(dAtA[i:], k)
-			i = encodeVarintTopo(dAtA, i, uint64(len(k)))
-			i--
-			dAtA[i] = 0xa
-			i = encodeVarintTopo(dAtA, i, uint64(baseI-i))
-			i--
-			dAtA[i] = 0x12
+			i -= size
+			i = encodeVarintTopo(dAtA, i, uint64(size))
 		}
+		i--
+		dAtA[i] = 0x1a
 	}
 	if len(m.Type) > 0 {
 		i -= len(m.Type)
 		copy(dAtA[i:], m.Type)
 		i = encodeVarintTopo(dAtA, i, uint64(len(m.Type)))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x12
 	}
 	return len(dAtA) - i, nil
 }
@@ -1376,10 +1537,24 @@ func (m *Relationship) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TargetObject) > 0 {
-		for iNdEx := len(m.TargetObject) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.TargetRefs) > 0 {
+		for iNdEx := len(m.TargetRefs) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TargetObject[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.TargetRefs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTopo(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.SourceRefs) > 0 {
+		for iNdEx := len(m.SourceRefs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SourceRefs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -1390,19 +1565,17 @@ func (m *Relationship) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x2a
 		}
 	}
-	if len(m.SourceObject) > 0 {
-		for iNdEx := len(m.SourceObject) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.SourceObject[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTopo(dAtA, i, uint64(size))
+	if m.Attrs != nil {
+		{
+			size, err := m.Attrs.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
 			}
-			i--
-			dAtA[i] = 0x22
+			i -= size
+			i = encodeVarintTopo(dAtA, i, uint64(size))
 		}
+		i--
+		dAtA[i] = 0x22
 	}
 	if m.Type != 0 {
 		i = encodeVarintTopo(dAtA, i, uint64(m.Type))
@@ -1463,8 +1636,8 @@ func (m *ReadRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if len(m.Objects) > 0 {
-		for _, e := range m.Objects {
+	if len(m.Refs) > 0 {
+		for _, e := range m.Refs {
 			l = e.Size()
 			n += 1 + l + sovTopo(uint64(l))
 		}
@@ -1521,7 +1694,7 @@ func (m *Update) Size() (n int) {
 	return n
 }
 
-func (m *Object) Size() (n int) {
+func (m *Reference) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1529,6 +1702,36 @@ func (m *Object) Size() (n int) {
 	_ = l
 	l = len(m.ID)
 	if l > 0 {
+		n += 1 + l + sovTopo(uint64(l))
+	}
+	return n
+}
+
+func (m *Attributes) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Attrs) > 0 {
+		for k, v := range m.Attrs {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovTopo(uint64(len(k))) + 1 + len(v) + sovTopo(uint64(len(v)))
+			n += mapEntrySize + 1 + sovTopo(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *Object) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ref != nil {
+		l = m.Ref.Size()
 		n += 1 + l + sovTopo(uint64(l))
 	}
 	if m.Type != 0 {
@@ -1574,18 +1777,9 @@ func (m *Entity) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTopo(uint64(l))
 	}
-	if len(m.Attributes) > 0 {
-		for k, v := range m.Attributes {
-			_ = k
-			_ = v
-			l = 0
-			if v != nil {
-				l = v.Size()
-				l += 1 + sovTopo(uint64(l))
-			}
-			mapEntrySize := 1 + len(k) + sovTopo(uint64(len(k))) + l
-			n += mapEntrySize + 1 + sovTopo(uint64(mapEntrySize))
-		}
+	if m.Attrs != nil {
+		l = m.Attrs.Size()
+		n += 1 + l + sovTopo(uint64(l))
 	}
 	return n
 }
@@ -1605,14 +1799,18 @@ func (m *Relationship) Size() (n int) {
 	if m.Type != 0 {
 		n += 1 + sovTopo(uint64(m.Type))
 	}
-	if len(m.SourceObject) > 0 {
-		for _, e := range m.SourceObject {
+	if m.Attrs != nil {
+		l = m.Attrs.Size()
+		n += 1 + l + sovTopo(uint64(l))
+	}
+	if len(m.SourceRefs) > 0 {
+		for _, e := range m.SourceRefs {
 			l = e.Size()
 			n += 1 + l + sovTopo(uint64(l))
 		}
 	}
-	if len(m.TargetObject) > 0 {
-		for _, e := range m.TargetObject {
+	if len(m.TargetRefs) > 0 {
+		for _, e := range m.TargetRefs {
 			l = e.Size()
 			n += 1 + l + sovTopo(uint64(l))
 		}
@@ -1797,7 +1995,7 @@ func (m *ReadRequest) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Objects", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Refs", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1824,8 +2022,8 @@ func (m *ReadRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Objects = append(m.Objects, &Object{})
-			if err := m.Objects[len(m.Objects)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Refs = append(m.Refs, &Reference{})
+			if err := m.Refs[len(m.Refs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2154,7 +2352,7 @@ func (m *Update) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Object) Unmarshal(dAtA []byte) error {
+func (m *Reference) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2177,10 +2375,10 @@ func (m *Object) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Object: wiretype end group for non-group")
+			return fmt.Errorf("proto: Reference: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Object: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Reference: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2214,6 +2412,275 @@ func (m *Object) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.ID = ID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTopo(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Attributes) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTopo
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Attributes: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Attributes: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Attrs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Attrs == nil {
+				m.Attrs = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowTopo
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipTopo(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Attrs[mapkey] = mapvalue
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTopo(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Object) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTopo
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Object: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Object: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ref", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Ref == nil {
+				m.Ref = &Reference{}
+			}
+			if err := m.Ref.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
@@ -2357,7 +2824,7 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Entity: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
@@ -2389,9 +2856,9 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 			}
 			m.Type = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Attributes", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Attrs", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2418,105 +2885,12 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Attributes == nil {
-				m.Attributes = make(map[string]*types.Any)
+			if m.Attrs == nil {
+				m.Attrs = &Attributes{}
 			}
-			var mapkey string
-			var mapvalue *types.Any
-			for iNdEx < postIndex {
-				entryPreIndex := iNdEx
-				var wire uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return ErrIntOverflowTopo
-					}
-					if iNdEx >= l {
-						return io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					wire |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				fieldNum := int32(wire >> 3)
-				if fieldNum == 1 {
-					var stringLenmapkey uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowTopo
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						stringLenmapkey |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					intStringLenmapkey := int(stringLenmapkey)
-					if intStringLenmapkey < 0 {
-						return ErrInvalidLengthTopo
-					}
-					postStringIndexmapkey := iNdEx + intStringLenmapkey
-					if postStringIndexmapkey < 0 {
-						return ErrInvalidLengthTopo
-					}
-					if postStringIndexmapkey > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
-					iNdEx = postStringIndexmapkey
-				} else if fieldNum == 2 {
-					var mapmsglen int
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowTopo
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						mapmsglen |= int(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					if mapmsglen < 0 {
-						return ErrInvalidLengthTopo
-					}
-					postmsgIndex := iNdEx + mapmsglen
-					if postmsgIndex < 0 {
-						return ErrInvalidLengthTopo
-					}
-					if postmsgIndex > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapvalue = &types.Any{}
-					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
-						return err
-					}
-					iNdEx = postmsgIndex
-				} else {
-					iNdEx = entryPreIndex
-					skippy, err := skipTopo(dAtA[iNdEx:])
-					if err != nil {
-						return err
-					}
-					if skippy < 0 {
-						return ErrInvalidLengthTopo
-					}
-					if (iNdEx + skippy) > postIndex {
-						return io.ErrUnexpectedEOF
-					}
-					iNdEx += skippy
-				}
+			if err := m.Attrs.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
-			m.Attributes[mapkey] = mapvalue
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2630,7 +3004,7 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 			}
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SourceObject", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Attrs", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2657,14 +3031,16 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SourceObject = append(m.SourceObject, &Object{})
-			if err := m.SourceObject[len(m.SourceObject)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if m.Attrs == nil {
+				m.Attrs = &Attributes{}
+			}
+			if err := m.Attrs.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TargetObject", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceRefs", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2691,8 +3067,42 @@ func (m *Relationship) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TargetObject = append(m.TargetObject, &Object{})
-			if err := m.TargetObject[len(m.TargetObject)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.SourceRefs = append(m.SourceRefs, &Reference{})
+			if err := m.SourceRefs[len(m.SourceRefs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetRefs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TargetRefs = append(m.TargetRefs, &Reference{})
+			if err := m.TargetRefs[len(m.TargetRefs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

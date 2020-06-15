@@ -19,7 +19,6 @@ syntax = "proto3";
 // Package topo defines interfaces for managing network top
 package topo;
 
-import "google/protobuf/any.proto";
 import "gogoproto/gogo.proto";
 
 // EntityService provides an API for managing entities.
@@ -48,7 +47,7 @@ message WriteResponse {
 }
 
 message ReadRequest {
-  repeated Object objects = 1;
+  repeated Reference refs = 1;
 }
 
 message ReadResponse {
@@ -62,6 +61,7 @@ message StreamMessageResponse {
 }
 
 message Update {
+
   enum Type {
     UNSPECIFIED_TYPE = 0;
     INSERT = 1;
@@ -71,10 +71,24 @@ message Update {
   Type type = 2;
 
   Object object = 3;
+
+}
+
+message Reference {
+
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+
+}
+
+message Attributes {
+
+  map<string, string> attrs = 1;
+
 }
 
 message Object {
-  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+
+  Reference ref = 1;
 
   enum Type {
     UNSPECIFIED_TYPE = 0;
@@ -87,18 +101,20 @@ message Object {
     Entity entity = 3;
     Relationship relationship = 4;
   }
+
 }
 
 // Entity represents any "thing" that is represented in the topology
 message Entity {
-  string type = 1;
 
-  // attributes is an arbitrary mapping of attribute keys (strings) to values (any)
-  map<string, google.protobuf.Any> attributes = 2;
+  string type = 2;
+
+  Attributes attrs = 3;
 
 }
 
 message Relationship {
+
   enum Directionality {
     UNSPECIFIED_DIRECTIONALITY = 0;
     DIRECTED = 1;
@@ -127,7 +143,10 @@ message Relationship {
   }
   Type type = 3;
 
+  Attributes attrs = 4;
+
   // The two sets of objects that the relationship binds
-  repeated Object source_object = 4;
-  repeated Object target_object = 5;
+  repeated Reference source_refs = 5;
+  repeated Reference target_refs = 6;
+
 }
