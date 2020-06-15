@@ -82,6 +82,8 @@ message Reference {
 
 message Attributes {
 
+  // TODO - Instead of a plain string, consider using a "typed" value in attrs map.
+  //      - See onos-config for example.
   map<string, string> attrs = 1;
 
 }
