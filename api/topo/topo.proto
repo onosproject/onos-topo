@@ -22,7 +22,7 @@ package topo;
 import "gogoproto/gogo.proto";
 
 // EntityService provides an API for managing entities.
-service topo {
+service Topo {
   // Update one or more entities to the topology
   rpc Write (WriteRequest) returns (WriteResponse) {
   }
@@ -63,7 +63,7 @@ message StreamMessageResponse {
 message Update {
 
   enum Type {
-    UNSPECIFIED_TYPE = 0;
+    UNSPECIFIED = 0;
     INSERT = 1;
     MODIFY = 2;
     DELETE = 3;
@@ -93,7 +93,7 @@ message Object {
   Reference ref = 1;
 
   enum Type {
-    UNSPECIFIED_TYPE = 0;
+    UNSPECIFIED = 0;
     ENTITY = 1;
     RELATIONSHIP = 2;
   }
@@ -134,7 +134,7 @@ message Relationship {
   Multiplicity multiplicity = 2;
 
   enum Type {
-    UNSPECIFIED_TYPE = 0;
+    UNSPECIFIED = 0;
     CONTAINS = 1;
     CONTROLS = 2;
     AGGREGATES = 3;

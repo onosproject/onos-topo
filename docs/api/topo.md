@@ -24,7 +24,7 @@
     - [Relationship.Type](#topo.Relationship.Type)
     - [Update.Type](#topo.Update.Type)
   
-    - [topo](#topo.topo)
+    - [Topo](#topo.Topo)
   
 - [Scalar Value Types](#scalar-value-types)
 
@@ -45,7 +45,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| attrs | [Attributes.AttrsEntry](#topo.Attributes.AttrsEntry) | repeated |  |
+| attrs | [Attributes.AttrsEntry](#topo.Attributes.AttrsEntry) | repeated | TODO - Instead of a plain string, consider using a &#34;typed&#34; value in attrs map. - See onos-config for example. |
 
 
 
@@ -237,7 +237,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| UNSPECIFIED_TYPE | 0 |  |
+| UNSPECIFIED | 0 |  |
 | ENTITY | 1 |  |
 | RELATIONSHIP | 2 |  |
 
@@ -278,7 +278,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| UNSPECIFIED_TYPE | 0 |  |
+| UNSPECIFIED | 0 |  |
 | CONTAINS | 1 |  |
 | CONTROLS | 2 |  |
 | AGGREGATES | 3 |  |
@@ -296,7 +296,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| UNSPECIFIED_TYPE | 0 |  |
+| UNSPECIFIED | 0 |  |
 | INSERT | 1 |  |
 | MODIFY | 2 |  |
 | DELETE | 3 |  |
@@ -307,9 +307,9 @@ Entity represents any &#34;thing&#34; that is represented in the topology
  
 
 
-<a name="topo.topo"></a>
+<a name="topo.Topo"></a>
 
-### topo
+### Topo
 EntityService provides an API for managing entities.
 
 | Method Name | Request Type | Response Type | Description |
