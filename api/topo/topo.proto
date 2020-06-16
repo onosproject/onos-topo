@@ -1,0 +1,154 @@
+/*
+Copyright 2019-present Open Networking Foundation.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+syntax = "proto3";
+
+// Package topo defines interfaces for managing network top
+package topo;
+
+import "gogoproto/gogo.proto";
+
+// EntityService provides an API for managing entities.
+service Topo {
+  // Update one or more entities to the topology
+  rpc Write (WriteRequest) returns (WriteResponse) {
+  }
+
+  // Read one or more entities from topology
+  rpc Read (ReadRequest) returns (ReadResponse) {
+  }
+
+  // Represents the bidirectional stream between
+  // onos-topo and a client for the purpose of
+  // - streaming notifications
+  rpc StreamChannel (stream StreamMessageRequest) returns (stream StreamMessageResponse) {
+  }
+}
+
+message WriteRequest {
+  // The write batch, comprising a list of Update operations
+  repeated Update updates = 1;
+}
+
+message WriteResponse {
+}
+
+message ReadRequest {
+  repeated Reference refs = 1;
+}
+
+message ReadResponse {
+  repeated Object objects = 1;
+}
+
+message StreamMessageRequest {
+}
+
+message StreamMessageResponse {
+}
+
+message Update {
+
+  enum Type {
+    UNSPECIFIED = 0;
+    INSERT = 1;
+    MODIFY = 2;
+    DELETE = 3;
+  }
+  Type type = 2;
+
+  Object object = 3;
+
+}
+
+message Reference {
+
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+
+}
+
+message Attributes {
+
+  // TODO - Instead of a plain string, consider using a "typed" value in attrs map.
+  //      - See onos-config for example.
+  map<string, string> attrs = 1;
+
+}
+
+message Object {
+
+  Reference ref = 1;
+
+  enum Type {
+    UNSPECIFIED = 0;
+    ENTITY = 1;
+    RELATIONSHIP = 2;
+  }
+  Type type = 2;
+
+  oneof obj {
+    Entity entity = 3;
+    Relationship relationship = 4;
+  }
+
+}
+
+// Entity represents any "thing" that is represented in the topology
+message Entity {
+
+  string type = 2;
+
+  Attributes attrs = 3;
+
+}
+
+message Relationship {
+
+  enum Directionality {
+    UNSPECIFIED_DIRECTIONALITY = 0;
+    DIRECTED = 1;
+    BIDIRECTIONAL = 2;
+  }
+  Directionality directionality = 1;
+
+  enum Multiplicity {
+    UNSPECIFIED_MULTIPLICITY = 0;
+    ONE_TO_ONE = 1;
+    ONE_TO_MANY = 2;
+    MANY_TO_ONE = 3;
+    MANY_TO_MANY = 4;
+  }
+  Multiplicity multiplicity = 2;
+
+  enum Type {
+    UNSPECIFIED = 0;
+    CONTAINS = 1;
+    CONTROLS = 2;
+    AGGREGATES = 3;
+    ORIGINATES = 4;
+    TERMINATES = 5;
+    TRAVERSES = 6;
+    REALIZED_BY = 7;
+  }
+  Type type = 3;
+
+  Attributes attrs = 4;
+
+  // The two sets of objects that the relationship binds
+  repeated Reference source_refs = 5;
+  repeated Reference target_refs = 6;
+
+}
