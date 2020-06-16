@@ -18,15 +18,13 @@ package topo
 import (
 	"context"
 
-	"github.com/onosproject/onos-lib-go/pkg/logging"
-
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/api/topo"
 	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"google.golang.org/grpc"
 )
 
-var log = logging.GetLogger("northbound", "topo")
+//var log = logging.GetLogger("northbound", "topo")
 
 // NewService returns a new topo Service
 func NewService() (northbound.Service, error) {
