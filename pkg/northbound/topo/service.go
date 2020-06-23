@@ -18,32 +18,45 @@ package topo
 import (
 	"context"
 
+	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/api/topo"
 	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-//var log = logging.GetLogger("northbound", "topo")
+var log = logging.GetLogger("northbound", "topo")
 
 // NewService returns a new topo Service
 func NewService() (northbound.Service, error) {
-	return &Service{}, nil
+	objectStore, err := NewAtomixStore()
+	if err != nil {
+		return nil, err
+	}
+	return &Service{
+		store: objectStore,
+	}, nil
 }
 
 // Service is a Service implementation for administration.
 type Service struct {
 	northbound.Service
+	store Store
 }
 
 // Register registers the Service with the gRPC server.
 func (s Service) Register(r *grpc.Server) {
-	server := &Server{}
+	server := &Server{
+		objectStore: s.store,
+	}
 	topoapi.RegisterTopoServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
+	objectStore Store
 }
 
 // TopoClientFactory : Default TopoClient creation.
@@ -63,12 +76,41 @@ func ValidateEntity(entity *topoapi.Entity) error {
 
 // Write :
 func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*topoapi.WriteResponse, error) {
+	for _, update := range request.Updates {
+		object := update.Object
+		switch update.Type {
+		case topo.Update_INSERT:
+			log.Infof("Insert object %v", object)
+			if err := s.objectStore.Store(object); err != nil {
+				return nil, err
+			}
+		default:
+			log.Infof("Invalid type %v", object)
+		}
+	}
 	return &topoapi.WriteResponse{}, nil
 }
 
 // Read :
 func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoapi.ReadResponse, error) {
-	return &topoapi.ReadResponse{}, nil
+	var objects []*topo.Object
+
+	for _, ref := range request.Refs {
+		id := ref.ID
+		object, err := s.objectStore.Load(id)
+		if err != nil {
+			return nil, err
+		} else if object == nil {
+			log.Infof("Not found object %s", string(id))
+			return nil, status.Error(codes.NotFound, string(id))
+		}
+		log.Infof("Read object %v", object)
+		objects = append(objects, object)
+	}
+
+	return &topoapi.ReadResponse{
+		Objects: objects,
+	}, nil
 }
 
 // StreamChannel :
