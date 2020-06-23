@@ -18,19 +18,23 @@ import "github.com/spf13/cobra"
 
 func getGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get {device} [args]",
+		Use:   "get {device|entity|relation} [args]",
 		Short: "Get topology resources",
 	}
 	cmd.AddCommand(getGetDeviceCommand())
+	cmd.AddCommand(getGetEntityCommand())
+	cmd.AddCommand(getGetRelationCommand())
 	return cmd
 }
 
 func getAddCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add {device} [args]",
+		Use:   "add {device|entity|relation} [args]",
 		Short: "Add a topology resource",
 	}
 	cmd.AddCommand(getAddDeviceCommand())
+	cmd.AddCommand(getAddEntityCommand())
+	cmd.AddCommand(getAddRelationCommand())
 	return cmd
 }
 

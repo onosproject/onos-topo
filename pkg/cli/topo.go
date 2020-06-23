@@ -27,7 +27,7 @@ import (
 
 func getGetEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get-entity <id>",
+		Use:   "entity <id>",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Get a topo entity",
 		RunE:  runGetEntityCommand,
@@ -73,7 +73,7 @@ func runGetEntityCommand(cmd *cobra.Command, args []string) error {
 
 func getAddEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-entity <id> [args]",
+		Use:   "entity <id> [args]",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Add an entity",
 		RunE:  runAddEntityCommand,
@@ -89,7 +89,7 @@ func runAddEntityCommand(cmd *cobra.Command, args []string) error {
 
 func getGetRelationCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get-relation <id>",
+		Use:   "relation <id>",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Get a topo relationship",
 		RunE:  runGetRelationCommand,
@@ -133,7 +133,7 @@ func runGetRelationCommand(cmd *cobra.Command, args []string) error {
 
 func getAddRelationCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-relation <id> <src-entity-id> <tgt-entity-id> [args]",
+		Use:   "relation <id> <src-entity-id> <tgt-entity-id> [args]",
 		Args:  cobra.MinimumNArgs(3),
 		Short: "Add a topo relationship",
 		RunE:  runAddRelationCommand,
