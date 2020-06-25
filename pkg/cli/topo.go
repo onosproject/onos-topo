@@ -287,16 +287,16 @@ func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
 				return
 			}
 
-			update := response.Update
-
-			_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
-			switch obj := update.Object.Obj.(type) {
-			case *topo.Object_Entity:
-				_, _ = fmt.Fprintf(writer, "%s\n", obj.Entity.Type)
-			case *topo.Object_Relationship:
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\n", obj.Relationship.Type, obj.Relationship.SourceRefs[0], obj.Relationship.TargetRefs[0])
-			default:
-				_, _ = fmt.Fprintf(writer, "\n")
+			for _, update := range response.Updates {
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
+				switch obj := update.Object.Obj.(type) {
+				case *topo.Object_Entity:
+					_, _ = fmt.Fprintf(writer, "%s\n", obj.Entity.Type)
+				case *topo.Object_Relationship:
+					_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\n", obj.Relationship.Type, obj.Relationship.SourceRefs[0], obj.Relationship.TargetRefs[0])
+				default:
+					_, _ = fmt.Fprintf(writer, "\n")
+				}
 			}
 
 			_ = writer.Flush()

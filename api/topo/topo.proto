@@ -57,7 +57,7 @@ message SubscribeRequest {
 }
 
 message SubscribeResponse {
-  Update update = 1;
+  repeated Update updates = 1;
 }
 
 message Update {

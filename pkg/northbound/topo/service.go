@@ -50,16 +50,14 @@ type Service struct {
 // Register registers the Service with the gRPC server.
 func (s Service) Register(r *grpc.Server) {
 	server := &Server{
-		objectStore:   s.store,
-		subscribeChan: make(chan topo.Update),
+		objectStore: s.store,
 	}
 	topoapi.RegisterTopoServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	objectStore   Store
-	subscribeChan chan topo.Update
+	objectStore Store
 }
 
 // TopoClientFactory : Default TopoClient creation.
@@ -156,9 +154,11 @@ func (s *Server) Subscribe(stream topo.Topo_SubscribeServer) error {
 		}
 
 		subscribeResponse := &topo.SubscribeResponse{
-			Update: &topo.Update{
-				Type:   t,
-				Object: event.Object,
+			Updates: []*topo.Update{
+				{
+					Type:   t,
+					Object: event.Object,
+				},
 			},
 		}
 
