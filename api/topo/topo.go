@@ -21,6 +21,9 @@ import (
 // ID ...
 type ID string
 
+// NullID ...
+const NullID = ""
+
 // TopoClientFactory : Default EntityServiceClient creation.
 var TopoClientFactory = func(cc *grpc.ClientConn) TopoClient {
 	return NewTopoClient(cc)

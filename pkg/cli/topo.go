@@ -17,6 +17,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"io"
 	"text/tabwriter"
 	"time"
 
@@ -235,4 +236,79 @@ func readObjects(cmd *cobra.Command, args []string) ([]*topo.Object, error) {
 		objects = response.Objects
 	}
 	return objects, nil
+}
+
+func getWatchEntityCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "entity <id> [args]",
+		Short: "Watch for topo changes",
+		RunE:  runWatchEntityCommand,
+	}
+	return cmd
+}
+
+func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
+	var id topo.ID
+	if len(args) > 0 {
+		id = topo.ID(args[0])
+	} else {
+		id = topo.ID(topo.NullID)
+	}
+
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := topo.CreateTopoClient(conn)
+
+	stream, err := client.Subscribe(context.Background())
+	if err != nil {
+		return err
+	}
+
+	waitc := make(chan struct{})
+
+	writer := new(tabwriter.Writer)
+	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
+
+	go func() {
+		for {
+			response, err := stream.Recv()
+			if err == io.EOF {
+				// read done.
+				close(waitc)
+				return
+			}
+			if err != nil {
+				cli.Output("Error receiving notification : %v", err)
+				close(waitc)
+				return
+			}
+
+			update := response.Update
+
+			_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
+			switch obj := update.Object.Obj.(type) {
+			case *topo.Object_Entity:
+				_, _ = fmt.Fprintf(writer, "%s\n", obj.Entity.Type)
+			case *topo.Object_Relationship:
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\n", obj.Relationship.Type, obj.Relationship.SourceRefs[0], obj.Relationship.TargetRefs[0])
+			default:
+				_, _ = fmt.Fprintf(writer, "\n")
+			}
+
+			_ = writer.Flush()
+		}
+	}()
+
+	subscribeRequest := &topo.SubscribeRequest{Refs: []*topo.Reference{{ID: id}}}
+	if err := stream.Send(subscribeRequest); err != nil {
+		close(waitc)
+	}
+
+	_ = stream.CloseSend()
+	<-waitc
+	return nil
 }

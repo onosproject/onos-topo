@@ -31,10 +31,8 @@ service Topo {
   rpc Read (ReadRequest) returns (ReadResponse) {
   }
 
-  // Represents the bidirectional stream between
-  // onos-topo and a client for the purpose of
-  // - streaming notifications
-  rpc StreamChannel (stream StreamMessageRequest) returns (stream StreamMessageResponse) {
+  // Subscribe returns a stream of topo change notifications
+  rpc Subscribe (stream SubscribeRequest) returns (stream SubscribeResponse) {
   }
 }
 
@@ -54,10 +52,12 @@ message ReadResponse {
   repeated Object objects = 1;
 }
 
-message StreamMessageRequest {
+message SubscribeRequest {
+  repeated Reference refs = 1;
 }
 
-message StreamMessageResponse {
+message SubscribeResponse {
+  Update update = 1;
 }
 
 message Update {

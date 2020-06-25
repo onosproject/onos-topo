@@ -17,6 +17,7 @@ package topo
 
 import (
 	"context"
+	"io"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
@@ -49,14 +50,16 @@ type Service struct {
 // Register registers the Service with the gRPC server.
 func (s Service) Register(r *grpc.Server) {
 	server := &Server{
-		objectStore: s.store,
+		objectStore:   s.store,
+		subscribeChan: make(chan topo.Update),
 	}
 	topoapi.RegisterTopoServer(r, server)
 }
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	objectStore Store
+	objectStore   Store
+	subscribeChan chan topo.Update
 }
 
 // TopoClientFactory : Default TopoClient creation.
@@ -113,7 +116,57 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 	}, nil
 }
 
-// StreamChannel :
-func (s *Server) StreamChannel(topo.Topo_StreamChannelServer) error {
+// Subscribe ...
+func (s *Server) Subscribe(stream topo.Topo_SubscribeServer) error {
+	waitc := make(chan struct{})
+	go func() {
+		for {
+			subscribeRequest, err := stream.Recv()
+			if err == io.EOF {
+				//return nil
+				close(waitc)
+				return
+			}
+			if err != nil {
+				//return err
+				close(waitc)
+				return
+			}
+			log.Infof("Subscribe request %v", subscribeRequest)
+			// TODO - define subscribe request api
+		}
+	}()
+
+	ch := make(chan *Event)
+	if err := s.objectStore.Watch(ch); err != nil {
+		return err
+	}
+
+	for event := range ch {
+		var t topoapi.Update_Type
+		switch event.Type {
+		case EventNone:
+			t = topoapi.Update_UNSPECIFIED
+		case EventInserted:
+			t = topoapi.Update_INSERT
+		case EventUpdated:
+			t = topoapi.Update_MODIFY
+		case EventRemoved:
+			t = topoapi.Update_DELETE
+		}
+
+		subscribeResponse := &topo.SubscribeResponse{
+			Update: &topo.Update{
+				Type:   t,
+				Object: event.Object,
+			},
+		}
+
+		if err := stream.Send(subscribeResponse); err != nil {
+			close(waitc)
+			return err
+		}
+	}
+	<-waitc
 	return nil
 }
