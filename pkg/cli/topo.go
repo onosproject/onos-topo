@@ -240,7 +240,7 @@ func readObjects(cmd *cobra.Command, args []string) ([]*topo.Object, error) {
 
 func getWatchEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "entity <id> [args]",
+		Use:   "entity [id] [args]",
 		Short: "Watch for entity changes",
 		Args:  cobra.MaximumNArgs(2),
 		RunE:  runWatchEntityCommand,
