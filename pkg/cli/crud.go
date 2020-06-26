@@ -58,11 +58,13 @@ func getRemoveCommand() *cobra.Command {
 
 func getWatchCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "watch {device|entity} [args]",
+		Use:   "watch {device|entity|relation|all} [args]",
 		Short: "Watch for changes to a topology resource type",
 	}
 	cmd.AddCommand(getWatchDeviceCommand())
 	cmd.AddCommand(getWatchEntityCommand())
+	cmd.AddCommand(getWatchRelationCommand())
+	cmd.AddCommand(getWatchAllCommand())
 	return cmd
 }
 

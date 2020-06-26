@@ -17,7 +17,6 @@ package topo
 
 import (
 	"context"
-	"io"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
@@ -115,28 +114,13 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 }
 
 // Subscribe ...
-func (s *Server) Subscribe(stream topo.Topo_SubscribeServer) error {
-	waitc := make(chan struct{})
-	go func() {
-		for {
-			subscribeRequest, err := stream.Recv()
-			if err == io.EOF {
-				//return nil
-				close(waitc)
-				return
-			}
-			if err != nil {
-				//return err
-				close(waitc)
-				return
-			}
-			log.Infof("Subscribe request %v", subscribeRequest)
-			// TODO - define subscribe request api
-		}
-	}()
-
+func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
+	var watchOpts []WatchOption
+	if !request.WithoutReplay {
+		watchOpts = append(watchOpts, WithReplay())
+	}
 	ch := make(chan *Event)
-	if err := s.objectStore.Watch(ch); err != nil {
+	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
 		return err
 	}
 
@@ -162,11 +146,9 @@ func (s *Server) Subscribe(stream topo.Topo_SubscribeServer) error {
 			},
 		}
 
-		if err := stream.Send(subscribeResponse); err != nil {
-			close(waitc)
+		if err := server.Send(subscribeResponse); err != nil {
 			return err
 		}
 	}
-	<-waitc
 	return nil
 }

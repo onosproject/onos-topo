@@ -174,7 +174,8 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| refs | [Reference](#topo.Reference) | repeated |  |
+| ref | [Reference](#topo.Reference) |  |  |
+| withoutReplay | [bool](#bool) |  |  |
 
 
 
@@ -325,7 +326,7 @@ EntityService provides an API for managing entities.
 | ----------- | ------------ | ------------- | ------------|
 | Write | [WriteRequest](#topo.WriteRequest) | [WriteResponse](#topo.WriteResponse) | Update one or more entities to the topology |
 | Read | [ReadRequest](#topo.ReadRequest) | [ReadResponse](#topo.ReadResponse) | Read one or more entities from topology |
-| Subscribe | [SubscribeRequest](#topo.SubscribeRequest) stream | [SubscribeResponse](#topo.SubscribeResponse) stream | Subscribe returns a stream of topo change notifications |
+| Subscribe | [SubscribeRequest](#topo.SubscribeRequest) | [SubscribeResponse](#topo.SubscribeResponse) stream | Subscribe returns a stream of topo change notifications |
 
  
 

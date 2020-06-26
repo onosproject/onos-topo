@@ -3,7 +3,7 @@ module github.com/onosproject/onos-topo
 go 1.14
 
 require (
-	github.com/apex/log v1.3.0
+	github.com/apex/log v1.3.0 // indirect
 	github.com/atomix/go-client v0.2.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/onosproject/helmit v0.6.4

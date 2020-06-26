@@ -32,7 +32,7 @@ service Topo {
   }
 
   // Subscribe returns a stream of topo change notifications
-  rpc Subscribe (stream SubscribeRequest) returns (stream SubscribeResponse) {
+  rpc Subscribe (SubscribeRequest) returns (stream SubscribeResponse) {
   }
 }
 
@@ -53,7 +53,8 @@ message ReadResponse {
 }
 
 message SubscribeRequest {
-  repeated Reference refs = 1;
+  Reference ref = 1;
+  bool withoutReplay = 2;
 }
 
 message SubscribeResponse {
