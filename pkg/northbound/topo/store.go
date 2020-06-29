@@ -90,7 +90,25 @@ type Store interface {
 	List(chan<- *topoapi.Object) error
 
 	// Watch streams object events to the given channel
-	Watch(chan<- *Event) error
+	Watch(chan<- *Event, ...WatchOption) error
+}
+
+// WatchOption is a configuration option for Watch calls
+type WatchOption interface {
+	apply([]_map.WatchOption) []_map.WatchOption
+}
+
+// watchReplyOption is an option to replay events on watch
+type watchReplayOption struct {
+}
+
+func (o watchReplayOption) apply(opts []_map.WatchOption) []_map.WatchOption {
+	return append(opts, _map.WithReplay())
+}
+
+// WithReplay returns a WatchOption that replays past changes
+func WithReplay() WatchOption {
+	return watchReplayOption{}
 }
 
 // atomixStore is the object implementation of the Store
@@ -156,9 +174,14 @@ func (s *atomixStore) List(ch chan<- *topoapi.Object) error {
 	return nil
 }
 
-func (s *atomixStore) Watch(ch chan<- *Event) error {
+func (s *atomixStore) Watch(ch chan<- *Event, opts ...WatchOption) error {
+	watchOpts := make([]_map.WatchOption, 0)
+	for _, opt := range opts {
+		watchOpts = opt.apply(watchOpts)
+	}
+
 	mapCh := make(chan *_map.Event)
-	if err := s.objects.Watch(context.Background(), mapCh, _map.WithReplay()); err != nil {
+	if err := s.objects.Watch(context.Background(), mapCh, watchOpts...); err != nil {
 		return err
 	}
 

@@ -17,6 +17,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"io"
 	"text/tabwriter"
 	"time"
 
@@ -235,4 +236,126 @@ func readObjects(cmd *cobra.Command, args []string) ([]*topo.Object, error) {
 		objects = response.Objects
 	}
 	return objects, nil
+}
+
+func getWatchEntityCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "entity [id] [args]",
+		Short: "Watch for entity changes",
+		Args:  cobra.MaximumNArgs(2),
+		RunE:  runWatchEntityCommand,
+	}
+	cmd.Flags().BoolP("replay", "r", false, "whether to replay past topo updates")
+	return cmd
+}
+
+func getWatchRelationCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "relation <id> [args]",
+		Short: "Watch for relationship changes",
+		Args:  cobra.MaximumNArgs(2),
+		RunE:  runWatchRelationCommand,
+	}
+	cmd.Flags().BoolP("replay", "r", false, "whether to replay past topo updates")
+	return cmd
+}
+
+func getWatchAllCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all [args]",
+		Short: "Watch for entity and relationship changes",
+		RunE:  runWatchAllCommand,
+	}
+	cmd.Flags().BoolP("replay", "r", false, "whether to replay past topo updates")
+	return cmd
+}
+
+func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, "entity")
+}
+
+func runWatchRelationCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, "relation")
+}
+
+func runWatchAllCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, "all")
+}
+
+func watch(cmd *cobra.Command, args []string, filter string) error {
+	replay, _ := cmd.Flags().GetBool("replay")
+	var id topo.ID
+	if len(args) > 0 {
+		id = topo.ID(args[0])
+	} else {
+		id = topo.ID(topo.NullID)
+	}
+
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := topo.CreateTopoClient(conn)
+
+	stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
+		Ref: &topo.Reference{
+			ID: id,
+		},
+		WithoutReplay: !replay,
+	})
+	if err != nil {
+		return err
+	}
+
+	updatec := make(chan *topo.Update)
+
+	go watchStream(stream, updatec)
+
+	watchReport(updatec, filter)
+
+	return nil
+}
+func watchStream(stream topo.Topo_SubscribeClient, updatec chan *topo.Update) {
+	for {
+		response, err := stream.Recv()
+		if err == io.EOF {
+			// read done.
+			close(updatec)
+			return
+		}
+		if err != nil {
+			cli.Output("Error receiving notification : %v", err)
+			close(updatec)
+			return
+		}
+
+		for _, update := range response.Updates {
+			updatec <- update
+		}
+	}
+}
+
+func watchReport(updatec chan *topo.Update, filter string) {
+	writer := new(tabwriter.Writer)
+	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
+
+	for update := range updatec {
+		switch obj := update.Object.Obj.(type) {
+		case *topo.Object_Entity:
+			if filter == "all" || filter == "entity" {
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
+				_, _ = fmt.Fprintf(writer, "%s\n", obj.Entity.Type)
+			}
+		case *topo.Object_Relationship:
+			if filter == "all" || filter == "relation" {
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\n", obj.Relationship.Type, obj.Relationship.SourceRefs[0].ID, obj.Relationship.TargetRefs[0].ID)
+			}
+		default:
+			_, _ = fmt.Fprintf(writer, "\n")
+		}
+		_ = writer.Flush()
+	}
 }

@@ -12,8 +12,8 @@
     - [ReadResponse](#topo.ReadResponse)
     - [Reference](#topo.Reference)
     - [Relationship](#topo.Relationship)
-    - [StreamMessageRequest](#topo.StreamMessageRequest)
-    - [StreamMessageResponse](#topo.StreamMessageResponse)
+    - [SubscribeRequest](#topo.SubscribeRequest)
+    - [SubscribeResponse](#topo.SubscribeResponse)
     - [Update](#topo.Update)
     - [WriteRequest](#topo.WriteRequest)
     - [WriteResponse](#topo.WriteResponse)
@@ -77,7 +77,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | type | [string](#string) |  |  |
-| attrs | [Attributes](#topo.Attributes) |  |  |
 
 
 
@@ -96,6 +95,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | type | [Object.Type](#topo.Object.Type) |  |  |
 | entity | [Entity](#topo.Entity) |  |  |
 | relationship | [Relationship](#topo.Relationship) |  |  |
+| attrs | [Attributes](#topo.Attributes) |  |  |
 
 
 
@@ -158,7 +158,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | directionality | [Relationship.Directionality](#topo.Relationship.Directionality) |  |  |
 | multiplicity | [Relationship.Multiplicity](#topo.Relationship.Multiplicity) |  |  |
 | type | [Relationship.Type](#topo.Relationship.Type) |  |  |
-| attrs | [Attributes](#topo.Attributes) |  |  |
 | source_refs | [Reference](#topo.Reference) | repeated | The two sets of objects that the relationship binds |
 | target_refs | [Reference](#topo.Reference) | repeated |  |
 
@@ -167,20 +166,31 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
-<a name="topo.StreamMessageRequest"></a>
+<a name="topo.SubscribeRequest"></a>
 
-### StreamMessageRequest
-
-
+### SubscribeRequest
 
 
 
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ref | [Reference](#topo.Reference) |  |  |
+| withoutReplay | [bool](#bool) |  |  |
 
 
-<a name="topo.StreamMessageResponse"></a>
 
-### StreamMessageResponse
 
+
+
+<a name="topo.SubscribeResponse"></a>
+
+### SubscribeResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| updates | [Update](#topo.Update) | repeated |  |
 
 
 
@@ -316,7 +326,7 @@ EntityService provides an API for managing entities.
 | ----------- | ------------ | ------------- | ------------|
 | Write | [WriteRequest](#topo.WriteRequest) | [WriteResponse](#topo.WriteResponse) | Update one or more entities to the topology |
 | Read | [ReadRequest](#topo.ReadRequest) | [ReadResponse](#topo.ReadResponse) | Read one or more entities from topology |
-| StreamChannel | [StreamMessageRequest](#topo.StreamMessageRequest) stream | [StreamMessageResponse](#topo.StreamMessageResponse) stream | Represents the bidirectional stream between onos-topo and a client for the purpose of - streaming notifications |
+| Subscribe | [SubscribeRequest](#topo.SubscribeRequest) | [SubscribeResponse](#topo.SubscribeResponse) stream | Subscribe returns a stream of topo change notifications |
 
  
 

@@ -113,7 +113,42 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 	}, nil
 }
 
-// StreamChannel :
-func (s *Server) StreamChannel(topo.Topo_StreamChannelServer) error {
+// Subscribe ...
+func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
+	var watchOpts []WatchOption
+	if !request.WithoutReplay {
+		watchOpts = append(watchOpts, WithReplay())
+	}
+	ch := make(chan *Event)
+	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
+		return err
+	}
+
+	for event := range ch {
+		var t topoapi.Update_Type
+		switch event.Type {
+		case EventNone:
+			t = topoapi.Update_UNSPECIFIED
+		case EventInserted:
+			t = topoapi.Update_INSERT
+		case EventUpdated:
+			t = topoapi.Update_MODIFY
+		case EventRemoved:
+			t = topoapi.Update_DELETE
+		}
+
+		subscribeResponse := &topo.SubscribeResponse{
+			Updates: []*topo.Update{
+				{
+					Type:   t,
+					Object: event.Object,
+				},
+			},
+		}
+
+		if err := server.Send(subscribeResponse); err != nil {
+			return err
+		}
+	}
 	return nil
 }
