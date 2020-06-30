@@ -80,7 +80,12 @@ func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*top
 		object := update.Object
 		switch update.Type {
 		case topo.Update_INSERT:
-			log.Infof("Insert object %v", object)
+			switch object.Type {
+			case topo.Object_RELATIONSHIP:
+				if err := s.ValidateRelationship(object.GetRelationship()); err != nil {
+					return nil, err
+				}
+			}
 			if err := s.objectStore.Store(object); err != nil {
 				return nil, err
 			}
@@ -104,7 +109,6 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 			log.Infof("Not found object %s", string(id))
 			return nil, status.Error(codes.NotFound, string(id))
 		}
-		log.Infof("Read object %v", object)
 		objects = append(objects, object)
 	}
 
@@ -115,15 +119,49 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 
 // Subscribe ...
 func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
+	ch := make(chan *Event)
+
+	if request.SnapShot {
+		go s.List(request, server, ch)
+	} else {
+		s.Watch(request, server, ch)
+	}
+
+	return s.Stream(server, ch)
+}
+
+// List ...
+func (s *Server) List(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) error {
+	c := make(chan *topo.Object)
+	if err := s.objectStore.List(c); err != nil {
+		return err
+	}
+	for object := range c {
+		ch <- &Event{
+			Type:   EventNone,
+			Object: object,
+		}
+	}
+	close(ch)
+	return nil
+}
+
+// Watch ...
+func (s *Server) Watch(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) error {
 	var watchOpts []WatchOption
+
 	if !request.WithoutReplay {
 		watchOpts = append(watchOpts, WithReplay())
 	}
-	ch := make(chan *Event)
 	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// Stream ...
+func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *Event) error {
 	for event := range ch {
 		var t topoapi.Update_Type
 		switch event.Type {
@@ -151,4 +189,30 @@ func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Top
 		}
 	}
 	return nil
+}
+
+// ValidateRelationship ...
+func (s *Server) ValidateRelationship(relation *topo.Relationship) error {
+	_, err := s.Load(relation.SourceRef)
+	if err != nil {
+		return err
+	}
+	_, err = s.Load(relation.TargetRef)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Load ...
+func (s *Server) Load(ref *topo.Reference) (*topo.Object, error) {
+	id := ref.ID
+	object, err := s.objectStore.Load(id)
+	if err != nil {
+		return nil, err
+	} else if object == nil {
+		log.Infof("Not found object %s", string(id))
+		return nil, status.Error(codes.NotFound, string(id))
+	}
+	return object, nil
 }
