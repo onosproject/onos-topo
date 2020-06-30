@@ -173,8 +173,8 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ref | [Reference](#topo.Reference) |  |  |
-| withoutReplay | [bool](#bool) |  |  |
-| snapShot | [bool](#bool) |  |  |
+| without_replay | [bool](#bool) |  |  |
+| snap_shot | [bool](#bool) |  |  |
 
 
 

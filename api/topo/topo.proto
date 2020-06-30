@@ -54,8 +54,8 @@ message ReadResponse {
 
 message SubscribeRequest {
   Reference ref = 1;
-  bool withoutReplay = 2;
-  bool snapShot = 3;
+  bool without_replay = 2;
+  bool snap_shot = 3;
 }
 
 message SubscribeResponse {
