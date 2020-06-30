@@ -124,26 +124,24 @@ func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Top
 	if request.SnapShot {
 		go s.List(request, server, ch)
 	} else {
-		s.Watch(request, server, ch)
+		_ = s.Watch(request, server, ch)
 	}
 
 	return s.Stream(server, ch)
 }
 
 // List ...
-func (s *Server) List(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) error {
+func (s *Server) List(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) {
 	c := make(chan *topo.Object)
-	if err := s.objectStore.List(c); err != nil {
-		return err
-	}
-	for object := range c {
-		ch <- &Event{
-			Type:   EventNone,
-			Object: object,
+	if err := s.objectStore.List(c); err == nil {
+		for object := range c {
+			ch <- &Event{
+				Type:   EventNone,
+				Object: object,
+			}
 		}
 	}
 	close(ch)
-	return nil
 }
 
 // Watch ...

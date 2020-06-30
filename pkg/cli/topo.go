@@ -337,7 +337,6 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 			}
 		default:
 			_, _ = fmt.Fprintf(writer, "\n")
-			break
 		}
 		_ = writer.Flush()
 	}
