@@ -65,7 +65,8 @@ func main() {
 
 // Creates gRPC server and registers various services; then serves.
 func startServer(caPath string, keyPath string, certPath string) error {
-	s := northbound.NewServer(northbound.NewServerConfig(caPath, keyPath, certPath, 5150, true))
+	s := northbound.NewServer(northbound.NewServerCfg(caPath, keyPath, certPath,
+		5150, true, northbound.SecurityConfig{}))
 	s.AddService(admin.Service{})
 	s.AddService(diags.Service{})
 	s.AddService(logging.Service{})
