@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/onosproject/onos-topo/api/topo"
 	"github.com/onosproject/onos-topo/pkg/bulk"
 	"io"
 	"strings"
@@ -472,6 +473,7 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 	}
 }
 
+// Deprecated: to be replaced by getLoadYamlEntitiesCommand
 func getLoadYamlCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "yaml {file}",
@@ -483,6 +485,18 @@ func getLoadYamlCommand() *cobra.Command {
 	return cmd
 }
 
+func getLoadYamlEntitiesCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "yamlentities {file}",
+		Args:  cobra.ExactArgs(1),
+		Short: "Load topo data from a YAML file",
+		RunE:  runLoadYamlEntitiesCommand,
+	}
+	cmd.Flags().StringArray("attr", []string{""}, "Extra attributes to add to each device in k=v format")
+	return cmd
+}
+
+// Deprecated: only used for getLoadYamlCommand() above
 func runLoadYamlCommand(cmd *cobra.Command, args []string) error {
 	var filename string
 	if len(args) > 0 {
@@ -537,6 +551,83 @@ func runLoadYamlCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("Loaded %d topo devices from %s\n", len(deviceConfig.TopoDevices), filename)
+
+	return nil
+}
+
+func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
+	var filename string
+	if len(args) > 0 {
+		filename = args[0]
+	}
+
+	extraAttrs, err := cmd.Flags().GetStringArray("attr")
+	if err != nil {
+		return err
+	}
+	for _, x := range extraAttrs {
+		split := strings.Split(x, "=")
+		if len(split) != 2 {
+			return fmt.Errorf("expect extra args to be in the format a=b. Rejected: %s", x)
+		}
+	}
+
+	topoConfig, err := bulk.GetTopoConfig(filename)
+	if err != nil {
+		return err
+	}
+
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	client := topo.CreateTopoClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	writeRequest := topo.WriteRequest{
+		Updates: make([]*topo.Update, 0),
+	}
+
+	for _, entity := range topoConfig.TopoEntities {
+		if entity.Attrs == nil || entity.Attrs.Attrs == nil {
+			entity.Attrs.Attrs = make(map[string]string)
+		}
+		for _, x := range extraAttrs {
+			split := strings.Split(x, "=")
+			entity.Attrs.Attrs[split[0]] = split[1]
+		}
+
+		entity := entity // pin
+		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
+			Type:   topo.Update_INSERT,
+			Object: bulk.TopoEntityToTopoObject(&entity),
+		})
+	}
+
+	for _, relationship := range topoConfig.TopoRelationships {
+		if relationship.Attrs == nil || relationship.Attrs.Attrs == nil {
+			relationship.Attrs.Attrs = make(map[string]string)
+		}
+		for _, x := range extraAttrs {
+			split := strings.Split(x, "=")
+			relationship.Attrs.Attrs[split[0]] = split[1]
+		}
+
+		relationship := relationship // pin
+		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
+			Type:   topo.Update_INSERT,
+			Object: bulk.TopoRelationshipToTopoObject(&relationship),
+		})
+	}
+	_, err = client.Write(ctx, &writeRequest)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Loaded %d topo devices from %s\n", len(topoConfig.TopoEntities), filename)
 
 	return nil
 }
