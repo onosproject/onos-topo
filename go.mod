@@ -3,11 +3,12 @@ module github.com/onosproject/onos-topo
 go 1.14
 
 require (
-	github.com/apex/log v1.3.0 // indirect
-	github.com/atomix/go-client v0.2.0
+	github.com/atomix/go-client v0.2.1
 	github.com/gogo/protobuf v1.3.1
+	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/onosproject/helmit v0.6.4
-	github.com/onosproject/onos-lib-go v0.6.4
+	github.com/onosproject/onos-lib-go v0.6.8
+	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2 // indirect
 	github.com/stretchr/testify v1.5.1
