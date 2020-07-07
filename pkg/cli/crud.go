@@ -74,5 +74,7 @@ func getLoadCommand() *cobra.Command {
 		Short: "Bulk load topo data from a file",
 	}
 	cmd.AddCommand(getLoadYamlCommand())
+	cmd.AddCommand(getLoadYamlEntitiesCommand())
+
 	return cmd
 }
