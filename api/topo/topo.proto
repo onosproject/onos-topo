@@ -54,7 +54,8 @@ message ReadResponse {
 
 message SubscribeRequest {
   Reference ref = 1;
-  bool withoutReplay = 2;
+  bool without_replay = 2;
+  bool snap_shot = 3;
 }
 
 message SubscribeResponse {
@@ -125,6 +126,7 @@ message Relationship {
   }
   Directionality directionality = 1;
 
+  /*
   enum Multiplicity {
     UNSPECIFIED_MULTIPLICITY = 0;
     ONE_TO_ONE = 1;
@@ -133,6 +135,7 @@ message Relationship {
     MANY_TO_MANY = 4;
   }
   Multiplicity multiplicity = 2;
+  */
 
   enum Type {
     UNSPECIFIED = 0;
@@ -147,7 +150,11 @@ message Relationship {
   Type type = 3;
 
   // The two sets of objects that the relationship binds
+  /*
   repeated Reference source_refs = 5;
   repeated Reference target_refs = 6;
+  */
+  Reference source_ref = 5;
+  Reference target_ref = 6;
 
 }

@@ -28,48 +28,17 @@ import (
 
 func getGetEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "entity <id>",
-		Args:  cobra.MinimumNArgs(1),
-		Short: "Get a topo entity",
-		RunE:  runGetEntityCommand,
+		Use:     "entity <id>",
+		Aliases: []string{"entities"},
+		Args:    cobra.MaximumNArgs(1),
+		Short:   "Get a topo entity",
+		RunE:    runGetEntityCommand,
 	}
-	/*
-		cmd.Flags().StringP("id", "i", "", "the id of the entity")
-		cmd.Flags().BoolP("verbose", "v", false, "whether to print the entity with verbose output")
-
-		_ = cmd.MarkFlagRequired("id")
-	*/
-
 	return cmd
 }
 
 func runGetEntityCommand(cmd *cobra.Command, args []string) error {
-
-	var objects []*topo.Object
-
-	outputWriter := cli.GetOutput()
-	writer := new(tabwriter.Writer)
-	writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
-
-	objects, err := readObjects(cmd, args)
-	if err != nil {
-		return err
-	}
-
-	if len(objects) != 0 {
-		switch obj := objects[0].Obj.(type) {
-		case *topo.Object_Entity:
-			_, _ = fmt.Fprintf(writer, "ID\t%s\n", objects[0].Ref.GetID())
-			_, _ = fmt.Fprintf(writer, "Type\t%s\n", obj.Entity.GetType())
-		case nil:
-			cli.Output("No object is set")
-			// No object is set
-		default:
-			cli.Output("get error")
-			// return ERROR
-		}
-	}
-	return writer.Flush()
+	return runGetCommand(cmd, args, topo.Object_ENTITY)
 }
 
 func getAddEntityCommand() *cobra.Command {
@@ -90,46 +59,46 @@ func runAddEntityCommand(cmd *cobra.Command, args []string) error {
 
 func getGetRelationCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "relation <id>",
-		Args:  cobra.MinimumNArgs(1),
-		Short: "Get a topo relationship",
-		RunE:  runGetRelationCommand,
+		Use:     "relation <id>",
+		Aliases: []string{"relations"},
+		Args:    cobra.MaximumNArgs(1),
+		Short:   "Get topo relationships",
+		RunE:    runGetRelationCommand,
 	}
 
 	return cmd
 }
 
 func runGetRelationCommand(cmd *cobra.Command, args []string) error {
+	return runGetCommand(cmd, args, topo.Object_RELATIONSHIP)
+}
 
+func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
 	var objects []*topo.Object
 
-	outputWriter := cli.GetOutput()
-	writer := new(tabwriter.Writer)
-	writer.Init(outputWriter, 0, 0, 3, ' ', tabwriter.FilterHTML)
+	updates := make(chan *topo.Update)
+	done := make(chan bool)
+	defer close(updates)
+	defer close(done)
 
-	objects, err := readObjects(cmd, args)
+	go printIt(updates, objectType, done)
+
+	objects, err := readObjects(cmd, args, objectType)
 	if err != nil {
 		return err
 	}
 
-	if len(objects) != 0 {
-		switch obj := objects[0].Obj.(type) {
-		case *topo.Object_Relationship:
-			_, _ = fmt.Fprintf(writer, "ID\t%s\n", objects[0].Ref.GetID())
-			_, _ = fmt.Fprintf(writer, "type\t%s\n", obj.Relationship.GetType())
-			for _, ref := range obj.Relationship.GetSourceRefs() {
-				_, _ = fmt.Fprintf(writer, "src-entity-id\t%s\n", string(ref.ID))
-			}
-			for _, ref := range obj.Relationship.GetTargetRefs() {
-				_, _ = fmt.Fprintf(writer, "tgt-entity-id\t%s\n", string(ref.ID))
-			}
-		case nil:
-			cli.Output("Error: nil object\n")
-		default:
-			cli.Output("Error: get error\n")
+	for _, obj := range objects {
+		updates <- &topo.Update{
+			Type:   topo.Update_UNSPECIFIED,
+			Object: obj,
 		}
 	}
-	return writer.Flush()
+
+	updates <- &topo.Update{}
+	<-done
+
+	return nil
 }
 
 func getAddRelationCommand() *cobra.Command {
@@ -180,8 +149,8 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 	} else if objectType == topo.Object_RELATIONSHIP {
 		object := &topo.Object_Relationship{
 			Relationship: &topo.Relationship{
-				SourceRefs: []*topo.Reference{{ID: topo.ID(args[1])}},
-				TargetRefs: []*topo.Reference{{ID: topo.ID(args[2])}},
+				SourceRef: &topo.Reference{ID: topo.ID(args[1])},
+				TargetRef: &topo.Reference{ID: topo.ID(args[2])},
 			},
 		}
 
@@ -206,10 +175,9 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 	return nil
 }
 
-func readObjects(cmd *cobra.Command, args []string) ([]*topo.Object, error) {
+func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) ([]*topo.Object, error) {
 
 	var objects []*topo.Object
-	id := args[0]
 
 	conn, err := cli.GetConnection(cmd)
 	if err != nil {
@@ -222,8 +190,18 @@ func readObjects(cmd *cobra.Command, args []string) ([]*topo.Object, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	if len(args) == 0 {
-		// TODO - implement List function
+		stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
+			Ref:      &topo.Reference{},
+			SnapShot: true,
+		})
+		if err != nil {
+			return nil, err
+		}
+		updates := make(chan *topo.Update)
+		go watchStream(stream, updates)
+		printIt(updates, objectType, nil)
 	} else {
+		id := args[0]
 		reference := &topo.Reference{
 			ID: topo.ID(id),
 		}
@@ -271,18 +249,18 @@ func getWatchAllCommand() *cobra.Command {
 }
 
 func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, "entity")
+	return watch(cmd, args, topo.Object_ENTITY)
 }
 
 func runWatchRelationCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, "relation")
+	return watch(cmd, args, topo.Object_RELATIONSHIP)
 }
 
 func runWatchAllCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, "all")
+	return watch(cmd, args, topo.Object_UNSPECIFIED)
 }
 
-func watch(cmd *cobra.Command, args []string, filter string) error {
+func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
 	replay, _ := cmd.Flags().GetBool("replay")
 	var id topo.ID
 	if len(args) > 0 {
@@ -309,53 +287,60 @@ func watch(cmd *cobra.Command, args []string, filter string) error {
 		return err
 	}
 
-	updatec := make(chan *topo.Update)
+	updates := make(chan *topo.Update)
 
-	go watchStream(stream, updatec)
+	go watchStream(stream, updates)
 
-	watchReport(updatec, filter)
+	printIt(updates, objectType, nil)
 
 	return nil
 }
-func watchStream(stream topo.Topo_SubscribeClient, updatec chan *topo.Update) {
+func watchStream(stream topo.Topo_SubscribeClient, updates chan *topo.Update) {
 	for {
 		response, err := stream.Recv()
 		if err == io.EOF {
 			// read done.
-			close(updatec)
+			close(updates)
 			return
 		}
 		if err != nil {
 			cli.Output("Error receiving notification : %v", err)
-			close(updatec)
+			close(updates)
 			return
 		}
 
 		for _, update := range response.Updates {
-			updatec <- update
+			updates <- update
 		}
 	}
 }
 
-func watchReport(updatec chan *topo.Update, filter string) {
+func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan bool) {
 	writer := new(tabwriter.Writer)
 	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
 
-	for update := range updatec {
-		switch obj := update.Object.Obj.(type) {
-		case *topo.Object_Entity:
-			if filter == "all" || filter == "entity" {
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
-				_, _ = fmt.Fprintf(writer, "%s\n", obj.Entity.Type)
+	for update := range updates {
+		if update.Object == nil {
+			break
+		}
+		switch update.Object.Type {
+		case topo.Object_ENTITY:
+			e := update.Object.GetEntity()
+			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\n", update.Type, update.Object.Type, update.Object.Ref.ID, e.Type)
 			}
-		case *topo.Object_Relationship:
-			if filter == "all" || filter == "relation" {
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID)
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\n", obj.Relationship.Type, obj.Relationship.SourceRefs[0].ID, obj.Relationship.TargetRefs[0].ID)
+		case topo.Object_RELATIONSHIP:
+			r := update.Object.GetRelationship()
+			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATIONSHIP {
+				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID, r.Type)
+				_, _ = fmt.Fprintf(writer, "%s\t%s\n", r.SourceRef.ID, r.TargetRef.ID)
 			}
 		default:
 			_, _ = fmt.Fprintf(writer, "\n")
 		}
 		_ = writer.Flush()
+	}
+	if done != nil {
+		done <- true
 	}
 }

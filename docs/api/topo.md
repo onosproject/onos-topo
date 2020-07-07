@@ -20,7 +20,6 @@
   
     - [Object.Type](#topo.Object.Type)
     - [Relationship.Directionality](#topo.Relationship.Directionality)
-    - [Relationship.Multiplicity](#topo.Relationship.Multiplicity)
     - [Relationship.Type](#topo.Relationship.Type)
     - [Update.Type](#topo.Update.Type)
   
@@ -156,10 +155,9 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | directionality | [Relationship.Directionality](#topo.Relationship.Directionality) |  |  |
-| multiplicity | [Relationship.Multiplicity](#topo.Relationship.Multiplicity) |  |  |
 | type | [Relationship.Type](#topo.Relationship.Type) |  |  |
-| source_refs | [Reference](#topo.Reference) | repeated | The two sets of objects that the relationship binds |
-| target_refs | [Reference](#topo.Reference) | repeated |  |
+| source_ref | [Reference](#topo.Reference) |  | repeated Reference source_refs = 5; repeated Reference target_refs = 6; |
+| target_ref | [Reference](#topo.Reference) |  |  |
 
 
 
@@ -175,7 +173,8 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ref | [Reference](#topo.Reference) |  |  |
-| withoutReplay | [bool](#bool) |  |  |
+| without_replay | [bool](#bool) |  |  |
+| snap_shot | [bool](#bool) |  |  |
 
 
 
@@ -263,21 +262,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | UNSPECIFIED_DIRECTIONALITY | 0 |  |
 | DIRECTED | 1 |  |
 | BIDIRECTIONAL | 2 |  |
-
-
-
-<a name="topo.Relationship.Multiplicity"></a>
-
-### Relationship.Multiplicity
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| UNSPECIFIED_MULTIPLICITY | 0 |  |
-| ONE_TO_ONE | 1 |  |
-| ONE_TO_MANY | 2 |  |
-| MANY_TO_ONE | 3 |  |
-| MANY_TO_MANY | 4 |  |
 
 
 
