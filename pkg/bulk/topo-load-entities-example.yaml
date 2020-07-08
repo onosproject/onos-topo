@@ -40,6 +40,11 @@ toporelationships:
     obj:
       relationship:
         type: 6
+        directionality: 2
+        sourceref:
+          id: "315010-0001420"
+        targetref:
+          id: "315010-0001421"
     attrs:
       attrs:
         displayname: "Tower 1 - Tower 2"
