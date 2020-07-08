@@ -104,6 +104,12 @@ func TopoChecker(config *TopoConfig) error {
 			return fmt.Errorf("unexpected type %v for TopoRelationship", topoRelationship.Type)
 		} else if topoRelationship.Ref == nil || topoRelationship.Ref.GetID() == "" {
 			return fmt.Errorf("empty ref for TopoRelationship")
+		} else if topoRelationship.Obj.Relationship.SourceRef == nil ||
+			topoRelationship.Obj.Relationship.SourceRef.ID == "" {
+			return fmt.Errorf("empty source ref for TopoRelationship")
+		} else if topoRelationship.Obj.Relationship.TargetRef == nil ||
+			topoRelationship.Obj.Relationship.TargetRef.ID == "" {
+			return fmt.Errorf("empty target ref for TopoRelationship")
 		}
 	}
 

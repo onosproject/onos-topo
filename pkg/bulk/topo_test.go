@@ -39,6 +39,9 @@ func Test_LoadConfig2(t *testing.T) {
 	rel1 := config.TopoRelationships[0]
 	assert.Equal(t, topo.Object_RELATIONSHIP, rel1.Type)
 	assert.Equal(t, topo.Relationship_TRAVERSES, rel1.Obj.Relationship.GetType())
+	assert.Equal(t, topo.Relationship_BIDIRECTIONAL, rel1.Obj.Relationship.GetDirectionality())
+	assert.Equal(t, topo.ID("315010-0001420"), rel1.Obj.Relationship.GetSourceRef().GetID())
+	assert.Equal(t, topo.ID("315010-0001421"), rel1.Obj.Relationship.GetTargetRef().GetID())
 	assert.Equal(t, topo.ID("rel1"), rel1.Ref.GetID())
 	displayname, ok := rel1.Attrs.GetAttrs()["displayname"]
 	assert.Assert(t, ok, "error extracting displayname")
