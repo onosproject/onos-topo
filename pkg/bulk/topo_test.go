@@ -15,10 +15,11 @@
 package bulk
 
 import (
+	"testing"
+
 	"github.com/ghodss/yaml"
 	"github.com/onosproject/onos-topo/api/topo"
 	"gotest.tools/assert"
-	"testing"
 )
 
 func Test_LoadConfig2(t *testing.T) {
@@ -38,8 +39,7 @@ func Test_LoadConfig2(t *testing.T) {
 
 	rel1 := config.TopoRelationships[0]
 	assert.Equal(t, topo.Object_RELATIONSHIP, rel1.Type)
-	assert.Equal(t, topo.Relationship_TRAVERSES, rel1.Obj.Relationship.GetType())
-	assert.Equal(t, topo.Relationship_BIDIRECTIONAL, rel1.Obj.Relationship.GetDirectionality())
+	assert.Equal(t, "XnInterface", rel1.Obj.Relationship.GetType())
 	assert.Equal(t, topo.ID("315010-0001420"), rel1.Obj.Relationship.GetSourceRef().GetID())
 	assert.Equal(t, topo.ID("315010-0001421"), rel1.Obj.Relationship.GetTargetRef().GetID())
 	assert.Equal(t, topo.ID("rel1"), rel1.Ref.GetID())
@@ -73,10 +73,9 @@ func Test_LoadConfig3(t *testing.T) {
 		Ref:  &topo.Reference{ID: "relationship1"},
 		Type: topo.Object_RELATIONSHIP,
 		Obj: &topo.Object_Relationship{Relationship: &topo.Relationship{
-			Directionality: topo.Relationship_BIDIRECTIONAL,
-			Type:           topo.Relationship_TRAVERSES,
-			SourceRef:      topoEntity1.Ref,
-			TargetRef:      topoEntity2.Ref,
+			Type:      "XnInterface",
+			SourceRef: topoEntity1.Ref,
+			TargetRef: topoEntity2.Ref,
 		}},
 		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
 	}
