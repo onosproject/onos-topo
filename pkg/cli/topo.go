@@ -34,6 +34,7 @@ func getGetEntityCommand() *cobra.Command {
 		Short:   "Get a topo entity",
 		RunE:    runGetEntityCommand,
 	}
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
@@ -65,7 +66,7 @@ func getGetRelationCommand() *cobra.Command {
 		Short:   "Get topo relationships",
 		RunE:    runGetRelationCommand,
 	}
-
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
@@ -75,13 +76,14 @@ func runGetRelationCommand(cmd *cobra.Command, args []string) error {
 
 func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
 	var objects []*topo.Object
+	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
 	updates := make(chan *topo.Update)
 	done := make(chan bool)
 	defer close(updates)
 	defer close(done)
 
-	go printIt(updates, objectType, done)
+	go printIt(updates, objectType, done, false, noHeaders)
 
 	objects, err := readObjects(cmd, args, objectType)
 	if err != nil {
@@ -147,8 +149,10 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 			},
 		}
 	} else if objectType == topo.Object_RELATIONSHIP {
+		relationshipType, _ := cmd.Flags().GetString("type")
 		object := &topo.Object_Relationship{
 			Relationship: &topo.Relationship{
+				Type:      relationshipType,
 				SourceRef: &topo.Reference{ID: topo.ID(args[1])},
 				TargetRef: &topo.Reference{ID: topo.ID(args[2])},
 			},
@@ -176,7 +180,7 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 }
 
 func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) ([]*topo.Object, error) {
-
+	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 	var objects []*topo.Object
 
 	conn, err := cli.GetConnection(cmd)
@@ -192,14 +196,14 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 	if len(args) == 0 {
 		stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
 			Ref:      &topo.Reference{},
-			SnapShot: true,
+			Snapshot: true,
 		})
 		if err != nil {
 			return nil, err
 		}
 		updates := make(chan *topo.Update)
 		go watchStream(stream, updates)
-		printIt(updates, objectType, nil)
+		printIt(updates, objectType, nil, false, noHeaders)
 	} else {
 		id := args[0]
 		reference := &topo.Reference{
@@ -223,7 +227,8 @@ func getWatchEntityCommand() *cobra.Command {
 		Args:  cobra.MaximumNArgs(2),
 		RunE:  runWatchEntityCommand,
 	}
-	cmd.Flags().BoolP("replay", "r", false, "whether to replay past topo updates")
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
@@ -234,7 +239,8 @@ func getWatchRelationCommand() *cobra.Command {
 		Args:  cobra.MaximumNArgs(2),
 		RunE:  runWatchRelationCommand,
 	}
-	cmd.Flags().BoolP("replay", "r", false, "whether to replay past topo updates")
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
@@ -244,7 +250,8 @@ func getWatchAllCommand() *cobra.Command {
 		Short: "Watch for entity and relationship changes",
 		RunE:  runWatchAllCommand,
 	}
-	cmd.Flags().BoolP("replay", "r", false, "whether to replay past topo updates")
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
 	return cmd
 }
 
@@ -261,7 +268,8 @@ func runWatchAllCommand(cmd *cobra.Command, args []string) error {
 }
 
 func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
-	replay, _ := cmd.Flags().GetBool("replay")
+	noHeaders, _ := cmd.Flags().GetBool("no-headers")
+	noreplay, _ := cmd.Flags().GetBool("noreplay")
 	var id topo.ID
 	if len(args) > 0 {
 		id = topo.ID(args[0])
@@ -281,7 +289,7 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 		Ref: &topo.Reference{
 			ID: id,
 		},
-		WithoutReplay: !replay,
+		Noreplay: noreplay,
 	})
 	if err != nil {
 		return err
@@ -291,7 +299,7 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 
 	go watchStream(stream, updates)
 
-	printIt(updates, objectType, nil)
+	printIt(updates, objectType, nil, true, noHeaders)
 
 	return nil
 }
@@ -315,9 +323,18 @@ func watchStream(stream topo.Topo_SubscribeClient, updates chan *topo.Update) {
 	}
 }
 
-func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan bool) {
+func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan bool, watch bool, noHeaders bool) {
+	var width = 16
+	var prec = width - 1
 	writer := new(tabwriter.Writer)
 	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
+
+	if !noHeaders {
+		if watch {
+			_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "Update Type")
+			_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%-*.*s\n", width, prec, "Object Type", width, prec, "Reference ID", width, prec, "Object Kind", width, prec, "Attributes")
+		}
+	}
 
 	for update := range updates {
 		if update.Object == nil {
@@ -327,13 +344,27 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 		case topo.Object_ENTITY:
 			e := update.Object.GetEntity()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\n", update.Type, update.Object.Type, update.Object.Ref.ID, e.Type)
+				if watch {
+					if update.Type == topo.Update_UNSPECIFIED {
+						_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
+					} else {
+						_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, update.Type)
+					}
+				}
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, e.Type)
 			}
 		case topo.Object_RELATIONSHIP:
 			r := update.Object.GetRelationship()
+			if watch {
+				if update.Type == topo.Update_UNSPECIFIED {
+					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
+				} else {
+					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, update.Type)
+				}
+			}
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATIONSHIP {
-				_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t", update.Type, update.Object.Type, update.Object.Ref.ID, r.Type)
-				_, _ = fmt.Fprintf(writer, "%s\t%s\n", r.SourceRef.ID, r.TargetRef.ID)
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, r.Type)
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s\n", width, prec, r.SourceRef.ID, width, prec, r.TargetRef.ID)
 			}
 		default:
 			_, _ = fmt.Fprintf(writer, "\n")

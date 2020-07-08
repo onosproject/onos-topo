@@ -121,7 +121,7 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
 	ch := make(chan *Event)
 
-	if request.SnapShot {
+	if request.Snapshot {
 		go s.List(request, server, ch)
 	} else {
 		_ = s.Watch(request, server, ch)
@@ -148,7 +148,7 @@ func (s *Server) List(request *topoapi.SubscribeRequest, server topoapi.Topo_Sub
 func (s *Server) Watch(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) error {
 	var watchOpts []WatchOption
 
-	if !request.WithoutReplay {
+	if !request.Noreplay {
 		watchOpts = append(watchOpts, WithReplay())
 	}
 	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
