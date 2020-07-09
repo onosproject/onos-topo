@@ -11,7 +11,7 @@
     - [ReadRequest](#topo.ReadRequest)
     - [ReadResponse](#topo.ReadResponse)
     - [Reference](#topo.Reference)
-    - [Relationship](#topo.Relationship)
+    - [Relation](#topo.Relation)
     - [SubscribeRequest](#topo.SubscribeRequest)
     - [SubscribeResponse](#topo.SubscribeResponse)
     - [Update](#topo.Update)
@@ -19,8 +19,6 @@
     - [WriteResponse](#topo.WriteResponse)
   
     - [Object.Type](#topo.Object.Type)
-    - [Relationship.Directionality](#topo.Relationship.Directionality)
-    - [Relationship.Type](#topo.Relationship.Type)
     - [Update.Type](#topo.Update.Type)
   
     - [Topo](#topo.Topo)
@@ -75,7 +73,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [string](#string) |  |  |
+| kind | [string](#string) |  | user-defined entity kind |
 
 
 
@@ -93,7 +91,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ref | [Reference](#topo.Reference) |  |  |
 | type | [Object.Type](#topo.Object.Type) |  |  |
 | entity | [Entity](#topo.Entity) |  |  |
-| relationship | [Relationship](#topo.Relationship) |  |  |
+| relation | [Relation](#topo.Relation) |  |  |
 | attrs | [Attributes](#topo.Attributes) |  |  |
 
 
@@ -146,17 +144,16 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
-<a name="topo.Relationship"></a>
+<a name="topo.Relation"></a>
 
-### Relationship
+### Relation
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| directionality | [Relationship.Directionality](#topo.Relationship.Directionality) |  |  |
-| type | [Relationship.Type](#topo.Relationship.Type) |  |  |
-| source_ref | [Reference](#topo.Reference) |  | repeated Reference source_refs = 5; repeated Reference target_refs = 6; |
+| kind | [string](#string) |  | user defined relation kind |
+| source_ref | [Reference](#topo.Reference) |  |  |
 | target_ref | [Reference](#topo.Reference) |  |  |
 
 
@@ -173,8 +170,8 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ref | [Reference](#topo.Reference) |  |  |
-| without_replay | [bool](#bool) |  |  |
-| snap_shot | [bool](#bool) |  |  |
+| noreplay | [bool](#bool) |  |  |
+| snapshot | [bool](#bool) |  |  |
 
 
 
@@ -248,38 +245,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ---- | ------ | ----------- |
 | UNSPECIFIED | 0 |  |
 | ENTITY | 1 |  |
-| RELATIONSHIP | 2 |  |
-
-
-
-<a name="topo.Relationship.Directionality"></a>
-
-### Relationship.Directionality
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| UNSPECIFIED_DIRECTIONALITY | 0 |  |
-| DIRECTED | 1 |  |
-| BIDIRECTIONAL | 2 |  |
-
-
-
-<a name="topo.Relationship.Type"></a>
-
-### Relationship.Type
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| UNSPECIFIED | 0 |  |
-| CONTAINS | 1 |  |
-| CONTROLS | 2 |  |
-| AGGREGATES | 3 |  |
-| ORIGINATES | 4 |  |
-| TERMINATES | 5 |  |
-| TRAVERSES | 6 |  |
-| REALIZED_BY | 7 |  |
+| RELATION | 2 |  |
 
 
 

@@ -81,8 +81,8 @@ func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*top
 		switch update.Type {
 		case topo.Update_INSERT:
 			switch object.Type {
-			case topo.Object_RELATIONSHIP:
-				if err := s.ValidateRelationship(object.GetRelationship()); err != nil {
+			case topo.Object_RELATION:
+				if err := s.ValidateRelation(object.GetRelation()); err != nil {
 					return nil, err
 				}
 			}
@@ -121,7 +121,7 @@ func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoa
 func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
 	ch := make(chan *Event)
 
-	if request.SnapShot {
+	if request.Snapshot {
 		go s.List(request, server, ch)
 	} else {
 		_ = s.Watch(request, server, ch)
@@ -148,7 +148,7 @@ func (s *Server) List(request *topoapi.SubscribeRequest, server topoapi.Topo_Sub
 func (s *Server) Watch(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) error {
 	var watchOpts []WatchOption
 
-	if !request.WithoutReplay {
+	if !request.Noreplay {
 		watchOpts = append(watchOpts, WithReplay())
 	}
 	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
@@ -189,8 +189,8 @@ func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *Event) err
 	return nil
 }
 
-// ValidateRelationship ...
-func (s *Server) ValidateRelationship(relation *topo.Relationship) error {
+// ValidateRelation ...
+func (s *Server) ValidateRelation(relation *topo.Relation) error {
 	_, err := s.Load(relation.SourceRef)
 	if err != nil {
 		return err

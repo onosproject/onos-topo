@@ -18,12 +18,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/onosproject/onos-topo/api/topo"
-	"github.com/onosproject/onos-topo/pkg/bulk"
 	"io"
 	"strings"
 	"text/tabwriter"
 	"time"
+
+	"github.com/onosproject/onos-topo/api/topo"
+	"github.com/onosproject/onos-topo/pkg/bulk"
 
 	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-topo/api/device"
@@ -607,19 +608,19 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	for _, relationship := range topoConfig.TopoRelationships {
-		if relationship.Attrs == nil || relationship.Attrs.Attrs == nil {
-			relationship.Attrs.Attrs = make(map[string]string)
+	for _, relation := range topoConfig.TopoRelations {
+		if relation.Attrs == nil || relation.Attrs.Attrs == nil {
+			relation.Attrs.Attrs = make(map[string]string)
 		}
 		for _, x := range extraAttrs {
 			split := strings.Split(x, "=")
-			relationship.Attrs.Attrs[split[0]] = split[1]
+			relation.Attrs.Attrs[split[0]] = split[1]
 		}
 
-		relationship := relationship // pin
+		relation := relation // pin
 		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
 			Type:   topo.Update_INSERT,
-			Object: bulk.TopoRelationshipToTopoObject(&relationship),
+			Object: bulk.TopoRelationToTopoObject(&relation),
 		})
 	}
 	_, err = client.Write(ctx, &writeRequest)
