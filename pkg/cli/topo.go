@@ -31,7 +31,7 @@ func getGetEntityCommand() *cobra.Command {
 		Use:     "entity <id>",
 		Aliases: []string{"entities"},
 		Args:    cobra.MaximumNArgs(1),
-		Short:   "Get a topo entity",
+		Short:   "Get Entity",
 		RunE:    runGetEntityCommand,
 	}
 	cmd.Flags().Bool("no-headers", false, "disables output headers")
@@ -46,11 +46,12 @@ func getAddEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "entity <id> [args]",
 		Args:  cobra.MinimumNArgs(1),
-		Short: "Add an entity",
+		Short: "Add Entity",
 		RunE:  runAddEntityCommand,
 	}
-	cmd.Flags().StringP("type", "t", "", "the type of the entity")
-	//_ = cmd.MarkFlagRequired("type")
+	cmd.Flags().StringP("kind", "k", "", "entity kind")
+	//_ = cmd.MarkFlagRequired("kind")
+	cmd.Flags().StringToString("attributes", map[string]string{}, "an user defined mapping of entity attributes")
 	return cmd
 }
 
@@ -63,7 +64,7 @@ func getGetRelationCommand() *cobra.Command {
 		Use:     "relation <id>",
 		Aliases: []string{"relations"},
 		Args:    cobra.MaximumNArgs(1),
-		Short:   "Get topo relationships",
+		Short:   "Get Relation",
 		RunE:    runGetRelationCommand,
 	}
 	cmd.Flags().Bool("no-headers", false, "disables output headers")
@@ -71,7 +72,7 @@ func getGetRelationCommand() *cobra.Command {
 }
 
 func runGetRelationCommand(cmd *cobra.Command, args []string) error {
-	return runGetCommand(cmd, args, topo.Object_RELATIONSHIP)
+	return runGetCommand(cmd, args, topo.Object_RELATION)
 }
 
 func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
@@ -107,15 +108,15 @@ func getAddRelationCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "relation <id> <src-entity-id> <tgt-entity-id> [args]",
 		Args:  cobra.MinimumNArgs(3),
-		Short: "Add a topo relationship",
+		Short: "Add Relation",
 		RunE:  runAddRelationCommand,
 	}
-	cmd.Flags().StringP("type", "t", "", "the type of the entity")
+	cmd.Flags().StringP("kind", "k", "", "entity kind")
 	return cmd
 }
 
 func runAddRelationCommand(cmd *cobra.Command, args []string) error {
-	return writeObject(cmd, args, topo.Object_RELATIONSHIP, topo.Update_INSERT)
+	return writeObject(cmd, args, topo.Object_RELATION, topo.Update_INSERT)
 }
 
 func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type, updateType topo.Update_Type) error {
@@ -132,10 +133,10 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 	updates := make([]*topo.Update, 1)
 
 	if objectType == topo.Object_ENTITY {
-		entityType, _ := cmd.Flags().GetString("type")
+		entityKind, _ := cmd.Flags().GetString("kind")
 		object := &topo.Object_Entity{
 			Entity: &topo.Entity{
-				Type: entityType,
+				Kind: entityKind,
 			},
 		}
 
@@ -148,11 +149,11 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 				Obj:  object,
 			},
 		}
-	} else if objectType == topo.Object_RELATIONSHIP {
-		relationshipType, _ := cmd.Flags().GetString("type")
-		object := &topo.Object_Relationship{
-			Relationship: &topo.Relationship{
-				Type:      relationshipType,
+	} else if objectType == topo.Object_RELATION {
+		relationKind, _ := cmd.Flags().GetString("kind")
+		object := &topo.Object_Relation{
+			Relation: &topo.Relation{
+				Kind:      relationKind,
 				SourceRef: &topo.Reference{ID: topo.ID(args[1])},
 				TargetRef: &topo.Reference{ID: topo.ID(args[2])},
 			},
@@ -223,7 +224,7 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 func getWatchEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "entity [id] [args]",
-		Short: "Watch for entity changes",
+		Short: "Watch Entities",
 		Args:  cobra.MaximumNArgs(2),
 		RunE:  runWatchEntityCommand,
 	}
@@ -235,7 +236,7 @@ func getWatchEntityCommand() *cobra.Command {
 func getWatchRelationCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "relation <id> [args]",
-		Short: "Watch for relationship changes",
+		Short: "Watch Relations",
 		Args:  cobra.MaximumNArgs(2),
 		RunE:  runWatchRelationCommand,
 	}
@@ -247,7 +248,7 @@ func getWatchRelationCommand() *cobra.Command {
 func getWatchAllCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "all [args]",
-		Short: "Watch for entity and relationship changes",
+		Short: "Watch Entities and Relations",
 		RunE:  runWatchAllCommand,
 	}
 	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
@@ -260,7 +261,7 @@ func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runWatchRelationCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, topo.Object_RELATIONSHIP)
+	return watch(cmd, args, topo.Object_RELATION)
 }
 
 func runWatchAllCommand(cmd *cobra.Command, args []string) error {
@@ -351,10 +352,10 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 						_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, update.Type)
 					}
 				}
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, e.Type)
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, e.Kind)
 			}
-		case topo.Object_RELATIONSHIP:
-			r := update.Object.GetRelationship()
+		case topo.Object_RELATION:
+			r := update.Object.GetRelation()
 			if watch {
 				if update.Type == topo.Update_UNSPECIFIED {
 					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
@@ -362,8 +363,8 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, update.Type)
 				}
 			}
-			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATIONSHIP {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, r.Type)
+			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATION {
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, r.Kind)
 				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s\n", width, prec, r.SourceRef.ID, width, prec, r.TargetRef.ID)
 			}
 		default:

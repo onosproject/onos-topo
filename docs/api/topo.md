@@ -11,7 +11,7 @@
     - [ReadRequest](#topo.ReadRequest)
     - [ReadResponse](#topo.ReadResponse)
     - [Reference](#topo.Reference)
-    - [Relationship](#topo.Relationship)
+    - [Relation](#topo.Relation)
     - [SubscribeRequest](#topo.SubscribeRequest)
     - [SubscribeResponse](#topo.SubscribeResponse)
     - [Update](#topo.Update)
@@ -73,7 +73,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [string](#string) |  | user-defined entity type |
+| kind | [string](#string) |  | user-defined entity kind |
 
 
 
@@ -91,7 +91,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ref | [Reference](#topo.Reference) |  |  |
 | type | [Object.Type](#topo.Object.Type) |  |  |
 | entity | [Entity](#topo.Entity) |  |  |
-| relationship | [Relationship](#topo.Relationship) |  |  |
+| relation | [Relation](#topo.Relation) |  |  |
 | attrs | [Attributes](#topo.Attributes) |  |  |
 
 
@@ -144,15 +144,15 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
-<a name="topo.Relationship"></a>
+<a name="topo.Relation"></a>
 
-### Relationship
+### Relation
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [string](#string) |  | user defined relationship type |
+| kind | [string](#string) |  | user defined relation kind |
 | source_ref | [Reference](#topo.Reference) |  |  |
 | target_ref | [Reference](#topo.Reference) |  |  |
 
@@ -245,7 +245,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ---- | ------ | ----------- |
 | UNSPECIFIED | 0 |  |
 | ENTITY | 1 |  |
-| RELATIONSHIP | 2 |  |
+| RELATION | 2 |  |
 
 
 

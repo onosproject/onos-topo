@@ -16,6 +16,7 @@ package bulk
 
 import (
 	"fmt"
+
 	configlib "github.com/onosproject/onos-lib-go/pkg/config"
 	"github.com/onosproject/onos-topo/api/topo"
 )
@@ -24,8 +25,8 @@ var topoConfig *TopoConfig
 
 // TopoConfig - the top level object
 type TopoConfig struct {
-	TopoEntities      []TopoEntity
-	TopoRelationships []TopoRelationship
+	TopoEntities  []TopoEntity
+	TopoRelations []TopoRelation
 }
 
 // TopoEntity - required to get around the "onoof" Obj
@@ -46,21 +47,21 @@ func TopoEntityToTopoObject(topoEntity *TopoEntity) *topo.Object {
 	}
 }
 
-// TopoRelationship - required to get around the "onoof" Obj
-type TopoRelationship struct {
+// TopoRelation - required to get around the "onoof" Obj
+type TopoRelation struct {
 	Ref   *topo.Reference
 	Type  topo.Object_Type
-	Obj   *topo.Object_Relationship
+	Obj   *topo.Object_Relation
 	Attrs *topo.Attributes
 }
 
-// TopoRelationshipToTopoObject - convert to Object
-func TopoRelationshipToTopoObject(topoRelationship *TopoRelationship) *topo.Object {
+// TopoRelationToTopoObject - convert to Object
+func TopoRelationToTopoObject(topoRelation *TopoRelation) *topo.Object {
 	return &topo.Object{
-		Ref:   topoRelationship.Ref,
-		Type:  topoRelationship.Type,
-		Obj:   topoRelationship.Obj,
-		Attrs: topoRelationship.Attrs,
+		Ref:   topoRelation.Ref,
+		Type:  topoRelation.Type,
+		Obj:   topoRelation.Obj,
+		Attrs: topoRelation.Attrs,
 	}
 }
 
@@ -98,18 +99,18 @@ func TopoChecker(config *TopoConfig) error {
 		}
 	}
 
-	for _, relationship := range config.TopoRelationships {
-		topoRelationship := relationship // pin
-		if topoRelationship.Type != topo.Object_RELATIONSHIP {
-			return fmt.Errorf("unexpected type %v for TopoRelationship", topoRelationship.Type)
-		} else if topoRelationship.Ref == nil || topoRelationship.Ref.GetID() == "" {
-			return fmt.Errorf("empty ref for TopoRelationship")
-		} else if topoRelationship.Obj.Relationship.SourceRef == nil ||
-			topoRelationship.Obj.Relationship.SourceRef.ID == "" {
-			return fmt.Errorf("empty source ref for TopoRelationship")
-		} else if topoRelationship.Obj.Relationship.TargetRef == nil ||
-			topoRelationship.Obj.Relationship.TargetRef.ID == "" {
-			return fmt.Errorf("empty target ref for TopoRelationship")
+	for _, relation := range config.TopoRelations {
+		topoRelation := relation // pin
+		if topoRelation.Type != topo.Object_RELATION {
+			return fmt.Errorf("unexpected type %v for TopoRelation", topoRelation.Type)
+		} else if topoRelation.Ref == nil || topoRelation.Ref.GetID() == "" {
+			return fmt.Errorf("empty ref for TopoRelation")
+		} else if topoRelation.Obj.Relation.SourceRef == nil ||
+			topoRelation.Obj.Relation.SourceRef.ID == "" {
+			return fmt.Errorf("empty source ref for TopoRelation")
+		} else if topoRelation.Obj.Relation.TargetRef == nil ||
+			topoRelation.Obj.Relation.TargetRef.ID == "" {
+			return fmt.Errorf("empty target ref for TopoRelation")
 		}
 	}
 

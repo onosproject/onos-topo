@@ -4,7 +4,7 @@ topoentities:
     type: 1
     obj:
       entity:
-        type: "E2Node"
+        kind: "E2Node"
     attrs:
       attrs:
         azimuth: 0
@@ -21,7 +21,7 @@ topoentities:
     type: 1
     obj:
       entity:
-        type: "E2Node"
+        kind: "E2Node"
     attrs:
       attrs:
         azimuth: 120
@@ -33,13 +33,13 @@ topoentities:
         displayname: "Tower-1 Cell-2"
         address: "ran-simulator:5152"
         version: "1.0.0"
-toporelationships:
+toporelations:
   - ref:
       id: "rel1"
     type: 2
     obj:
-      relationship:
-        type: XnInterface
+      relation:
+        kind: "XnInterface"
         sourceref:
           id: "315010-0001420"
         targetref:

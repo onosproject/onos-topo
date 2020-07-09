@@ -89,13 +89,13 @@ message Object {
   enum Type {
     UNSPECIFIED = 0;
     ENTITY = 1;
-    RELATIONSHIP = 2;
+    RELATION = 2;
   }
   Type type = 2;
 
   oneof obj {
     Entity entity = 3;
-    Relationship relationship = 4;
+    Relation relation = 4;
   }
 
   Attributes attrs = 5;
@@ -103,13 +103,13 @@ message Object {
 
 // Entity represents any "thing" that is represented in the topology
 message Entity {
-  // user-defined entity type
-  string type = 2;
+  // user-defined entity kind
+  string kind = 2;
 }
 
-message Relationship {
-  // user defined relationship type
-  string type = 1;
+message Relation {
+  // user defined relation kind
+  string kind = 1;
 
   Reference source_ref = 5;
   Reference target_ref = 6;

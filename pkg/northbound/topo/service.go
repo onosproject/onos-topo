@@ -81,8 +81,8 @@ func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*top
 		switch update.Type {
 		case topo.Update_INSERT:
 			switch object.Type {
-			case topo.Object_RELATIONSHIP:
-				if err := s.ValidateRelationship(object.GetRelationship()); err != nil {
+			case topo.Object_RELATION:
+				if err := s.ValidateRelation(object.GetRelation()); err != nil {
 					return nil, err
 				}
 			}
@@ -189,8 +189,8 @@ func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *Event) err
 	return nil
 }
 
-// ValidateRelationship ...
-func (s *Server) ValidateRelationship(relation *topo.Relationship) error {
+// ValidateRelation ...
+func (s *Server) ValidateRelation(relation *topo.Relation) error {
 	_, err := s.Load(relation.SourceRef)
 	if err != nil {
 		return err
