@@ -25,11 +25,30 @@ var topoConfig *TopoConfig
 
 // TopoConfig - the top level object
 type TopoConfig struct {
+	TopoKinds     []TopoKind
 	TopoEntities  []TopoEntity
 	TopoRelations []TopoRelation
 }
 
-// TopoEntity - required to get around the "onoof" Obj
+// TopoKind - required to get around the "oneof" Obj
+type TopoKind struct {
+	Ref   *topo.Reference
+	Type  topo.Object_Type
+	Obj   *topo.Object_Kind
+	Attrs *topo.Attributes
+}
+
+// TopoKindToTopoObject - convert to Object
+func TopoKindToTopoObject(topoKind *TopoKind) *topo.Object {
+	return &topo.Object{
+		Ref:   topoKind.Ref,
+		Type:  topoKind.Type,
+		Obj:   topoKind.Obj,
+		Attrs: topoKind.Attrs,
+	}
+}
+
+// TopoEntity - required to get around the "oneof" Obj
 type TopoEntity struct {
 	Ref   *topo.Reference
 	Type  topo.Object_Type
@@ -47,7 +66,7 @@ func TopoEntityToTopoObject(topoEntity *TopoEntity) *topo.Object {
 	}
 }
 
-// TopoRelation - required to get around the "onoof" Obj
+// TopoRelation - required to get around the "oneof" Obj
 type TopoRelation struct {
 	Ref   *topo.Reference
 	Type  topo.Object_Type
@@ -86,6 +105,21 @@ func GetTopoConfig(location string) (TopoConfig, error) {
 
 // TopoChecker - check everything is within bounds
 func TopoChecker(config *TopoConfig) error {
+	if len(config.TopoKinds) == 0 {
+		return fmt.Errorf("no kinds found")
+	}
+
+	for _, kind := range config.TopoKinds {
+		topoKind := kind // pin
+		if topoKind.Type != topo.Object_KIND {
+			return fmt.Errorf("unexpected type %v for TopoKind", topoKind.Type)
+		} else if topoKind.Ref == nil || topoKind.Ref.GetID() == "" {
+			return fmt.Errorf("empty ref for TopoKind")
+		} else if topoKind.Obj.Kind.GetName() == "" {
+			return fmt.Errorf("empty name for TopoKind")
+		}
+	}
+
 	if len(config.TopoEntities) == 0 {
 		return fmt.Errorf("no entities found")
 	}

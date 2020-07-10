@@ -592,6 +592,22 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		Updates: make([]*topo.Update, 0),
 	}
 
+	for _, kind := range topoConfig.TopoKinds {
+		if kind.Attrs == nil || kind.Attrs.Attrs == nil {
+			kind.Attrs.Attrs = make(map[string]string)
+		}
+		for _, x := range extraAttrs {
+			split := strings.Split(x, "=")
+			kind.Attrs.Attrs[split[0]] = split[1]
+		}
+
+		kind := kind // pin
+		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
+			Type:   topo.Update_INSERT,
+			Object: bulk.TopoKindToTopoObject(&kind),
+		})
+	}
+
 	for _, entity := range topoConfig.TopoEntities {
 		if entity.Attrs == nil || entity.Attrs.Attrs == nil {
 			entity.Attrs.Attrs = make(map[string]string)
@@ -605,6 +621,22 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
 			Type:   topo.Update_INSERT,
 			Object: bulk.TopoEntityToTopoObject(&entity),
+		})
+	}
+
+	for _, relation := range topoConfig.TopoRelations {
+		if relation.Attrs == nil || relation.Attrs.Attrs == nil {
+			relation.Attrs.Attrs = make(map[string]string)
+		}
+		for _, x := range extraAttrs {
+			split := strings.Split(x, "=")
+			relation.Attrs.Attrs[split[0]] = split[1]
+		}
+
+		relation := relation // pin
+		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
+			Type:   topo.Update_INSERT,
+			Object: bulk.TopoRelationToTopoObject(&relation),
 		})
 	}
 

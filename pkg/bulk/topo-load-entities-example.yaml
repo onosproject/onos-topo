@@ -1,10 +1,29 @@
+topokinds:
+  - ref:
+      id: "E2Node"
+    type: 3
+    obj:
+      kind:
+        name: "E2Node"
+    attrs:
+      attrs:
+        foo: 0
+  - ref:
+      id: "XnInterface"
+    type: 3
+    obj:
+      kind:
+        name: "XnInterface"
+    attrs:
+      attrs:
 topoentities:
   - ref:
       id: "315010-0001420"
     type: 1
     obj:
       entity:
-        kind: "E2Node"
+        kind:
+          id: "E2Node"
     attrs:
       attrs:
         azimuth: 0
@@ -21,7 +40,8 @@ topoentities:
     type: 1
     obj:
       entity:
-        kind: "E2Node"
+        kind:
+          id: "E2Node"
     attrs:
       attrs:
         azimuth: 120
@@ -39,7 +59,8 @@ toporelations:
     type: 2
     obj:
       relation:
-        kind: "XnInterface"
+        kind:
+          id: "XnInterface"
         sourceref:
           id: "315010-0001420"
         targetref:
