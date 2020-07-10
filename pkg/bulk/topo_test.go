@@ -26,11 +26,14 @@ func Test_LoadConfig2(t *testing.T) {
 	topoConfig = nil
 	config, err := GetTopoConfig("topo-load-entities-example.yaml")
 	assert.NilError(t, err, "Unexpected error loading topo entities")
-	//assert.Equal(t, 2, len(config.TopoKinds), "Unexpected number of topo kinds")
+	assert.Equal(t, 2, len(config.TopoKinds), "Unexpected number of topo kinds")
 	assert.Equal(t, 2, len(config.TopoEntities), "Unexpected number of topo entities")
 	assert.Equal(t, 1, len(config.TopoRelations), "Unexpected number of topo relations")
 
-	// TODO - check kinds
+	k0 := config.TopoKinds[0]
+	assert.Equal(t, topo.Object_KIND, k0.Type)
+	assert.Equal(t, "E2Node", k0.Obj.Kind.GetName())
+
 	tower1 := config.TopoEntities[0]
 	assert.Equal(t, topo.Object_ENTITY, tower1.Type)
 	assert.Equal(t, "E2Node", string(tower1.Obj.Entity.GetKind().ID))
