@@ -30,7 +30,7 @@ type TopoConfig struct {
 	TopoRelations []TopoRelation
 }
 
-// TopoKind - required to get around the "onoof" Obj
+// TopoKind - required to get around the "oneof" Obj
 type TopoKind struct {
 	Ref   *topo.Reference
 	Type  topo.Object_Type
@@ -48,7 +48,7 @@ func TopoKindToTopoObject(topoKind *TopoKind) *topo.Object {
 	}
 }
 
-// TopoEntity - required to get around the "onoof" Obj
+// TopoEntity - required to get around the "oneof" Obj
 type TopoEntity struct {
 	Ref   *topo.Reference
 	Type  topo.Object_Type
@@ -66,7 +66,7 @@ func TopoEntityToTopoObject(topoEntity *TopoEntity) *topo.Object {
 	}
 }
 
-// TopoRelation - required to get around the "onoof" Obj
+// TopoRelation - required to get around the "oneof" Obj
 type TopoRelation struct {
 	Ref   *topo.Reference
 	Type  topo.Object_Type
@@ -94,11 +94,9 @@ func GetTopoConfig(location string) (TopoConfig, error) {
 	if topoConfig == nil {
 		topoConfig = &TopoConfig{}
 		if err := configlib.LoadNamedConfig(location, topoConfig); err != nil {
-			fmt.Println("1##########")
 			return TopoConfig{}, err
 		}
 		if err := TopoChecker(topoConfig); err != nil {
-			fmt.Println("2#########")
 			return TopoConfig{}, err
 		}
 	}
