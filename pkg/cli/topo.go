@@ -38,27 +38,6 @@ func getGetEntityCommand() *cobra.Command {
 	return cmd
 }
 
-func runGetEntityCommand(cmd *cobra.Command, args []string) error {
-	return runGetCommand(cmd, args, topo.Object_ENTITY)
-}
-
-func getAddEntityCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "entity <id> [args]",
-		Args:  cobra.MinimumNArgs(1),
-		Short: "Add Entity",
-		RunE:  runAddEntityCommand,
-	}
-	cmd.Flags().StringP("kind", "k", "", "entity kind")
-	//_ = cmd.MarkFlagRequired("kind")
-	cmd.Flags().StringToString("attributes", map[string]string{}, "an user defined mapping of entity attributes")
-	return cmd
-}
-
-func runAddEntityCommand(cmd *cobra.Command, args []string) error {
-	return writeObject(cmd, args, topo.Object_ENTITY, topo.Update_INSERT)
-}
-
 func getGetRelationCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "relation <id>",
@@ -71,8 +50,138 @@ func getGetRelationCommand() *cobra.Command {
 	return cmd
 }
 
+func getGetKindCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "kind <id>",
+		Aliases: []string{"kinds"},
+		Args:    cobra.MaximumNArgs(1),
+		Short:   "Get Kind",
+		RunE:    runGetKindCommand,
+	}
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
+	return cmd
+}
+
+func getAddEntityCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "entity <id> [args]",
+		Args:  cobra.MinimumNArgs(1),
+		Short: "Add Entity",
+		RunE:  runAddEntityCommand,
+	}
+	cmd.Flags().StringP("kind", "k", "", "Kind ID")
+	//_ = cmd.MarkFlagRequired("kind")
+	cmd.Flags().StringToString("attributes", map[string]string{}, "an user defined mapping of entity attributes")
+	return cmd
+}
+
+func getAddRelationCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "relation <id> <src-entity-id> <tgt-entity-id> [args]",
+		Args:  cobra.MinimumNArgs(3),
+		Short: "Add Relation",
+		RunE:  runAddRelationCommand,
+	}
+	cmd.Flags().StringP("kind", "k", "", "Kind ID")
+	//_ = cmd.MarkFlagRequired("kind")
+	return cmd
+}
+
+func getAddKindCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "kind <id> <name> [args]",
+		Args:  cobra.MinimumNArgs(2),
+		Short: "Add Kind",
+		RunE:  runAddKindCommand,
+	}
+	return cmd
+}
+
+func getWatchEntityCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "entity [id] [args]",
+		Short: "Watch Entities",
+		Args:  cobra.MaximumNArgs(2),
+		RunE:  runWatchEntityCommand,
+	}
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
+	return cmd
+}
+
+func getWatchRelationCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "relation <id> [args]",
+		Short: "Watch Relations",
+		Args:  cobra.MaximumNArgs(2),
+		RunE:  runWatchRelationCommand,
+	}
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
+	return cmd
+}
+
+func getWatchKindCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "kind [id] [args]",
+		Short: "Watch Kinds",
+		Args:  cobra.MaximumNArgs(2),
+		RunE:  runWatchKindCommand,
+	}
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
+	return cmd
+}
+
+func getWatchAllCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all [args]",
+		Short: "Watch Entities and Relations",
+		RunE:  runWatchAllCommand,
+	}
+	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
+	cmd.Flags().Bool("no-headers", false, "disables output headers")
+	return cmd
+}
+
+func runGetEntityCommand(cmd *cobra.Command, args []string) error {
+	return runGetCommand(cmd, args, topo.Object_ENTITY)
+}
+
 func runGetRelationCommand(cmd *cobra.Command, args []string) error {
 	return runGetCommand(cmd, args, topo.Object_RELATION)
+}
+
+func runGetKindCommand(cmd *cobra.Command, args []string) error {
+	return runGetCommand(cmd, args, topo.Object_KIND)
+}
+
+func runAddEntityCommand(cmd *cobra.Command, args []string) error {
+	return writeObject(cmd, args, topo.Object_ENTITY, topo.Update_INSERT)
+}
+
+func runAddRelationCommand(cmd *cobra.Command, args []string) error {
+	return writeObject(cmd, args, topo.Object_RELATION, topo.Update_INSERT)
+}
+
+func runAddKindCommand(cmd *cobra.Command, args []string) error {
+	return writeObject(cmd, args, topo.Object_KIND, topo.Update_INSERT)
+}
+
+func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, topo.Object_ENTITY)
+}
+
+func runWatchRelationCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, topo.Object_RELATION)
+}
+
+func runWatchKindCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, topo.Object_KIND)
+}
+
+func runWatchAllCommand(cmd *cobra.Command, args []string) error {
+	return watch(cmd, args, topo.Object_UNSPECIFIED)
 }
 
 func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
@@ -104,21 +213,6 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 	return nil
 }
 
-func getAddRelationCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "relation <id> <src-entity-id> <tgt-entity-id> [args]",
-		Args:  cobra.MinimumNArgs(3),
-		Short: "Add Relation",
-		RunE:  runAddRelationCommand,
-	}
-	cmd.Flags().StringP("kind", "k", "", "entity kind")
-	return cmd
-}
-
-func runAddRelationCommand(cmd *cobra.Command, args []string) error {
-	return writeObject(cmd, args, topo.Object_RELATION, topo.Update_INSERT)
-}
-
 func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type, updateType topo.Update_Type) error {
 	id := args[0]
 
@@ -133,27 +227,26 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 	updates := make([]*topo.Update, 1)
 
 	if objectType == topo.Object_ENTITY {
-		entityKind, _ := cmd.Flags().GetString("kind")
+		kindID, _ := cmd.Flags().GetString("kind")
 		object := &topo.Object_Entity{
 			Entity: &topo.Entity{
-				Kind: entityKind,
+				Kind: &topo.Reference{ID: topo.ID(kindID)},
 			},
 		}
 
 		updates[0] = &topo.Update{
 			Type: updateType,
 			Object: &topo.Object{
-				Ref: &topo.Reference{
-					ID: topo.ID(id)},
+				Ref:  &topo.Reference{ID: topo.ID(id)},
 				Type: objectType,
 				Obj:  object,
 			},
 		}
 	} else if objectType == topo.Object_RELATION {
-		relationKind, _ := cmd.Flags().GetString("kind")
+		kindID, _ := cmd.Flags().GetString("kind")
 		object := &topo.Object_Relation{
 			Relation: &topo.Relation{
-				Kind:      relationKind,
+				Kind:      &topo.Reference{ID: topo.ID(kindID)},
 				SourceRef: &topo.Reference{ID: topo.ID(args[1])},
 				TargetRef: &topo.Reference{ID: topo.ID(args[2])},
 			},
@@ -162,8 +255,22 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 		updates[0] = &topo.Update{
 			Type: updateType,
 			Object: &topo.Object{
-				Ref: &topo.Reference{
-					ID: topo.ID(id)},
+				Ref:  &topo.Reference{ID: topo.ID(id)},
+				Type: objectType,
+				Obj:  object,
+			},
+		}
+	} else if objectType == topo.Object_KIND {
+		object := &topo.Object_Kind{
+			Kind: &topo.Kind{
+				Name: args[1],
+			},
+		}
+
+		updates[0] = &topo.Update{
+			Type: updateType,
+			Object: &topo.Object{
+				Ref:  &topo.Reference{ID: topo.ID(id)},
 				Type: objectType,
 				Obj:  object,
 			},
@@ -207,9 +314,7 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 		printIt(updates, objectType, nil, false, noHeaders)
 	} else {
 		id := args[0]
-		reference := &topo.Reference{
-			ID: topo.ID(id),
-		}
+		reference := &topo.Reference{ID: topo.ID(id)}
 		refs := []*topo.Reference{reference}
 		response, err := client.Read(ctx, &topo.ReadRequest{Refs: refs})
 		if err != nil {
@@ -219,53 +324,6 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 		objects = response.Objects
 	}
 	return objects, nil
-}
-
-func getWatchEntityCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "entity [id] [args]",
-		Short: "Watch Entities",
-		Args:  cobra.MaximumNArgs(2),
-		RunE:  runWatchEntityCommand,
-	}
-	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
-	cmd.Flags().Bool("no-headers", false, "disables output headers")
-	return cmd
-}
-
-func getWatchRelationCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "relation <id> [args]",
-		Short: "Watch Relations",
-		Args:  cobra.MaximumNArgs(2),
-		RunE:  runWatchRelationCommand,
-	}
-	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
-	cmd.Flags().Bool("no-headers", false, "disables output headers")
-	return cmd
-}
-
-func getWatchAllCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "all [args]",
-		Short: "Watch Entities and Relations",
-		RunE:  runWatchAllCommand,
-	}
-	cmd.Flags().BoolP("noreplay", "r", false, "do not replay past topo updates")
-	cmd.Flags().Bool("no-headers", false, "disables output headers")
-	return cmd
-}
-
-func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, topo.Object_ENTITY)
-}
-
-func runWatchRelationCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, topo.Object_RELATION)
-}
-
-func runWatchAllCommand(cmd *cobra.Command, args []string) error {
-	return watch(cmd, args, topo.Object_UNSPECIFIED)
 }
 
 func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
@@ -287,9 +345,7 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 	client := topo.CreateTopoClient(conn)
 
 	stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
-		Ref: &topo.Reference{
-			ID: id,
-		},
+		Ref:      &topo.Reference{ID: id},
 		Noreplay: noreplay,
 	})
 	if err != nil {
@@ -338,34 +394,38 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 	}
 
 	for update := range updates {
-		if update.Object == nil {
-			break
-		}
-		switch update.Object.Type {
-		case topo.Object_ENTITY:
-			e := update.Object.GetEntity()
-			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
-				if watch {
-					if update.Type == topo.Update_UNSPECIFIED {
-						_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
-					} else {
-						_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, update.Type)
-					}
-				}
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, e.Kind)
-			}
-		case topo.Object_RELATION:
-			r := update.Object.GetRelation()
+		u := update
+		printUpdateType := func() {
 			if watch {
-				if update.Type == topo.Update_UNSPECIFIED {
+				if u.Type == topo.Update_UNSPECIFIED {
 					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
 				} else {
-					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, update.Type)
+					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, u.Type)
 				}
 			}
+		}
+		if u.Object == nil {
+			break
+		}
+		switch u.Object.Type {
+		case topo.Object_ENTITY:
+			e := u.Object.GetEntity()
+			printUpdateType()
+			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, e.Kind.ID)
+			}
+		case topo.Object_RELATION:
+			r := u.Object.GetRelation()
+			printUpdateType()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATION {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, update.Object.Type, width, prec, update.Object.Ref.ID, width, prec, r.Kind)
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, r.Kind.ID)
 				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s\n", width, prec, r.SourceRef.ID, width, prec, r.TargetRef.ID)
+			}
+		case topo.Object_KIND:
+			k := u.Object.GetKind()
+			printUpdateType()
+			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_KIND {
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, k.GetName())
 			}
 		default:
 			_, _ = fmt.Fprintf(writer, "\n")

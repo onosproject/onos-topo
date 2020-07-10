@@ -26,12 +26,14 @@ func Test_LoadConfig2(t *testing.T) {
 	topoConfig = nil
 	config, err := GetTopoConfig("topo-load-entities-example.yaml")
 	assert.NilError(t, err, "Unexpected error loading topo entities")
+	//assert.Equal(t, 2, len(config.TopoKinds), "Unexpected number of topo kinds")
 	assert.Equal(t, 2, len(config.TopoEntities), "Unexpected number of topo entities")
 	assert.Equal(t, 1, len(config.TopoRelations), "Unexpected number of topo relations")
 
+	// TODO - check kinds
 	tower1 := config.TopoEntities[0]
 	assert.Equal(t, topo.Object_ENTITY, tower1.Type)
-	assert.Equal(t, "E2Node", tower1.Obj.Entity.GetKind())
+	assert.Equal(t, "E2Node", string(tower1.Obj.Entity.GetKind().ID))
 	assert.Equal(t, topo.ID("315010-0001420"), tower1.Ref.GetID())
 	address, ok := tower1.Attrs.GetAttrs()["address"]
 	assert.Assert(t, ok, "error extracting address")
@@ -39,7 +41,7 @@ func Test_LoadConfig2(t *testing.T) {
 
 	rel1 := config.TopoRelations[0]
 	assert.Equal(t, topo.Object_RELATION, rel1.Type)
-	assert.Equal(t, "XnInterface", rel1.Obj.Relation.GetKind())
+	assert.Equal(t, "XnInterface", string(rel1.Obj.Relation.GetKind().ID))
 	assert.Equal(t, topo.ID("315010-0001420"), rel1.Obj.Relation.GetSourceRef().GetID())
 	assert.Equal(t, topo.ID("315010-0001421"), rel1.Obj.Relation.GetTargetRef().GetID())
 	assert.Equal(t, topo.ID("rel1"), rel1.Ref.GetID())
@@ -52,18 +54,26 @@ func Test_LoadConfig2(t *testing.T) {
 func Test_LoadConfig3(t *testing.T) {
 
 	topoEntity1 := topo.Object{
-		Ref:   &topo.Reference{ID: "entity1"},
-		Type:  topo.Object_ENTITY,
-		Obj:   &topo.Object_Entity{Entity: &topo.Entity{Kind: "E2Node"}},
+		Ref:  &topo.Reference{ID: "entity1"},
+		Type: topo.Object_ENTITY,
+		Obj: &topo.Object_Entity{
+			Entity: &topo.Entity{
+				Kind: &topo.Reference{ID: "E2Node"},
+			},
+		},
 		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
 	}
 	topoEntity1.GetAttrs().GetAttrs()["test1"] = "testvalue1"
 	topoEntity1.GetAttrs().GetAttrs()["test2"] = "testvalue2"
 
 	topoEntity2 := topo.Object{
-		Ref:   &topo.Reference{ID: "entity2"},
-		Type:  topo.Object_ENTITY,
-		Obj:   &topo.Object_Entity{Entity: &topo.Entity{Kind: "E2Node"}},
+		Ref:  &topo.Reference{ID: "entity2"},
+		Type: topo.Object_ENTITY,
+		Obj: &topo.Object_Entity{
+			Entity: &topo.Entity{
+				Kind: &topo.Reference{ID: "E2Node"},
+			},
+		},
 		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
 	}
 	topoEntity2.GetAttrs().GetAttrs()["test3"] = "testvalue3"
@@ -72,11 +82,12 @@ func Test_LoadConfig3(t *testing.T) {
 	topoRelation1 := topo.Object{
 		Ref:  &topo.Reference{ID: "relation1"},
 		Type: topo.Object_RELATION,
-		Obj: &topo.Object_Relation{Relation: &topo.Relation{
-			Kind:      "XnInterface",
-			SourceRef: topoEntity1.Ref,
-			TargetRef: topoEntity2.Ref,
-		}},
+		Obj: &topo.Object_Relation{
+			Relation: &topo.Relation{
+				Kind:      &topo.Reference{ID: "XnInterface"},
+				SourceRef: topoEntity1.Ref,
+				TargetRef: topoEntity2.Ref,
+			}},
 		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
 	}
 	topoRelation1.GetAttrs().GetAttrs()["test3"] = "testvalue3"

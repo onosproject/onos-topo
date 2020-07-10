@@ -18,23 +18,25 @@ import "github.com/spf13/cobra"
 
 func getGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get {device|entity|relation} [args]",
+		Use:   "get {device|entity|relation|kind} [args]",
 		Short: "Get topology resources",
 	}
 	cmd.AddCommand(getGetDeviceCommand())
 	cmd.AddCommand(getGetEntityCommand())
 	cmd.AddCommand(getGetRelationCommand())
+	cmd.AddCommand(getGetKindCommand())
 	return cmd
 }
 
 func getAddCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add {device|entity|relation} [args]",
+		Use:   "add {device|entity|relation|kind} [args]",
 		Short: "Add a topology resource",
 	}
 	cmd.AddCommand(getAddDeviceCommand())
 	cmd.AddCommand(getAddEntityCommand())
 	cmd.AddCommand(getAddRelationCommand())
+	cmd.AddCommand(getAddKindCommand())
 	return cmd
 }
 
@@ -58,12 +60,13 @@ func getRemoveCommand() *cobra.Command {
 
 func getWatchCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "watch {device|entity|relation|all} [args]",
+		Use:   "watch {device|entity|relation|kind|all} [args]",
 		Short: "Watch for changes to a topology resource type",
 	}
 	cmd.AddCommand(getWatchDeviceCommand())
 	cmd.AddCommand(getWatchEntityCommand())
 	cmd.AddCommand(getWatchRelationCommand())
+	cmd.AddCommand(getWatchKindCommand())
 	cmd.AddCommand(getWatchAllCommand())
 	return cmd
 }
