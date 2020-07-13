@@ -562,7 +562,6 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		filename = args[0]
 	}
 
-	cli.Output("runLoadYamlEntitiesCommand")
 	extraAttrs, err := cmd.Flags().GetStringArray("attr")
 	if err != nil {
 		return err
