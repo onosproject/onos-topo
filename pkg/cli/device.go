@@ -562,11 +562,13 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		filename = args[0]
 	}
 
+	cli.Output("runLoadYamlEntitiesCommand")
 	extraAttrs, err := cmd.Flags().GetStringArray("attr")
 	if err != nil {
 		return err
 	}
 	for _, x := range extraAttrs {
+		cli.Output("runLoadYamlEntitiesCommand %v", x)
 		split := strings.Split(x, "=")
 		if len(split) != 2 {
 			return fmt.Errorf("expect extra args to be in the format a=b. Rejected: %s", x)
@@ -593,12 +595,13 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, kind := range topoConfig.TopoKinds {
-		if kind.Attrs == nil || kind.Attrs.Attrs == nil {
-			kind.Attrs.Attrs = make(map[string]string)
+		if kind.Attributes == nil {
+			a := make(map[string]string)
+			kind.Attributes = &a
 		}
 		for _, x := range extraAttrs {
 			split := strings.Split(x, "=")
-			kind.Attrs.Attrs[split[0]] = split[1]
+			(*kind.Attributes)[split[0]] = split[1]
 		}
 
 		kind := kind // pin
@@ -609,12 +612,13 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, entity := range topoConfig.TopoEntities {
-		if entity.Attrs == nil || entity.Attrs.Attrs == nil {
-			entity.Attrs.Attrs = make(map[string]string)
+		if entity.Attributes == nil {
+			a := make(map[string]string)
+			entity.Attributes = &a
 		}
 		for _, x := range extraAttrs {
 			split := strings.Split(x, "=")
-			entity.Attrs.Attrs[split[0]] = split[1]
+			(*entity.Attributes)[split[0]] = split[1]
 		}
 
 		entity := entity // pin
@@ -625,12 +629,13 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, relation := range topoConfig.TopoRelations {
-		if relation.Attrs == nil || relation.Attrs.Attrs == nil {
-			relation.Attrs.Attrs = make(map[string]string)
+		if relation.Attributes == nil {
+			a := make(map[string]string)
+			relation.Attributes = &a
 		}
 		for _, x := range extraAttrs {
 			split := strings.Split(x, "=")
-			relation.Attrs.Attrs[split[0]] = split[1]
+			(*relation.Attributes)[split[0]] = split[1]
 		}
 
 		relation := relation // pin
@@ -641,12 +646,13 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, relation := range topoConfig.TopoRelations {
-		if relation.Attrs == nil || relation.Attrs.Attrs == nil {
-			relation.Attrs.Attrs = make(map[string]string)
+		if relation.Attributes == nil {
+			a := make(map[string]string)
+			relation.Attributes = &a
 		}
 		for _, x := range extraAttrs {
 			split := strings.Split(x, "=")
-			relation.Attrs.Attrs[split[0]] = split[1]
+			(*relation.Attributes)[split[0]] = split[1]
 		}
 
 		relation := relation // pin

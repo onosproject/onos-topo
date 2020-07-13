@@ -5,17 +5,15 @@ topokinds:
     obj:
       kind:
         name: "E2Node"
-    attrs:
-      attrs:
-        foo: 0
+        requiredattrs:
+          - address
+          - displayname
   - ref:
       id: "XnInterface"
     type: 3
     obj:
       kind:
         name: "XnInterface"
-    attrs:
-      attrs:
 topoentities:
   - ref:
       id: "315010-0001420"
@@ -24,17 +22,16 @@ topoentities:
       entity:
         kind:
           id: "E2Node"
-    attrs:
-      attrs:
-        azimuth: 0
-        arc: 120
-        plmnid: "315010"
-        ecid: "0001420"
-        latitude: 52.5350
-        longitude: 13.3885
-        displayname: "Tower-1 Cell-1"
-        address: "ran-simulator:5152"
-        version: "1.0.0"
+    attributes:
+      azimuth: 0
+      arc: 120
+      plmnid: "315010"
+      ecid: "0001420"
+      latitude: 52.5350
+      longitude: 13.3885
+      displayname: "Tower-1 Cell-1"
+      address: "ran-simulator:5152"
+      version: "1.0.0"
   - ref:
       id: "315010-0001421"
     type: 1
@@ -42,17 +39,16 @@ topoentities:
       entity:
         kind:
           id: "E2Node"
-    attrs:
-      attrs:
-        azimuth: 120
-        arc: 120
-        plmnid: "315010"
-        ecid: "0001420"
-        latitude: 52.5350
-        longitude: 13.3885
-        displayname: "Tower-1 Cell-2"
-        address: "ran-simulator:5152"
-        version: "1.0.0"
+    attributes:
+      azimuth: 120
+      arc: 120
+      plmnid: "315010"
+      ecid: "0001420"
+      latitude: 52.5350
+      longitude: 13.3885
+      displayname: "Tower-1 Cell-2"
+      address: "ran-simulator:5152"
+      version: "1.0.0"
 toporelations:
   - ref:
       id: "rel1"
@@ -65,6 +61,5 @@ toporelations:
           id: "315010-0001420"
         targetref:
           id: "315010-0001421"
-    attrs:
-      attrs:
-        displayname: "Tower 1 - Tower 2"
+    attributes:
+      displayname: "Tower 1 - Tower 2"

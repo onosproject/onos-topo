@@ -38,7 +38,7 @@ func Test_LoadConfig2(t *testing.T) {
 	assert.Equal(t, topo.Object_ENTITY, tower1.Type)
 	assert.Equal(t, "E2Node", string(tower1.Obj.Entity.GetKind().ID))
 	assert.Equal(t, topo.ID("315010-0001420"), tower1.Ref.GetID())
-	address, ok := tower1.Attrs.GetAttrs()["address"]
+	address, ok := (*tower1.Attributes)["address"]
 	assert.Assert(t, ok, "error extracting address")
 	assert.Equal(t, "ran-simulator:5152", address)
 
@@ -48,7 +48,7 @@ func Test_LoadConfig2(t *testing.T) {
 	assert.Equal(t, topo.ID("315010-0001420"), rel1.Obj.Relation.GetSourceRef().GetID())
 	assert.Equal(t, topo.ID("315010-0001421"), rel1.Obj.Relation.GetTargetRef().GetID())
 	assert.Equal(t, topo.ID("rel1"), rel1.Ref.GetID())
-	displayname, ok := rel1.Attrs.GetAttrs()["displayname"]
+	displayname, ok := (*rel1.Attributes)["displayname"]
 	assert.Assert(t, ok, "error extracting displayname")
 	assert.Equal(t, "Tower 1 - Tower 2", displayname)
 
@@ -64,10 +64,10 @@ func Test_LoadConfig3(t *testing.T) {
 				Kind: &topo.Reference{ID: "E2Node"},
 			},
 		},
-		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
+		Attributes: make(map[string]string),
 	}
-	topoEntity1.GetAttrs().GetAttrs()["test1"] = "testvalue1"
-	topoEntity1.GetAttrs().GetAttrs()["test2"] = "testvalue2"
+	topoEntity1.Attributes["test1"] = "testvalue1"
+	topoEntity1.Attributes["test2"] = "testvalue2"
 
 	topoEntity2 := topo.Object{
 		Ref:  &topo.Reference{ID: "entity2"},
@@ -77,10 +77,10 @@ func Test_LoadConfig3(t *testing.T) {
 				Kind: &topo.Reference{ID: "E2Node"},
 			},
 		},
-		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
+		Attributes: make(map[string]string),
 	}
-	topoEntity2.GetAttrs().GetAttrs()["test3"] = "testvalue3"
-	topoEntity2.GetAttrs().GetAttrs()["test4"] = "testvalue4"
+	topoEntity2.Attributes["test3"] = "testvalue3"
+	topoEntity2.Attributes["test4"] = "testvalue4"
 
 	topoRelation1 := topo.Object{
 		Ref:  &topo.Reference{ID: "relation1"},
@@ -91,10 +91,10 @@ func Test_LoadConfig3(t *testing.T) {
 				SourceRef: topoEntity1.Ref,
 				TargetRef: topoEntity2.Ref,
 			}},
-		Attrs: &topo.Attributes{Attrs: make(map[string]string)},
+		Attributes: make(map[string]string),
 	}
-	topoRelation1.GetAttrs().GetAttrs()["test3"] = "testvalue3"
-	topoRelation1.GetAttrs().GetAttrs()["test4"] = "testvalue4"
+	topoRelation1.Attributes["test3"] = "testvalue3"
+	topoRelation1.Attributes["test4"] = "testvalue4"
 
 	out, err := yaml.Marshal(topoEntity1)
 	assert.NilError(t, err, "Unexpected error marshalling entity to YAML")

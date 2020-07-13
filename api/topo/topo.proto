@@ -77,12 +77,6 @@ message Reference {
   string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
 }
 
-message Attributes {
-  // TODO - Instead of a plain string, consider using a "typed" value in attrs map.
-  //      - See onos-config for example.
-  map<string, string> attrs = 1;
-}
-
 message Object {
   Reference ref = 1;
 
@@ -100,7 +94,9 @@ message Object {
     Kind kind = 5;
   }
 
-  Attributes attrs = 6;
+  // TODO - Instead of a plain string, consider using a "typed" value in attributes map.
+  //      - See onos-config for example.
+  map<string, string> attributes = 6;
 }
 
 // Entity represents any "thing" that is represented in the topology
@@ -119,4 +115,5 @@ message Relation {
 
 message Kind {
   string name = 1;
+  repeated string required_attrs = 2;
 }
