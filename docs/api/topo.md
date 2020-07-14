@@ -4,11 +4,11 @@
 ## Table of Contents
 
 - [api/topo/topo.proto](#api/topo/topo.proto)
-    - [Attributes](#topo.Attributes)
-    - [Attributes.AttrsEntry](#topo.Attributes.AttrsEntry)
     - [Entity](#topo.Entity)
     - [Kind](#topo.Kind)
+    - [Kind.AttributesEntry](#topo.Kind.AttributesEntry)
     - [Object](#topo.Object)
+    - [Object.AttributesEntry](#topo.Object.AttributesEntry)
     - [ReadRequest](#topo.ReadRequest)
     - [ReadResponse](#topo.ReadResponse)
     - [Reference](#topo.Reference)
@@ -32,37 +32,6 @@
 <p align="right"><a href="#top">Top</a></p>
 
 ## api/topo/topo.proto
-
-
-
-<a name="topo.Attributes"></a>
-
-### Attributes
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| attrs | [Attributes.AttrsEntry](#topo.Attributes.AttrsEntry) | repeated | TODO - Instead of a plain string, consider using a &#34;typed&#34; value in attrs map. - See onos-config for example. |
-
-
-
-
-
-
-<a name="topo.Attributes.AttrsEntry"></a>
-
-### Attributes.AttrsEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [string](#string) |  |  |
-
-
-
 
 
 
@@ -90,6 +59,23 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  |  |
+| attributes | [Kind.AttributesEntry](#topo.Kind.AttributesEntry) | repeated | Map of attributes and their default values for this Kind |
+
+
+
+
+
+
+<a name="topo.Kind.AttributesEntry"></a>
+
+### Kind.AttributesEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [string](#string) |  |  |
 
 
 
@@ -109,7 +95,23 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | entity | [Entity](#topo.Entity) |  |  |
 | relation | [Relation](#topo.Relation) |  |  |
 | kind | [Kind](#topo.Kind) |  |  |
-| attrs | [Attributes](#topo.Attributes) |  |  |
+| attributes | [Object.AttributesEntry](#topo.Object.AttributesEntry) | repeated |  |
+
+
+
+
+
+
+<a name="topo.Object.AttributesEntry"></a>
+
+### Object.AttributesEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [string](#string) |  |  |
 
 
 

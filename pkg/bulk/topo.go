@@ -32,55 +32,55 @@ type TopoConfig struct {
 
 // TopoKind - required to get around the "oneof" Obj
 type TopoKind struct {
-	Ref   *topo.Reference
-	Type  topo.Object_Type
-	Obj   *topo.Object_Kind
-	Attrs *topo.Attributes
+	Ref        *topo.Reference
+	Type       topo.Object_Type
+	Obj        *topo.Object_Kind
+	Attributes *map[string]string
 }
 
 // TopoKindToTopoObject - convert to Object
 func TopoKindToTopoObject(topoKind *TopoKind) *topo.Object {
 	return &topo.Object{
-		Ref:   topoKind.Ref,
-		Type:  topoKind.Type,
-		Obj:   topoKind.Obj,
-		Attrs: topoKind.Attrs,
+		Ref:        topoKind.Ref,
+		Type:       topoKind.Type,
+		Obj:        topoKind.Obj,
+		Attributes: *topoKind.Attributes,
 	}
 }
 
 // TopoEntity - required to get around the "oneof" Obj
 type TopoEntity struct {
-	Ref   *topo.Reference
-	Type  topo.Object_Type
-	Obj   *topo.Object_Entity
-	Attrs *topo.Attributes
+	Ref        *topo.Reference
+	Type       topo.Object_Type
+	Obj        *topo.Object_Entity
+	Attributes *map[string]string
 }
 
 // TopoEntityToTopoObject - convert to Object
 func TopoEntityToTopoObject(topoEntity *TopoEntity) *topo.Object {
 	return &topo.Object{
-		Ref:   topoEntity.Ref,
-		Type:  topoEntity.Type,
-		Obj:   topoEntity.Obj,
-		Attrs: topoEntity.Attrs,
+		Ref:        topoEntity.Ref,
+		Type:       topoEntity.Type,
+		Obj:        topoEntity.Obj,
+		Attributes: *topoEntity.Attributes,
 	}
 }
 
 // TopoRelation - required to get around the "oneof" Obj
 type TopoRelation struct {
-	Ref   *topo.Reference
-	Type  topo.Object_Type
-	Obj   *topo.Object_Relation
-	Attrs *topo.Attributes
+	Ref        *topo.Reference
+	Type       topo.Object_Type
+	Obj        *topo.Object_Relation
+	Attributes *map[string]string
 }
 
 // TopoRelationToTopoObject - convert to Object
 func TopoRelationToTopoObject(topoRelation *TopoRelation) *topo.Object {
 	return &topo.Object{
-		Ref:   topoRelation.Ref,
-		Type:  topoRelation.Type,
-		Obj:   topoRelation.Obj,
-		Attrs: topoRelation.Attrs,
+		Ref:        topoRelation.Ref,
+		Type:       topoRelation.Type,
+		Obj:        topoRelation.Obj,
+		Attributes: *topoRelation.Attributes,
 	}
 }
 

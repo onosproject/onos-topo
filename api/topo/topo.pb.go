@@ -88,7 +88,7 @@ func (x Object_Type) String() string {
 }
 
 func (Object_Type) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{9, 0}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8, 0}
 }
 
 type WriteRequest struct {
@@ -460,52 +460,6 @@ func (m *Reference) GetID() ID {
 	return ""
 }
 
-type Attributes struct {
-	// TODO - Instead of a plain string, consider using a "typed" value in attrs map.
-	//      - See onos-config for example.
-	Attrs map[string]string `protobuf:"bytes,1,rep,name=attrs,proto3" json:"attrs,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-}
-
-func (m *Attributes) Reset()         { *m = Attributes{} }
-func (m *Attributes) String() string { return proto.CompactTextString(m) }
-func (*Attributes) ProtoMessage()    {}
-func (*Attributes) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{8}
-}
-func (m *Attributes) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Attributes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Attributes.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Attributes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Attributes.Merge(m, src)
-}
-func (m *Attributes) XXX_Size() int {
-	return m.Size()
-}
-func (m *Attributes) XXX_DiscardUnknown() {
-	xxx_messageInfo_Attributes.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Attributes proto.InternalMessageInfo
-
-func (m *Attributes) GetAttrs() map[string]string {
-	if m != nil {
-		return m.Attrs
-	}
-	return nil
-}
-
 type Object struct {
 	Ref  *Reference  `protobuf:"bytes,1,opt,name=ref,proto3" json:"ref,omitempty"`
 	Type Object_Type `protobuf:"varint,2,opt,name=type,proto3,enum=topo.Object_Type" json:"type,omitempty"`
@@ -513,15 +467,15 @@ type Object struct {
 	//	*Object_Entity
 	//	*Object_Relation
 	//	*Object_Kind
-	Obj   isObject_Obj `protobuf_oneof:"obj"`
-	Attrs *Attributes  `protobuf:"bytes,6,opt,name=attrs,proto3" json:"attrs,omitempty"`
+	Obj        isObject_Obj      `protobuf_oneof:"obj"`
+	Attributes map[string]string `protobuf:"bytes,6,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (m *Object) Reset()         { *m = Object{} }
 func (m *Object) String() string { return proto.CompactTextString(m) }
 func (*Object) ProtoMessage()    {}
 func (*Object) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{9}
+	return fileDescriptor_5823f9f54b50fd8c, []int{8}
 }
 func (m *Object) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -612,9 +566,9 @@ func (m *Object) GetKind() *Kind {
 	return nil
 }
 
-func (m *Object) GetAttrs() *Attributes {
+func (m *Object) GetAttributes() map[string]string {
 	if m != nil {
-		return m.Attrs
+		return m.Attributes
 	}
 	return nil
 }
@@ -638,7 +592,7 @@ func (m *Entity) Reset()         { *m = Entity{} }
 func (m *Entity) String() string { return proto.CompactTextString(m) }
 func (*Entity) ProtoMessage()    {}
 func (*Entity) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{10}
+	return fileDescriptor_5823f9f54b50fd8c, []int{9}
 }
 func (m *Entity) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -685,7 +639,7 @@ func (m *Relation) Reset()         { *m = Relation{} }
 func (m *Relation) String() string { return proto.CompactTextString(m) }
 func (*Relation) ProtoMessage()    {}
 func (*Relation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{11}
+	return fileDescriptor_5823f9f54b50fd8c, []int{10}
 }
 func (m *Relation) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -737,13 +691,15 @@ func (m *Relation) GetTargetRef() *Reference {
 
 type Kind struct {
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Map of attributes and their default values for this Kind
+	Attributes map[string]string `protobuf:"bytes,2,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (m *Kind) Reset()         { *m = Kind{} }
 func (m *Kind) String() string { return proto.CompactTextString(m) }
 func (*Kind) ProtoMessage()    {}
 func (*Kind) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5823f9f54b50fd8c, []int{12}
+	return fileDescriptor_5823f9f54b50fd8c, []int{11}
 }
 func (m *Kind) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -779,6 +735,13 @@ func (m *Kind) GetName() string {
 	return ""
 }
 
+func (m *Kind) GetAttributes() map[string]string {
+	if m != nil {
+		return m.Attributes
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("topo.Update_Type", Update_Type_name, Update_Type_value)
 	proto.RegisterEnum("topo.Object_Type", Object_Type_name, Object_Type_value)
@@ -790,63 +753,63 @@ func init() {
 	proto.RegisterType((*SubscribeResponse)(nil), "topo.SubscribeResponse")
 	proto.RegisterType((*Update)(nil), "topo.Update")
 	proto.RegisterType((*Reference)(nil), "topo.Reference")
-	proto.RegisterType((*Attributes)(nil), "topo.Attributes")
-	proto.RegisterMapType((map[string]string)(nil), "topo.Attributes.AttrsEntry")
 	proto.RegisterType((*Object)(nil), "topo.Object")
+	proto.RegisterMapType((map[string]string)(nil), "topo.Object.AttributesEntry")
 	proto.RegisterType((*Entity)(nil), "topo.Entity")
 	proto.RegisterType((*Relation)(nil), "topo.Relation")
 	proto.RegisterType((*Kind)(nil), "topo.Kind")
+	proto.RegisterMapType((map[string]string)(nil), "topo.Kind.AttributesEntry")
 }
 
 func init() { proto.RegisterFile("api/topo/topo.proto", fileDescriptor_5823f9f54b50fd8c) }
 
 var fileDescriptor_5823f9f54b50fd8c = []byte{
-	// 716 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x54, 0xcd, 0x6e, 0xd3, 0x4a,
-	0x14, 0xf6, 0xd8, 0x8e, 0x6f, 0x72, 0x9a, 0xdb, 0xba, 0xd3, 0xea, 0xde, 0x28, 0xf7, 0x2a, 0x04,
-	0x03, 0x55, 0x91, 0x20, 0x85, 0x20, 0xa1, 0x8a, 0x6e, 0x68, 0x89, 0xab, 0x5a, 0x2d, 0x29, 0x9a,
-	0xa6, 0x42, 0x5d, 0x21, 0x27, 0x99, 0x14, 0xf7, 0xc7, 0x63, 0xec, 0x09, 0x92, 0x9f, 0x02, 0xc4,
-	0x7b, 0xb0, 0xe5, 0x19, 0x58, 0x76, 0xc9, 0x0a, 0xa1, 0xf4, 0x2d, 0x58, 0xa1, 0x99, 0x89, 0xdd,
-	0x34, 0xb4, 0xa8, 0x9b, 0xe8, 0xcc, 0xf7, 0x7d, 0xe7, 0x9c, 0x39, 0xdf, 0xc4, 0x07, 0x16, 0xfc,
-	0x28, 0x58, 0xe1, 0x2c, 0x62, 0xf2, 0xa7, 0x11, 0xc5, 0x8c, 0x33, 0x6c, 0x8a, 0xb8, 0xba, 0x78,
-	0xc8, 0x0e, 0x99, 0x04, 0x56, 0x44, 0xa4, 0x38, 0xe7, 0x29, 0x94, 0x5f, 0xc7, 0x01, 0xa7, 0x84,
-	0xbe, 0x1b, 0xd2, 0x84, 0xe3, 0x25, 0xf8, 0x6b, 0x18, 0xf5, 0x7d, 0x4e, 0x93, 0x0a, 0xaa, 0x1b,
-	0xcb, 0x33, 0xcd, 0x72, 0x43, 0x56, 0xda, 0x97, 0x20, 0xc9, 0x48, 0x67, 0x0e, 0xfe, 0x1e, 0xe7,
-	0x25, 0x11, 0x0b, 0x13, 0xea, 0x34, 0x61, 0x86, 0x50, 0xbf, 0x9f, 0xd5, 0xb9, 0x03, 0x66, 0x4c,
-	0x07, 0x59, 0x91, 0x39, 0x55, 0x84, 0xd0, 0x01, 0x8d, 0x69, 0xd8, 0xa3, 0x44, 0x92, 0xa2, 0xb9,
-	0xca, 0x51, 0x35, 0x44, 0x73, 0xd6, 0x3d, 0xa2, 0x3d, 0x3e, 0xd5, 0x7c, 0x57, 0x82, 0x24, 0x23,
-	0x9d, 0x53, 0xb0, 0xf7, 0x86, 0xdd, 0xa4, 0x17, 0x07, 0xdd, 0xfc, 0xe2, 0xb7, 0xc1, 0x88, 0xe9,
-	0xa0, 0x82, 0xea, 0xe8, 0xaa, 0x7e, 0x82, 0xc3, 0x55, 0x28, 0x86, 0x2c, 0xa6, 0xd1, 0x89, 0x9f,
-	0x56, 0xf4, 0x3a, 0x5a, 0x2e, 0x92, 0xfc, 0x2c, 0xb8, 0x24, 0xf4, 0xa3, 0xe4, 0x2d, 0xe3, 0x15,
-	0x43, 0x71, 0xd9, 0xd9, 0x59, 0x83, 0xf9, 0x89, 0x76, 0x17, 0x77, 0xbd, 0x91, 0x51, 0x9f, 0x10,
-	0x58, 0x0a, 0xc3, 0xf7, 0xc0, 0xe4, 0x69, 0x44, 0x65, 0xef, 0xd9, 0xe6, 0xfc, 0xa4, 0xbe, 0xd1,
-	0x49, 0x23, 0x4a, 0x24, 0x8d, 0xef, 0x82, 0xa5, 0x06, 0x95, 0x17, 0x99, 0x36, 0x61, 0xcc, 0x39,
-	0x6b, 0x60, 0x8a, 0x1c, 0x3c, 0x07, 0x33, 0xfb, 0xed, 0xbd, 0x57, 0xee, 0x0b, 0x6f, 0xd3, 0x73,
-	0x5b, 0xb6, 0x86, 0x01, 0x2c, 0xaf, 0xbd, 0xe7, 0x92, 0x8e, 0x8d, 0x44, 0xfc, 0x72, 0xb7, 0xe5,
-	0x6d, 0x1e, 0xd8, 0xba, 0x88, 0x5b, 0xee, 0x8e, 0xdb, 0x71, 0x6d, 0xc3, 0xb9, 0x0f, 0xa5, 0xdc,
-	0x1b, 0xfc, 0x3f, 0xe8, 0x41, 0x5f, 0x1a, 0x57, 0xda, 0x28, 0x8f, 0xbe, 0xdf, 0xd2, 0xbd, 0xd6,
-	0x4f, 0xf9, 0x4b, 0xf4, 0xa0, 0xef, 0xa4, 0x00, 0xeb, 0x9c, 0xc7, 0x41, 0x77, 0xc8, 0x69, 0x82,
-	0x1f, 0x43, 0xc1, 0xe7, 0x3c, 0xce, 0x66, 0xfe, 0x4f, 0x5d, 0xed, 0x42, 0x20, 0xc3, 0xc4, 0x0d,
-	0x79, 0x9c, 0x12, 0xa5, 0xac, 0xae, 0xaa, 0x02, 0x0a, 0xc4, 0x36, 0x18, 0xc7, 0x34, 0x55, 0xdd,
-	0x88, 0x08, 0xf1, 0x22, 0x14, 0xde, 0xfb, 0x27, 0x43, 0x65, 0x4b, 0x89, 0xa8, 0xc3, 0x33, 0x7d,
-	0x15, 0x39, 0x5f, 0x74, 0xb0, 0xd4, 0xd4, 0x37, 0x79, 0xdd, 0x2b, 0xdd, 0x55, 0xe9, 0x93, 0xee,
-	0x2e, 0x81, 0x45, 0x43, 0x1e, 0xf0, 0xf4, 0xb2, 0xbb, 0xae, 0xc4, 0xb6, 0x34, 0x32, 0x66, 0xf1,
-	0x03, 0x28, 0xc6, 0xf4, 0xc4, 0xe7, 0x01, 0x0b, 0x2b, 0xa6, 0x54, 0xce, 0x66, 0x6d, 0x15, 0xba,
-	0xa5, 0x91, 0x5c, 0x81, 0xeb, 0x60, 0x1e, 0x07, 0x61, 0xbf, 0x52, 0x90, 0x4a, 0x50, 0xca, 0xed,
-	0x20, 0xec, 0x6f, 0x69, 0x44, 0x32, 0x78, 0x29, 0x73, 0xce, 0x92, 0x12, 0x7b, 0xda, 0xb9, 0xb1,
-	0x5d, 0x7f, 0x7c, 0x57, 0xb7, 0xdd, 0xf1, 0x3a, 0x07, 0x36, 0xc2, 0x65, 0x28, 0x12, 0x77, 0x67,
-	0xbd, 0xe3, 0xed, 0xb6, 0x6d, 0x1d, 0x17, 0xc1, 0xdc, 0xf6, 0xda, 0x2d, 0xdb, 0xd8, 0x28, 0x80,
-	0xc1, 0xba, 0x47, 0xce, 0x43, 0xb0, 0xd4, 0x3c, 0xe2, 0x33, 0x94, 0xf7, 0xba, 0xc6, 0x38, 0x49,
-	0x3a, 0x1f, 0x10, 0x14, 0xb3, 0xa9, 0x6e, 0x94, 0x81, 0x1b, 0x00, 0x09, 0x1b, 0xc6, 0x3d, 0xfa,
-	0x46, 0xbc, 0x8a, 0x7e, 0xb5, 0xb4, 0xa4, 0x24, 0x84, 0x0e, 0x84, 0x9e, 0xfb, 0xf1, 0x21, 0xe5,
-	0x52, 0x6f, 0x5c, 0xa3, 0x57, 0x12, 0x42, 0x07, 0x4e, 0x15, 0x4c, 0x61, 0x1e, 0xc6, 0x60, 0x86,
-	0xfe, 0x29, 0x1d, 0xff, 0x5d, 0x64, 0xdc, 0xfc, 0x8c, 0xc0, 0xec, 0xb0, 0x88, 0xe1, 0x26, 0x14,
-	0xe4, 0x0a, 0xc2, 0x58, 0x55, 0x9a, 0xdc, 0x63, 0xd5, 0x85, 0x4b, 0xd8, 0x78, 0x47, 0x69, 0x78,
-	0x05, 0x4c, 0xb1, 0x71, 0xf0, 0x7c, 0xd6, 0x3c, 0xdf, 0x58, 0x55, 0x3c, 0x09, 0xe5, 0x09, 0xcf,
-	0xa1, 0x94, 0x7f, 0xfb, 0xf8, 0x1f, 0x25, 0x99, 0xde, 0x3d, 0xd5, 0x7f, 0x7f, 0xc3, 0xb3, 0xfc,
-	0x47, 0x68, 0xa3, 0xf2, 0x75, 0x54, 0x43, 0x67, 0xa3, 0x1a, 0xfa, 0x31, 0xaa, 0xa1, 0x8f, 0xe7,
-	0x35, 0xed, 0xec, 0xbc, 0xa6, 0x7d, 0x3b, 0xaf, 0x69, 0x5d, 0x4b, 0xae, 0xe0, 0x27, 0xbf, 0x02,
-	0x00, 0x00, 0xff, 0xff, 0x0e, 0x8d, 0x9f, 0x24, 0xb5, 0x05, 0x00, 0x00,
+	// 717 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x54, 0xdd, 0x6a, 0xdb, 0x48,
+	0x14, 0xd6, 0x48, 0xb2, 0xd6, 0x3e, 0xf1, 0xc6, 0xca, 0x24, 0xec, 0x1a, 0x13, 0xbc, 0x5e, 0xed,
+	0x6e, 0xc8, 0xc2, 0xae, 0x53, 0x5c, 0x28, 0x25, 0x69, 0xa1, 0x49, 0xad, 0x10, 0x91, 0xd4, 0x29,
+	0x13, 0x87, 0x92, 0xab, 0x22, 0xdb, 0xe3, 0x54, 0xf9, 0xd1, 0xa8, 0xd2, 0xb8, 0xe0, 0x67, 0xe8,
+	0x45, 0x4b, 0xa1, 0x8f, 0xd1, 0xf7, 0xe8, 0x65, 0x2e, 0x7b, 0x55, 0x8a, 0xf3, 0x16, 0xbd, 0x2a,
+	0x33, 0x63, 0x29, 0xb6, 0x9b, 0x94, 0xdc, 0xf4, 0x46, 0x9c, 0x39, 0xdf, 0x77, 0xe6, 0xcc, 0xf9,
+	0x3e, 0x74, 0x60, 0xd1, 0x8f, 0x82, 0x35, 0xce, 0x22, 0x26, 0x3f, 0xf5, 0x28, 0x66, 0x9c, 0x61,
+	0x53, 0xc4, 0x95, 0xa5, 0x63, 0x76, 0xcc, 0x64, 0x62, 0x4d, 0x44, 0x0a, 0x73, 0xee, 0x41, 0xf1,
+	0x59, 0x1c, 0x70, 0x4a, 0xe8, 0xcb, 0x01, 0x4d, 0x38, 0x5e, 0x81, 0x5f, 0x06, 0x51, 0xcf, 0xe7,
+	0x34, 0x29, 0xa3, 0x9a, 0xb1, 0x3a, 0xd7, 0x28, 0xd6, 0xe5, 0x4d, 0x87, 0x32, 0x49, 0x52, 0xd0,
+	0x29, 0xc1, 0xaf, 0xe3, 0xba, 0x24, 0x62, 0x61, 0x42, 0x9d, 0x06, 0xcc, 0x11, 0xea, 0xf7, 0xd2,
+	0x7b, 0xfe, 0x02, 0x33, 0xa6, 0xfd, 0xf4, 0x92, 0x92, 0xba, 0x84, 0xd0, 0x3e, 0x8d, 0x69, 0xd8,
+	0xa5, 0x44, 0x82, 0xa2, 0xb9, 0xaa, 0x51, 0x77, 0x88, 0xe6, 0xac, 0x73, 0x42, 0xbb, 0x7c, 0xa6,
+	0xf9, 0xbe, 0x4c, 0x92, 0x14, 0x74, 0xce, 0xc1, 0x3e, 0x18, 0x74, 0x92, 0x6e, 0x1c, 0x74, 0xb2,
+	0x87, 0xff, 0x09, 0x46, 0x4c, 0xfb, 0x65, 0x54, 0x43, 0xd7, 0xf5, 0x13, 0x18, 0xae, 0x40, 0x3e,
+	0x64, 0x31, 0x8d, 0xce, 0xfc, 0x61, 0x59, 0xaf, 0xa1, 0xd5, 0x3c, 0xc9, 0xce, 0x02, 0x4b, 0x42,
+	0x3f, 0x4a, 0x5e, 0x30, 0x5e, 0x36, 0x14, 0x96, 0x9e, 0x9d, 0x0d, 0x58, 0x98, 0x68, 0x77, 0xf5,
+	0xd6, 0x5b, 0x09, 0xf5, 0x0e, 0x81, 0xa5, 0x72, 0xf8, 0x1f, 0x30, 0xf9, 0x30, 0xa2, 0xb2, 0xf7,
+	0x7c, 0x63, 0x61, 0x92, 0x5f, 0x6f, 0x0f, 0x23, 0x4a, 0x24, 0x8c, 0xff, 0x06, 0x4b, 0x0d, 0x2a,
+	0x1f, 0x32, 0x2b, 0xc2, 0x18, 0x73, 0x36, 0xc0, 0x14, 0x35, 0xb8, 0x04, 0x73, 0x87, 0xad, 0x83,
+	0xa7, 0xee, 0x63, 0x6f, 0xdb, 0x73, 0x9b, 0xb6, 0x86, 0x01, 0x2c, 0xaf, 0x75, 0xe0, 0x92, 0xb6,
+	0x8d, 0x44, 0xfc, 0x64, 0xbf, 0xe9, 0x6d, 0x1f, 0xd9, 0xba, 0x88, 0x9b, 0xee, 0x9e, 0xdb, 0x76,
+	0x6d, 0xc3, 0xf9, 0x17, 0x0a, 0x99, 0x36, 0x78, 0x19, 0xf4, 0xa0, 0x27, 0x85, 0x2b, 0x6c, 0x15,
+	0x47, 0x9f, 0xff, 0xd0, 0xbd, 0xe6, 0x57, 0xf9, 0x25, 0x7a, 0xd0, 0x73, 0x5e, 0x1b, 0x60, 0xa9,
+	0xd6, 0xb7, 0x91, 0xf8, 0xda, 0x11, 0x55, 0xf9, 0xe4, 0x88, 0x2b, 0x60, 0xd1, 0x90, 0x07, 0x7c,
+	0x38, 0x3d, 0xa2, 0x2b, 0x73, 0x3b, 0x1a, 0x19, 0xa3, 0xf8, 0x3f, 0xc8, 0xc7, 0xf4, 0xcc, 0xe7,
+	0x01, 0x0b, 0xcb, 0xa6, 0x64, 0xce, 0xa7, 0x6d, 0x55, 0x76, 0x47, 0x23, 0x19, 0x03, 0xd7, 0xc0,
+	0x3c, 0x0d, 0xc2, 0x5e, 0x39, 0x27, 0x99, 0xa0, 0x98, 0xbb, 0x41, 0xd8, 0xdb, 0xd1, 0x88, 0x44,
+	0xf0, 0x03, 0x00, 0x9f, 0xf3, 0x38, 0xe8, 0x0c, 0x84, 0x6f, 0x96, 0xf4, 0x6d, 0x79, 0xea, 0x91,
+	0x9b, 0x19, 0xec, 0x86, 0x3c, 0x1e, 0x92, 0x09, 0x7e, 0xe5, 0x21, 0x94, 0x66, 0x60, 0x6c, 0x83,
+	0x71, 0x4a, 0x87, 0x4a, 0x3c, 0x22, 0x42, 0xbc, 0x04, 0xb9, 0x57, 0xfe, 0xd9, 0x40, 0x49, 0x50,
+	0x20, 0xea, 0xb0, 0xae, 0xdf, 0x47, 0x3f, 0x74, 0xcc, 0x6d, 0xb5, 0xbd, 0xf6, 0x91, 0x8d, 0x70,
+	0x11, 0xf2, 0xc4, 0xdd, 0xdb, 0x6c, 0x7b, 0xfb, 0x2d, 0x5b, 0xc7, 0x79, 0x30, 0x77, 0xbd, 0x56,
+	0xd3, 0x36, 0xb6, 0x72, 0x60, 0xb0, 0xce, 0x89, 0xf3, 0x3f, 0x58, 0x4a, 0x24, 0xf1, 0x83, 0xc9,
+	0x61, 0x6f, 0x70, 0x43, 0x82, 0xce, 0x1b, 0x04, 0xf9, 0x54, 0xaa, 0x5b, 0x55, 0xe0, 0x3a, 0x40,
+	0xc2, 0x06, 0x71, 0x97, 0x3e, 0x17, 0x56, 0xeb, 0xd7, 0x53, 0x0b, 0x8a, 0x42, 0x68, 0x5f, 0xf0,
+	0xb9, 0x1f, 0x1f, 0x53, 0x2e, 0xf9, 0xc6, 0x0d, 0x7c, 0x45, 0x21, 0xb4, 0xef, 0xbc, 0x47, 0x60,
+	0x0a, 0x4b, 0x30, 0x06, 0x33, 0xf4, 0xcf, 0xe9, 0x58, 0x3a, 0x19, 0xe3, 0xf5, 0x29, 0x7b, 0x74,
+	0x69, 0x4f, 0xe5, 0xca, 0xc6, 0x9f, 0x68, 0x4e, 0xe3, 0x03, 0x02, 0xb3, 0xcd, 0x22, 0x86, 0x1b,
+	0x90, 0x93, 0x8b, 0x0d, 0x63, 0xd5, 0x78, 0x72, 0x3b, 0x56, 0x16, 0xa7, 0x72, 0xe3, 0xcd, 0xa7,
+	0xe1, 0x35, 0x30, 0xc5, 0x1e, 0xc3, 0x0b, 0xe9, 0xe0, 0xd9, 0x1e, 0xac, 0xe0, 0xc9, 0x54, 0x56,
+	0xf0, 0x08, 0x0a, 0xd9, 0x46, 0xc1, 0xbf, 0x29, 0xca, 0xec, 0x46, 0xab, 0xfc, 0xfe, 0x5d, 0x3e,
+	0xad, 0xbf, 0x83, 0xb6, 0xca, 0x1f, 0x47, 0x55, 0x74, 0x31, 0xaa, 0xa2, 0x2f, 0xa3, 0x2a, 0x7a,
+	0x7b, 0x59, 0xd5, 0x2e, 0x2e, 0xab, 0xda, 0xa7, 0xcb, 0xaa, 0xd6, 0xb1, 0xe4, 0x62, 0xbf, 0xfb,
+	0x2d, 0x00, 0x00, 0xff, 0xff, 0xe6, 0x4b, 0x21, 0x6a, 0x0b, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1331,48 +1294,6 @@ func (m *Reference) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *Attributes) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Attributes) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Attributes) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Attrs) > 0 {
-		for k := range m.Attrs {
-			v := m.Attrs[k]
-			baseI := i
-			i -= len(v)
-			copy(dAtA[i:], v)
-			i = encodeVarintTopo(dAtA, i, uint64(len(v)))
-			i--
-			dAtA[i] = 0x12
-			i -= len(k)
-			copy(dAtA[i:], k)
-			i = encodeVarintTopo(dAtA, i, uint64(len(k)))
-			i--
-			dAtA[i] = 0xa
-			i = encodeVarintTopo(dAtA, i, uint64(baseI-i))
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *Object) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1393,17 +1314,24 @@ func (m *Object) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Attrs != nil {
-		{
-			size, err := m.Attrs.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTopo(dAtA, i, uint64(size))
+	if len(m.Attributes) > 0 {
+		for k := range m.Attributes {
+			v := m.Attributes[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintTopo(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintTopo(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintTopo(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x32
 		}
-		i--
-		dAtA[i] = 0x32
 	}
 	if m.Obj != nil {
 		{
@@ -1611,6 +1539,25 @@ func (m *Kind) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Attributes) > 0 {
+		for k := range m.Attributes {
+			v := m.Attributes[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintTopo(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintTopo(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintTopo(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
 	if len(m.Name) > 0 {
 		i -= len(m.Name)
 		copy(dAtA[i:], m.Name)
@@ -1749,23 +1696,6 @@ func (m *Reference) Size() (n int) {
 	return n
 }
 
-func (m *Attributes) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.Attrs) > 0 {
-		for k, v := range m.Attrs {
-			_ = k
-			_ = v
-			mapEntrySize := 1 + len(k) + sovTopo(uint64(len(k))) + 1 + len(v) + sovTopo(uint64(len(v)))
-			n += mapEntrySize + 1 + sovTopo(uint64(mapEntrySize))
-		}
-	}
-	return n
-}
-
 func (m *Object) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1782,9 +1712,13 @@ func (m *Object) Size() (n int) {
 	if m.Obj != nil {
 		n += m.Obj.Size()
 	}
-	if m.Attrs != nil {
-		l = m.Attrs.Size()
-		n += 1 + l + sovTopo(uint64(l))
+	if len(m.Attributes) > 0 {
+		for k, v := range m.Attributes {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovTopo(uint64(len(k))) + 1 + len(v) + sovTopo(uint64(len(v)))
+			n += mapEntrySize + 1 + sovTopo(uint64(mapEntrySize))
+		}
 	}
 	return n
 }
@@ -1868,6 +1802,14 @@ func (m *Kind) Size() (n int) {
 	l = len(m.Name)
 	if l > 0 {
 		n += 1 + l + sovTopo(uint64(l))
+	}
+	if len(m.Attributes) > 0 {
+		for k, v := range m.Attributes {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovTopo(uint64(len(k))) + 1 + len(v) + sovTopo(uint64(len(v)))
+			n += mapEntrySize + 1 + sovTopo(uint64(mapEntrySize))
+		}
 	}
 	return n
 }
@@ -2601,186 +2543,6 @@ func (m *Reference) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Attributes) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTopo
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: Attributes: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Attributes: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Attrs", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTopo
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTopo
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Attrs == nil {
-				m.Attrs = make(map[string]string)
-			}
-			var mapkey string
-			var mapvalue string
-			for iNdEx < postIndex {
-				entryPreIndex := iNdEx
-				var wire uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return ErrIntOverflowTopo
-					}
-					if iNdEx >= l {
-						return io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					wire |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				fieldNum := int32(wire >> 3)
-				if fieldNum == 1 {
-					var stringLenmapkey uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowTopo
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						stringLenmapkey |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					intStringLenmapkey := int(stringLenmapkey)
-					if intStringLenmapkey < 0 {
-						return ErrInvalidLengthTopo
-					}
-					postStringIndexmapkey := iNdEx + intStringLenmapkey
-					if postStringIndexmapkey < 0 {
-						return ErrInvalidLengthTopo
-					}
-					if postStringIndexmapkey > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
-					iNdEx = postStringIndexmapkey
-				} else if fieldNum == 2 {
-					var stringLenmapvalue uint64
-					for shift := uint(0); ; shift += 7 {
-						if shift >= 64 {
-							return ErrIntOverflowTopo
-						}
-						if iNdEx >= l {
-							return io.ErrUnexpectedEOF
-						}
-						b := dAtA[iNdEx]
-						iNdEx++
-						stringLenmapvalue |= uint64(b&0x7F) << shift
-						if b < 0x80 {
-							break
-						}
-					}
-					intStringLenmapvalue := int(stringLenmapvalue)
-					if intStringLenmapvalue < 0 {
-						return ErrInvalidLengthTopo
-					}
-					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
-					if postStringIndexmapvalue < 0 {
-						return ErrInvalidLengthTopo
-					}
-					if postStringIndexmapvalue > l {
-						return io.ErrUnexpectedEOF
-					}
-					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
-					iNdEx = postStringIndexmapvalue
-				} else {
-					iNdEx = entryPreIndex
-					skippy, err := skipTopo(dAtA[iNdEx:])
-					if err != nil {
-						return err
-					}
-					if skippy < 0 {
-						return ErrInvalidLengthTopo
-					}
-					if (iNdEx + skippy) > postIndex {
-						return io.ErrUnexpectedEOF
-					}
-					iNdEx += skippy
-				}
-			}
-			m.Attrs[mapkey] = mapvalue
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTopo(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTopo
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *Object) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2972,7 +2734,7 @@ func (m *Object) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Attrs", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Attributes", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2999,12 +2761,103 @@ func (m *Object) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Attrs == nil {
-				m.Attrs = &Attributes{}
+			if m.Attributes == nil {
+				m.Attributes = make(map[string]string)
 			}
-			if err := m.Attrs.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowTopo
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipTopo(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
 			}
+			m.Attributes[mapkey] = mapvalue
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -3340,6 +3193,133 @@ func (m *Kind) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Attributes", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTopo
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTopo
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTopo
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Attributes == nil {
+				m.Attributes = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowTopo
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTopo
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthTopo
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipTopo(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthTopo
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Attributes[mapkey] = mapvalue
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

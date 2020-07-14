@@ -5,17 +5,24 @@ topokinds:
     obj:
       kind:
         name: "E2Node"
-    attrs:
-      attrs:
-        foo: 0
+    attributes:
+      displayname: "E2 Node"
+      address: ""
+      version: ""
+      plmnid: ""
+      ecid: ""
+      azimuth: 0
+      arc: 0
+      latitude: 00.000
+      longitude: 00.000
   - ref:
       id: "XnInterface"
     type: 3
     obj:
       kind:
         name: "XnInterface"
-    attrs:
-      attrs:
+    attributes:
+      displayname: "Xn Interface"
 topoentities:
   - ref:
       id: "315010-0001420"
@@ -24,17 +31,16 @@ topoentities:
       entity:
         kind:
           id: "E2Node"
-    attrs:
-      attrs:
-        azimuth: 0
-        arc: 120
-        plmnid: "315010"
-        ecid: "0001420"
-        latitude: 52.5350
-        longitude: 13.3885
-        displayname: "Tower-1 Cell-1"
-        address: "ran-simulator:5152"
-        version: "1.0.0"
+    attributes:
+      displayname: "Tower-1 Cell-1"
+      address: "ran-simulator:5152"
+      azimuth: 0
+      version: "1.0.0"
+      arc: 120
+      plmnid: "315010"
+      ecid: "0001420"
+      latitude: 52.5350
+      longitude: 13.3885
   - ref:
       id: "315010-0001421"
     type: 1
@@ -42,17 +48,16 @@ topoentities:
       entity:
         kind:
           id: "E2Node"
-    attrs:
-      attrs:
-        azimuth: 120
-        arc: 120
-        plmnid: "315010"
-        ecid: "0001420"
-        latitude: 52.5350
-        longitude: 13.3885
-        displayname: "Tower-1 Cell-2"
-        address: "ran-simulator:5152"
-        version: "1.0.0"
+    attributes:
+      displayname: "Tower-1 Cell-2"
+      address: "ran-simulator:5152"
+      version: "1.0.0"
+      azimuth: 120
+      arc: 120
+      plmnid: "315010"
+      ecid: "0001420"
+      latitude: 52.5350
+      longitude: 13.3885
 toporelations:
   - ref:
       id: "rel1"
@@ -65,6 +70,5 @@ toporelations:
           id: "315010-0001420"
         targetref:
           id: "315010-0001421"
-    attrs:
-      attrs:
-        displayname: "Tower 1 - Tower 2"
+    attributes:
+      displayname: "Tower 1 - Tower 2"

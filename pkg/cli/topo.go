@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -71,7 +72,7 @@ func getAddEntityCommand() *cobra.Command {
 	}
 	cmd.Flags().StringP("kind", "k", "", "Kind ID")
 	//_ = cmd.MarkFlagRequired("kind")
-	cmd.Flags().StringToString("attributes", map[string]string{}, "an user defined mapping of entity attributes")
+	cmd.Flags().StringToStringP("attributes", "a", map[string]string{}, "an user defined mapping of entity attributes")
 	return cmd
 }
 
@@ -207,7 +208,7 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 		}
 	}
 
-	updates <- &topo.Update{}
+	updates <- nil
 	<-done
 
 	return nil
@@ -215,6 +216,7 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 
 func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type, updateType topo.Update_Type) error {
 	id := args[0]
+	attributes, _ := cmd.Flags().GetStringToString("attributes")
 
 	conn, err := cli.GetConnection(cmd)
 	if err != nil {
@@ -237,9 +239,10 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 		updates[0] = &topo.Update{
 			Type: updateType,
 			Object: &topo.Object{
-				Ref:  &topo.Reference{ID: topo.ID(id)},
-				Type: objectType,
-				Obj:  object,
+				Ref:        &topo.Reference{ID: topo.ID(id)},
+				Type:       objectType,
+				Obj:        object,
+				Attributes: attributes,
 			},
 		}
 	} else if objectType == topo.Object_RELATION {
@@ -360,6 +363,7 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 
 	return nil
 }
+
 func watchStream(stream topo.Topo_SubscribeClient, updates chan *topo.Update) {
 	for {
 		response, err := stream.Recv()
@@ -389,8 +393,8 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 	if !noHeaders {
 		if watch {
 			_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "Update Type")
-			_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%-*.*s\n", width, prec, "Object Type", width, prec, "Reference ID", width, prec, "Object Kind", width, prec, "Attributes")
 		}
+		_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%-*.*s\n", width, prec, "Object Type", width, prec, "Reference ID", width, prec, "Object Kind", width, prec, "Attributes")
 	}
 
 	for update := range updates {
@@ -404,7 +408,7 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 				}
 			}
 		}
-		if u.Object == nil {
+		if u == nil {
 			break
 		}
 		switch u.Object.Type {
@@ -412,14 +416,14 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 			e := u.Object.GetEntity()
 			printUpdateType()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, e.Kind.ID)
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%s\n", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, e.Kind.ID, attrsToString(u.Object.Attributes))
 			}
 		case topo.Object_RELATION:
 			r := u.Object.GetRelation()
 			printUpdateType()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATION {
 				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, r.Kind.ID)
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s\n", width, prec, r.SourceRef.ID, width, prec, r.TargetRef.ID)
+				_, _ = fmt.Fprintf(writer, "src=%s, tgt=%s, %s\n", r.SourceRef.ID, r.TargetRef.ID, attrsToString(u.Object.Attributes))
 			}
 		case topo.Object_KIND:
 			k := u.Object.GetKind()
@@ -435,4 +439,20 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 	if done != nil {
 		done <- true
 	}
+}
+
+func attrsToString(attrs map[string]string) string {
+	attributesBuf := bytes.Buffer{}
+	first := true
+	for key, attribute := range attrs {
+		if !first {
+			attributesBuf.WriteString(", ")
+		} else {
+			first = false
+		}
+		attributesBuf.WriteString(key)
+		attributesBuf.WriteString(":")
+		attributesBuf.WriteString(attribute)
+	}
+	return attributesBuf.String()
 }
