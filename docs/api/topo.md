@@ -6,6 +6,7 @@
 - [api/topo/topo.proto](#api/topo/topo.proto)
     - [Entity](#topo.Entity)
     - [Kind](#topo.Kind)
+    - [Kind.AttributesEntry](#topo.Kind.AttributesEntry)
     - [Object](#topo.Object)
     - [Object.AttributesEntry](#topo.Object.AttributesEntry)
     - [ReadRequest](#topo.ReadRequest)
@@ -58,7 +59,23 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | name | [string](#string) |  |  |
-| required_attrs | [string](#string) | repeated |  |
+| attributes | [Kind.AttributesEntry](#topo.Kind.AttributesEntry) | repeated | Map of attributes and their default values for this Kind |
+
+
+
+
+
+
+<a name="topo.Kind.AttributesEntry"></a>
+
+### Kind.AttributesEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [string](#string) |  |  |
 
 
 
@@ -78,7 +95,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | entity | [Entity](#topo.Entity) |  |  |
 | relation | [Relation](#topo.Relation) |  |  |
 | kind | [Kind](#topo.Kind) |  |  |
-| attributes | [Object.AttributesEntry](#topo.Object.AttributesEntry) | repeated | TODO - Instead of a plain string, consider using a &#34;typed&#34; value in attributes map. - See onos-config for example. |
+| attributes | [Object.AttributesEntry](#topo.Object.AttributesEntry) | repeated |  |
 
 
 

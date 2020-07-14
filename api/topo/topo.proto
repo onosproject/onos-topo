@@ -94,8 +94,6 @@ message Object {
     Kind kind = 5;
   }
 
-  // TODO - Instead of a plain string, consider using a "typed" value in attributes map.
-  //      - See onos-config for example.
   map<string, string> attributes = 6;
 }
 
@@ -115,5 +113,6 @@ message Relation {
 
 message Kind {
   string name = 1;
-  repeated string required_attrs = 2;
+  // Map of attributes and their default values for this Kind
+  map<string, string> attributes = 2;
 }

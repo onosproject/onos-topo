@@ -17,6 +17,7 @@ package topo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
@@ -69,28 +70,18 @@ func CreateTopoClient(cc *grpc.ClientConn) topoapi.TopoClient {
 	return TopoClientFactory(cc)
 }
 
-// ValidateEntity validates the given entity
-func ValidateEntity(entity *topoapi.Entity) error {
-	return nil
-}
-
 // Write :
 func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*topoapi.WriteResponse, error) {
 	for _, update := range request.Updates {
+		if update.Type != topo.Update_INSERT {
+			log.Infof("Invalid type %v", request)
+		}
 		object := update.Object
-		switch update.Type {
-		case topo.Update_INSERT:
-			switch object.Type {
-			case topo.Object_RELATION:
-				if err := s.ValidateRelation(object.GetRelation()); err != nil {
-					return nil, err
-				}
-			}
-			if err := s.objectStore.Store(object); err != nil {
-				return nil, err
-			}
-		default:
-			log.Infof("Invalid type %v", object)
+		if err := s.ValidateObject(object); err != nil {
+			return nil, err
+		}
+		if err := s.objectStore.Store(object); err != nil {
+			return nil, err
 		}
 	}
 	return &topoapi.WriteResponse{}, nil
@@ -189,15 +180,47 @@ func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *Event) err
 	return nil
 }
 
-// ValidateRelation ...
-func (s *Server) ValidateRelation(relation *topo.Relation) error {
-	_, err := s.Load(relation.SourceRef)
-	if err != nil {
-		return err
+// ValidateObject validates the given object
+func (s *Server) ValidateObject(object *topoapi.Object) error {
+	var kind *topo.Object
+	var err error
+	switch object.Type {
+	case topo.Object_ENTITY:
+		kind, err = s.Load(object.GetEntity().Kind)
+		if err != nil {
+			return err
+		}
+	case topo.Object_RELATION:
+		kind, err = s.Load(object.GetRelation().Kind)
+		if err != nil {
+			return err
+		}
+		_, err := s.Load(object.GetRelation().SourceRef)
+		if err != nil {
+			return err
+		}
+		_, err = s.Load(object.GetRelation().TargetRef)
+		if err != nil {
+			return err
+		}
+		return nil
+	case topo.Object_KIND:
+		return nil
+	default:
+		log.Infof("Invalid type %v", object)
 	}
-	_, err = s.Load(relation.TargetRef)
-	if err != nil {
-		return err
+
+	if kind != nil && kind.Attributes != nil {
+		for attrName := range object.Attributes {
+			if _, ok := kind.Attributes[attrName]; !ok {
+				return fmt.Errorf("Invalid attribute %s", attrName)
+			}
+		}
+		for attrName, val := range kind.Attributes {
+			if _, ok := object.Attributes[attrName]; !ok {
+				object.Attributes[attrName] = val
+			}
+		}
 	}
 	return nil
 }
