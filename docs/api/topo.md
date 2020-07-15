@@ -5,19 +5,18 @@
 
 - [api/topo/topo.proto](#api/topo/topo.proto)
     - [Entity](#topo.Entity)
+    - [GetRequest](#topo.GetRequest)
+    - [GetResponse](#topo.GetResponse)
     - [Kind](#topo.Kind)
     - [Kind.AttributesEntry](#topo.Kind.AttributesEntry)
     - [Object](#topo.Object)
     - [Object.AttributesEntry](#topo.Object.AttributesEntry)
-    - [ReadRequest](#topo.ReadRequest)
-    - [ReadResponse](#topo.ReadResponse)
-    - [Reference](#topo.Reference)
     - [Relation](#topo.Relation)
+    - [SetRequest](#topo.SetRequest)
+    - [SetResponse](#topo.SetResponse)
     - [SubscribeRequest](#topo.SubscribeRequest)
     - [SubscribeResponse](#topo.SubscribeResponse)
     - [Update](#topo.Update)
-    - [WriteRequest](#topo.WriteRequest)
-    - [WriteResponse](#topo.WriteResponse)
   
     - [Object.Type](#topo.Object.Type)
     - [Update.Type](#topo.Update.Type)
@@ -43,7 +42,37 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| kind | [Reference](#topo.Reference) |  | user-defined entity kind |
+| kind_id | [string](#string) |  | user-defined entity kind |
+
+
+
+
+
+
+<a name="topo.GetRequest"></a>
+
+### GetRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="topo.GetResponse"></a>
+
+### GetResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| object | [Object](#topo.Object) |  |  |
 
 
 
@@ -90,7 +119,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| ref | [Reference](#topo.Reference) |  |  |
+| id | [string](#string) |  |  |
 | type | [Object.Type](#topo.Object.Type) |  |  |
 | entity | [Entity](#topo.Entity) |  |  |
 | relation | [Relation](#topo.Relation) |  |  |
@@ -118,51 +147,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
-<a name="topo.ReadRequest"></a>
-
-### ReadRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| refs | [Reference](#topo.Reference) | repeated |  |
-
-
-
-
-
-
-<a name="topo.ReadResponse"></a>
-
-### ReadResponse
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| objects | [Object](#topo.Object) | repeated |  |
-
-
-
-
-
-
-<a name="topo.Reference"></a>
-
-### Reference
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  |  |
-
-
-
-
-
-
 <a name="topo.Relation"></a>
 
 ### Relation
@@ -171,9 +155,34 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| kind | [Reference](#topo.Reference) |  | user defined relation kind |
-| source_ref | [Reference](#topo.Reference) |  |  |
-| target_ref | [Reference](#topo.Reference) |  |  |
+| kind_id | [string](#string) |  | user defined relation kind |
+| src_entity_id | [string](#string) |  |  |
+| tgt_entity_id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="topo.SetRequest"></a>
+
+### SetRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| objects | [Object](#topo.Object) | repeated | The write batch, comprising a list of Update operations |
+
+
+
+
+
+
+<a name="topo.SetResponse"></a>
+
+### SetResponse
+
 
 
 
@@ -188,7 +197,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| ref | [Reference](#topo.Reference) |  |  |
+| id | [string](#string) |  |  |
 | noreplay | [bool](#bool) |  |  |
 | snapshot | [bool](#bool) |  |  |
 
@@ -205,7 +214,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| updates | [Update](#topo.Update) | repeated |  |
+| update | [Update](#topo.Update) |  |  |
 
 
 
@@ -222,31 +231,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ----- | ---- | ----- | ----------- |
 | type | [Update.Type](#topo.Update.Type) |  |  |
 | object | [Object](#topo.Object) |  |  |
-
-
-
-
-
-
-<a name="topo.WriteRequest"></a>
-
-### WriteRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| updates | [Update](#topo.Update) | repeated | The write batch, comprising a list of Update operations |
-
-
-
-
-
-
-<a name="topo.WriteResponse"></a>
-
-### WriteResponse
-
 
 
 
@@ -294,8 +278,8 @@ EntityService provides an API for managing entities.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Write | [WriteRequest](#topo.WriteRequest) | [WriteResponse](#topo.WriteResponse) | Update one or more entities to the topology |
-| Read | [ReadRequest](#topo.ReadRequest) | [ReadResponse](#topo.ReadResponse) | Read one or more entities from topology |
+| Set | [SetRequest](#topo.SetRequest) | [SetResponse](#topo.SetResponse) | Insert or replace an object from the topology |
+| Get | [GetRequest](#topo.GetRequest) | [GetResponse](#topo.GetResponse) | Get an object from topology |
 | Subscribe | [SubscribeRequest](#topo.SubscribeRequest) | [SubscribeResponse](#topo.SubscribeResponse) stream | Subscribe returns a stream of topo change notifications |
 
  

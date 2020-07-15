@@ -70,13 +70,9 @@ func CreateTopoClient(cc *grpc.ClientConn) topoapi.TopoClient {
 	return TopoClientFactory(cc)
 }
 
-// Write :
-func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*topoapi.WriteResponse, error) {
-	for _, update := range request.Updates {
-		if update.Type != topo.Update_INSERT {
-			log.Infof("Invalid type %v", request)
-		}
-		object := update.Object
+// Set :
+func (s *Server) Set(ctx context.Context, request *topoapi.SetRequest) (*topoapi.SetResponse, error) {
+	for _, object := range request.Objects {
 		if err := s.ValidateObject(object); err != nil {
 			return nil, err
 		}
@@ -84,27 +80,21 @@ func (s *Server) Write(ctx context.Context, request *topoapi.WriteRequest) (*top
 			return nil, err
 		}
 	}
-	return &topoapi.WriteResponse{}, nil
+	return &topoapi.SetResponse{}, nil
 }
 
-// Read :
-func (s *Server) Read(ctx context.Context, request *topoapi.ReadRequest) (*topoapi.ReadResponse, error) {
-	var objects []*topo.Object
-
-	for _, ref := range request.Refs {
-		id := ref.ID
-		object, err := s.objectStore.Load(id)
-		if err != nil {
-			return nil, err
-		} else if object == nil {
-			log.Infof("Not found object %s", string(id))
-			return nil, status.Error(codes.NotFound, string(id))
-		}
-		objects = append(objects, object)
+// Get :
+func (s *Server) Get(ctx context.Context, request *topoapi.GetRequest) (*topoapi.GetResponse, error) {
+	id := request.ID
+	object, err := s.objectStore.Load(id)
+	if err != nil {
+		return nil, err
+	} else if object == nil {
+		log.Infof("Not found object %s", string(id))
+		return nil, status.Error(codes.NotFound, string(id))
 	}
-
-	return &topoapi.ReadResponse{
-		Objects: objects,
+	return &topoapi.GetResponse{
+		Object: object,
 	}, nil
 }
 
@@ -165,11 +155,9 @@ func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *Event) err
 		}
 
 		subscribeResponse := &topo.SubscribeResponse{
-			Updates: []*topo.Update{
-				{
-					Type:   t,
-					Object: event.Object,
-				},
+			Update: &topo.Update{
+				Type:   t,
+				Object: event.Object,
 			},
 		}
 
@@ -187,20 +175,20 @@ func (s *Server) ValidateObject(object *topoapi.Object) error {
 	switch object.Type {
 	case topo.Object_KIND:
 	case topo.Object_ENTITY:
-		kind, err = s.Load(object.GetEntity().Kind)
+		kind, err = s.Load(object.GetEntity().KindID)
 		if err != nil {
 			return err
 		}
 	case topo.Object_RELATION:
-		kind, err = s.Load(object.GetRelation().Kind)
+		kind, err = s.Load(object.GetRelation().KindID)
 		if err != nil {
 			return err
 		}
-		_, err := s.Load(object.GetRelation().SourceRef)
+		_, err := s.Load(object.GetRelation().SrcEntityID)
 		if err != nil {
 			return err
 		}
-		_, err = s.Load(object.GetRelation().TargetRef)
+		_, err = s.Load(object.GetRelation().TgtEntityID)
 		if err != nil {
 			return err
 		}
@@ -226,8 +214,7 @@ func (s *Server) ValidateObject(object *topoapi.Object) error {
 }
 
 // Load ...
-func (s *Server) Load(ref *topo.Reference) (*topo.Object, error) {
-	id := ref.ID
+func (s *Server) Load(id topo.ID) (*topo.Object, error) {
 	object, err := s.objectStore.Load(id)
 	if err != nil {
 		return nil, err
