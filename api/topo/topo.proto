@@ -23,12 +23,12 @@ import "gogoproto/gogo.proto";
 
 // EntityService provides an API for managing entities.
 service Topo {
-  // Update one or more entities to the topology
-  rpc Write (WriteRequest) returns (WriteResponse) {
+  // Insert or replace an object from the topology
+  rpc Set (SetRequest) returns (SetResponse) {
   }
 
-  // Read one or more entities from topology
-  rpc Read (ReadRequest) returns (ReadResponse) {
+  // Get an object from topology
+  rpc Get (GetRequest) returns (GetResponse) {
   }
 
   // Subscribe returns a stream of topo change notifications
@@ -36,30 +36,30 @@ service Topo {
   }
 }
 
-message WriteRequest {
+message SetRequest {
   // The write batch, comprising a list of Update operations
-  repeated Update updates = 1;
-}
-
-message WriteResponse {
-}
-
-message ReadRequest {
-  repeated Reference refs = 1;
-}
-
-message ReadResponse {
   repeated Object objects = 1;
 }
 
+message SetResponse {
+}
+
+message GetRequest {
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+}
+
+message GetResponse {
+  Object object = 1;
+}
+
 message SubscribeRequest {
-  Reference ref = 1;
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
   bool noreplay = 2;
   bool snapshot = 3;
 }
 
 message SubscribeResponse {
-  repeated Update updates = 1;
+  Update update = 1;
 }
 
 message Update {
@@ -73,12 +73,8 @@ message Update {
   Object object = 3;
 }
 
-message Reference {
-  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
-}
-
 message Object {
-  Reference ref = 1;
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
 
   enum Type {
     UNSPECIFIED = 0;
@@ -100,15 +96,15 @@ message Object {
 // Entity represents any "thing" that is represented in the topology
 message Entity {
   // user-defined entity kind
-  Reference kind = 1;
+  string kind_id = 1 [(gogoproto.customname) = "KindID", (gogoproto.casttype) = "ID"];
 }
 
 message Relation {
   // user defined relation kind
-  Reference kind = 1;
+  string kind_id = 1 [(gogoproto.customname) = "KindID", (gogoproto.casttype) = "ID"];
 
-  Reference source_ref = 2;
-  Reference target_ref = 3;
+  string src_entity_id = 2 [(gogoproto.customname) = "SrcEntityID", (gogoproto.casttype) = "ID"];
+  string tgt_entity_id = 3 [(gogoproto.customname) = "TgtEntityID", (gogoproto.casttype) = "ID"];
 }
 
 message Kind {

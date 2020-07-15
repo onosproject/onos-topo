@@ -158,15 +158,15 @@ func runGetKindCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runAddEntityCommand(cmd *cobra.Command, args []string) error {
-	return writeObject(cmd, args, topo.Object_ENTITY, topo.Update_INSERT)
+	return writeObject(cmd, args, topo.Object_ENTITY)
 }
 
 func runAddRelationCommand(cmd *cobra.Command, args []string) error {
-	return writeObject(cmd, args, topo.Object_RELATION, topo.Update_INSERT)
+	return writeObject(cmd, args, topo.Object_RELATION)
 }
 
 func runAddKindCommand(cmd *cobra.Command, args []string) error {
-	return writeObject(cmd, args, topo.Object_KIND, topo.Update_INSERT)
+	return writeObject(cmd, args, topo.Object_KIND)
 }
 
 func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
@@ -186,7 +186,7 @@ func runWatchAllCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
-	var objects []*topo.Object
+	var object *topo.Object
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
 	updates := make(chan *topo.Update)
@@ -196,16 +196,14 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 
 	go printIt(updates, objectType, done, false, noHeaders)
 
-	objects, err := readObjects(cmd, args, objectType)
+	object, err := readObjects(cmd, args, objectType)
 	if err != nil {
 		return err
 	}
 
-	for _, obj := range objects {
-		updates <- &topo.Update{
-			Type:   topo.Update_UNSPECIFIED,
-			Object: obj,
-		}
+	updates <- &topo.Update{
+		Type:   topo.Update_UNSPECIFIED,
+		Object: object,
 	}
 
 	updates <- nil
@@ -214,7 +212,8 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 	return nil
 }
 
-func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type, updateType topo.Update_Type) error {
+func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
+	var object *topo.Object
 	id := args[0]
 	attributes, _ := cmd.Flags().GetStringToString("attributes")
 
@@ -226,73 +225,62 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type,
 
 	client := topo.CreateTopoClient(conn)
 
-	updates := make([]*topo.Update, 1)
-
 	if objectType == topo.Object_ENTITY {
 		kindID, _ := cmd.Flags().GetString("kind")
-		object := &topo.Object_Entity{
+		entity := &topo.Object_Entity{
 			Entity: &topo.Entity{
-				Kind: &topo.Reference{ID: topo.ID(kindID)},
+				KindID: topo.ID(kindID),
 			},
 		}
 
-		updates[0] = &topo.Update{
-			Type: updateType,
-			Object: &topo.Object{
-				Ref:        &topo.Reference{ID: topo.ID(id)},
-				Type:       objectType,
-				Obj:        object,
-				Attributes: attributes,
-			},
+		object = &topo.Object{
+			ID:         topo.ID(id),
+			Type:       objectType,
+			Obj:        entity,
+			Attributes: attributes,
 		}
 	} else if objectType == topo.Object_RELATION {
 		kindID, _ := cmd.Flags().GetString("kind")
-		object := &topo.Object_Relation{
+		relation := &topo.Object_Relation{
 			Relation: &topo.Relation{
-				Kind:      &topo.Reference{ID: topo.ID(kindID)},
-				SourceRef: &topo.Reference{ID: topo.ID(args[1])},
-				TargetRef: &topo.Reference{ID: topo.ID(args[2])},
+				KindID:      topo.ID(kindID),
+				SrcEntityID: topo.ID(args[1]),
+				TgtEntityID: topo.ID(args[2]),
 			},
 		}
 
-		updates[0] = &topo.Update{
-			Type: updateType,
-			Object: &topo.Object{
-				Ref:  &topo.Reference{ID: topo.ID(id)},
-				Type: objectType,
-				Obj:  object,
-			},
+		object = &topo.Object{
+			ID:   topo.ID(id),
+			Type: objectType,
+			Obj:  relation,
 		}
 	} else if objectType == topo.Object_KIND {
-		object := &topo.Object_Kind{
+		kind := &topo.Object_Kind{
 			Kind: &topo.Kind{
 				Name: args[1],
 			},
 		}
 
-		updates[0] = &topo.Update{
-			Type: updateType,
-			Object: &topo.Object{
-				Ref:  &topo.Reference{ID: topo.ID(id)},
-				Type: objectType,
-				Obj:  object,
-			},
+		object = &topo.Object{
+			ID:   topo.ID(id),
+			Type: objectType,
+			Obj:  kind,
 		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err = client.Write(ctx, &topo.WriteRequest{Updates: updates})
+	_, err = client.Set(ctx, &topo.SetRequest{Objects: []*topo.Object{object}})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) ([]*topo.Object, error) {
+func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) (*topo.Object, error) {
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
-	var objects []*topo.Object
+	var object *topo.Object
 
 	conn, err := cli.GetConnection(cmd)
 	if err != nil {
@@ -306,7 +294,7 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 	defer cancel()
 	if len(args) == 0 {
 		stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
-			Ref:      &topo.Reference{},
+			ID:       topo.NullID,
 			Snapshot: true,
 		})
 		if err != nil {
@@ -317,16 +305,14 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 		printIt(updates, objectType, nil, false, noHeaders)
 	} else {
 		id := args[0]
-		reference := &topo.Reference{ID: topo.ID(id)}
-		refs := []*topo.Reference{reference}
-		response, err := client.Read(ctx, &topo.ReadRequest{Refs: refs})
+		response, err := client.Get(ctx, &topo.GetRequest{ID: topo.ID(id)})
 		if err != nil {
 			cli.Output("get error")
 			return nil, err
 		}
-		objects = response.Objects
+		object = response.Object
 	}
-	return objects, nil
+	return object, nil
 }
 
 func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
@@ -348,7 +334,7 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 	client := topo.CreateTopoClient(conn)
 
 	stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
-		Ref:      &topo.Reference{ID: id},
+		ID:       id,
 		Noreplay: noreplay,
 	})
 	if err != nil {
@@ -378,9 +364,7 @@ func watchStream(stream topo.Topo_SubscribeClient, updates chan *topo.Update) {
 			return
 		}
 
-		for _, update := range response.Updates {
-			updates <- update
-		}
+		updates <- response.Update
 	}
 }
 
@@ -416,20 +400,20 @@ func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan b
 			e := u.Object.GetEntity()
 			printUpdateType()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%s\n", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, e.Kind.ID, attrsToString(u.Object.Attributes))
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%s\n", width, prec, u.Object.Type, width, prec, u.Object.ID, width, prec, e.KindID, attrsToString(u.Object.Attributes))
 			}
 		case topo.Object_RELATION:
 			r := u.Object.GetRelation()
 			printUpdateType()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATION {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, r.Kind.ID)
-				_, _ = fmt.Fprintf(writer, "src=%s, tgt=%s, %s\n", r.SourceRef.ID, r.TargetRef.ID, attrsToString(u.Object.Attributes))
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, u.Object.Type, width, prec, u.Object.ID, width, prec, r.KindID)
+				_, _ = fmt.Fprintf(writer, "src=%s, tgt=%s, %s\n", r.SrcEntityID, r.TgtEntityID, attrsToString(u.Object.Attributes))
 			}
 		case topo.Object_KIND:
 			k := u.Object.GetKind()
 			printUpdateType()
 			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_KIND {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, u.Object.Type, width, prec, u.Object.Ref.ID, width, prec, k.GetName())
+				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, u.Object.Type, width, prec, u.Object.ID, width, prec, k.GetName())
 			}
 		default:
 			_, _ = fmt.Fprintf(writer, "\n")

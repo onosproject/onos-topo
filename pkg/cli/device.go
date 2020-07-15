@@ -589,8 +589,8 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	writeRequest := topo.WriteRequest{
-		Updates: make([]*topo.Update, 0),
+	request := topo.SetRequest{
+		Objects: make([]*topo.Object, 0),
 	}
 
 	for _, kind := range topoConfig.TopoKinds {
@@ -604,10 +604,7 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		kind := kind // pin
-		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
-			Type:   topo.Update_INSERT,
-			Object: bulk.TopoKindToTopoObject(&kind),
-		})
+		request.Objects = append(request.Objects, bulk.TopoKindToTopoObject(&kind))
 	}
 
 	for _, entity := range topoConfig.TopoEntities {
@@ -621,10 +618,7 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		entity := entity // pin
-		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
-			Type:   topo.Update_INSERT,
-			Object: bulk.TopoEntityToTopoObject(&entity),
-		})
+		request.Objects = append(request.Objects, bulk.TopoEntityToTopoObject(&entity))
 	}
 
 	for _, relation := range topoConfig.TopoRelations {
@@ -638,10 +632,7 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		relation := relation // pin
-		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
-			Type:   topo.Update_INSERT,
-			Object: bulk.TopoRelationToTopoObject(&relation),
-		})
+		request.Objects = append(request.Objects, bulk.TopoRelationToTopoObject(&relation))
 	}
 
 	for _, relation := range topoConfig.TopoRelations {
@@ -655,12 +646,9 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		relation := relation // pin
-		writeRequest.Updates = append(writeRequest.Updates, &topo.Update{
-			Type:   topo.Update_INSERT,
-			Object: bulk.TopoRelationToTopoObject(&relation),
-		})
+		request.Objects = append(request.Objects, bulk.TopoRelationToTopoObject(&relation))
 	}
-	_, err = client.Write(ctx, &writeRequest)
+	_, err = client.Set(ctx, &request)
 	if err != nil {
 		return err
 	}

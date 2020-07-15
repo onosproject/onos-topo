@@ -32,7 +32,7 @@ type TopoConfig struct {
 
 // TopoKind - required to get around the "oneof" Obj
 type TopoKind struct {
-	Ref        *topo.Reference
+	ID         topo.ID
 	Type       topo.Object_Type
 	Obj        *topo.Object_Kind
 	Attributes *map[string]string
@@ -41,7 +41,7 @@ type TopoKind struct {
 // TopoKindToTopoObject - convert to Object
 func TopoKindToTopoObject(topoKind *TopoKind) *topo.Object {
 	return &topo.Object{
-		Ref:        topoKind.Ref,
+		ID:         topoKind.ID,
 		Type:       topoKind.Type,
 		Obj:        topoKind.Obj,
 		Attributes: *topoKind.Attributes,
@@ -50,7 +50,7 @@ func TopoKindToTopoObject(topoKind *TopoKind) *topo.Object {
 
 // TopoEntity - required to get around the "oneof" Obj
 type TopoEntity struct {
-	Ref        *topo.Reference
+	ID         topo.ID
 	Type       topo.Object_Type
 	Obj        *topo.Object_Entity
 	Attributes *map[string]string
@@ -59,7 +59,7 @@ type TopoEntity struct {
 // TopoEntityToTopoObject - convert to Object
 func TopoEntityToTopoObject(topoEntity *TopoEntity) *topo.Object {
 	return &topo.Object{
-		Ref:        topoEntity.Ref,
+		ID:         topoEntity.ID,
 		Type:       topoEntity.Type,
 		Obj:        topoEntity.Obj,
 		Attributes: *topoEntity.Attributes,
@@ -68,7 +68,7 @@ func TopoEntityToTopoObject(topoEntity *TopoEntity) *topo.Object {
 
 // TopoRelation - required to get around the "oneof" Obj
 type TopoRelation struct {
-	Ref        *topo.Reference
+	ID         topo.ID
 	Type       topo.Object_Type
 	Obj        *topo.Object_Relation
 	Attributes *map[string]string
@@ -77,7 +77,7 @@ type TopoRelation struct {
 // TopoRelationToTopoObject - convert to Object
 func TopoRelationToTopoObject(topoRelation *TopoRelation) *topo.Object {
 	return &topo.Object{
-		Ref:        topoRelation.Ref,
+		ID:         topoRelation.ID,
 		Type:       topoRelation.Type,
 		Obj:        topoRelation.Obj,
 		Attributes: *topoRelation.Attributes,
@@ -113,7 +113,7 @@ func TopoChecker(config *TopoConfig) error {
 		topoKind := kind // pin
 		if topoKind.Type != topo.Object_KIND {
 			return fmt.Errorf("unexpected type %v for TopoKind", topoKind.Type)
-		} else if topoKind.Ref == nil || topoKind.Ref.GetID() == "" {
+		} else if topoKind.ID == topo.NullID {
 			return fmt.Errorf("empty ref for TopoKind")
 		} else if topoKind.Obj.Kind.GetName() == "" {
 			return fmt.Errorf("empty name for TopoKind")
@@ -128,7 +128,7 @@ func TopoChecker(config *TopoConfig) error {
 		topoEntity := entity // pin
 		if topoEntity.Type != topo.Object_ENTITY {
 			return fmt.Errorf("unexpected type %v for TopoEntity", topoEntity.Type)
-		} else if topoEntity.Ref == nil || topoEntity.Ref.GetID() == "" {
+		} else if topoEntity.ID == topo.NullID {
 			return fmt.Errorf("empty ref for TopoEntity")
 		}
 	}
@@ -137,14 +137,12 @@ func TopoChecker(config *TopoConfig) error {
 		topoRelation := relation // pin
 		if topoRelation.Type != topo.Object_RELATION {
 			return fmt.Errorf("unexpected type %v for TopoRelation", topoRelation.Type)
-		} else if topoRelation.Ref == nil || topoRelation.Ref.GetID() == "" {
-			return fmt.Errorf("empty ref for TopoRelation")
-		} else if topoRelation.Obj.Relation.SourceRef == nil ||
-			topoRelation.Obj.Relation.SourceRef.ID == "" {
-			return fmt.Errorf("empty source ref for TopoRelation")
-		} else if topoRelation.Obj.Relation.TargetRef == nil ||
-			topoRelation.Obj.Relation.TargetRef.ID == "" {
-			return fmt.Errorf("empty target ref for TopoRelation")
+		} else if topoRelation.ID == topo.NullID {
+			return fmt.Errorf("null id for TopoRelation")
+		} else if topoRelation.Obj.Relation.SrcEntityID == "" {
+			return fmt.Errorf("null source entity id for TopoRelation")
+		} else if topoRelation.Obj.Relation.TgtEntityID == "" {
+			return fmt.Errorf("null target entity id for TopoRelation")
 		}
 	}
 
