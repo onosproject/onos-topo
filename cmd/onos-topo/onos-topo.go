@@ -30,6 +30,8 @@ package main
 
 import (
 	"flag"
+	"github.com/onosproject/onos-lib-go/pkg/auth"
+	"os"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
@@ -65,8 +67,15 @@ func main() {
 
 // Creates gRPC server and registers various services; then serves.
 func startServer(caPath string, keyPath string, certPath string) error {
+	oidcServer := os.Getenv(auth.OIDCServerURL)
+	securityConfig := northbound.SecurityConfig{}
+	if oidcServer != "" {
+		log.Infof("Authentication checking enabled. Using oidc server %s", oidcServer)
+		securityConfig.AuthenticationEnabled = true
+	}
+
 	s := northbound.NewServer(northbound.NewServerCfg(caPath, keyPath, certPath,
-		5150, true, northbound.SecurityConfig{}))
+		5150, true, securityConfig))
 	s.AddService(admin.Service{})
 	s.AddService(diags.Service{})
 	s.AddService(logging.Service{})
