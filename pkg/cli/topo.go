@@ -225,8 +225,10 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 
 	if len(args) == 0 {
 		for object := range listObjects(cmd, args, objectType) {
-			if objectType == topo.Object_UNSPECIFIED || objectType == object.Type {
-				printRow(object, false, noHeaders)
+			if object != nil {
+				if objectType == topo.Object_UNSPECIFIED || objectType == object.Type {
+					printRow(object, false, noHeaders)
+				}
 			}
 		}
 	} else {
@@ -236,7 +238,9 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 			return err
 		}
 		if object != nil {
-			printRow(object, false, noHeaders)
+			if objectType == topo.Object_UNSPECIFIED || objectType == object.Type {
+				printRow(object, false, noHeaders)
+			}
 		}
 	}
 

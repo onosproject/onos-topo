@@ -129,34 +129,8 @@ func (s *Server) List(request *topoapi.ListRequest, server topoapi.Topo_ListServ
 
 // Subscribe ...
 func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
-	ch := make(chan *Event)
-
-	if request.Snapshot {
-		go s._List(request, server, ch)
-	} else {
-		_ = s.Watch(request, server, ch)
-	}
-
-	return s.Stream(server, ch)
-}
-
-// _List ...
-func (s *Server) _List(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) {
-	c := make(chan *topo.Object)
-	if err := s.objectStore.List(c); err == nil {
-		for object := range c {
-			ch <- &Event{
-				Type:   EventNone,
-				Object: object,
-			}
-		}
-	}
-	close(ch)
-}
-
-// Watch ...
-func (s *Server) Watch(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) error {
 	var watchOpts []WatchOption
+	ch := make(chan *Event)
 
 	if !request.Noreplay {
 		watchOpts = append(watchOpts, WithReplay())
@@ -165,7 +139,7 @@ func (s *Server) Watch(request *topoapi.SubscribeRequest, server topoapi.Topo_Su
 		return err
 	}
 
-	return nil
+	return s.Stream(server, ch)
 }
 
 // Stream ...

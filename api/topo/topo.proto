@@ -77,7 +77,6 @@ message ListResponse {
 message SubscribeRequest {
   string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
   bool noreplay = 2;
-  bool snapshot = 3;
 }
 
 message SubscribeResponse {

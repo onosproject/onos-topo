@@ -253,7 +253,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ----- | ---- | ----- | ----------- |
 | id | [string](#string) |  |  |
 | noreplay | [bool](#bool) |  |  |
-| snapshot | [bool](#bool) |  |  |
 
 
 
