@@ -98,12 +98,41 @@ func (s *Server) Get(ctx context.Context, request *topoapi.GetRequest) (*topoapi
 	}, nil
 }
 
+// Delete ...
+func (s *Server) Delete(ctx context.Context, request *topoapi.DeleteRequest) (*topoapi.DeleteResponse, error) {
+	id := request.ID
+	err := s.objectStore.Delete(id)
+	if err != nil {
+		return nil, err
+	}
+	return &topoapi.DeleteResponse{}, nil
+}
+
+// List ..
+func (s *Server) List(request *topoapi.ListRequest, server topoapi.Topo_ListServer) error {
+	ch := make(chan *topoapi.Object)
+	if err := s.objectStore.List(ch); err != nil {
+		return err
+	}
+
+	for object := range ch {
+		err := server.Send(&topoapi.ListResponse{
+			Object: object,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Subscribe ...
 func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
 	ch := make(chan *Event)
 
 	if request.Snapshot {
-		go s.List(request, server, ch)
+		go s._List(request, server, ch)
 	} else {
 		_ = s.Watch(request, server, ch)
 	}
@@ -111,8 +140,8 @@ func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Top
 	return s.Stream(server, ch)
 }
 
-// List ...
-func (s *Server) List(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) {
+// _List ...
+func (s *Server) _List(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer, ch chan *Event) {
 	c := make(chan *topo.Object)
 	if err := s.objectStore.List(c); err == nil {
 		for object := range c {

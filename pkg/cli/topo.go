@@ -98,6 +98,15 @@ func getAddKindCommand() *cobra.Command {
 	return cmd
 }
 
+func getRemoveObjectCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "object <id>",
+		Args:  cobra.ExactArgs(1),
+		Short: "Remove an object",
+		RunE:  runRemoveObjectCommand,
+	}
+}
+
 func getWatchEntityCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "entity [id] [args]",
@@ -169,6 +178,28 @@ func runAddKindCommand(cmd *cobra.Command, args []string) error {
 	return writeObject(cmd, args, topo.Object_KIND)
 }
 
+func runRemoveObjectCommand(cmd *cobra.Command, args []string) error {
+	id := args[0]
+
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := topo.CreateTopoClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	_, err = client.Delete(ctx, &topo.DeleteRequest{ID: topo.ID(id)})
+	if err != nil {
+		return err
+	}
+	cli.Output("Removed object %s", id)
+	return nil
+}
+
 func runWatchEntityCommand(cmd *cobra.Command, args []string) error {
 	return watch(cmd, args, topo.Object_ENTITY)
 }
@@ -186,28 +217,28 @@ func runWatchAllCommand(cmd *cobra.Command, args []string) error {
 }
 
 func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
-	var object *topo.Object
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 
-	updates := make(chan *topo.Update)
-	done := make(chan bool)
-	defer close(updates)
-	defer close(done)
-
-	go printIt(updates, objectType, done, false, noHeaders)
-
-	object, err := readObjects(cmd, args, objectType)
-	if err != nil {
-		return err
+	if !noHeaders {
+		printHeader(false)
 	}
 
-	updates <- &topo.Update{
-		Type:   topo.Update_UNSPECIFIED,
-		Object: object,
+	if len(args) == 0 {
+		for object := range listObjects(cmd, args, objectType) {
+			if objectType == topo.Object_UNSPECIFIED || objectType == object.Type {
+				printRow(object, false, noHeaders)
+			}
+		}
+	} else {
+		id := args[0]
+		object, err := getObject(cmd, topo.ID(id))
+		if err != nil {
+			return err
+		}
+		if object != nil {
+			printRow(object, false, noHeaders)
+		}
 	}
-
-	updates <- nil
-	<-done
 
 	return nil
 }
@@ -278,10 +309,40 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 	return nil
 }
 
-func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) (*topo.Object, error) {
-	noHeaders, _ := cmd.Flags().GetBool("no-headers")
-	var object *topo.Object
+func listObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) <-chan *topo.Object {
+	out := make(chan *topo.Object)
 
+	go func() {
+		defer close(out)
+		conn, err := cli.GetConnection(cmd)
+		if err != nil {
+			return
+		}
+		defer conn.Close()
+
+		client := topo.CreateTopoClient(conn)
+
+		stream, err := client.List(context.Background(), &topo.ListRequest{})
+		if err != nil {
+			return
+		}
+		for {
+			response, err := stream.Recv()
+			if err == io.EOF {
+				// read done.
+				break
+			} else if err != nil {
+				cli.Output("recv error : %v", err)
+				return
+			}
+			out <- response.Object
+		}
+	}()
+
+	return out
+}
+
+func getObject(cmd *cobra.Command, id topo.ID) (*topo.Object, error) {
 	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return nil, err
@@ -292,32 +353,18 @@ func readObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	if len(args) == 0 {
-		stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
-			ID:       topo.NullID,
-			Snapshot: true,
-		})
-		if err != nil {
-			return nil, err
-		}
-		updates := make(chan *topo.Update)
-		go watchStream(stream, updates)
-		printIt(updates, objectType, nil, false, noHeaders)
-	} else {
-		id := args[0]
-		response, err := client.Get(ctx, &topo.GetRequest{ID: topo.ID(id)})
-		if err != nil {
-			cli.Output("get error")
-			return nil, err
-		}
-		object = response.Object
+	response, err := client.Get(ctx, &topo.GetRequest{ID: id})
+	if err != nil {
+		cli.Output("get error")
+		return nil, err
 	}
-	return object, nil
+	return response.Object, nil
 }
 
 func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error {
 	noHeaders, _ := cmd.Flags().GetBool("no-headers")
 	noreplay, _ := cmd.Flags().GetBool("noreplay")
+
 	var id topo.ID
 	if len(args) > 0 {
 		id = topo.ID(args[0])
@@ -341,88 +388,90 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 		return err
 	}
 
-	updates := make(chan *topo.Update)
-
-	go watchStream(stream, updates)
-
-	printIt(updates, objectType, nil, true, noHeaders)
+	if !noHeaders {
+		printHeader(true)
+	}
+	for update := range watchStream(stream) {
+		if objectType == topo.Object_UNSPECIFIED || objectType == update.Object.Type {
+			printUpdateType(update.Type)
+			printRow(update.Object, true, noHeaders)
+		}
+	}
 
 	return nil
 }
 
-func watchStream(stream topo.Topo_SubscribeClient, updates chan *topo.Update) {
-	for {
-		response, err := stream.Recv()
-		if err == io.EOF {
-			// read done.
-			close(updates)
-			return
-		}
-		if err != nil {
-			cli.Output("Error receiving notification : %v", err)
-			close(updates)
-			return
-		}
+func watchStream(stream topo.Topo_SubscribeClient) <-chan *topo.Update {
+	out := make(chan *topo.Update)
 
-		updates <- response.Update
-	}
+	go func() {
+		defer close(out)
+		for {
+			response, err := stream.Recv()
+			if err == io.EOF {
+				// read done.
+				return
+			}
+			if err != nil {
+				cli.Output("Error receiving notification : %v", err)
+				return
+			}
+
+			out <- response.Update
+		}
+	}()
+	return out
 }
 
-func printIt(updates chan *topo.Update, objectType topo.Object_Type, done chan bool, watch bool, noHeaders bool) {
+func printHeader(printUpdateType bool) {
 	var width = 16
 	var prec = width - 1
 	writer := new(tabwriter.Writer)
 	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
 
-	if !noHeaders {
-		if watch {
-			_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "Update Type")
-		}
-		_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%-*.*s\n", width, prec, "Object Type", width, prec, "Reference ID", width, prec, "Object Kind", width, prec, "Attributes")
+	if printUpdateType {
+		_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "Update Type")
 	}
+	_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%-*.*s\n", width, prec, "Object Type", width, prec, "Object ID", width, prec, "Kind ID", width, prec, "Attributes")
+}
 
-	for update := range updates {
-		u := update
-		printUpdateType := func() {
-			if watch {
-				if u.Type == topo.Update_UNSPECIFIED {
-					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
-				} else {
-					_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, u.Type)
-				}
-			}
-		}
-		if u == nil {
-			break
-		}
-		switch u.Object.Type {
-		case topo.Object_ENTITY:
-			e := u.Object.GetEntity()
-			printUpdateType()
-			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_ENTITY {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%s\n", width, prec, u.Object.Type, width, prec, u.Object.ID, width, prec, e.KindID, attrsToString(u.Object.Attributes))
-			}
-		case topo.Object_RELATION:
-			r := u.Object.GetRelation()
-			printUpdateType()
-			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_RELATION {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, u.Object.Type, width, prec, u.Object.ID, width, prec, r.KindID)
-				_, _ = fmt.Fprintf(writer, "src=%s, tgt=%s, %s\n", r.SrcEntityID, r.TgtEntityID, attrsToString(u.Object.Attributes))
-			}
-		case topo.Object_KIND:
-			k := u.Object.GetKind()
-			printUpdateType()
-			if objectType == topo.Object_UNSPECIFIED || objectType == topo.Object_KIND {
-				_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, u.Object.Type, width, prec, u.Object.ID, width, prec, k.GetName())
-			}
-		default:
-			_, _ = fmt.Fprintf(writer, "\n")
-		}
-		_ = writer.Flush()
+func printUpdateType(updateType topo.Update_Type) {
+	var width = 16
+	var prec = width - 1
+	writer := new(tabwriter.Writer)
+	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
+	if updateType == topo.Update_UNSPECIFIED {
+		_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
+	} else {
+		_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, updateType)
 	}
-	if done != nil {
-		done <- true
+	_ = writer.Flush()
+}
+
+func printRow(object *topo.Object, watch bool, noHeaders bool) {
+	var width = 16
+	var prec = width - 1
+	writer := new(tabwriter.Writer)
+	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
+
+	switch object.Type {
+	case topo.Object_ENTITY:
+		e := object.GetEntity()
+		// printUpdateType()
+		_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%s\n", width, prec, object.Type, width, prec, object.ID, width, prec, e.KindID, attrsToString(object.Attributes))
+	case topo.Object_RELATION:
+		r := object.GetRelation()
+		// printUpdateType()
+		_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s", width, prec, object.Type, width, prec, object.ID, width, prec, r.KindID)
+		_, _ = fmt.Fprintf(writer, "src=%s, tgt=%s, %s\n", r.SrcEntityID, r.TgtEntityID, attrsToString(object.Attributes))
+	case topo.Object_KIND:
+		k := object.GetKind()
+		// printUpdateType()
+		_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s\n", width, prec, object.Type, width, prec, object.ID, width, prec, k.GetName())
+	default:
+		_, _ = fmt.Fprintf(writer, "\n")
 	}
+	_ = writer.Flush()
 }
 
 func attrsToString(attrs map[string]string) string {

@@ -84,7 +84,7 @@ type Store interface {
 	Store(*topoapi.Object) error
 
 	// Delete deletes a object from the store
-	Delete(*topoapi.Object) error
+	Delete(topoapi.ID) error
 
 	// List streams objects to the given channel
 	List(chan<- *topoapi.Object) error
@@ -149,11 +149,11 @@ func (s *atomixStore) Store(object *topoapi.Object) error {
 	return err
 }
 
-func (s *atomixStore) Delete(object *topoapi.Object) error {
+func (s *atomixStore) Delete(id topoapi.ID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err := s.objects.Remove(ctx, string(object.ID))
+	_, err := s.objects.Remove(ctx, string(id))
 	return err
 }
 
