@@ -51,10 +51,11 @@ func getUpdateCommand() *cobra.Command {
 
 func getRemoveCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove {device} [args]",
+		Use:   "remove {device|object} [args]",
 		Short: "Remove a topology resource",
 	}
 	cmd.AddCommand(getRemoveDeviceCommand())
+	cmd.AddCommand(getRemoveObjectCommand())
 	return cmd
 }
 

@@ -31,6 +31,14 @@ service Topo {
   rpc Get (GetRequest) returns (GetResponse) {
   }
 
+  // Delete an object from topology
+  rpc Delete (DeleteRequest) returns (DeleteResponse) {
+  }
+
+  // List gets a stream of requested objects
+  rpc List (ListRequest) returns (stream ListResponse) {
+  }
+
   // Subscribe returns a stream of topo change notifications
   rpc Subscribe (SubscribeRequest) returns (stream SubscribeResponse) {
   }
@@ -52,10 +60,23 @@ message GetResponse {
   Object object = 1;
 }
 
+message DeleteRequest {
+  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+}
+
+message DeleteResponse {
+}
+
+message ListRequest {
+}
+
+message ListResponse {
+  Object object = 1;
+}
+
 message SubscribeRequest {
   string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
   bool noreplay = 2;
-  bool snapshot = 3;
 }
 
 message SubscribeResponse {

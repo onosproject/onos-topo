@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/atomix/go-client v0.2.1
+	github.com/docker/docker-credential-helpers v0.6.3 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/mattn/go-colorable v0.1.2 // indirect

@@ -4,11 +4,15 @@
 ## Table of Contents
 
 - [api/topo/topo.proto](#api/topo/topo.proto)
+    - [DeleteRequest](#topo.DeleteRequest)
+    - [DeleteResponse](#topo.DeleteResponse)
     - [Entity](#topo.Entity)
     - [GetRequest](#topo.GetRequest)
     - [GetResponse](#topo.GetResponse)
     - [Kind](#topo.Kind)
     - [Kind.AttributesEntry](#topo.Kind.AttributesEntry)
+    - [ListRequest](#topo.ListRequest)
+    - [ListResponse](#topo.ListResponse)
     - [Object](#topo.Object)
     - [Object.AttributesEntry](#topo.Object.AttributesEntry)
     - [Relation](#topo.Relation)
@@ -31,6 +35,31 @@
 <p align="right"><a href="#top">Top</a></p>
 
 ## api/topo/topo.proto
+
+
+
+<a name="topo.DeleteRequest"></a>
+
+### DeleteRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="topo.DeleteResponse"></a>
+
+### DeleteResponse
+
+
+
+
 
 
 
@@ -105,6 +134,31 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  |  |
 | value | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="topo.ListRequest"></a>
+
+### ListRequest
+
+
+
+
+
+
+
+<a name="topo.ListResponse"></a>
+
+### ListResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| object | [Object](#topo.Object) |  |  |
 
 
 
@@ -199,7 +253,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ----- | ---- | ----- | ----------- |
 | id | [string](#string) |  |  |
 | noreplay | [bool](#bool) |  |  |
-| snapshot | [bool](#bool) |  |  |
 
 
 
@@ -280,6 +333,8 @@ EntityService provides an API for managing entities.
 | ----------- | ------------ | ------------- | ------------|
 | Set | [SetRequest](#topo.SetRequest) | [SetResponse](#topo.SetResponse) | Insert or replace an object from the topology |
 | Get | [GetRequest](#topo.GetRequest) | [GetResponse](#topo.GetResponse) | Get an object from topology |
+| Delete | [DeleteRequest](#topo.DeleteRequest) | [DeleteResponse](#topo.DeleteResponse) | Delete an object from topology |
+| List | [ListRequest](#topo.ListRequest) | [ListResponse](#topo.ListResponse) stream | List gets a stream of requested objects |
 | Subscribe | [SubscribeRequest](#topo.SubscribeRequest) | [SubscribeResponse](#topo.SubscribeResponse) stream | Subscribe returns a stream of topo change notifications |
 
  
