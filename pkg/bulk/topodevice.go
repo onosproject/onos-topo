@@ -16,6 +16,7 @@ package bulk
 
 import (
 	"fmt"
+
 	configlib "github.com/onosproject/onos-lib-go/pkg/config"
 	"github.com/onosproject/onos-topo/api/device"
 	deviceservice "github.com/onosproject/onos-topo/pkg/northbound/device"
@@ -31,6 +32,7 @@ type DeviceConfig struct {
 // Clear - reset the config - needed for tests
 func Clear() {
 	deviceConfig = nil
+	topoConfig = nil
 }
 
 // GetDeviceConfig gets the onos-topo configuration
