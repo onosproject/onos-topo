@@ -3,6 +3,9 @@
 
 ## Table of Contents
 
+- [api/topo/device.proto](#api/topo/device.proto)
+    - [Attribute](#topo.Attribute)
+  
 - [api/topo/topo.proto](#api/topo/topo.proto)
     - [DeleteRequest](#topo.DeleteRequest)
     - [DeleteResponse](#topo.DeleteResponse)
@@ -28,6 +31,46 @@
     - [Topo](#topo.Topo)
   
 - [Scalar Value Types](#scalar-value-types)
+
+
+
+<a name="api/topo/device.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## api/topo/device.proto
+
+
+ 
+
+
+<a name="topo.Attribute"></a>
+
+### Attribute
+Device attribute keys
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| ADDRESS | 0 |  |
+| REVISION | 1 |  |
+| TARGET | 2 |  |
+| VERSION | 3 |  |
+| TIMEOUT | 4 |  |
+| TYPE | 5 |  |
+| ROLE | 6 |  |
+| DISPLAYNAME | 7 |  |
+| USER | 8 |  |
+| PASSWORD | 9 |  |
+| PLAINTEXT | 10 |  |
+| INSECURE | 11 |  |
+| CA_CERT | 12 |  |
+| CERT | 13 |  |
+
+
+ 
+
+ 
+
+ 
 
 
 
@@ -72,6 +115,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | kind_id | [string](#string) |  | user-defined entity kind |
+| protocols | [device.ProtocolState](#topo.device.ProtocolState) | repeated |  |
 
 
 
