@@ -73,10 +73,12 @@ func ObjectToDevice(obj *Object) *device.Device {
 	d.Target = obj.Attributes[Target]
 	d.Version = obj.Attributes[Version]
 	t, err := strconv.Atoi(obj.Attributes[Timeout])
-	if err != nil {
-		return nil
+	var timeout time.Duration
+	if err == nil {
+		timeout = time.Duration(t) * time.Second
+	} else {
+		timeout = time.Duration(0) * time.Second
 	}
-	timeout := time.Duration(t) * time.Second
 	d.Timeout = &timeout
 	d.Role = device.Role(obj.Attributes[Role])
 	d.Displayname = obj.Attributes[Displayname]
@@ -98,8 +100,8 @@ func ObjectToDevice(obj *Object) *device.Device {
 	entity := obj.GetEntity()
 	if entity != nil {
 		d.Protocols = obj.GetEntity().Protocols
+		d.Type = device.Type(obj.GetEntity().KindID)
 	}
-	d.Type = device.Type(obj.GetEntity().KindID)
 
 	return d
 }
