@@ -20,6 +20,7 @@ syntax = "proto3";
 package topo;
 
 import "gogoproto/gogo.proto";
+import "github.com/onosproject/onos-topo/api/device/device.proto";
 
 // EntityService provides an API for managing entities.
 service Topo {
@@ -118,6 +119,7 @@ message Object {
 message Entity {
   // user-defined entity kind
   string kind_id = 1 [(gogoproto.customname) = "KindID", (gogoproto.casttype) = "ID"];
+  repeated topo.device.ProtocolState protocols = 2;
 }
 
 message Relation {

@@ -178,9 +178,11 @@ func (s *Server) ValidateObject(object *topoapi.Object) error {
 	switch object.Type {
 	case topo.Object_KIND:
 	case topo.Object_ENTITY:
-		kind, err = s.Load(object.GetEntity().KindID)
-		if err != nil {
-			return err
+		if object.GetEntity().KindID != topo.NullID {
+			kind, err = s.Load(object.GetEntity().KindID)
+			if err != nil {
+				return err
+			}
 		}
 	case topo.Object_RELATION:
 		kind, err = s.Load(object.GetRelation().KindID)
@@ -199,8 +201,8 @@ func (s *Server) ValidateObject(object *topoapi.Object) error {
 		log.Infof("Invalid type %v", object)
 	}
 
-	if object.Type != topo.Object_KIND {
-		if kind != nil && kind.Attributes != nil {
+	if kind != nil && object.Type != topo.Object_KIND {
+		if kind.Attributes != nil {
 			for attrName := range object.Attributes {
 				if _, ok := kind.Attributes[attrName]; !ok {
 					return fmt.Errorf("Invalid attribute %s", attrName)
