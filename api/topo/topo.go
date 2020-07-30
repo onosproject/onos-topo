@@ -32,7 +32,6 @@ const NullID = ""
 
 // Attribute keys
 const (
-	Revision    = "revision"
 	Address     = "address"
 	Target      = "target"
 	Type        = "type"
@@ -70,12 +69,13 @@ func ObjectToDevice(obj *Object) *device.Device {
 		Protocols: []*device.ProtocolState{},
 	}
 
-	r, _ := strconv.Atoi(obj.Attributes[Revision])
-	d.Revision = device.Revision(r)
 	d.Address = obj.Attributes[Address]
 	d.Target = obj.Attributes[Target]
 	d.Version = obj.Attributes[Version]
-	t, _ := strconv.Atoi(obj.Attributes[Timeout])
+	t, err := strconv.Atoi(obj.Attributes[Timeout])
+	if err != nil {
+		return nil
+	}
 	timeout := time.Duration(t) * time.Second
 	d.Timeout = &timeout
 	d.Role = device.Role(obj.Attributes[Role])
@@ -99,6 +99,7 @@ func ObjectToDevice(obj *Object) *device.Device {
 	if entity != nil {
 		d.Protocols = obj.GetEntity().Protocols
 	}
+	d.Type = device.Type(obj.GetEntity().KindID)
 
 	return d
 }
@@ -115,7 +116,6 @@ func DeviceToObject(d *device.Device) *Object {
 			},
 		},
 	}
-	obj.Attributes[Revision] = strconv.Itoa(int(d.Revision))
 	obj.Attributes[Address] = d.Address
 	obj.Attributes[Target] = d.Target
 	obj.Attributes[Version] = d.Version
@@ -138,6 +138,7 @@ func DeviceToObject(d *device.Device) *Object {
 		obj.Attributes[TLSInsecure] = "false"
 	}
 	obj.GetEntity().Protocols = d.Protocols
+	obj.GetEntity().KindID = ID(d.Type)
 
 	return obj
 }
