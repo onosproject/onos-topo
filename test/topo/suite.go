@@ -46,7 +46,7 @@ func (s *TestSuite) SetupTestSuite() error {
 		return err
 	}
 
-	err = helm.Chart("onos-topo").
+	err = helm.Chart("onos-topo", "http://charts.onosproject.org").
 		Release("onos-topo").
 		Set("image.tag", "latest").
 		Set("store.controller", "onos-topo-atomix-kubernetes-controller:5679").
