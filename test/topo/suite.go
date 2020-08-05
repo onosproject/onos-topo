@@ -49,7 +49,7 @@ func (s *TestSuite) SetupTestSuite() error {
 	err = helm.Chart("onos-topo").
 		Release("onos-topo").
 		Set("image.tag", "latest").
-		Set("store.controller", "onos-topo-atomix-kubernetes-controller:5679").
+		Set("storage.controller", "onos-topo-atomix-kubernetes-controller:5679").
 		Install(true)
 	if err != nil {
 		return err
