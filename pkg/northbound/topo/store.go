@@ -34,7 +34,7 @@ func NewAtomixStore() (Store, error) {
 		return nil, err
 	}
 
-	database, err := atomix.GetDatabase(ricConfig.Atomix, ricConfig.Atomix.GetDatabase(atomix.DatabaseTypeConsensus))
+	database, err := atomix.GetDatabase(ricConfig.Atomix, ricConfig.Atomix.GetDatabase(atomix.DatabaseTypeConfig))
 	if err != nil {
 		return nil, err
 	}
