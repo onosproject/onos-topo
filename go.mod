@@ -9,6 +9,7 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/onosproject/helmit v0.6.6
 	github.com/onosproject/onos-lib-go v0.6.15
+	github.com/onosproject/onos-test v0.6.2
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2 // indirect

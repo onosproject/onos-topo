@@ -17,6 +17,7 @@ package topo
 import (
 	"github.com/onosproject/helmit/pkg/helm"
 	"github.com/onosproject/helmit/pkg/test"
+	"github.com/onosproject/onos-test/pkg/onostest"
 )
 
 type testSuite struct {
@@ -28,28 +29,31 @@ type TestSuite struct {
 	testSuite
 }
 
+const onosTopoComponentName = "onos-topo"
+const testName = "topo-test"
+
 // SetupTestSuite sets up the onos-topo test suite
 func (s *TestSuite) SetupTestSuite() error {
-	err := helm.Chart("kubernetes-controller", "https://charts.atomix.io").
-		Release("onos-topo-atomix").
+	err := helm.Chart(onostest.ControllerChartName, onostest.AtomixChartRepo).
+		Release(onostest.AtomixName(testName, onosTopoComponentName)).
 		Set("scope", "Namespace").
 		Install(true)
 	if err != nil {
 		return err
 	}
 
-	err = helm.Chart("raft-storage-controller", "https://charts.atomix.io").
-		Release("onos-topo-raft").
+	err = helm.Chart(onostest.RaftStorageControllerChartName, onostest.AtomixChartRepo).
+		Release(onostest.RaftReleaseName(onosTopoComponentName)).
 		Set("scope", "Namespace").
 		Install(true)
 	if err != nil {
 		return err
 	}
 
-	err = helm.Chart("onos-topo", "http://charts.onosproject.org").
-		Release("onos-topo").
+	err = helm.Chart(onosTopoComponentName, onostest.OnosChartRepo).
+		Release(onosTopoComponentName).
 		Set("image.tag", "latest").
-		Set("storage.controller", "onos-topo-atomix-kubernetes-controller:5679").
+		Set("storage.controller", onostest.AtomixController(testName, onosTopoComponentName)).
 		Install(true)
 	if err != nil {
 		return err
