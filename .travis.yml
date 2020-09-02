@@ -30,7 +30,7 @@ jobs:
   include:
     - stage: tests
       script:
-        - make test
+        - make coverage
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
              bash ./build/bin/push-images &&
              bash -x ../build-tools/release-merge-commit;
