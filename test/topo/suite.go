@@ -30,30 +30,13 @@ type TestSuite struct {
 }
 
 const onosTopoComponentName = "onos-topo"
-const testName = "topo-test"
 
 // SetupTestSuite sets up the onos-topo test suite
 func (s *TestSuite) SetupTestSuite() error {
-	err := helm.Chart(onostest.ControllerChartName, onostest.AtomixChartRepo).
-		Release(onostest.AtomixName(testName, onosTopoComponentName)).
-		Set("scope", "Namespace").
-		Install(true)
-	if err != nil {
-		return err
-	}
 
-	err = helm.Chart(onostest.RaftStorageControllerChartName, onostest.AtomixChartRepo).
-		Release(onostest.RaftReleaseName(onosTopoComponentName)).
-		Set("scope", "Namespace").
-		Install(true)
-	if err != nil {
-		return err
-	}
-
-	err = helm.Chart(onosTopoComponentName, onostest.OnosChartRepo).
+	err := helm.Chart(onosTopoComponentName, onostest.OnosChartRepo).
 		Release(onosTopoComponentName).
 		Set("image.tag", "latest").
-		Set("storage.controller", onostest.AtomixController(testName, onosTopoComponentName)).
 		Install(true)
 	if err != nil {
 		return err
