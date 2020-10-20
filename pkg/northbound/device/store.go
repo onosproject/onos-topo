@@ -125,7 +125,7 @@ func (s *atomixStore) Store(device *deviceapi.Device) error {
 	if device.Revision == 0 {
 		entry, err = s.devices.Put(ctx, string(device.ID), bytes)
 	} else {
-		entry, err = s.devices.Put(ctx, string(device.ID), bytes, _map.IfVersion(int64(device.Revision)))
+		entry, err = s.devices.Put(ctx, string(device.ID), bytes, _map.IfVersion(_map.Version(device.Revision)))
 	}
 
 	if err != nil {
@@ -142,7 +142,7 @@ func (s *atomixStore) Delete(device *deviceapi.Device) error {
 	defer cancel()
 
 	if device.Revision > 0 {
-		_, err := s.devices.Remove(ctx, string(device.ID), _map.IfVersion(int64(device.Revision)))
+		_, err := s.devices.Remove(ctx, string(device.ID), _map.IfVersion(_map.Version(device.Revision)))
 		return err
 	}
 	_, err := s.devices.Remove(ctx, string(device.ID))
