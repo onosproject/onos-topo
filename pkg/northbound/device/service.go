@@ -17,6 +17,7 @@ package device
 
 import (
 	"context"
+	devicestore "github.com/onosproject/onos-topo/pkg/store/device"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
@@ -43,7 +44,7 @@ const (
 
 // NewService returns a new device Service
 func NewService() (northbound.Service, error) {
-	deviceStore, err := NewAtomixStore()
+	deviceStore, err := devicestore.NewAtomixStore()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func NewService() (northbound.Service, error) {
 // Service is a Service implementation for administration.
 type Service struct {
 	northbound.Service
-	store Store
+	store devicestore.Store
 }
 
 // Register registers the Service with the gRPC server.
@@ -68,7 +69,7 @@ func (s Service) Register(r *grpc.Server) {
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	deviceStore Store
+	deviceStore devicestore.Store
 }
 
 // DeviceServiceClientFactory : Default DeviceServiceClient creation.
@@ -188,7 +189,7 @@ func (s *Server) Get(ctx context.Context, request *deviceapi.GetRequest) (*devic
 // List :
 func (s *Server) List(request *deviceapi.ListRequest, server deviceapi.DeviceService_ListServer) error {
 	if request.Subscribe {
-		ch := make(chan *Event)
+		ch := make(chan *devicestore.Event)
 		if err := s.deviceStore.Watch(ch); err != nil {
 			return err
 		}
@@ -196,13 +197,13 @@ func (s *Server) List(request *deviceapi.ListRequest, server deviceapi.DeviceSer
 		for event := range ch {
 			var t deviceapi.ListResponse_Type
 			switch event.Type {
-			case EventNone:
+			case devicestore.EventNone:
 				t = deviceapi.ListResponse_NONE
-			case EventInserted:
+			case devicestore.EventInserted:
 				t = deviceapi.ListResponse_ADDED
-			case EventUpdated:
+			case devicestore.EventUpdated:
 				t = deviceapi.ListResponse_UPDATED
-			case EventRemoved:
+			case devicestore.EventRemoved:
 				t = deviceapi.ListResponse_REMOVED
 			}
 			err := server.Send(&deviceapi.ListResponse{

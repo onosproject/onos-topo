@@ -18,6 +18,7 @@ package topo
 import (
 	"context"
 	"fmt"
+	topostore "github.com/onosproject/onos-topo/pkg/store/topo"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
@@ -32,7 +33,7 @@ var log = logging.GetLogger("northbound", "topo")
 
 // NewService returns a new topo Service
 func NewService() (northbound.Service, error) {
-	objectStore, err := NewAtomixStore()
+	objectStore, err := topostore.NewAtomixStore()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func NewService() (northbound.Service, error) {
 // Service is a Service implementation for administration.
 type Service struct {
 	northbound.Service
-	store Store
+	store topostore.Store
 }
 
 // Register registers the Service with the gRPC server.
@@ -57,7 +58,7 @@ func (s Service) Register(r *grpc.Server) {
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	objectStore Store
+	objectStore topostore.Store
 }
 
 // TopoClientFactory : Default TopoClient creation.
@@ -129,11 +130,11 @@ func (s *Server) List(request *topoapi.ListRequest, server topoapi.Topo_ListServ
 
 // Subscribe ...
 func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
-	var watchOpts []WatchOption
-	ch := make(chan *Event)
+	var watchOpts []topostore.WatchOption
+	ch := make(chan *topostore.Event)
 
 	if !request.Noreplay {
-		watchOpts = append(watchOpts, WithReplay())
+		watchOpts = append(watchOpts, topostore.WithReplay())
 	}
 	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
 		return err
@@ -143,17 +144,17 @@ func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Top
 }
 
 // Stream ...
-func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *Event) error {
+func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *topostore.Event) error {
 	for event := range ch {
 		var t topoapi.Update_Type
 		switch event.Type {
-		case EventNone:
+		case topostore.EventNone:
 			t = topoapi.Update_UNSPECIFIED
-		case EventInserted:
+		case topostore.EventInserted:
 			t = topoapi.Update_INSERT
-		case EventUpdated:
+		case topostore.EventUpdated:
 			t = topoapi.Update_MODIFY
-		case EventRemoved:
+		case topostore.EventRemoved:
 			t = topoapi.Update_DELETE
 		}
 
