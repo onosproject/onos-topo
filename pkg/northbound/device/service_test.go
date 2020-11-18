@@ -16,6 +16,7 @@ package device
 
 import (
 	"context"
+	devicestore "github.com/onosproject/onos-topo/pkg/store/device"
 	"io"
 	"net"
 	"testing"
@@ -31,7 +32,7 @@ func TestLocalServer(t *testing.T) {
 	lis := bufconn.Listen(1024 * 1024)
 	s := grpc.NewServer()
 
-	store, err := NewLocalStore()
+	store, err := devicestore.NewLocalStore()
 	assert.NoError(t, err)
 	defer s.Stop()
 
