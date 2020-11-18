@@ -30,6 +30,9 @@ type ID string
 // NullID ...
 const NullID = ""
 
+// Revision is an object revision
+type Revision uint64
+
 // Attribute keys
 const (
 	Address     = "address"

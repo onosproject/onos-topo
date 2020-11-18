@@ -16,6 +16,9 @@ package topo
 
 import (
 	"context"
+	"errors"
+	"github.com/atomix/go-client/pkg/client/util/net"
+	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"io"
 	"time"
 
@@ -26,6 +29,8 @@ import (
 	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"github.com/onosproject/onos-topo/pkg/config"
 )
+
+var log = logging.GetLogger("store", "topo")
 
 // NewAtomixStore returns a new persistent Store
 func NewAtomixStore() (Store, error) {
@@ -51,7 +56,11 @@ func NewAtomixStore() (Store, error) {
 
 // NewLocalStore returns a new local object store
 func NewLocalStore() (Store, error) {
-	node, address := atomix.StartLocalNode()
+	_, address := atomix.StartLocalNode()
+	return newLocalStore(address)
+}
+
+func newLocalStore(address net.Address) (Store, error) {
 	name := primitive.Name{
 		Namespace: "local",
 		Name:      "objects",
@@ -69,7 +78,6 @@ func NewLocalStore() (Store, error) {
 
 	return &atomixStore{
 		objects: objects,
-		closer:  node.Stop,
 	}, nil
 }
 
@@ -77,20 +85,20 @@ func NewLocalStore() (Store, error) {
 type Store interface {
 	io.Closer
 
-	// Load loads a object from the store
-	Load(objectID topoapi.ID) (*topoapi.Object, error)
+	// Create creates an object in the store
+	Create(ctx context.Context, object *topoapi.Object) error
 
-	// Store stores a object in the store
-	Store(*topoapi.Object) error
+	// Get retrieves an object from the store
+	Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, error)
 
 	// Delete deletes a object from the store
-	Delete(topoapi.ID) error
+	Delete(ctx context.Context, id topoapi.ID) error
 
 	// List streams objects to the given channel
-	List(chan<- *topoapi.Object) error
+	List(ctx context.Context) ([]topoapi.Object, error)
 
 	// Watch streams object events to the given channel
-	Watch(chan<- *Event, ...WatchOption) error
+	Watch(ctx context.Context, ch chan<- *topoapi.Event, opts ...WatchOption) error
 }
 
 // WatchOption is a configuration option for Watch calls
@@ -114,67 +122,76 @@ func WithReplay() WatchOption {
 // atomixStore is the object implementation of the Store
 type atomixStore struct {
 	objects _map.Map
-	closer  func() error
 }
 
-func (s *atomixStore) Load(objectID topoapi.ID) (*topoapi.Object, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
+func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
+	if object.ID == "" {
+		return errors.New("ID cannot be empty")
+	}
 
-	entry, err := s.objects.Get(ctx, string(objectID))
+	log.Infof("Creating object %+v", object)
+	bytes, err := proto.Marshal(object)
+	if err != nil {
+		log.Errorf("Failed to create object %+v: %s", object, err)
+		return err
+	}
+
+	// Put the object in the map using an optimistic lock if this is an update
+	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfNotSet())
+	if err != nil {
+		log.Errorf("Failed to create object %+v: %s", object, err)
+		return err
+	}
+
+	object.Revision = topoapi.Revision(entry.Version)
+	return err
+}
+
+func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, error) {
+	if id == "" {
+		return nil, errors.New("ID cannot be empty")
+	}
+	entry, err := s.objects.Get(ctx, string(id))
 	if err != nil {
 		return nil, err
-	} else if entry == nil {
+	}
+	if entry == nil {
 		return nil, nil
 	}
 	return decodeObject(entry)
 }
 
-func (s *atomixStore) Store(object *topoapi.Object) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
-	bytes, err := proto.Marshal(object)
-	if err != nil {
-		return err
+func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
+	if id == "" {
+		return errors.New("ID cannot be empty")
 	}
 
-	// Put the object in the map using an optimistic lock if this is an update
-	_, err = s.objects.Put(ctx, string(object.ID), bytes)
-
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func (s *atomixStore) Delete(id topoapi.ID) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-
+	log.Infof("Deleting object %s", id)
 	_, err := s.objects.Remove(ctx, string(id))
-	return err
-}
-
-func (s *atomixStore) List(ch chan<- *topoapi.Object) error {
-	mapCh := make(chan *_map.Entry)
-	if err := s.objects.Entries(context.Background(), mapCh); err != nil {
+	if err != nil {
+		log.Errorf("Failed to delete object %s: %s", id, err)
 		return err
 	}
-
-	go func() {
-		defer close(ch)
-		for entry := range mapCh {
-			if object, err := decodeObject(entry); err == nil {
-				ch <- object
-			}
-		}
-	}()
 	return nil
 }
 
-func (s *atomixStore) Watch(ch chan<- *Event, opts ...WatchOption) error {
+func (s *atomixStore) List(ctx context.Context) ([]topoapi.Object, error) {
+	mapCh := make(chan *_map.Entry)
+	if err := s.objects.Entries(context.Background(), mapCh); err != nil {
+		return nil, err
+	}
+
+	eps := make([]topoapi.Object, 0)
+
+	for entry := range mapCh {
+		if ep, err := decodeObject(entry); err == nil {
+			eps = append(eps, *ep)
+		}
+	}
+	return eps, nil
+}
+
+func (s *atomixStore) Watch(ctx context.Context, ch chan<- *topoapi.Event, opts ...WatchOption) error {
 	watchOpts := make([]_map.WatchOption, 0)
 	for _, opt := range opts {
 		watchOpts = opt.apply(watchOpts)
@@ -189,9 +206,18 @@ func (s *atomixStore) Watch(ch chan<- *Event, opts ...WatchOption) error {
 		defer close(ch)
 		for event := range mapCh {
 			if object, err := decodeObject(event.Entry); err == nil {
-				ch <- &Event{
-					Type:   EventType(event.Type),
-					Object: object,
+				var eventType topoapi.EventType
+				switch event.Type {
+				case _map.EventNone:
+					eventType = topoapi.EventType_NONE
+				case _map.EventInserted:
+					eventType = topoapi.EventType_ADDED
+				case _map.EventRemoved:
+					eventType = topoapi.EventType_REMOVED
+				}
+				ch <- &topoapi.Event{
+					Type:   eventType,
+					Object: *object,
 				}
 			}
 		}
@@ -202,11 +228,8 @@ func (s *atomixStore) Watch(ch chan<- *Event, opts ...WatchOption) error {
 func (s *atomixStore) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	_ = s.objects.Close(ctx)
-	cancel()
-	if s.closer != nil {
-		return s.closer()
-	}
-	return nil
+	defer cancel()
+	return s.objects.Close(ctx)
 }
 
 func decodeObject(entry *_map.Entry) (*topoapi.Object, error) {
@@ -216,24 +239,4 @@ func decodeObject(entry *_map.Entry) (*topoapi.Object, error) {
 	}
 	object.ID = topoapi.ID(entry.Key)
 	return object, nil
-}
-
-// EventType provides the type for a object event
-type EventType string
-
-const (
-	// EventNone is no event
-	EventNone EventType = ""
-	// EventInserted is inserted
-	EventInserted EventType = "inserted"
-	// EventUpdated is updated
-	EventUpdated EventType = "updated"
-	// EventRemoved is removed
-	EventRemoved EventType = "removed"
-)
-
-// Event is a store event for a object
-type Event struct {
-	Type   EventType
-	Object *topoapi.Object
 }
