@@ -64,11 +64,11 @@ message Event {
 
 
 message CreateRequest {
-  repeated Object objects = 1;
+  Object object = 1;
 }
 
 message CreateResponse {
-  repeated Object objects = 1;
+  Object object = 1;
 }
 
 message GetRequest {
@@ -80,11 +80,11 @@ message GetResponse {
 }
 
 message UpdateRequest {
-  repeated Object objects = 1;
+  Object object = 1;
 }
 
 message UpdateResponse {
-  repeated Object objects = 1;
+  Object object = 1;
 }
 
 message DeleteRequest {

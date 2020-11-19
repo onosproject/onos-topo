@@ -16,8 +16,8 @@ package topo
 
 import (
 	"context"
-	"errors"
 	"github.com/atomix/go-client/pkg/client/util/net"
+	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"io"
 	"time"
@@ -98,7 +98,7 @@ type Store interface {
 	List(ctx context.Context) ([]topoapi.Object, error)
 
 	// Watch streams object events to the given channel
-	Watch(ctx context.Context, ch chan<- *topoapi.Event, opts ...WatchOption) error
+	Watch(ctx context.Context, ch chan<- topoapi.Event, opts ...WatchOption) error
 }
 
 // WatchOption is a configuration option for Watch calls
@@ -126,7 +126,7 @@ type atomixStore struct {
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
 	if object.ID == "" {
-		return errors.New("ID cannot be empty")
+		return errors.NewInvalid("ID cannot be empty")
 	}
 
 	log.Infof("Creating object %+v", object)
@@ -149,7 +149,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 
 func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, error) {
 	if id == "" {
-		return nil, errors.New("ID cannot be empty")
+		return nil, errors.NewInvalid("ID cannot be empty")
 	}
 	entry, err := s.objects.Get(ctx, string(id))
 	if err != nil {
@@ -163,7 +163,7 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 
 func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 	if id == "" {
-		return errors.New("ID cannot be empty")
+		return errors.NewInvalid("ID cannot be empty")
 	}
 
 	log.Infof("Deleting object %s", id)
@@ -177,7 +177,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 
 func (s *atomixStore) List(ctx context.Context) ([]topoapi.Object, error) {
 	mapCh := make(chan *_map.Entry)
-	if err := s.objects.Entries(context.Background(), mapCh); err != nil {
+	if err := s.objects.Entries(ctx, mapCh); err != nil {
 		return nil, err
 	}
 
@@ -191,7 +191,7 @@ func (s *atomixStore) List(ctx context.Context) ([]topoapi.Object, error) {
 	return eps, nil
 }
 
-func (s *atomixStore) Watch(ctx context.Context, ch chan<- *topoapi.Event, opts ...WatchOption) error {
+func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, opts ...WatchOption) error {
 	watchOpts := make([]_map.WatchOption, 0)
 	for _, opt := range opts {
 		watchOpts = opt.apply(watchOpts)
@@ -215,7 +215,7 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- *topoapi.Event, opts 
 				case _map.EventRemoved:
 					eventType = topoapi.EventType_REMOVED
 				}
-				ch <- &topoapi.Event{
+				ch <- topoapi.Event{
 					Type:   eventType,
 					Object: *object,
 				}

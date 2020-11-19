@@ -18,34 +18,28 @@ package topo
 import (
 	"context"
 	"fmt"
-	topostore "github.com/onosproject/onos-topo/pkg/store/topo"
+	"github.com/onosproject/onos-lib-go/pkg/errors"
 
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/api/topo"
 	topoapi "github.com/onosproject/onos-topo/api/topo"
+	store "github.com/onosproject/onos-topo/pkg/store/topo"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 var log = logging.GetLogger("northbound", "topo")
 
 // NewService returns a new topo Service
-func NewService() (northbound.Service, error) {
-	objectStore, err := topostore.NewAtomixStore()
-	if err != nil {
-		return nil, err
-	}
+func NewService (store store.Store) northbound.Service {
 	return &Service{
-		store: objectStore,
-	}, nil
+		store: store,
+	}
 }
 
 // Service is a Service implementation for administration.
 type Service struct {
-	northbound.Service
-	store topostore.Store
+	store store.Store
 }
 
 // Register registers the Service with the gRPC server.
@@ -58,7 +52,7 @@ func (s Service) Register(r *grpc.Server) {
 
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
-	objectStore topostore.Store
+	objectStore store.Store
 }
 
 // TopoClientFactory : Default TopoClient creation.
@@ -71,101 +65,105 @@ func CreateTopoClient(cc *grpc.ClientConn) topoapi.TopoClient {
 	return TopoClientFactory(cc)
 }
 
-// Set :
-func (s *Server) Set(ctx context.Context, request *topoapi.SetRequest) (*topoapi.SetResponse, error) {
-	for _, object := range request.Objects {
-		if err := s.ValidateObject(object); err != nil {
-			return nil, err
-		}
-		if err := s.objectStore.Store(object); err != nil {
-			return nil, err
-		}
-	}
-	return &topoapi.SetResponse{}, nil
-}
-
-// Get :
-func (s *Server) Get(ctx context.Context, request *topoapi.GetRequest) (*topoapi.GetResponse, error) {
-	id := request.ID
-	object, err := s.objectStore.Load(id)
+// Create creates a new topology object
+func (s *Server) Create(ctx context.Context, req *topoapi.CreateRequest) (*topoapi.CreateResponse, error) {
+	log.Infof("Received CreateRequest %+v", req)
+	object := req.Object
+	err := s.objectStore.Create(ctx, object)
 	if err != nil {
-		return nil, err
-	} else if object == nil {
-		log.Infof("Not found object %s", string(id))
-		return nil, status.Error(codes.NotFound, string(id))
+		log.Warnf("CreateRequest %+v failed: %v", req, err)
+		return nil, errors.Status(err).Err()
 	}
-	return &topoapi.GetResponse{
+	res := &topoapi.CreateResponse{
 		Object: object,
-	}, nil
+	}
+	log.Infof("Sending CreateResponse %+v", res)
+	return res, nil
 }
 
-// Delete ...
-func (s *Server) Delete(ctx context.Context, request *topoapi.DeleteRequest) (*topoapi.DeleteResponse, error) {
-	id := request.ID
-	err := s.objectStore.Delete(id)
+// Get retrieves the specified topology object
+func (s *Server) Get(ctx context.Context, req *topoapi.GetRequest) (*topoapi.GetResponse, error) {
+	log.Infof("Received GetRequest %+v", req)
+	object, err := s.objectStore.Get(ctx, req.ID)
 	if err != nil {
-		return nil, err
+		log.Warnf("GetRequest %+v failed: %v", req, err)
+		return nil, errors.Status(err).Err()
 	}
-	return &topoapi.DeleteResponse{}, nil
+	res := &topoapi.GetResponse{
+		Object: object,
+	}
+	log.Infof("Sending GetResponse %+v", res)
+	return res, nil
 }
 
-// List ..
-func (s *Server) List(request *topoapi.ListRequest, server topoapi.Topo_ListServer) error {
-	ch := make(chan *topoapi.Object)
-	if err := s.objectStore.List(ch); err != nil {
-		return err
-	}
+// Update creates an existing topology object
+func (s *Server) Update(ctx context.Context, req *topoapi.UpdateRequest) (*topoapi.UpdateResponse, error) {
+	log.Infof("Received UpdateRequest %+v", req)
 
-	for object := range ch {
-		err := server.Send(&topoapi.ListResponse{
-			Object: object,
-		})
-		if err != nil {
-			return err
-		}
+	res := &topoapi.UpdateResponse{
+		Object: nil,
 	}
-
-	return nil
+	log.Infof("Sending UpdateResponse %+v", res)
+	return nil, nil
 }
 
-// Subscribe ...
-func (s *Server) Subscribe(request *topoapi.SubscribeRequest, server topoapi.Topo_SubscribeServer) error {
-	var watchOpts []topostore.WatchOption
-	ch := make(chan *topostore.Event)
-
-	if !request.Noreplay {
-		watchOpts = append(watchOpts, topostore.WithReplay())
+// Delete removes the specified topology object
+func (s *Server) Delete(ctx context.Context, req *topoapi.DeleteRequest) (*topoapi.DeleteResponse, error) {
+	log.Infof("Received DeleteRequest %+v", req)
+	err := s.objectStore.Delete(ctx, req.ID)
+	if err != nil {
+		log.Warnf("DeleteRequest %+v failed: %v", req, err)
+		return nil, errors.Status(err).Err()
 	}
-	if err := s.objectStore.Watch(ch, watchOpts...); err != nil {
-		return err
+	res := &topoapi.DeleteResponse{}
+	log.Infof("Sending DeleteResponse %+v", res)
+	return res, nil
+}
+
+// TODO: add filter criteria; otherwise not scalable
+// List returns list of all objects
+func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.ListResponse, error) {
+	log.Infof("Received ListRequest %+v", req)
+	objects, err := s.objectStore.List(ctx)
+	if err != nil {
+		log.Warnf("ListRequest %+v failed: %v", req, err)
+		return nil, errors.Status(err).Err()
+	}
+
+	res := &topoapi.ListResponse{
+		Objects: objects,
+	}
+	log.Infof("Sending ListResponse %+v", res)
+	return res, nil
+}
+
+// Watch streams topology changes
+func (s *Server) Watch(req *topo.WatchRequest, server topo.Topo_WatchServer) error {
+	log.Infof("Received WatchRequest %+v", req)
+	var watchOpts []store.WatchOption
+	if !req.Noreplay {
+		watchOpts = append(watchOpts, store.WithReplay())
+	}
+
+	ch := make(chan topoapi.Event)
+	if err := s.objectStore.Watch(server.Context(), ch, watchOpts...); err != nil {
+		log.Warnf("WatchTerminationsRequest %+v failed: %v", req, err)
+		return errors.Status(err).Err()
 	}
 
 	return s.Stream(server, ch)
 }
 
-// Stream ...
-func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *topostore.Event) error {
+// Stream is the ongoing stream for WatchTerminations request
+func (s *Server) Stream(server topoapi.Topo_WatchServer, ch chan topo.Event) error {
 	for event := range ch {
-		var t topoapi.Update_Type
-		switch event.Type {
-		case topostore.EventNone:
-			t = topoapi.Update_UNSPECIFIED
-		case topostore.EventInserted:
-			t = topoapi.Update_INSERT
-		case topostore.EventUpdated:
-			t = topoapi.Update_MODIFY
-		case topostore.EventRemoved:
-			t = topoapi.Update_DELETE
+		res := &topo.WatchResponse{
+			Event: event,
 		}
 
-		subscribeResponse := &topo.SubscribeResponse{
-			Update: &topo.Update{
-				Type:   t,
-				Object: event.Object,
-			},
-		}
-
-		if err := server.Send(subscribeResponse); err != nil {
+		log.Infof("Sending WatchResponse %+v", res)
+		if err := server.Send(res); err != nil {
+			log.Warnf("WatchResponse %+v failed: %v", res, err)
 			return err
 		}
 	}
@@ -173,28 +171,28 @@ func (s *Server) Stream(server topoapi.Topo_SubscribeServer, ch chan *topostore.
 }
 
 // ValidateObject validates the given object
-func (s *Server) ValidateObject(object *topoapi.Object) error {
+func (s *Server) ValidateObject(ctx context.Context, object *topoapi.Object) error {
 	var kind *topo.Object
 	var err error
 	switch object.Type {
 	case topo.Object_KIND:
 	case topo.Object_ENTITY:
 		if object.GetEntity().KindID != topo.NullID {
-			kind, err = s.Load(object.GetEntity().KindID)
+			kind, err = s.objectStore.Get(ctx, object.GetEntity().KindID)
 			if err != nil {
 				return err
 			}
 		}
 	case topo.Object_RELATION:
-		kind, err = s.Load(object.GetRelation().KindID)
+		kind, err = s.objectStore.Get(ctx, object.GetRelation().KindID)
 		if err != nil {
 			return err
 		}
-		_, err := s.Load(object.GetRelation().SrcEntityID)
+		_, err := s.objectStore.Get(ctx, object.GetRelation().SrcEntityID)
 		if err != nil {
 			return err
 		}
-		_, err = s.Load(object.GetRelation().TgtEntityID)
+		_, err = s.objectStore.Get(ctx, object.GetRelation().TgtEntityID)
 		if err != nil {
 			return err
 		}
@@ -217,16 +215,4 @@ func (s *Server) ValidateObject(object *topoapi.Object) error {
 		}
 	}
 	return nil
-}
-
-// Load ...
-func (s *Server) Load(id topo.ID) (*topo.Object, error) {
-	object, err := s.objectStore.Load(id)
-	if err != nil {
-		return nil, err
-	} else if object == nil {
-		log.Infof("Not found object %s", string(id))
-		return nil, status.Error(codes.NotFound, string(id))
-	}
-	return object, nil
 }
