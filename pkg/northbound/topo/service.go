@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package topo :
 package topo
 
 import (
@@ -99,12 +98,16 @@ func (s *Server) Get(ctx context.Context, req *topoapi.GetRequest) (*topoapi.Get
 // Update creates an existing topology object
 func (s *Server) Update(ctx context.Context, req *topoapi.UpdateRequest) (*topoapi.UpdateResponse, error) {
 	log.Infof("Received UpdateRequest %+v", req)
-
+	err := s.objectStore.Update(ctx, req.Object)
+	if err != nil {
+		log.Warnf("UpdateRequest %+v failed: %v", req, err)
+		return nil, errors.Status(err).Err()
+	}
 	res := &topoapi.UpdateResponse{
-		Object: nil,
+		Object: req.Object,
 	}
 	log.Infof("Sending UpdateResponse %+v", res)
-	return nil, nil
+	return res, nil
 }
 
 // Delete removes the specified topology object
