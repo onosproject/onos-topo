@@ -88,6 +88,9 @@ type Store interface {
 	// Create creates an object in the store
 	Create(ctx context.Context, object *topoapi.Object) error
 
+	// Update updates an existing object in the store
+	Update(ctx context.Context, object *topoapi.Object) error
+
 	// Get retrieves an object from the store
 	Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, error)
 
@@ -147,16 +150,39 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	return err
 }
 
+func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error {
+	if object.ID == "" {
+		return errors.NewInvalid("ID cannot be empty")
+	}
+	if object.Revision == 0 {
+		return errors.NewInvalid("object must contain a revision on update")
+	}
+
+	log.Infof("Updating object %+v", object)
+	bytes, err := proto.Marshal(object)
+	if err != nil {
+		log.Errorf("Failed to update object %+v: %s", object, err)
+		return errors.NewInvalid(err.Error())
+	}
+
+	// Update the object in the map
+	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfVersion(_map.Version(object.Revision)))
+	if err != nil {
+		log.Errorf("Failed to update object %+v: %s", object, err)
+		return errors.FromAtomix(err)
+	}
+	object.Revision = topoapi.Revision(entry.Version)
+	return nil
+}
+
 func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, error) {
 	if id == "" {
 		return nil, errors.NewInvalid("ID cannot be empty")
 	}
+
 	entry, err := s.objects.Get(ctx, string(id))
 	if err != nil {
-		return nil, err
-	}
-	if entry == nil {
-		return nil, nil
+		return nil, errors.FromAtomix(err)
 	}
 	return decodeObject(entry)
 }
@@ -170,7 +196,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 	_, err := s.objects.Remove(ctx, string(id))
 	if err != nil {
 		log.Errorf("Failed to delete object %s: %s", id, err)
-		return err
+		return errors.FromAtomix(err)
 	}
 	return nil
 }
@@ -238,5 +264,6 @@ func decodeObject(entry *_map.Entry) (*topoapi.Object, error) {
 		return nil, err
 	}
 	object.ID = topoapi.ID(entry.Key)
+	object.Revision = topoapi.Revision(entry.Version)
 	return object, nil
 }
