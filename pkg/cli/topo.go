@@ -224,8 +224,9 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 	}
 
 	if len(args) == 0 {
-		for object := range listObjects(cmd, args, objectType) {
-			if object != nil {
+		objects, err := listObjects(cmd)
+		if err == nil {
+			for _, object := range objects {
 				if objectType == topo.Object_UNSPECIFIED || objectType == object.Type {
 					printRow(object, false, noHeaders)
 				}
@@ -239,7 +240,7 @@ func runGetCommand(cmd *cobra.Command, args []string, objectType topo.Object_Typ
 		}
 		if object != nil {
 			if objectType == topo.Object_UNSPECIFIED || objectType == object.Type {
-				printRow(object, false, noHeaders)
+				printRow(*object, false, noHeaders)
 			}
 		}
 	}
@@ -306,44 +307,27 @@ func writeObject(cmd *cobra.Command, args []string, objectType topo.Object_Type)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	_, err = client.Set(ctx, &topo.SetRequest{Objects: []*topo.Object{object}})
+	_, err = client.Create(ctx, &topo.CreateRequest{Object: object})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func listObjects(cmd *cobra.Command, args []string, objectType topo.Object_Type) <-chan *topo.Object {
-	out := make(chan *topo.Object)
+func listObjects(cmd *cobra.Command) ([]topo.Object, error) {
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
 
-	go func() {
-		defer close(out)
-		conn, err := cli.GetConnection(cmd)
-		if err != nil {
-			return
-		}
-		defer conn.Close()
+	client := topo.CreateTopoClient(conn)
 
-		client := topo.CreateTopoClient(conn)
-
-		stream, err := client.List(context.Background(), &topo.ListRequest{})
-		if err != nil {
-			return
-		}
-		for {
-			response, err := stream.Recv()
-			if err == io.EOF {
-				// read done.
-				break
-			} else if err != nil {
-				cli.Output("recv error : %v", err)
-				return
-			}
-			out <- response.Object
-		}
-	}()
-
-	return out
+	resp, err := client.List(context.Background(), &topo.ListRequest{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Objects, nil
 }
 
 func getObject(cmd *cobra.Command, id topo.ID) (*topo.Object, error) {
@@ -373,7 +357,7 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 	if len(args) > 0 {
 		id = topo.ID(args[0])
 	} else {
-		id = topo.ID(topo.NullID)
+		id = topo.NullID
 	}
 
 	conn, err := cli.GetConnection(cmd)
@@ -384,10 +368,11 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 
 	client := topo.CreateTopoClient(conn)
 
-	stream, err := client.Subscribe(context.Background(), &topo.SubscribeRequest{
-		ID:       id,
+	req := &topo.WatchRequest{
 		Noreplay: noreplay,
-	})
+	}
+
+	stream, err := client.Watch(context.Background(), req)
 	if err != nil {
 		return err
 	}
@@ -395,36 +380,28 @@ func watch(cmd *cobra.Command, args []string, objectType topo.Object_Type) error
 	if !noHeaders {
 		printHeader(true)
 	}
-	for update := range watchStream(stream) {
-		if objectType == topo.Object_UNSPECIFIED || objectType == update.Object.Type {
-			printUpdateType(update.Type)
-			printRow(update.Object, true, noHeaders)
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			cli.Output("Error receiving notification : %v", err)
+			return err
+		}
+
+		event := res.Event
+		// FIXME: for now doing client-side filtering of events
+		if id == topo.NullID || id == event.Object.ID {
+			if event.Object.Type == topo.Object_UNSPECIFIED || objectType == event.Object.Type {
+				printUpdateType(event.Type)
+				printRow(event.Object, true, noHeaders)
+			}
 		}
 	}
 
 	return nil
-}
-
-func watchStream(stream topo.Topo_SubscribeClient) <-chan *topo.Update {
-	out := make(chan *topo.Update)
-
-	go func() {
-		defer close(out)
-		for {
-			response, err := stream.Recv()
-			if err == io.EOF {
-				// read done.
-				return
-			}
-			if err != nil {
-				cli.Output("Error receiving notification : %v", err)
-				return
-			}
-
-			out <- response.Update
-		}
-	}()
-	return out
 }
 
 func printHeader(printUpdateType bool) {
@@ -439,20 +416,20 @@ func printHeader(printUpdateType bool) {
 	_, _ = fmt.Fprintf(writer, "%-*.*s%-*.*s%-*.*s%-*.*s\n", width, prec, "Object Type", width, prec, "Object ID", width, prec, "Kind ID", width, prec, "Attributes")
 }
 
-func printUpdateType(updateType topo.Update_Type) {
+func printUpdateType(eventType topo.EventType) {
 	var width = 16
 	var prec = width - 1
 	writer := new(tabwriter.Writer)
 	writer.Init(cli.GetOutput(), 0, 0, 3, ' ', tabwriter.FilterHTML)
-	if updateType == topo.Update_UNSPECIFIED {
+	if eventType == topo.EventType_NONE {
 		_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, "REPLAY")
 	} else {
-		_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, updateType)
+		_, _ = fmt.Fprintf(writer, "%-*.*s", width, prec, eventType)
 	}
 	_ = writer.Flush()
 }
 
-func printRow(object *topo.Object, watch bool, noHeaders bool) {
+func printRow(object topo.Object, watch bool, noHeaders bool) {
 	var width = 16
 	var prec = width - 1
 	writer := new(tabwriter.Writer)

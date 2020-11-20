@@ -17,36 +17,91 @@ package manager
 
 import (
 	"github.com/onosproject/onos-lib-go/pkg/logging"
+	"github.com/onosproject/onos-lib-go/pkg/northbound"
+	topoctrl "github.com/onosproject/onos-topo/pkg/controller/topo"
+	"github.com/onosproject/onos-topo/pkg/northbound/topo"
+	topostore "github.com/onosproject/onos-topo/pkg/store/topo"
 )
 
 var log = logging.GetLogger("manager")
 
-var mgr Manager
+// Config is a manager configuration
+type Config struct {
+	CAPath   string
+	KeyPath  string
+	CertPath string
+	GRPCPort int
+	E2Port   int
+}
 
-// NewManager initializes the network control manager subsystem.
-func NewManager() (*Manager, error) {
+// NewManager creates a new manager
+func NewManager(config Config) *Manager {
 	log.Info("Creating Manager")
-	mgr = Manager{}
-	return &mgr, nil
+	return &Manager{
+		Config: config,
+	}
 }
 
 // Manager single point of entry for the topology system.
 type Manager struct {
+	Config Config
 }
 
 // Run starts a synchronizer based on the devices and the northbound services.
 func (m *Manager) Run() {
 	log.Info("Starting Manager")
-	// Start the main dispatcher system
+	if err := m.Start(); err != nil {
+		log.Fatal("Unable to run Manager", err)
+	}
 }
 
-//Close kills the channels and manager related objects
+// Start starts the manager
+func (m *Manager) Start() error {
+	err := m.startNorthboundServer()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// startNorthboundServer starts the northbound gRPC server
+func (m *Manager) startNorthboundServer() error {
+	s := northbound.NewServer(northbound.NewServerCfg(
+		m.Config.CAPath,
+		m.Config.KeyPath,
+		m.Config.CertPath,
+		int16(m.Config.GRPCPort),
+		true,
+		northbound.SecurityConfig{}))
+
+	topoStore, err := topostore.NewAtomixStore()
+	if err != nil {
+		return err
+	}
+
+	topoController := topoctrl.NewController(topoStore)
+	err = topoController.Start()
+	if err != nil {
+		return err
+	}
+
+	s.AddService(logging.Service{})
+	s.AddService(topo.NewService(topoStore))
+
+	doneCh := make(chan error)
+	go func() {
+		err := s.Serve(func(started string) {
+			log.Info("Started NBI on ", started)
+			close(doneCh)
+		})
+		if err != nil {
+			doneCh <- err
+		}
+	}()
+	return <-doneCh
+}
+
+// Close kills the channels and manager related objects
 func (m *Manager) Close() {
 	log.Info("Closing Manager")
-}
-
-// GetManager returns the initialized and running instance of manager.
-// Should be called only after NewManager and Run are done.
-func GetManager() *Manager {
-	return &mgr
 }

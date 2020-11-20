@@ -31,7 +31,7 @@ import (
 var log = logging.GetLogger("northbound", "topo")
 
 // NewService returns a new topo Service
-func NewService (store store.Store) northbound.Service {
+func NewService(store store.Store) northbound.Service {
 	return &Service{
 		store: store,
 	}
@@ -120,9 +120,9 @@ func (s *Server) Delete(ctx context.Context, req *topoapi.DeleteRequest) (*topoa
 	return res, nil
 }
 
-// TODO: add filter criteria; otherwise not scalable
 // List returns list of all objects
 func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.ListResponse, error) {
+	// TODO: add filter criteria; otherwise not scalable
 	log.Infof("Received ListRequest %+v", req)
 	objects, err := s.objectStore.List(ctx)
 	if err != nil {
