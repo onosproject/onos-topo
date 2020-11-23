@@ -18,6 +18,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/onosproject/onos-topo/api/topo"
+	"github.com/onosproject/onos-topo/pkg/bulk"
 	"io"
 	"strings"
 	"text/tabwriter"
@@ -25,6 +27,7 @@ import (
 
 	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-topo/api/device"
+	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"github.com/spf13/cobra"
 )
 
@@ -471,7 +474,6 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 	}
 }
 
-/*
 func getLoadYamlEntitiesCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "yamlentities {file}",
@@ -482,7 +484,6 @@ func getLoadYamlEntitiesCommand() *cobra.Command {
 	cmd.Flags().StringArray("attr", []string{""}, "Extra attributes to add to each device in k=v format")
 	return cmd
 }
-
 
 func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	var filename string
@@ -517,10 +518,6 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	request := topo.CreateRequest{
-		Object: *topo.Object, 0),
-	}
-
 	for _, kind := range topoConfig.TopoKinds {
 		if kind.Attributes == nil {
 			a := make(map[string]string)
@@ -532,7 +529,12 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		kind := kind // pin
-		request.Objects = append(request.Objects, bulk.TopoKindToTopoObject(&kind))
+
+		object := bulk.TopoKindToTopoObject(&kind)
+		_, err = client.Create(ctx, &topoapi.CreateRequest{Object: object})
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, entity := range topoConfig.TopoEntities {
@@ -546,7 +548,11 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		entity := entity // pin
-		request.Objects = append(request.Objects, bulk.TopoEntityToTopoObject(&entity))
+		object := bulk.TopoEntityToTopoObject(&entity)
+		_, err = client.Create(ctx, &topoapi.CreateRequest{Object: object})
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, relation := range topoConfig.TopoRelations {
@@ -560,7 +566,11 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		relation := relation // pin
-		request.Objects = append(request.Objects, bulk.TopoRelationToTopoObject(&relation))
+		object := bulk.TopoRelationToTopoObject(&relation)
+		_, err = client.Create(ctx, &topoapi.CreateRequest{Object: object})
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, relation := range topoConfig.TopoRelations {
@@ -574,15 +584,14 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		relation := relation // pin
-		request.Objects = append(request.Objects, bulk.TopoRelationToTopoObject(&relation))
-	}
-	_, err = client.Set(ctx, &request)
-	if err != nil {
-		return err
+		object := bulk.TopoRelationToTopoObject(&relation)
+		_, err = client.Create(ctx, &topoapi.CreateRequest{Object: object})
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Printf("Loaded %d topo devices from %s\n", len(topoConfig.TopoEntities), filename)
 
 	return nil
 }
-*/
