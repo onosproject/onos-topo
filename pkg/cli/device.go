@@ -474,6 +474,18 @@ func runWatchDeviceCommand(cmd *cobra.Command, args []string) error {
 	}
 }
 
+// Deprecated: to be replaced by getLoadYamlEntitiesCommand
+func getLoadYamlCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "yaml {file}",
+		Args:  cobra.ExactArgs(1),
+		Short: "Load topo data from a YAML file",
+		RunE:  runLoadYamlCommand,
+	}
+	cmd.Flags().StringArray("attr", []string{""}, "Extra attributes to add to each device in k=v format")
+	return cmd
+}
+
 func getLoadYamlEntitiesCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "yamlentities {file}",
@@ -483,6 +495,65 @@ func getLoadYamlEntitiesCommand() *cobra.Command {
 	}
 	cmd.Flags().StringArray("attr", []string{""}, "Extra attributes to add to each device in k=v format")
 	return cmd
+}
+
+// Deprecated: only used for getLoadYamlCommand() above
+func runLoadYamlCommand(cmd *cobra.Command, args []string) error {
+	var filename string
+	if len(args) > 0 {
+		filename = args[0]
+	}
+
+	extraAttrs, err := cmd.Flags().GetStringArray("attr")
+	if err != nil {
+		return err
+	}
+	for _, x := range extraAttrs {
+		split := strings.Split(x, "=")
+		if len(split) != 2 {
+			return fmt.Errorf("expect extra args to be in the format a=b. Rejected: %s", x)
+		}
+	}
+
+	deviceConfig, err := bulk.GetDeviceConfig(filename)
+	if err != nil {
+		return err
+	}
+
+	conn, err := cli.GetConnection(cmd)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	client := device.CreateDeviceServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	for _, dev := range deviceConfig.TopoDevices {
+		if dev.Attributes == nil {
+			dev.Attributes = make(map[string]string)
+		}
+		for _, x := range extraAttrs {
+			split := strings.Split(x, "=")
+			dev.Attributes[split[0]] = split[1]
+		}
+
+		dev := dev // pin
+		resp, err := client.Add(ctx, &device.AddRequest{
+			Device: &dev,
+		})
+		if err != nil {
+			return err
+		}
+		if resp.Device.ID != dev.ID {
+			return fmt.Errorf("error loading %s in to topo", dev.ID)
+		}
+	}
+
+	fmt.Printf("Loaded %d topo devices from %s\n", len(deviceConfig.TopoDevices), filename)
+
+	return nil
 }
 
 func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
