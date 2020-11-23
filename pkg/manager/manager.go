@@ -18,6 +18,7 @@ package manager
 import (
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
+	"github.com/onosproject/onos-topo/pkg/northbound/device"
 	"github.com/onosproject/onos-topo/pkg/northbound/topo"
 	topostore "github.com/onosproject/onos-topo/pkg/store/topo"
 )
@@ -80,6 +81,13 @@ func (m *Manager) startNorthboundServer() error {
 
 	s.AddService(logging.Service{})
 	s.AddService(topo.NewService(topoStore))
+
+	// FIXME: deprecate this
+	deviceService, err := device.NewService()
+	if err != nil {
+		return err
+	}
+	s.AddService(deviceService)
 
 	doneCh := make(chan error)
 	go func() {
