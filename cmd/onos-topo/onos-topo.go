@@ -36,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Info("Starting onos-e2sub")
+	log.Info("Starting onos-topo")
 	cfg := manager.Config{
 		CAPath:   *caPath,
 		KeyPath:  *keyPath,
@@ -44,7 +44,7 @@ func main() {
 		GRPCPort: 5150,
 	}
 
-	log.Info("Starting onos-e2sub")
+	log.Info("Starting onos-topo")
 	mgr := manager.NewManager(cfg)
 	mgr.Run()
 	<-ready
