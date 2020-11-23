@@ -18,7 +18,6 @@ package manager
 import (
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
-	topoctrl "github.com/onosproject/onos-topo/pkg/controller/topo"
 	"github.com/onosproject/onos-topo/pkg/northbound/topo"
 	topostore "github.com/onosproject/onos-topo/pkg/store/topo"
 )
@@ -75,12 +74,6 @@ func (m *Manager) startNorthboundServer() error {
 		northbound.SecurityConfig{}))
 
 	topoStore, err := topostore.NewAtomixStore()
-	if err != nil {
-		return err
-	}
-
-	topoController := topoctrl.NewController(topoStore)
-	err = topoController.Start()
 	if err != nil {
 		return err
 	}
