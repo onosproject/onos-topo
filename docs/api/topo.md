@@ -3,13 +3,13 @@
 
 ## Table of Contents
 
-- [api/topo/device.proto](#api/topo/device.proto)
-    - [Attribute](#topo.Attribute)
-  
 - [api/topo/topo.proto](#api/topo/topo.proto)
+    - [CreateRequest](#topo.CreateRequest)
+    - [CreateResponse](#topo.CreateResponse)
     - [DeleteRequest](#topo.DeleteRequest)
     - [DeleteResponse](#topo.DeleteResponse)
     - [Entity](#topo.Entity)
+    - [Event](#topo.Event)
     - [GetRequest](#topo.GetRequest)
     - [GetResponse](#topo.GetResponse)
     - [Kind](#topo.Kind)
@@ -19,14 +19,13 @@
     - [Object](#topo.Object)
     - [Object.AttributesEntry](#topo.Object.AttributesEntry)
     - [Relation](#topo.Relation)
-    - [SetRequest](#topo.SetRequest)
-    - [SetResponse](#topo.SetResponse)
-    - [SubscribeRequest](#topo.SubscribeRequest)
-    - [SubscribeResponse](#topo.SubscribeResponse)
-    - [Update](#topo.Update)
+    - [UpdateRequest](#topo.UpdateRequest)
+    - [UpdateResponse](#topo.UpdateResponse)
+    - [WatchRequest](#topo.WatchRequest)
+    - [WatchResponse](#topo.WatchResponse)
   
+    - [EventType](#topo.EventType)
     - [Object.Type](#topo.Object.Type)
-    - [Update.Type](#topo.Update.Type)
   
     - [Topo](#topo.Topo)
   
@@ -34,50 +33,40 @@
 
 
 
-<a name="api/topo/device.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## api/topo/device.proto
-
-
- 
-
-
-<a name="topo.Attribute"></a>
-
-### Attribute
-Device attribute keys
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| ADDRESS | 0 |  |
-| REVISION | 1 |  |
-| TARGET | 2 |  |
-| VERSION | 3 |  |
-| TIMEOUT | 4 |  |
-| TYPE | 5 |  |
-| ROLE | 6 |  |
-| DISPLAYNAME | 7 |  |
-| USER | 8 |  |
-| PASSWORD | 9 |  |
-| PLAINTEXT | 10 |  |
-| INSECURE | 11 |  |
-| CA_CERT | 12 |  |
-| CERT | 13 |  |
-
-
- 
-
- 
-
- 
-
-
-
 <a name="api/topo/topo.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
 ## api/topo/topo.proto
+
+
+
+<a name="topo.CreateRequest"></a>
+
+### CreateRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| object | [Object](#topo.Object) |  |  |
+
+
+
+
+
+
+<a name="topo.CreateResponse"></a>
+
+### CreateResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| object | [Object](#topo.Object) |  |  |
+
+
+
 
 
 
@@ -116,6 +105,22 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | ----- | ---- | ----- | ----------- |
 | kind_id | [string](#string) |  | user-defined entity kind |
 | protocols | [device.ProtocolState](#topo.device.ProtocolState) | repeated |  |
+
+
+
+
+
+
+<a name="topo.Event"></a>
+
+### Event
+Event is a topo operation event
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| type | [EventType](#topo.EventType) |  |  |
+| object | [Object](#topo.Object) |  |  |
 
 
 
@@ -202,7 +207,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| object | [Object](#topo.Object) |  |  |
+| objects | [Object](#topo.Object) | repeated |  |
 
 
 
@@ -218,6 +223,7 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | id | [string](#string) |  |  |
+| revision | [uint64](#uint64) |  |  |
 | type | [Object.Type](#topo.Object.Type) |  |  |
 | entity | [Entity](#topo.Entity) |  |  |
 | relation | [Relation](#topo.Relation) |  |  |
@@ -262,40 +268,44 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
-<a name="topo.SetRequest"></a>
+<a name="topo.UpdateRequest"></a>
 
-### SetRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| objects | [Object](#topo.Object) | repeated | The write batch, comprising a list of Update operations |
-
-
-
-
-
-
-<a name="topo.SetResponse"></a>
-
-### SetResponse
-
-
-
-
-
-
-
-<a name="topo.SubscribeRequest"></a>
-
-### SubscribeRequest
+### UpdateRequest
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  |  |
+| object | [Object](#topo.Object) |  |  |
+
+
+
+
+
+
+<a name="topo.UpdateResponse"></a>
+
+### UpdateResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| object | [Object](#topo.Object) |  |  |
+
+
+
+
+
+
+<a name="topo.WatchRequest"></a>
+
+### WatchRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
 | noreplay | [bool](#bool) |  |  |
 
 
@@ -303,37 +313,35 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 
 
 
-<a name="topo.SubscribeResponse"></a>
+<a name="topo.WatchResponse"></a>
 
-### SubscribeResponse
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| update | [Update](#topo.Update) |  |  |
-
-
-
-
-
-
-<a name="topo.Update"></a>
-
-### Update
+### WatchResponse
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| type | [Update.Type](#topo.Update.Type) |  |  |
-| object | [Object](#topo.Object) |  |  |
+| event | [Event](#topo.Event) |  |  |
 
 
 
 
 
  
+
+
+<a name="topo.EventType"></a>
+
+### EventType
+EventType is a topo operation event type
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| NONE | 0 |  |
+| ADDED | 1 |  |
+| UPDATED | 2 |  |
+| REMOVED | 3 |  |
+
 
 
 <a name="topo.Object.Type"></a>
@@ -349,20 +357,6 @@ Entity represents any &#34;thing&#34; that is represented in the topology
 | KIND | 3 |  |
 
 
-
-<a name="topo.Update.Type"></a>
-
-### Update.Type
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| UNSPECIFIED | 0 |  |
-| INSERT | 1 |  |
-| MODIFY | 2 |  |
-| DELETE | 3 |  |
-
-
  
 
  
@@ -375,11 +369,12 @@ EntityService provides an API for managing entities.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Set | [SetRequest](#topo.SetRequest) | [SetResponse](#topo.SetResponse) | Insert or replace an object from the topology |
+| Create | [CreateRequest](#topo.CreateRequest) | [CreateResponse](#topo.CreateResponse) | Create a new topology object |
 | Get | [GetRequest](#topo.GetRequest) | [GetResponse](#topo.GetResponse) | Get an object from topology |
+| Update | [UpdateRequest](#topo.UpdateRequest) | [UpdateResponse](#topo.UpdateResponse) | Update an existing topology object |
 | Delete | [DeleteRequest](#topo.DeleteRequest) | [DeleteResponse](#topo.DeleteResponse) | Delete an object from topology |
-| List | [ListRequest](#topo.ListRequest) | [ListResponse](#topo.ListResponse) stream | List gets a stream of requested objects |
-| Subscribe | [SubscribeRequest](#topo.SubscribeRequest) | [SubscribeResponse](#topo.SubscribeResponse) stream | Subscribe returns a stream of topo change notifications |
+| List | [ListRequest](#topo.ListRequest) | [ListResponse](#topo.ListResponse) | List gets a stream of requested objects |
+| Watch | [WatchRequest](#topo.WatchRequest) | [WatchResponse](#topo.WatchResponse) stream | Watch returns a stream of topo change notifications |
 
  
 

@@ -24,33 +24,51 @@ import "github.com/onosproject/onos-topo/api/device/device.proto";
 
 // EntityService provides an API for managing entities.
 service Topo {
-  // Insert or replace an object from the topology
-  rpc Set (SetRequest) returns (SetResponse) {
+  // Create a new topology object
+  rpc Create (CreateRequest) returns (CreateResponse) {
   }
 
   // Get an object from topology
   rpc Get (GetRequest) returns (GetResponse) {
   }
 
+  // Update an existing topology object
+  rpc Update (UpdateRequest) returns (UpdateResponse) {
+  }
   // Delete an object from topology
   rpc Delete (DeleteRequest) returns (DeleteResponse) {
   }
 
   // List gets a stream of requested objects
-  rpc List (ListRequest) returns (stream ListResponse) {
+  rpc List (ListRequest) returns (ListResponse) {
   }
 
-  // Subscribe returns a stream of topo change notifications
-  rpc Subscribe (SubscribeRequest) returns (stream SubscribeResponse) {
+  // Watch returns a stream of topo change notifications
+  rpc Watch (WatchRequest) returns (stream WatchResponse) {
   }
 }
 
-message SetRequest {
-  // The write batch, comprising a list of Update operations
-  repeated Object objects = 1;
+// EventType is a topo operation event type
+enum EventType {
+  NONE = 0;
+  ADDED = 1;
+  UPDATED = 2;
+  REMOVED = 3;
 }
 
-message SetResponse {
+// Event is a topo operation event
+message Event {
+  EventType type = 1;
+  Object object = 2 [(gogoproto.nullable) = false];
+}
+
+
+message CreateRequest {
+  Object object = 1;
+}
+
+message CreateResponse {
+  Object object = 1;
 }
 
 message GetRequest {
@@ -58,6 +76,14 @@ message GetRequest {
 }
 
 message GetResponse {
+  Object object = 1;
+}
+
+message UpdateRequest {
+  Object object = 1;
+}
+
+message UpdateResponse {
   Object object = 1;
 }
 
@@ -72,31 +98,20 @@ message ListRequest {
 }
 
 message ListResponse {
-  Object object = 1;
+  repeated Object objects = 1 [(gogoproto.nullable) = false];
 }
 
-message SubscribeRequest {
-  string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+message WatchRequest {
   bool noreplay = 2;
 }
 
-message SubscribeResponse {
-  Update update = 1;
-}
-
-message Update {
-  enum Type {
-    UNSPECIFIED = 0;
-    INSERT = 1;
-    MODIFY = 2;
-    DELETE = 3;
-  }
-  Type type = 2;
-  Object object = 3;
+message WatchResponse {
+  Event event = 1 [(gogoproto.nullable) = false];
 }
 
 message Object {
   string id = 1 [(gogoproto.customname) = "ID", (gogoproto.casttype) = "ID"];
+  uint64 revision = 2 [(gogoproto.casttype) = "Revision"];
 
   enum Type {
     UNSPECIFIED = 0;
@@ -104,15 +119,15 @@ message Object {
     RELATION = 2;
     KIND = 3;
   }
-  Type type = 2;
+  Type type = 3;
 
   oneof obj {
-    Entity entity = 3;
-    Relation relation = 4;
-    Kind kind = 5;
+    Entity entity = 4;
+    Relation relation = 5;
+    Kind kind = 6;
   }
 
-  map<string, string> attributes = 6;
+  map<string, string> attributes = 7;
 }
 
 // Entity represents any "thing" that is represented in the topology
