@@ -16,7 +16,7 @@ package topo
 
 import (
 	"context"
-	topoapi "github.com/onosproject/onos-api/api/topo"
+	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	store "github.com/onosproject/onos-topo/pkg/store/topo"
 	"github.com/stretchr/testify/assert"

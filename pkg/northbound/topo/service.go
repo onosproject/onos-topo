@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 
-	topoapi "github.com/onosproject/onos-api/api/topo"
+	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	store "github.com/onosproject/onos-topo/pkg/store/topo"

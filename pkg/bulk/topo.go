@@ -17,7 +17,7 @@ package bulk
 import (
 	"fmt"
 
-	"github.com/onosproject/onos-api/api/topo"
+	"github.com/onosproject/onos-api/go/onos/topo"
 	configlib "github.com/onosproject/onos-lib-go/pkg/config"
 )
 

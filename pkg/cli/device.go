@@ -24,7 +24,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	topoapi "github.com/onosproject/onos-api/api/topo"
+	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-topo/api/device"
 	"github.com/spf13/cobra"
