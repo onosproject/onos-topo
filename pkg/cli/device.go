@@ -18,16 +18,15 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/onosproject/onos-topo/api/topo"
 	"github.com/onosproject/onos-topo/pkg/bulk"
 	"io"
 	"strings"
 	"text/tabwriter"
 	"time"
 
+	topoapi "github.com/onosproject/onos-api/api/topo"
 	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-topo/api/device"
-	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"github.com/spf13/cobra"
 )
 
@@ -513,7 +512,7 @@ func runLoadYamlEntitiesCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	defer conn.Close()
-	client := topo.CreateTopoClient(conn)
+	client := topoapi.CreateTopoClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

@@ -17,8 +17,8 @@ package bulk
 import (
 	"fmt"
 
+	"github.com/onosproject/onos-api/api/topo"
 	configlib "github.com/onosproject/onos-lib-go/pkg/config"
-	"github.com/onosproject/onos-topo/api/topo"
 )
 
 var topoConfig *TopoConfig
