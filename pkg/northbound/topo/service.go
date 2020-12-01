@@ -19,10 +19,9 @@ import (
 	"fmt"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 
+	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
-	"github.com/onosproject/onos-topo/api/topo"
-	topoapi "github.com/onosproject/onos-topo/api/topo"
 	store "github.com/onosproject/onos-topo/pkg/store/topo"
 	"google.golang.org/grpc"
 )
@@ -141,7 +140,7 @@ func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.L
 }
 
 // Watch streams topology changes
-func (s *Server) Watch(req *topo.WatchRequest, server topo.Topo_WatchServer) error {
+func (s *Server) Watch(req *topoapi.WatchRequest, server topoapi.Topo_WatchServer) error {
 	log.Infof("Received WatchRequest %+v", req)
 	var watchOpts []store.WatchOption
 	if !req.Noreplay {
@@ -158,9 +157,9 @@ func (s *Server) Watch(req *topo.WatchRequest, server topo.Topo_WatchServer) err
 }
 
 // Stream is the ongoing stream for WatchTerminations request
-func (s *Server) Stream(server topoapi.Topo_WatchServer, ch chan topo.Event) error {
+func (s *Server) Stream(server topoapi.Topo_WatchServer, ch chan topoapi.Event) error {
 	for event := range ch {
-		res := &topo.WatchResponse{
+		res := &topoapi.WatchResponse{
 			Event: event,
 		}
 
@@ -175,18 +174,18 @@ func (s *Server) Stream(server topoapi.Topo_WatchServer, ch chan topo.Event) err
 
 // ValidateObject validates the given object
 func (s *Server) ValidateObject(ctx context.Context, object *topoapi.Object) error {
-	var kind *topo.Object
+	var kind *topoapi.Object
 	var err error
 	switch object.Type {
-	case topo.Object_KIND:
-	case topo.Object_ENTITY:
-		if object.GetEntity().KindID != topo.NullID {
+	case topoapi.Object_KIND:
+	case topoapi.Object_ENTITY:
+		if object.GetEntity().KindID != topoapi.NullID {
 			kind, err = s.objectStore.Get(ctx, object.GetEntity().KindID)
 			if err != nil {
 				return err
 			}
 		}
-	case topo.Object_RELATION:
+	case topoapi.Object_RELATION:
 		kind, err = s.objectStore.Get(ctx, object.GetRelation().KindID)
 		if err != nil {
 			return err
@@ -203,7 +202,7 @@ func (s *Server) ValidateObject(ctx context.Context, object *topoapi.Object) err
 		log.Infof("Invalid type %v", object)
 	}
 
-	if kind != nil && object.Type != topo.Object_KIND {
+	if kind != nil && object.Type != topoapi.Object_KIND {
 		if kind.Attributes != nil {
 			for attrName := range object.Attributes {
 				if _, ok := kind.Attributes[attrName]; !ok {

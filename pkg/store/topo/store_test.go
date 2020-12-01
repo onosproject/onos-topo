@@ -16,9 +16,9 @@ package topo
 
 import (
 	"context"
+	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
-	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

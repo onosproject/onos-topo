@@ -25,8 +25,8 @@ import (
 	_map "github.com/atomix/go-client/pkg/client/map"
 	"github.com/atomix/go-client/pkg/client/primitive"
 	"github.com/gogo/protobuf/proto"
+	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/atomix"
-	topoapi "github.com/onosproject/onos-topo/api/topo"
 	"github.com/onosproject/onos-topo/pkg/config"
 )
 
