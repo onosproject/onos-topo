@@ -18,10 +18,9 @@ import "github.com/spf13/cobra"
 
 func getGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get {device|entity|relation|kind} [args]",
+		Use:   "get {entity|relation|kind} [args]",
 		Short: "Get topology resources",
 	}
-	cmd.AddCommand(getGetDeviceCommand())
 	cmd.AddCommand(getGetEntityCommand())
 	cmd.AddCommand(getGetRelationCommand())
 	cmd.AddCommand(getGetKindCommand())
@@ -30,41 +29,40 @@ func getGetCommand() *cobra.Command {
 
 func getAddCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add {device|entity|relation|kind} [args]",
+		Use:   "add {entity|relation|kind} [args]",
 		Short: "Add a topology resource",
 	}
-	cmd.AddCommand(getAddDeviceCommand())
 	cmd.AddCommand(getAddEntityCommand())
 	cmd.AddCommand(getAddRelationCommand())
 	cmd.AddCommand(getAddKindCommand())
 	return cmd
 }
 
+// FIXME: implement update for entity|relation|kind
 func getUpdateCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update {device} [args]",
+		Use:   "update {...} [args]",
 		Short: "Update a topology resource",
 	}
-	cmd.AddCommand(getUpdateDeviceCommand())
 	return cmd
 }
 
+// FIXME: implement remove for entity|relation|kind
+// FIXME: fix inconsistency... what is "object"? Is it "entity"?!
 func getRemoveCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove {device|object} [args]",
+		Use:   "remove {object} [args]",
 		Short: "Remove a topology resource",
 	}
-	cmd.AddCommand(getRemoveDeviceCommand())
 	cmd.AddCommand(getRemoveObjectCommand())
 	return cmd
 }
 
 func getWatchCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "watch {device|entity|relation|kind|all} [args]",
+		Use:   "watch {entity|relation|kind|all} [args]",
 		Short: "Watch for changes to a topology resource type",
 	}
-	cmd.AddCommand(getWatchDeviceCommand())
 	cmd.AddCommand(getWatchEntityCommand())
 	cmd.AddCommand(getWatchRelationCommand())
 	cmd.AddCommand(getWatchKindCommand())
