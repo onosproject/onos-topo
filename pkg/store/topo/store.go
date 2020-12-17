@@ -238,6 +238,8 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, opts .
 					eventType = topoapi.EventType_NONE
 				case _map.EventInserted:
 					eventType = topoapi.EventType_ADDED
+				case _map.EventUpdated:
+					eventType = topoapi.EventType_UPDATED
 				case _map.EventRemoved:
 					eventType = topoapi.EventType_REMOVED
 				}
