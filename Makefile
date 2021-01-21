@@ -1,4 +1,4 @@
-export CGO_ENABLED=0
+export CGO_ENABLED=1
 export GO111MODULE=on
 
 .PHONY: build
@@ -11,10 +11,14 @@ build: # @HELP build the Go binaries and run all validations (default)
 build:
 	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos-topo
 
-test: # @HELP run the unit tests and source code validation
+test: # @HELP run the unit tests and source code validation producing a golang style report
 test: build deps license_check linters
-	go test github.com/onosproject/onos-topo/pkg/...
-	go test github.com/onosproject/onos-topo/cmd/...
+	go test -race github.com/onosproject/onos-topo/...
+
+jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
+jenkins-test: build deps license_check linters
+	./../build-tools/build/jenkins/make-unit
+
 
 coverage: # @HELP generate unit test coverage data
 coverage: build deps linters license_check
