@@ -6,4 +6,3 @@
 [![GoDoc](https://godoc.org/github.com/onosproject/onos-topo?status.svg)](https://godoc.org/github.com/onosproject/onos-topo)
 
 Topology subsystem for ONOS (µONOS Architecture)
-
