@@ -15,7 +15,7 @@ test: # @HELP run the unit tests and source code validation producing a golang s
 test: build deps license_check linters
 	go test -race github.com/onosproject/onos-topo/...
 
-jenkins-test: build-tools # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
+jenkins-test: build-tools jenkins-tools # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
 jenkins-test: build deps license_check linters
 	./../build-tools/build/jenkins/make-unit
 
