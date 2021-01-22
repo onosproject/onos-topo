@@ -32,7 +32,10 @@ deps: # @HELP ensure that the required dependencies are in place
 linters: # @HELP examines Go source code and reports coding problems
 	golangci-lint run
 
-license_check: # @HELP examine and ensure license headers exist
+build-tools: # @HELP install the ONOS build tools if needed
+	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
+
+license_check: build-tools # @HELP examine and ensure license headers exist
 	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
 	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
