@@ -36,7 +36,8 @@ build-tools: # @HELP install the ONOS build tools if needed
 	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
 
 golang-ci: # @HELP install golang-ci if not present
-	golangci-lint --version || curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.7
+	go env GOPATH
+	golangci-lint --version || curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b `go env GOPATH`/bin v1.23.7
 
 license_check: build-tools # @HELP examine and ensure license headers exist
 	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
