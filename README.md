@@ -1,4 +1,4 @@
-# onos-topo 5
+# onos-topo
 [![Build Status](https://travis-ci.com/onosproject/onos-topo.svg?branch=master)](https://travis-ci.com/onosproject/onos-topo)
 [![Integration Test Status](https://img.shields.io/travis/onosproject/onos-test?label=integration-tests&logo=integration-tests)](https://travis-ci.com/onosproject/onos-test)
 [![Go Report Card](https://goreportcard.com/badge/github.com/onosproject/onos-topo)](https://goreportcard.com/report/github.com/onosproject/onos-topo)
