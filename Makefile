@@ -15,7 +15,7 @@ test: # @HELP run the unit tests and source code validation producing a golang s
 test: build deps license_check linters
 	go test -race github.com/onosproject/onos-topo/...
 
-jenkins-test: build-tools jenkins-tools # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
+jenkins-test: build-tools # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
 jenkins-test: build deps license_check linters
 	TEST_PACKAGES=github.com/onosproject/onos-topo/pkg/... ./../build-tools/build/jenkins/make-unit
 
@@ -29,7 +29,7 @@ deps: # @HELP ensure that the required dependencies are in place
 	bash -c "diff -u <(echo -n) <(git diff go.mod)"
 	bash -c "diff -u <(echo -n) <(git diff go.sum)"
 
-linters: golang-ci # @HELP examines Go source code and reports coding problems
+linters: # @HELP examines Go source code and reports coding problems
 	golangci-lint run --timeout 5m
 
 build-tools: # @HELP install the ONOS build tools if needed
