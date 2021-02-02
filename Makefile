@@ -1,20 +1,23 @@
-export CGO_ENABLED=0
+export CGO_ENABLED=1
 export GO111MODULE=on
 
 .PHONY: build
 
 ONOS_TOPO_VERSION := latest
-ONOS_BUILD_VERSION := v0.6.3
 ONOS_PROTOC_VERSION := v0.6.3
 
 build: # @HELP build the Go binaries and run all validations (default)
 build:
 	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos-topo
 
-test: # @HELP run the unit tests and source code validation
+test: # @HELP run the unit tests and source code validation producing a golang style report
 test: build deps license_check linters
-	go test github.com/onosproject/onos-topo/pkg/...
-	go test github.com/onosproject/onos-topo/cmd/...
+	go test -race github.com/onosproject/onos-topo/...
+
+jenkins-test: build-tools # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
+jenkins-test: build deps license_check linters
+	TEST_PACKAGES=github.com/onosproject/onos-topo/pkg/... ./../build-tools/build/jenkins/make-unit
+
 
 coverage: # @HELP generate unit test coverage data
 coverage: build deps linters license_check
@@ -25,24 +28,23 @@ deps: # @HELP ensure that the required dependencies are in place
 	bash -c "diff -u <(echo -n) <(git diff go.mod)"
 	bash -c "diff -u <(echo -n) <(git diff go.sum)"
 
-linters: # @HELP examines Go source code and reports coding problems
-	golangci-lint run
+linters: golang-ci # @HELP examines Go source code and reports coding problems
+	golangci-lint run --timeout 5m
 
-license_check: # @HELP examine and ensure license headers exist
+build-tools: # @HELP install the ONOS build tools if needed
 	@if [ ! -d "../build-tools" ]; then cd .. && git clone https://github.com/onosproject/build-tools.git; fi
+
+golang-ci: # @HELP install golang-ci if not present
+	golangci-lint --version || curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b `go env GOPATH`/bin v1.36.0
+
+license_check: build-tools # @HELP examine and ensure license headers exist
 	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
 onos-topo-base-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
-	docker build . -f build/base/Dockerfile \
-		--build-arg ONOS_BUILD_VERSION=${ONOS_BUILD_VERSION} \
-		-t onosproject/onos-topo-base:${ONOS_TOPO_VERSION}
-	@rm -rf vendor
-
-onos-topo-docker: onos-topo-base-docker # @HELP build onos-topo Docker image
 	docker build . -f build/onos-topo/Dockerfile \
-		--build-arg ONOS_TOPO_BASE_VERSION=${ONOS_TOPO_VERSION} \
 		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
+	@rm -rf vendor
 
 images: # @HELP build all Docker images
 images: build onos-topo-docker

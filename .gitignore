@@ -4,4 +4,7 @@ vendor
 *.DS_Store
 coverage.txt
 *.coverprofile
+*report*.xml
+*coverage*.xml
+*-output.out
 .idea
