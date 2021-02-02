@@ -40,13 +40,7 @@ golang-ci: # @HELP install golang-ci if not present
 license_check: build-tools # @HELP examine and ensure license headers exist
 	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
-protos: # @HELP compile the protobuf files (using protoc-go Docker)
-	docker run -it -v `pwd`:/go/src/github.com/onosproject/onos-topo \
-		-w /go/src/github.com/onosproject/onos-topo \
-		--entrypoint build/bin/compile-protos.sh \
-		onosproject/protoc-go:${ONOS_PROTOC_VERSION}
-
-onos-topo-docker: # @HELP build onos-topo Docker image
+onos-topo-base-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
 	docker build . -f build/onos-topo/Dockerfile \
 		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
