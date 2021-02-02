@@ -40,7 +40,7 @@ golang-ci: # @HELP install golang-ci if not present
 license_check: build-tools # @HELP examine and ensure license headers exist
 	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
-onos-topo-base-docker: # @HELP build onos-topo base Docker image
+onos-topo-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
 	docker build . -f build/onos-topo/Dockerfile \
 		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
