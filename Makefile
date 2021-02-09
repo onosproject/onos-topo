@@ -59,6 +59,10 @@ all: build images
 publish: # @HELP publish version on github and dockerhub
 	./../build-tools/publish-version ${VERSION} onosproject/onos-topo
 
+jenkins-publish: build-tools # @HELP Jenkins calls this to publish artifacts
+	./build/bin/push-images
+	../build-tools/release-merge-commit
+
 bumponosdeps: # @HELP update "onosproject" go dependencies and push patch to git.
 	./../build-tools/bump-onos-deps ${VERSION}
 
