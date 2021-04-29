@@ -6,7 +6,7 @@ require (
 	github.com/atomix/go-client v0.4.1
 	github.com/gogo/protobuf v1.3.1
 	github.com/mattn/go-colorable v0.1.2 // indirect
-	github.com/onosproject/helmit v0.6.8
+	github.com/onosproject/helmit v0.6.11
 	github.com/onosproject/onos-api/go v0.7.0
 	github.com/onosproject/onos-lib-go v0.7.0
 	github.com/onosproject/onos-test v0.6.4
