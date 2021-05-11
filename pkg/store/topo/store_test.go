@@ -16,6 +16,7 @@ package topo
 
 import (
 	"context"
+	"github.com/gogo/protobuf/types"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
@@ -40,10 +41,12 @@ func TestTopoStore(t *testing.T) {
 	assert.NoError(t, err)
 
 	obj1 := &topoapi.Object{
-		ID: "o1",
+		ID:     "o1",
+		Labels: []string{"test", "ran"},
 	}
 	obj2 := &topoapi.Object{
-		ID: "o2",
+		ID:     "o2",
+		Labels: []string{"e2node", "ran"},
 	}
 
 	// Create a new object
@@ -58,6 +61,8 @@ func TestTopoStore(t *testing.T) {
 	assert.NotNil(t, obj1)
 	assert.Equal(t, topoapi.ID("o1"), obj1.ID)
 	assert.NotEqual(t, topoapi.Revision(0), obj1.Revision)
+	assert.Equal(t, "test", obj1.Labels[0])
+	assert.Equal(t, "ran", obj1.Labels[1])
 
 	// Create another object
 	err = store2.Create(context.TODO(), obj2)
@@ -72,8 +77,9 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, topoapi.ID("o2"), topoEvent.ID)
 
 	// Update one of the objects
-	obj2.Attributes = make(map[string]string)
-	obj2.Attributes["foo"] = "bar"
+	obj2.Attributes = make(map[string]*types.Any)
+	err = topoapi.SetAttribute(obj2, "foo", &topoapi.Location{Lat: 1, Lng: 2})
+	assert.NoError(t, err)
 	revision := obj2.Revision
 	err = store1.Update(context.TODO(), obj2)
 	assert.NoError(t, err)
@@ -86,6 +92,8 @@ func TestTopoStore(t *testing.T) {
 	err = store1.Update(context.TODO(), obj2)
 	assert.NoError(t, err)
 	assert.NotEqual(t, revision, obj2.Revision)
+	assert.Equal(t, "e2node", obj2.Labels[0])
+	assert.Equal(t, "ran", obj2.Labels[1])
 
 	// Verify that concurrent updates fail
 	obj11, err := store1.Get(context.TODO(), "o1")
@@ -93,13 +101,15 @@ func TestTopoStore(t *testing.T) {
 	obj12, err := store2.Get(context.TODO(), "o1")
 	assert.NoError(t, err)
 
-	obj11.Attributes = make(map[string]string)
-	obj11.Attributes["foo"] = "barfoo"
+	obj11.Attributes = make(map[string]*types.Any)
+	err = topoapi.SetAttribute(obj11, "foo", &topoapi.Location{Lat: 2, Lng: 1})
+	assert.NoError(t, err)
 	err = store1.Update(context.TODO(), obj11)
 	assert.NoError(t, err)
 
-	obj12.Attributes = make(map[string]string)
-	obj12.Attributes["foo"] = "foobar"
+	obj12.Attributes = make(map[string]*types.Any)
+	err = topoapi.SetAttribute(obj12, "foo", &topoapi.E2Node{})
+	assert.NoError(t, err)
 	err = store2.Update(context.TODO(), obj12)
 	assert.Error(t, err)
 
@@ -110,6 +120,14 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, topoapi.ID("o2"), topoEvent.ID)
 	topoEvent = nextEvent(t, ch)
 	assert.Equal(t, topoapi.ID("o1"), topoEvent.ID)
+
+	// Verify the attribute values
+	obj2g, err := store1.Get(context.TODO(), obj2.ID)
+	assert.NoError(t, err)
+	loc := topoapi.GetAttribute(obj2g, "foo", &topoapi.Location{}).(*topoapi.Location)
+	assert.NotNil(t, loc)
+	assert.Equal(t, 1.0, loc.Lat)
+	assert.Equal(t, 2.0, loc.Lng)
 
 	// List the objects
 	objects, err := store1.List(context.TODO())
