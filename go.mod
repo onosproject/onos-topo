@@ -12,7 +12,11 @@ require (
 	github.com/onosproject/onos-test v0.6.4
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/spf13/viper v1.6.2 // indirect
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/tools v0.0.0-20200113040837-eac381796e91 // indirect
 	google.golang.org/grpc v1.33.2
+	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 )
+
+replace github.com/onosproject/onos-api/go => /Users/tom/src/github.com/onosproject/onos-api/go
