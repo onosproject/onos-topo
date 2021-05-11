@@ -74,9 +74,8 @@ func TestTopoStore(t *testing.T) {
 
 	// Update one of the objects
 	obj2.Attributes = make(map[string]*types.Any)
-	foo, err := types.MarshalAny(&topoapi.Location{Lat: 1, Lng: 2})
+	err = topoapi.SetAttribute(obj2, "foo", &topoapi.Location{Lat: 1, Lng: 2})
 	assert.NoError(t, err)
-	obj2.Attributes["foo"] = foo
 	revision := obj2.Revision
 	err = store1.Update(context.TODO(), obj2)
 	assert.NoError(t, err)
@@ -97,16 +96,14 @@ func TestTopoStore(t *testing.T) {
 	assert.NoError(t, err)
 
 	obj11.Attributes = make(map[string]*types.Any)
-	bar, err := types.MarshalAny(&topoapi.Location{Lat: 2, Lng: 1})
+	err = topoapi.SetAttribute(obj11, "foo", &topoapi.Location{Lat: 2, Lng: 1})
 	assert.NoError(t, err)
-	obj11.Attributes["foo"] = bar
 	err = store1.Update(context.TODO(), obj11)
 	assert.NoError(t, err)
 
 	obj12.Attributes = make(map[string]*types.Any)
-	foobar, err := types.MarshalAny(&topoapi.E2Node{})
+	err = topoapi.SetAttribute(obj12, "foo", &topoapi.E2Node{})
 	assert.NoError(t, err)
-	obj12.Attributes["foo"] = foobar
 	err = store2.Update(context.TODO(), obj12)
 	assert.Error(t, err)
 
@@ -121,9 +118,8 @@ func TestTopoStore(t *testing.T) {
 	// Verify the attribute values
 	obj2g, err := store1.Get(context.TODO(), obj2.ID)
 	assert.NoError(t, err)
-	var loc topoapi.Location
-	err = types.UnmarshalAny(obj2g.Attributes["foo"], &loc)
-	assert.NoError(t, err)
+	loc := topoapi.GetAttribute(obj2g, "foo", &topoapi.Location{}).(*topoapi.Location)
+	assert.NotNil(t, loc)
 	assert.Equal(t, 1.0, loc.Lat)
 	assert.Equal(t, 2.0, loc.Lng)
 
