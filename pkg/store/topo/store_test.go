@@ -41,10 +41,12 @@ func TestTopoStore(t *testing.T) {
 	assert.NoError(t, err)
 
 	obj1 := &topoapi.Object{
-		ID: "o1",
+		ID:     "o1",
+		Labels: []string{"test", "ran"},
 	}
 	obj2 := &topoapi.Object{
-		ID: "o2",
+		ID:     "o2",
+		Labels: []string{"e2node", "ran"},
 	}
 
 	// Create a new object
@@ -59,6 +61,8 @@ func TestTopoStore(t *testing.T) {
 	assert.NotNil(t, obj1)
 	assert.Equal(t, topoapi.ID("o1"), obj1.ID)
 	assert.NotEqual(t, topoapi.Revision(0), obj1.Revision)
+	assert.Equal(t, "test", obj1.Labels[0])
+	assert.Equal(t, "ran", obj1.Labels[1])
 
 	// Create another object
 	err = store2.Create(context.TODO(), obj2)
@@ -88,6 +92,8 @@ func TestTopoStore(t *testing.T) {
 	err = store1.Update(context.TODO(), obj2)
 	assert.NoError(t, err)
 	assert.NotEqual(t, revision, obj2.Revision)
+	assert.Equal(t, "e2node", obj2.Labels[0])
+	assert.Equal(t, "ran", obj2.Labels[1])
 
 	// Verify that concurrent updates fail
 	obj11, err := store1.Get(context.TODO(), "o1")
