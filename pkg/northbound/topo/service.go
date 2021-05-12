@@ -203,15 +203,15 @@ func (s *Server) ValidateObject(ctx context.Context, object *topoapi.Object) err
 	}
 
 	if kind != nil && object.Type != topoapi.Object_KIND {
-		if kind.Attributes != nil {
-			for attrName := range object.Attributes {
-				if _, ok := kind.Attributes[attrName]; !ok {
+		if kind.Aspects != nil {
+			for attrName := range object.Aspects {
+				if _, ok := kind.Aspects[attrName]; !ok {
 					return fmt.Errorf("Invalid attribute %s", attrName)
 				}
 			}
-			for attrName, val := range kind.Attributes {
-				if _, ok := object.Attributes[attrName]; !ok {
-					object.Attributes[attrName] = val
+			for attrName, val := range kind.Aspects {
+				if _, ok := object.Aspects[attrName]; !ok {
+					object.Aspects[attrName] = val
 				}
 			}
 		}

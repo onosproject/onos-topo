@@ -16,7 +16,6 @@ package topo
 
 import (
 	"context"
-	"github.com/gogo/protobuf/types"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
@@ -77,8 +76,7 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, topoapi.ID("o2"), topoEvent.ID)
 
 	// Update one of the objects
-	obj2.Attributes = make(map[string]*types.Any)
-	err = topoapi.SetAttribute(obj2, "foo", &topoapi.Location{Lat: 1, Lng: 2})
+	err = obj2.SetAspect(&topoapi.Location{Lat: 1, Lng: 2})
 	assert.NoError(t, err)
 	revision := obj2.Revision
 	err = store1.Update(context.TODO(), obj2)
@@ -101,14 +99,12 @@ func TestTopoStore(t *testing.T) {
 	obj12, err := store2.Get(context.TODO(), "o1")
 	assert.NoError(t, err)
 
-	obj11.Attributes = make(map[string]*types.Any)
-	err = topoapi.SetAttribute(obj11, "foo", &topoapi.Location{Lat: 2, Lng: 1})
+	err = obj11.SetAspect(&topoapi.Location{Lat: 2, Lng: 1})
 	assert.NoError(t, err)
 	err = store1.Update(context.TODO(), obj11)
 	assert.NoError(t, err)
 
-	obj12.Attributes = make(map[string]*types.Any)
-	err = topoapi.SetAttribute(obj12, "foo", &topoapi.E2Node{})
+	err = obj12.SetAspect(&topoapi.E2Node{})
 	assert.NoError(t, err)
 	err = store2.Update(context.TODO(), obj12)
 	assert.Error(t, err)
@@ -124,7 +120,7 @@ func TestTopoStore(t *testing.T) {
 	// Verify the attribute values
 	obj2g, err := store1.Get(context.TODO(), obj2.ID)
 	assert.NoError(t, err)
-	loc := topoapi.GetAttribute(obj2g, "foo", &topoapi.Location{}).(*topoapi.Location)
+	loc := obj2g.GetAspect(&topoapi.Location{}).(*topoapi.Location)
 	assert.NotNil(t, loc)
 	assert.Equal(t, 1.0, loc.Lat)
 	assert.Equal(t, 2.0, loc.Lng)
