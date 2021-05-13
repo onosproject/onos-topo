@@ -136,18 +136,18 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	bytes, err := proto.Marshal(object)
 	if err != nil {
 		log.Errorf("Failed to create object %+v: %s", object, err)
-		return err
+		return errors.NewInvalid(err.Error())
 	}
 
 	// Put the object in the map using an optimistic lock if this is an update
 	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfNotSet())
 	if err != nil {
 		log.Errorf("Failed to create object %+v: %s", object, err)
-		return err
+		return errors.FromAtomix(err)
 	}
 
 	object.Revision = topoapi.Revision(entry.Version)
-	return err
+	return nil
 }
 
 func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error {
@@ -204,7 +204,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 func (s *atomixStore) List(ctx context.Context) ([]topoapi.Object, error) {
 	mapCh := make(chan *_map.Entry)
 	if err := s.objects.Entries(ctx, mapCh); err != nil {
-		return nil, err
+		return nil, errors.FromAtomix(err)
 	}
 
 	eps := make([]topoapi.Object, 0)
@@ -225,7 +225,7 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, opts .
 
 	mapCh := make(chan *_map.Event)
 	if err := s.objects.Watch(context.Background(), mapCh, watchOpts...); err != nil {
-		return err
+		return errors.FromAtomix(err)
 	}
 
 	go func() {
@@ -263,7 +263,7 @@ func (s *atomixStore) Close() error {
 func decodeObject(entry *_map.Entry) (*topoapi.Object, error) {
 	object := &topoapi.Object{}
 	if err := proto.Unmarshal(entry.Value, object); err != nil {
-		return nil, err
+		return nil, errors.NewInvalid(err.Error())
 	}
 	object.ID = topoapi.ID(entry.Key)
 	object.Revision = topoapi.Revision(entry.Version)
