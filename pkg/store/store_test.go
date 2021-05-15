@@ -16,8 +16,11 @@ package store
 
 import (
 	"context"
+	primitiveapi "github.com/atomix/atomix-api/go/atomix/primitive"
+	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
+	"github.com/atomix/atomix-go-client/pkg/atomix/test"
+	"github.com/atomix/atomix-go-framework/pkg/atomix/logging"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
-	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -25,15 +28,36 @@ import (
 )
 
 func TestTopoStore(t *testing.T) {
-	_, address := atomix.StartLocalNode()
+	logging.SetLevel(logging.DebugLevel)
 
-	store1, err := newLocalStore(address)
-	assert.NoError(t, err)
-	defer store1.Close()
+	primitiveID := primitiveapi.PrimitiveId{
+		Type:      _map.Type.String(),
+		Namespace: "test",
+		Name:      "objects",
+	}
 
-	store2, err := newLocalStore(address)
+	test := test.NewRSMTest()
+	assert.NoError(t, test.Start())
+
+	conn1, err := test.CreateProxy(primitiveID)
 	assert.NoError(t, err)
-	defer store2.Close()
+
+	conn2, err := test.CreateProxy(primitiveID)
+	assert.NoError(t, err)
+
+	objects1, err := _map.New(context.TODO(), "objects", conn1)
+	assert.NoError(t, err)
+
+	store1 := &atomixStore{
+		objects: objects1,
+	}
+
+	objects2, err := _map.New(context.TODO(), "objects", conn2)
+	assert.NoError(t, err)
+
+	store2 := &atomixStore{
+		objects: objects2,
+	}
 
 	ch := make(chan topoapi.Event)
 	err = store2.Watch(context.Background(), ch, nil)
@@ -223,6 +247,8 @@ func TestTopoStore(t *testing.T) {
 	assert.NotNil(t, obj)
 	obj = nextEvent(t, ch)
 	assert.NotNil(t, obj)
+
+	assert.NoError(t, test.Stop())
 }
 
 func nextEvent(t *testing.T, ch chan topoapi.Event) *topoapi.Object {
