@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/atomix/atomix-api/go v0.4.4
-	github.com/atomix/atomix-go-client v0.5.1
+	github.com/atomix/atomix-go-client v0.5.5
 	github.com/atomix/atomix-go-framework v0.6.5
 	github.com/atomix/go-client v0.4.1
 	github.com/gogo/protobuf v1.3.2
@@ -17,5 +17,3 @@ require (
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/grpc v1.33.2
 )
-
-replace github.com/onosproject/onos-lib-go => ../onos-lib-go
