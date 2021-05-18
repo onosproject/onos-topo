@@ -71,14 +71,16 @@ func TestServiceBasics(t *testing.T) {
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
-			ID: "1",
+			ID:   "1",
+			Type: topoapi.Object_ENTITY,
 		},
 	})
 	assert.NoError(t, err)
 
 	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
-			ID: "2",
+			ID:   "2",
+			Type: topoapi.Object_ENTITY,
 		},
 	})
 	assert.NoError(t, err)
@@ -124,7 +126,8 @@ func TestWatchBasics(t *testing.T) {
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
-			ID: "1",
+			ID:   "1",
+			Type: topoapi.Object_ENTITY,
 		},
 	})
 	assert.NoError(t, err)
@@ -156,7 +159,8 @@ func TestWatchBasics(t *testing.T) {
 	pause.Wait()
 	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
-			ID: "2",
+			ID:   "2",
+			Type: topoapi.Object_ENTITY,
 		},
 	})
 	assert.NoError(t, err)
@@ -169,12 +173,22 @@ func TestWatchBasics(t *testing.T) {
 	wg.Wait()
 }
 
-func TestBadAdd(t *testing.T) {
+func TestBadIDAdd(t *testing.T) {
 	conn := createServerConnection(t)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{},
+	})
+	assert.Error(t, err)
+}
+
+func TestBadTypeAdd(t *testing.T) {
+	conn := createServerConnection(t)
+	client := topoapi.NewTopoClient(conn)
+
+	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
+		Object: &topoapi.Object{ID: "foo"},
 	})
 	assert.Error(t, err)
 }

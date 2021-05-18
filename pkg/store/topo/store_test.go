@@ -36,17 +36,42 @@ func TestTopoStore(t *testing.T) {
 	defer store2.Close()
 
 	ch := make(chan topoapi.Event)
-	err = store2.Watch(context.Background(), ch)
+	err = store2.Watch(context.Background(), ch, nil)
+	assert.NoError(t, err)
+
+	k1 := &topoapi.Object{
+		ID:   "foo",
+		Type: topoapi.Object_KIND,
+		Obj:  &topoapi.Object_Kind{Kind: &topoapi.Kind{Name: "Foo"}},
+	}
+	err = store1.Create(context.TODO(), k1)
+	assert.NoError(t, err)
+
+	k2 := &topoapi.Object{
+		ID:   "bar",
+		Type: topoapi.Object_KIND,
+		Obj:  &topoapi.Object_Kind{Kind: &topoapi.Kind{Name: "Bar"}},
+	}
+	err = store1.Create(context.TODO(), k2)
 	assert.NoError(t, err)
 
 	obj1 := &topoapi.Object{
 		ID:     "o1",
-		Labels: []string{"test", "ran"},
+		Type:   topoapi.Object_ENTITY,
+		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("foo")}},
+		Labels: map[string]string{},
 	}
+	obj1.Labels["env"] = "test"
+	obj1.Labels["area"] = "ran"
+
 	obj2 := &topoapi.Object{
 		ID:     "o2",
-		Labels: []string{"e2node", "ran"},
+		Type:   topoapi.Object_ENTITY,
+		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("bar")}},
+		Labels: map[string]string{},
 	}
+	obj2.Labels["env"] = "production"
+	obj2.Labels["area"] = "ran"
 
 	// Create a new object
 	err = store1.Create(context.TODO(), obj1)
@@ -60,8 +85,8 @@ func TestTopoStore(t *testing.T) {
 	assert.NotNil(t, obj1)
 	assert.Equal(t, topoapi.ID("o1"), obj1.ID)
 	assert.NotEqual(t, topoapi.Revision(0), obj1.Revision)
-	assert.Equal(t, "test", obj1.Labels[0])
-	assert.Equal(t, "ran", obj1.Labels[1])
+	assert.Equal(t, "test", obj1.Labels["env"])
+	assert.Equal(t, "ran", obj1.Labels["area"])
 
 	// Create another object
 	err = store2.Create(context.TODO(), obj2)
@@ -69,8 +94,14 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, topoapi.ID("o2"), obj2.ID)
 	assert.NotEqual(t, topoapi.Revision(0), obj2.Revision)
 
-	// Verify events were received for the objects
+	// Verify events were received for the kinds
 	topoEvent := nextEvent(t, ch)
+	assert.Equal(t, topoapi.ID("foo"), topoEvent.ID)
+	topoEvent = nextEvent(t, ch)
+	assert.Equal(t, topoapi.ID("bar"), topoEvent.ID)
+
+	// Verify events were received for the objects
+	topoEvent = nextEvent(t, ch)
 	assert.Equal(t, topoapi.ID("o1"), topoEvent.ID)
 	topoEvent = nextEvent(t, ch)
 	assert.Equal(t, topoapi.ID("o2"), topoEvent.ID)
@@ -90,8 +121,8 @@ func TestTopoStore(t *testing.T) {
 	err = store1.Update(context.TODO(), obj2)
 	assert.NoError(t, err)
 	assert.NotEqual(t, revision, obj2.Revision)
-	assert.Equal(t, "e2node", obj2.Labels[0])
-	assert.Equal(t, "ran", obj2.Labels[1])
+	assert.Equal(t, "production", obj2.Labels["env"])
+	assert.Equal(t, "ran", obj2.Labels["area"])
 
 	// Verify that concurrent updates fail
 	obj11, err := store1.Get(context.TODO(), "o1")
@@ -126,9 +157,40 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, 2.0, loc.Lng)
 
 	// List the objects
-	objects, err := store1.List(context.TODO())
+	objects, err := store1.List(context.TODO(), nil)
 	assert.NoError(t, err)
-	assert.Len(t, objects, 2)
+	assert.Len(t, objects, 4)
+
+	// List the objects with label filter
+	objects, err = store1.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
+		{
+			Filter: &topoapi.Filter_Equal_{
+				Equal_: &topoapi.EqualFilter{Value: "production"},
+			},
+			Key: "env",
+		},
+	}})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 1)
+	assert.Equal(t, "o2", string(objects[0].ID))
+
+	// List the objects with kind filter
+	objects, err = store1.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
+		{
+			Filter: &topoapi.Filter_Not{
+				Not: &topoapi.NotFilter{
+					Inner: &topoapi.Filter{
+						Filter: &topoapi.Filter_Equal_{
+							Equal_: &topoapi.EqualFilter{Value: "bar"},
+						},
+					},
+				},
+			},
+		},
+	}})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 1)
+	assert.Equal(t, "o1", string(objects[0].ID))
 
 	// Delete an object
 	err = store1.Delete(context.TODO(), obj2.ID)
@@ -146,14 +208,15 @@ func TestTopoStore(t *testing.T) {
 	assert.Error(t, err)
 
 	obj = &topoapi.Object{
-		ID: "o2",
+		ID:   "o2",
+		Type: topoapi.Object_ENTITY,
 	}
 
 	err = store1.Create(context.TODO(), obj)
 	assert.NoError(t, err)
 
 	ch = make(chan topoapi.Event)
-	err = store1.Watch(context.TODO(), ch, WithReplay())
+	err = store1.Watch(context.TODO(), ch, nil, WithReplay())
 	assert.NoError(t, err)
 
 	obj = nextEvent(t, ch)

@@ -124,9 +124,8 @@ func (s *Server) Delete(ctx context.Context, req *topoapi.DeleteRequest) (*topoa
 
 // List returns list of all objects
 func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.ListResponse, error) {
-	// TODO: add filter criteria; otherwise not scalable
 	log.Infof("Received ListRequest %+v", req)
-	objects, err := s.objectStore.List(ctx)
+	objects, err := s.objectStore.List(ctx, req.Filters)
 	if err != nil {
 		log.Warnf("ListRequest %+v failed: %v", req, err)
 		return nil, errors.Status(err).Err()
@@ -148,7 +147,7 @@ func (s *Server) Watch(req *topoapi.WatchRequest, server topoapi.Topo_WatchServe
 	}
 
 	ch := make(chan topoapi.Event)
-	if err := s.objectStore.Watch(server.Context(), ch, watchOpts...); err != nil {
+	if err := s.objectStore.Watch(server.Context(), ch, req.Filters, watchOpts...); err != nil {
 		log.Warnf("WatchTerminationsRequest %+v failed: %v", req, err)
 		return errors.Status(err).Err()
 	}

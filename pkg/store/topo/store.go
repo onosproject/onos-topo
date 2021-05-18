@@ -98,10 +98,10 @@ type Store interface {
 	Delete(ctx context.Context, id topoapi.ID) error
 
 	// List streams objects to the given channel
-	List(ctx context.Context) ([]topoapi.Object, error)
+	List(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error)
 
 	// Watch streams object events to the given channel
-	Watch(ctx context.Context, ch chan<- topoapi.Event, opts ...WatchOption) error
+	Watch(ctx context.Context, ch chan<- topoapi.Event, filters *topoapi.Filters, opts ...WatchOption) error
 }
 
 // WatchOption is a configuration option for Watch calls
@@ -131,6 +131,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	if object.ID == "" {
 		return errors.NewInvalid("ID cannot be empty")
 	}
+	if object.Type == topoapi.Object_UNSPECIFIED {
+		return errors.NewInvalid("Type cannot be unspecified")
+	}
 
 	log.Infof("Creating object %+v", object)
 	bytes, err := proto.Marshal(object)
@@ -153,6 +156,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error {
 	if object.ID == "" {
 		return errors.NewInvalid("ID cannot be empty")
+	}
+	if object.Type == topoapi.Object_UNSPECIFIED {
+		return errors.NewInvalid("Type cannot be unspecified")
 	}
 	if object.Revision == 0 {
 		return errors.NewInvalid("object must contain a revision on update")
@@ -201,7 +207,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 	return nil
 }
 
-func (s *atomixStore) List(ctx context.Context) ([]topoapi.Object, error) {
+func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error) {
 	mapCh := make(chan *_map.Entry)
 	if err := s.objects.Entries(ctx, mapCh); err != nil {
 		return nil, errors.FromAtomix(err)
@@ -211,13 +217,15 @@ func (s *atomixStore) List(ctx context.Context) ([]topoapi.Object, error) {
 
 	for entry := range mapCh {
 		if ep, err := decodeObject(entry); err == nil {
-			eps = append(eps, *ep)
+			if match(ep, filters) {
+				eps = append(eps, *ep)
+			}
 		}
 	}
 	return eps, nil
 }
 
-func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, opts ...WatchOption) error {
+func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filters *topoapi.Filters, opts ...WatchOption) error {
 	watchOpts := make([]_map.WatchOption, 0)
 	for _, opt := range opts {
 		watchOpts = opt.apply(watchOpts)
@@ -232,20 +240,22 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, opts .
 		defer close(ch)
 		for event := range mapCh {
 			if object, err := decodeObject(event.Entry); err == nil {
-				var eventType topoapi.EventType
-				switch event.Type {
-				case _map.EventNone:
-					eventType = topoapi.EventType_NONE
-				case _map.EventInserted:
-					eventType = topoapi.EventType_ADDED
-				case _map.EventRemoved:
-					eventType = topoapi.EventType_REMOVED
-				default:
-					eventType = topoapi.EventType_UPDATED
-				}
-				ch <- topoapi.Event{
-					Type:   eventType,
-					Object: *object,
+				if match(object, filters) {
+					var eventType topoapi.EventType
+					switch event.Type {
+					case _map.EventNone:
+						eventType = topoapi.EventType_NONE
+					case _map.EventInserted:
+						eventType = topoapi.EventType_ADDED
+					case _map.EventRemoved:
+						eventType = topoapi.EventType_REMOVED
+					default:
+						eventType = topoapi.EventType_UPDATED
+					}
+					ch <- topoapi.Event{
+						Type:   eventType,
+						Object: *object,
+					}
 				}
 			}
 		}
