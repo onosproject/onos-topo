@@ -131,6 +131,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	if object.ID == "" {
 		return errors.NewInvalid("ID cannot be empty")
 	}
+	if object.Type == topoapi.Object_UNSPECIFIED {
+		return errors.NewInvalid("Type cannot be unspecified")
+	}
 
 	log.Infof("Creating object %+v", object)
 	bytes, err := proto.Marshal(object)
@@ -153,6 +156,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error {
 	if object.ID == "" {
 		return errors.NewInvalid("ID cannot be empty")
+	}
+	if object.Type == topoapi.Object_UNSPECIFIED {
+		return errors.NewInvalid("Type cannot be unspecified")
 	}
 	if object.Revision == 0 {
 		return errors.NewInvalid("object must contain a revision on update")
