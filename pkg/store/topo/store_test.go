@@ -36,17 +36,22 @@ func TestTopoStore(t *testing.T) {
 	defer store2.Close()
 
 	ch := make(chan topoapi.Event)
-	err = store2.Watch(context.Background(), ch)
+	err = store2.Watch(context.Background(), ch, nil)
 	assert.NoError(t, err)
 
 	obj1 := &topoapi.Object{
 		ID:     "o1",
-		Labels: []string{"test", "ran"},
+		Labels: map[string]string{},
 	}
+	obj1.Labels["env"] = "test"
+	obj1.Labels["area"] = "ran"
+
 	obj2 := &topoapi.Object{
 		ID:     "o2",
-		Labels: []string{"e2node", "ran"},
+		Labels: map[string]string{},
 	}
+	obj2.Labels["env"] = "production"
+	obj2.Labels["area"] = "ran"
 
 	// Create a new object
 	err = store1.Create(context.TODO(), obj1)
@@ -60,8 +65,8 @@ func TestTopoStore(t *testing.T) {
 	assert.NotNil(t, obj1)
 	assert.Equal(t, topoapi.ID("o1"), obj1.ID)
 	assert.NotEqual(t, topoapi.Revision(0), obj1.Revision)
-	assert.Equal(t, "test", obj1.Labels[0])
-	assert.Equal(t, "ran", obj1.Labels[1])
+	assert.Equal(t, "test", obj1.Labels["env"])
+	assert.Equal(t, "ran", obj1.Labels["area"])
 
 	// Create another object
 	err = store2.Create(context.TODO(), obj2)
@@ -90,8 +95,8 @@ func TestTopoStore(t *testing.T) {
 	err = store1.Update(context.TODO(), obj2)
 	assert.NoError(t, err)
 	assert.NotEqual(t, revision, obj2.Revision)
-	assert.Equal(t, "e2node", obj2.Labels[0])
-	assert.Equal(t, "ran", obj2.Labels[1])
+	assert.Equal(t, "production", obj2.Labels["env"])
+	assert.Equal(t, "ran", obj2.Labels["area"])
 
 	// Verify that concurrent updates fail
 	obj11, err := store1.Get(context.TODO(), "o1")
@@ -126,9 +131,21 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, 2.0, loc.Lng)
 
 	// List the objects
-	objects, err := store1.List(context.TODO())
+	objects, err := store1.List(context.TODO(), nil)
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2)
+
+	// List the objects with label filter
+	objects, err = store1.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
+		{
+			Filter: &topoapi.Filter_Equal_{
+				Equal_: &topoapi.EqualFilter{Value: "production"},
+			},
+			Key: "env",
+		},
+	}})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 1)
 
 	// Delete an object
 	err = store1.Delete(context.TODO(), obj2.ID)
@@ -153,7 +170,7 @@ func TestTopoStore(t *testing.T) {
 	assert.NoError(t, err)
 
 	ch = make(chan topoapi.Event)
-	err = store1.Watch(context.TODO(), ch, WithReplay())
+	err = store1.Watch(context.TODO(), ch, nil, WithReplay())
 	assert.NoError(t, err)
 
 	obj = nextEvent(t, ch)

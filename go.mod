@@ -7,7 +7,7 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/onosproject/helmit v0.6.12
-	github.com/onosproject/onos-api/go v0.7.38
+	github.com/onosproject/onos-api/go v0.7.42
 	github.com/onosproject/onos-lib-go v0.7.10
 	github.com/onosproject/onos-test v0.6.4
 	github.com/smartystreets/assertions v1.0.0 // indirect
@@ -18,3 +18,5 @@ require (
 	google.golang.org/grpc v1.33.2
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 )
+
+replace github.com/onosproject/onos-api/go => /Users/tom/src/github.com/onosproject/onos-api/go
