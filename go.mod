@@ -18,5 +18,3 @@ require (
 	google.golang.org/grpc v1.33.2
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 )
-
-replace github.com/onosproject/onos-api/go => /Users/tom/src/github.com/onosproject/onos-api/go
