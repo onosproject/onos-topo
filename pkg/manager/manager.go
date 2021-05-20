@@ -18,8 +18,8 @@ package manager
 import (
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
-	"github.com/onosproject/onos-topo/pkg/northbound/topo"
-	topostore "github.com/onosproject/onos-topo/pkg/store/topo"
+	service "github.com/onosproject/onos-topo/pkg/northbound"
+	"github.com/onosproject/onos-topo/pkg/store"
 )
 
 var log = logging.GetLogger("manager")
@@ -73,13 +73,13 @@ func (m *Manager) startNorthboundServer() error {
 		true,
 		northbound.SecurityConfig{}))
 
-	topoStore, err := topostore.NewAtomixStore()
+	topoStore, err := store.NewAtomixStore()
 	if err != nil {
 		return err
 	}
 
 	s.AddService(logging.Service{})
-	s.AddService(topo.NewService(topoStore))
+	s.AddService(service.NewService(topoStore))
 
 	doneCh := make(chan error)
 	go func() {

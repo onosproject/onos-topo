@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package topo
+package store
 
 import topoapi "github.com/onosproject/onos-api/go/onos/topo"
 
