@@ -21,13 +21,13 @@ import (
 
 var config *Config
 
-// Config is the onos-config configuration
+// Config is the onos-topo configuration
 type Config struct {
 	// Atomix is the Atomix configuration
 	Atomix atomix.Config `yaml:"atomix,omitempty"`
 }
 
-// GetConfig gets the onos-config configuration
+// GetConfig gets the onos-topo configuration
 func GetConfig() (Config, error) {
 	if config == nil {
 		config = &Config{}
@@ -38,7 +38,7 @@ func GetConfig() (Config, error) {
 	return *config, nil
 }
 
-// GetConfigOrDie gets the onos-config configuration or panics
+// GetConfigOrDie gets the onos-topo configuration or panics
 func GetConfigOrDie() Config {
 	config, err := GetConfig()
 	if err != nil {

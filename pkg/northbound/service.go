@@ -1,4 +1,4 @@
-// Copyright 2019-present Open Networking Foundation.
+// Copyright 2021-present Open Networking Foundation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package topo
+package northbound
 
 import (
 	"context"
@@ -22,7 +22,7 @@ import (
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
-	store "github.com/onosproject/onos-topo/pkg/store/topo"
+	"github.com/onosproject/onos-topo/pkg/store"
 	"google.golang.org/grpc"
 )
 
@@ -51,16 +51,6 @@ func (s Service) Register(r *grpc.Server) {
 // Server implements the gRPC service for administrative facilities.
 type Server struct {
 	objectStore store.Store
-}
-
-// TopoClientFactory : Default TopoClient creation.
-var TopoClientFactory = func(cc *grpc.ClientConn) topoapi.TopoClient {
-	return topoapi.NewTopoClient(cc)
-}
-
-// CreateTopoClient creates and returns a new topo entity client
-func CreateTopoClient(cc *grpc.ClientConn) topoapi.TopoClient {
-	return TopoClientFactory(cc)
 }
 
 // Create creates a new topology object
