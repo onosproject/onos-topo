@@ -40,6 +40,9 @@ func newTestService(test *test.Test) (northbound.Service, error) {
 		return nil, err
 	}
 	store, err := store.NewAtomixStore(client)
+	if err != nil {
+		return nil, err
+	}
 	return &Service{
 		store: store,
 	}, nil
