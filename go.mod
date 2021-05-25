@@ -3,10 +3,8 @@ module github.com/onosproject/onos-topo
 go 1.14
 
 require (
-	github.com/atomix/atomix-api/go v0.4.4
-	github.com/atomix/atomix-go-client v0.5.5
-	github.com/atomix/atomix-go-framework v0.6.5
-	github.com/atomix/go-client v0.4.1
+	github.com/atomix/atomix-go-client v0.5.13
+	github.com/atomix/atomix-go-framework v0.6.11
 	github.com/gogo/protobuf v1.3.2
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/onosproject/helmit v0.6.12

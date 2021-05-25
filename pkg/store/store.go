@@ -16,13 +16,11 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"io"
-	"os"
 	"time"
 
 	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
@@ -33,8 +31,8 @@ import (
 var log = logging.GetLogger("store", "topo")
 
 // NewAtomixStore returns a new persistent Store
-func NewAtomixStore() (Store, error) {
-	objects, err := atomix.GetMap(context.Background(), fmt.Sprintf("%s-objects", os.Getenv("SERVICE_NAME")))
+func NewAtomixStore(client atomix.Client) (Store, error) {
+	objects, err := client.GetMap(context.Background(), "onos-topo-objects")
 	if err != nil {
 		return nil, err
 	}

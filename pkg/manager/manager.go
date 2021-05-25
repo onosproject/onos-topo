@@ -16,6 +16,7 @@
 package manager
 
 import (
+	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	service "github.com/onosproject/onos-topo/pkg/northbound"
@@ -73,7 +74,9 @@ func (m *Manager) startNorthboundServer() error {
 		true,
 		northbound.SecurityConfig{}))
 
-	topoStore, err := store.NewAtomixStore()
+	atomixClient := atomix.NewClient()
+
+	topoStore, err := store.NewAtomixStore(atomixClient)
 	if err != nil {
 		return err
 	}
