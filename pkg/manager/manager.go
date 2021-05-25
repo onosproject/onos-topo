@@ -21,6 +21,7 @@ import (
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	service "github.com/onosproject/onos-topo/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
+	"os"
 )
 
 var log = logging.GetLogger("manager")
@@ -74,7 +75,7 @@ func (m *Manager) startNorthboundServer() error {
 		true,
 		northbound.SecurityConfig{}))
 
-	atomixClient := atomix.NewClient()
+	atomixClient := atomix.NewClient(atomix.WithClientID(os.Getenv("POD_NAME")))
 
 	topoStore, err := store.NewAtomixStore(atomixClient)
 	if err != nil {
