@@ -16,6 +16,7 @@ package northbound
 
 import (
 	"context"
+	"github.com/atomix/atomix-go-client/pkg/atomix/test"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
@@ -33,19 +34,23 @@ func bufDialer(context.Context, string) (net.Conn, error) {
 	return lis.Dial()
 }
 
-func newTestService() (northbound.Service, error) {
-	endPointStore, err := store.NewLocalStore()
+func newTestService(test *test.Test) (northbound.Service, error) {
+	client, err := test.NewClient("test")
+	if err != nil {
+		return nil, err
+	}
+	store, err := store.NewAtomixStore(client)
 	if err != nil {
 		return nil, err
 	}
 	return &Service{
-		store: endPointStore,
+		store: store,
 	}, nil
 }
 
-func createServerConnection(t *testing.T) *grpc.ClientConn {
+func createServerConnection(t *testing.T, test *test.Test) *grpc.ClientConn {
 	lis = bufconn.Listen(1024 * 1024)
-	s, err := newTestService()
+	s, err := newTestService(test)
 	assert.NoError(t, err)
 	assert.NotNil(t, s)
 	server := grpc.NewServer()
@@ -66,7 +71,13 @@ func createServerConnection(t *testing.T) *grpc.ClientConn {
 }
 
 func TestServiceBasics(t *testing.T) {
-	conn := createServerConnection(t)
+	test := test.NewTest(
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+
+	conn := createServerConnection(t, test)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -121,7 +132,13 @@ func TestServiceBasics(t *testing.T) {
 }
 
 func TestWatchBasics(t *testing.T) {
-	conn := createServerConnection(t)
+	test := test.NewTest(
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+
+	conn := createServerConnection(t, test)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -174,7 +191,13 @@ func TestWatchBasics(t *testing.T) {
 }
 
 func TestBadIDAdd(t *testing.T) {
-	conn := createServerConnection(t)
+	test := test.NewTest(
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+
+	conn := createServerConnection(t, test)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -184,7 +207,13 @@ func TestBadIDAdd(t *testing.T) {
 }
 
 func TestBadTypeAdd(t *testing.T) {
-	conn := createServerConnection(t)
+	test := test.NewTest(
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+
+	conn := createServerConnection(t, test)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -194,7 +223,13 @@ func TestBadTypeAdd(t *testing.T) {
 }
 
 func TestBadRemove(t *testing.T) {
-	conn := createServerConnection(t)
+	test := test.NewTest(
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+
+	conn := createServerConnection(t, test)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Delete(context.Background(), &topoapi.DeleteRequest{})

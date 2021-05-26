@@ -15,17 +15,13 @@
 package config
 
 import (
-	"github.com/onosproject/onos-lib-go/pkg/atomix"
 	configlib "github.com/onosproject/onos-lib-go/pkg/config"
 )
 
 var config *Config
 
-// Config is the onos-topo configuration
-type Config struct {
-	// Atomix is the Atomix configuration
-	Atomix atomix.Config `yaml:"atomix,omitempty"`
-}
+// Config is the onos-config configuration
+type Config struct{}
 
 // GetConfig gets the onos-topo configuration
 func GetConfig() (Config, error) {

@@ -16,66 +16,26 @@ package store
 
 import (
 	"context"
-	"github.com/atomix/go-client/pkg/client/util/net"
+	"github.com/atomix/atomix-go-client/pkg/atomix"
+	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"io"
 	"time"
 
-	_map "github.com/atomix/go-client/pkg/client/map"
-	"github.com/atomix/go-client/pkg/client/primitive"
+	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
 	"github.com/gogo/protobuf/proto"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
-	"github.com/onosproject/onos-lib-go/pkg/atomix"
-	"github.com/onosproject/onos-topo/pkg/config"
 )
 
 var log = logging.GetLogger("store", "topo")
 
 // NewAtomixStore returns a new persistent Store
-func NewAtomixStore() (Store, error) {
-	ricConfig, err := config.GetConfig()
+func NewAtomixStore(client atomix.Client) (Store, error) {
+	objects, err := client.GetMap(context.Background(), "onos-topo-objects")
 	if err != nil {
 		return nil, err
 	}
-
-	database, err := atomix.GetDatabase(ricConfig.Atomix, ricConfig.Atomix.GetDatabase(atomix.DatabaseTypeConsensus))
-	if err != nil {
-		return nil, err
-	}
-
-	objects, err := database.GetMap(context.Background(), "objects")
-	if err != nil {
-		return nil, err
-	}
-
-	return &atomixStore{
-		objects: objects,
-	}, nil
-}
-
-// NewLocalStore returns a new local object store
-func NewLocalStore() (Store, error) {
-	_, address := atomix.StartLocalNode()
-	return newLocalStore(address)
-}
-
-func newLocalStore(address net.Address) (Store, error) {
-	name := primitive.Name{
-		Namespace: "local",
-		Name:      "objects",
-	}
-
-	session, err := primitive.NewSession(context.TODO(), primitive.Partition{ID: 1, Address: address})
-	if err != nil {
-		return nil, err
-	}
-
-	objects, err := _map.New(context.Background(), name, []*primitive.Session{session})
-	if err != nil {
-		return nil, err
-	}
-
 	return &atomixStore{
 		objects: objects,
 	}, nil
@@ -149,7 +109,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		return errors.FromAtomix(err)
 	}
 
-	object.Revision = topoapi.Revision(entry.Version)
+	object.Revision = topoapi.Revision(entry.Revision)
 	return nil
 }
 
@@ -172,12 +132,12 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	}
 
 	// Update the object in the map
-	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfVersion(_map.Version(object.Revision)))
+	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfMatch(meta.NewRevision(meta.Revision(object.Revision))))
 	if err != nil {
 		log.Errorf("Failed to update object %+v: %s", object, err)
 		return errors.FromAtomix(err)
 	}
-	object.Revision = topoapi.Revision(entry.Version)
+	object.Revision = topoapi.Revision(entry.Revision)
 	return nil
 }
 
@@ -190,7 +150,7 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 	if err != nil {
 		return nil, errors.FromAtomix(err)
 	}
-	return decodeObject(entry)
+	return decodeObject(*entry)
 }
 
 func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
@@ -208,7 +168,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 }
 
 func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error) {
-	mapCh := make(chan *_map.Entry)
+	mapCh := make(chan _map.Entry)
 	if err := s.objects.Entries(ctx, mapCh); err != nil {
 		return nil, errors.FromAtomix(err)
 	}
@@ -231,7 +191,7 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 		watchOpts = opt.apply(watchOpts)
 	}
 
-	mapCh := make(chan *_map.Event)
+	mapCh := make(chan _map.Event)
 	if err := s.objects.Watch(ctx, mapCh, watchOpts...); err != nil {
 		return errors.FromAtomix(err)
 	}
@@ -240,22 +200,22 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 		defer close(ch)
 		for event := range mapCh {
 			if object, err := decodeObject(event.Entry); err == nil {
-				if match(object, filters) {
-					var eventType topoapi.EventType
-					switch event.Type {
-					case _map.EventNone:
-						eventType = topoapi.EventType_NONE
-					case _map.EventInserted:
-						eventType = topoapi.EventType_ADDED
-					case _map.EventRemoved:
-						eventType = topoapi.EventType_REMOVED
-					default:
-						eventType = topoapi.EventType_UPDATED
-					}
-					ch <- topoapi.Event{
-						Type:   eventType,
-						Object: *object,
-					}
+				var eventType topoapi.EventType
+				switch event.Type {
+				case _map.EventReplay:
+					eventType = topoapi.EventType_NONE
+				case _map.EventInsert:
+					eventType = topoapi.EventType_ADDED
+				case _map.EventRemove:
+					eventType = topoapi.EventType_REMOVED
+				case _map.EventUpdate:
+					eventType = topoapi.EventType_UPDATED
+				default:
+					eventType = topoapi.EventType_UPDATED
+				}
+				ch <- topoapi.Event{
+					Type:   eventType,
+					Object: *object,
 				}
 			}
 		}
@@ -270,12 +230,12 @@ func (s *atomixStore) Close() error {
 	return s.objects.Close(ctx)
 }
 
-func decodeObject(entry *_map.Entry) (*topoapi.Object, error) {
+func decodeObject(entry _map.Entry) (*topoapi.Object, error) {
 	object := &topoapi.Object{}
 	if err := proto.Unmarshal(entry.Value, object); err != nil {
 		return nil, errors.NewInvalid(err.Error())
 	}
 	object.ID = topoapi.ID(entry.Key)
-	object.Revision = topoapi.Revision(entry.Version)
+	object.Revision = topoapi.Revision(entry.Revision)
 	return object, nil
 }
