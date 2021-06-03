@@ -17,6 +17,7 @@ package northbound
 import (
 	"context"
 	"github.com/atomix/atomix-go-client/pkg/atomix/test"
+	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
@@ -72,6 +73,7 @@ func createServerConnection(t *testing.T, test *test.Test) *grpc.ClientConn {
 
 func TestServiceBasics(t *testing.T) {
 	test := test.NewTest(
+		rsm.NewProtocol(),
 		test.WithReplicas(1),
 		test.WithPartitions(1))
 	assert.NoError(t, test.Start())
@@ -133,6 +135,7 @@ func TestServiceBasics(t *testing.T) {
 
 func TestWatchBasics(t *testing.T) {
 	test := test.NewTest(
+		rsm.NewProtocol(),
 		test.WithReplicas(1),
 		test.WithPartitions(1))
 	assert.NoError(t, test.Start())
@@ -192,6 +195,7 @@ func TestWatchBasics(t *testing.T) {
 
 func TestBadIDAdd(t *testing.T) {
 	test := test.NewTest(
+		rsm.NewProtocol(),
 		test.WithReplicas(1),
 		test.WithPartitions(1))
 	assert.NoError(t, test.Start())
@@ -208,6 +212,7 @@ func TestBadIDAdd(t *testing.T) {
 
 func TestBadTypeAdd(t *testing.T) {
 	test := test.NewTest(
+		rsm.NewProtocol(),
 		test.WithReplicas(1),
 		test.WithPartitions(1))
 	assert.NoError(t, test.Start())
@@ -224,6 +229,7 @@ func TestBadTypeAdd(t *testing.T) {
 
 func TestBadRemove(t *testing.T) {
 	test := test.NewTest(
+		rsm.NewProtocol(),
 		test.WithReplicas(1),
 		test.WithPartitions(1))
 	assert.NoError(t, test.Start())
