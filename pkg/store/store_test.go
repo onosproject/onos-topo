@@ -17,6 +17,7 @@ package store
 import (
 	"context"
 	"github.com/atomix/atomix-go-client/pkg/atomix/test"
+	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,7 @@ import (
 
 func TestTopoStore(t *testing.T) {
 	test := test.NewTest(
+		rsm.NewProtocol(),
 		test.WithReplicas(1),
 		test.WithPartitions(1))
 	assert.NoError(t, test.Start())
