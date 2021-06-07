@@ -200,6 +200,9 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 		defer close(ch)
 		for event := range mapCh {
 			if object, err := decodeObject(event.Entry); err == nil {
+				if !match(object, filters) {
+					continue
+				}
 				var eventType topoapi.EventType
 				switch event.Type {
 				case _map.EventReplay:

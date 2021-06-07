@@ -172,6 +172,11 @@ func TestWatchBasics(t *testing.T) {
 		assert.Equal(t, topoapi.EventType_ADDED, e.Event.Type)
 		assert.Equal(t, topoapi.ID("2"), e.Event.Object.ID)
 
+		e, err = res.Recv()
+		assert.NoError(t, err)
+		assert.Equal(t, topoapi.EventType_REMOVED, e.Event.Type)
+		assert.Equal(t, topoapi.ID("1"), e.Event.Object.ID)
+
 		wg.Done()
 	}()
 
