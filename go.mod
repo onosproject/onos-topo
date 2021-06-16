@@ -15,3 +15,5 @@ require (
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/grpc v1.33.2
 )
+
+replace github.com/onosproject/onos-api/go => ../onos-api/go
