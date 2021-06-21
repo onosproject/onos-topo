@@ -189,16 +189,16 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 	if filters.RelationFilter != nil {
 		filter := filters.RelationFilter
 
-		// contains _all_ relations that have the same kind as the filter, same SrcId as the filter, and has a target ID that (at time of their reading in mapCh) had not been seen
+		// contains _all_ relations that have the same kind as the filter and same SrcId as the filter
 		entitiesToGet := make(map[topoapi.ID]*topoapi.Object)
 
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
-				// if object is a relation and its kind and src id matches the filter, push the destination id
+				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
 				if ep.Type == topoapi.Object_RELATION && string(ep.GetRelation().KindID) == filter.GetRelationKind() && string(ep.GetRelation().GetSrcEntityID()) == filter.SrcId {
 					entitiesToGet[ep.GetRelation().TgtEntityID] = nil
 				} else
-				// if object is an entity, see if satisfies some relation. else, put in unresolved_entities
+				// if object is an entity, see if satisfies the filter and set its value in entitiesToGet
 				if ep.Type == topoapi.Object_ENTITY {
 					if mapEntity, found := entitiesToGet[ep.ID]; found {
 						if filter.TargetKind == "" || ep.GetKind().Name == filter.TargetKind {
@@ -208,7 +208,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 				}
 			}
 		}
-		// iterate over entities to make sure we did not miss any valid ones (due to the corresponding relationship being seen first)
+		// iterate over entitiesToGet to obtain missed entities and push onto eps
 		for id, entity := range entitiesToGet {
 			if entity == nil {
 				store_entity, _ := s.Get(ctx, id)
