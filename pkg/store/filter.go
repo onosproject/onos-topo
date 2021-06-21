@@ -16,6 +16,10 @@ package store
 
 import topoapi "github.com/onosproject/onos-api/go/onos/topo"
 
+func matchRelation(object *topoapi.Object, filter *topoapi.RelationFilter) bool {
+	return object.Type == topoapi.Object_RELATION && string(object.GetRelation().KindID) == filter.GetRelationKind() && string(object.GetRelation().GetSrcEntityID()) == filter.SrcId && (filter.TargetKind != "" || string(object.GetRelation().TgtEntityID) == filter.TargetKind)
+}
+
 func match(object *topoapi.Object, filters *topoapi.Filters) bool {
 	return filters == nil || (matchKinds(object, filters.KindFilters) && matchLabels(object, filters.LabelFilters))
 }

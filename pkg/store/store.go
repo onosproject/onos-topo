@@ -16,12 +16,13 @@ package store
 
 import (
 	"context"
+	"io"
+	"time"
+
 	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
-	"io"
-	"time"
 
 	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
 	"github.com/gogo/protobuf/proto"
@@ -175,10 +176,42 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 
 	eps := make([]topoapi.Object, 0)
 
-	for entry := range mapCh {
-		if ep, err := decodeObject(entry); err == nil {
-			if match(ep, filters) {
+	// first make sure there are filters. if there aren't, just return everything
+	if filters == nil {
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
 				eps = append(eps, *ep)
+			}
+		}
+		return eps, nil
+	}
+
+	if filters.RelationFilter != nil {
+		entities := make(map[topoapi.ID]*topoapi.Object)
+		targetIds := make([]*topoapi.ID, 0)
+		for entry := range mapCh {
+			// create map for entities (including endpoints)
+			if ep, err := decodeObject(entry); err == nil {
+				if ep.Type == topoapi.Object_ENTITY {
+					entities[ep.ID] = ep
+				}
+			}
+			// create array for ID's (to index into map)
+			if ep, err := decodeObject(entry); err == nil {
+				if matchRelation(ep, filters.RelationFilter) {
+					targetIds = append(targetIds, &ep.GetRelation().TgtEntityID)
+				}
+			}
+		}
+		for entry := range targetIds {
+			eps = append(eps, *entities[*targetIds[entry]])
+		}
+	} else {
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
+				if match(ep, filters) {
+					eps = append(eps, *ep)
+				}
 			}
 		}
 	}
