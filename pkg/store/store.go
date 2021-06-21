@@ -211,9 +211,9 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 		// iterate over entitiesToGet to obtain missed entities and push onto eps
 		for id, entity := range entitiesToGet {
 			if entity == nil {
-				store_entity, _ := s.Get(ctx, id)
-				if filter.TargetKind == "" || store_entity.GetKind().Name == filter.TargetKind {
-					eps = append(eps, *store_entity)
+				storeEntity, _ := s.Get(ctx, id)
+				if filter.TargetKind == "" || storeEntity.GetKind().Name == filter.TargetKind {
+					eps = append(eps, *storeEntity)
 				}
 			} else {
 				eps = append(eps, *entitiesToGet[id])
