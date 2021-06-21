@@ -188,23 +188,21 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 
 	if filters.RelationFilter != nil {
 		entities := make(map[topoapi.ID]*topoapi.Object)
-		targetIds := make([]*topoapi.ID, 0)
+		// create map for entities
 		for entry := range mapCh {
-			// create map for entities (including endpoints)
 			if ep, err := decodeObject(entry); err == nil {
 				if ep.Type == topoapi.Object_ENTITY {
 					entities[ep.ID] = ep
 				}
 			}
-			// create array for ID's (to index into map)
+		}
+		// iterate again, now with a reference to the map (to check properties), to create eps output
+		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
-				if matchRelation(ep, filters.RelationFilter) {
-					targetIds = append(targetIds, &ep.GetRelation().TgtEntityID)
+				if matchRelation(ep, filters.RelationFilter, entities) {
+					eps = append(eps, *ep)
 				}
 			}
-		}
-		for entry := range targetIds {
-			eps = append(eps, *entities[*targetIds[entry]])
 		}
 	} else {
 		for entry := range mapCh {
