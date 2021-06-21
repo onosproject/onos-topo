@@ -16,15 +16,15 @@ package store
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/atomix/atomix-go-client/pkg/atomix/test"
 	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
-
 
 func TestTopoStore(t *testing.T) {
 	test := test.NewTest(
