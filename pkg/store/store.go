@@ -189,42 +189,34 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 	if filters.RelationFilter != nil {
 		filter := filters.RelationFilter
 
-		// contains _all_ entities that (at the time of their reading in mapCh) were not part of relations that had been seen
-		// will iterate over this b/c it is likely shorter, especially in dense networks
-		unresolvedEntities := make([]*topoapi.Object, 0)
 		// contains _all_ relations that have the same kind as the filter, same SrcId as the filter, and has a target ID that (at time of their reading in mapCh) had not been seen
-		unresolvedRelations := make(map[topoapi.ID]topoapi.ID)
+		entitiesToGet := make(map[topoapi.ID]*topoapi.Object)
 
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
-				// if object is a relation and its kind and src id matches the filter, push the relation
+				// if object is a relation and its kind and src id matches the filter, push the destination id
 				if ep.Type == topoapi.Object_RELATION && string(ep.GetRelation().KindID) == filter.GetRelationKind() && string(ep.GetRelation().GetSrcEntityID()) == filter.SrcId {
-					// avoid overwriting (performance may be better). only useful to do this if multiple relations go to same targe
-					if _, found := unresolvedRelations[ep.GetRelation().TgtEntityID]; !found {
-						unresolvedRelations[ep.GetRelation().TgtEntityID] = ep.GetRelation().TgtEntityID
-					}
+					entitiesToGet[ep.GetRelation().TgtEntityID] = nil
 				} else
 				// if object is an entity, see if satisfies some relation. else, put in unresolved_entities
 				if ep.Type == topoapi.Object_ENTITY {
-					if _, found := unresolvedRelations[ep.ID]; found {
-						if ep.GetKind().Name == filters.RelationFilter.TargetKind {
-							eps = append(eps, *ep)
+					if map_entity, found := entitiesToGet[ep.ID]; found {
+						if filter.TargetKind == "" || ep.GetKind().Name == filter.TargetKind {
+							*map_entity = *ep
 						}
-						// remove the relation b/c we've already found the only entity with that id (assumes id's are unique)
-						delete(unresolvedRelations, ep.ID)
-					} else {
-						unresolvedEntities = append(unresolvedEntities, ep)
 					}
 				}
 			}
 		}
 		// iterate over entities to make sure we did not miss any valid ones (due to the corresponding relationship being seen first)
-		for i := range unresolvedEntities {
-			if _, found := unresolvedRelations[unresolvedEntities[i].ID]; found {
-				// filter.TargetKind is optional, so it may be ""
-				if filter.TargetKind == "" || unresolvedEntities[i].GetKind().GetName() == filter.TargetKind {
-					eps = append(eps, *unresolvedEntities[i])
+		for id := range entitiesToGet {
+			if entitiesToGet[id] == nil {
+				entity, _ := s.Get(ctx, id)
+				if filter.TargetKind == "" || entity.GetKind().Name == filter.TargetKind {
+					eps = append(eps, *entity)
 				}
+			} else {
+				eps = append(eps, *entitiesToGet[id])
 			}
 		}
 	} else {
