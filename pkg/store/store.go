@@ -26,7 +26,6 @@ import (
 
 	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
 	"github.com/gogo/protobuf/proto"
-	"github.com/onosproject/onos-api/go/onos/topo"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 )
 
@@ -192,39 +191,39 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 
 		// contains _all_ entities that (at the time of their reading in mapCh) were not part of relations that had been seen
 		// will iterate over this b/c it is likely shorter, especially in dense networks
-		unresolved_entities := make([]*topoapi.Object, 0)
+		unresolvedEntities := make([]*topoapi.Object, 0)
 		// contains _all_ relations that have the same kind as the filter, same SrcId as the filter, and has a target ID that (at time of their reading in mapCh) had not been seen
-		unresolved_relations := make(map[topoapi.ID]topoapi.ID)
+		unresolvedRelations := make(map[topoapi.ID]topoapi.ID)
 
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
 				// if object is a relation and its kind and src id matches the filter, push the relation
 				if ep.Type == topoapi.Object_RELATION && string(ep.GetRelation().KindID) == filter.GetRelationKind() && string(ep.GetRelation().GetSrcEntityID()) == filter.SrcId {
 					// avoid overwriting (performance may be better). only useful to do this if multiple relations go to same targe
-					if _, found := unresolved_relations[ep.GetRelation().TgtEntityID]; !found {
-						unresolved_relations[ep.GetRelation().TgtEntityID] = ep.GetRelation().TgtEntityID
+					if _, found := unresolvedRelations[ep.GetRelation().TgtEntityID]; !found {
+						unresolvedRelations[ep.GetRelation().TgtEntityID] = ep.GetRelation().TgtEntityID
 					}
 				} else
 				// if object is an entity, see if satisfies some relation. else, put in unresolved_entities
 				if ep.Type == topoapi.Object_ENTITY {
-					if _, found := unresolved_relations[ep.ID]; found {
+					if _, found := unresolvedRelations[ep.ID]; found {
 						if ep.GetKind().Name == filters.RelationFilter.TargetKind {
 							eps = append(eps, *ep)
 						}
 						// remove the relation b/c we've already found the only entity with that id (assumes id's are unique)
-						delete(unresolved_relations, ep.ID)
+						delete(unresolvedRelations, ep.ID)
 					} else {
-						unresolved_entities = append(unresolved_entities, ep)
+						unresolvedEntities = append(unresolvedEntities, ep)
 					}
 				}
 			}
 		}
 		// iterate over entities to make sure we did not miss any valid ones (due to the corresponding relationship being seen first)
-		for i := range unresolved_entities {
-			if _, found := unresolved_relations[unresolved_entities[i].ID]; found {
+		for i := range unresolvedEntities {
+			if _, found := unresolvedRelations[unresolvedEntities[i].ID]; found {
 				// filter.TargetKind is optional, so it may be ""
-				if filter.TargetKind == "" || unresolved_entities[i].GetKind().GetName() == filter.TargetKind {
-					eps = append(eps, topo.Object(*unresolved_entities[i]))
+				if filter.TargetKind == "" || unresolvedEntities[i].GetKind().GetName() == filter.TargetKind {
+					eps = append(eps, *unresolvedEntities[i])
 				}
 			}
 		}
