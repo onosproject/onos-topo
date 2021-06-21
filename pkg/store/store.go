@@ -200,20 +200,20 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 				} else
 				// if object is an entity, see if satisfies some relation. else, put in unresolved_entities
 				if ep.Type == topoapi.Object_ENTITY {
-					if map_entity, found := entitiesToGet[ep.ID]; found {
+					if mapEntity, found := entitiesToGet[ep.ID]; found {
 						if filter.TargetKind == "" || ep.GetKind().Name == filter.TargetKind {
-							*map_entity = *ep
+							*mapEntity = *ep
 						}
 					}
 				}
 			}
 		}
 		// iterate over entities to make sure we did not miss any valid ones (due to the corresponding relationship being seen first)
-		for id := range entitiesToGet {
-			if entitiesToGet[id] == nil {
-				entity, _ := s.Get(ctx, id)
-				if filter.TargetKind == "" || entity.GetKind().Name == filter.TargetKind {
-					eps = append(eps, *entity)
+		for id, entity := range entitiesToGet {
+			if entity == nil {
+				store_entity, _ := s.Get(ctx, id)
+				if filter.TargetKind == "" || store_entity.GetKind().Name == filter.TargetKind {
+					eps = append(eps, *store_entity)
 				}
 			} else {
 				eps = append(eps, *entitiesToGet[id])
