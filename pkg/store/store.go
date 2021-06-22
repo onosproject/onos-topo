@@ -201,7 +201,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 				// if object is an entity, see if satisfies the filter and set its value in entitiesToGet
 				if ep.Type == topoapi.Object_ENTITY {
 					if _, found := entitiesToGet[ep.ID]; found {
-						if filter.TargetKind == "" || ep.GetKind().Name == filter.TargetKind {
+						if filter.TargetKind == "" || string(ep.GetEntity().KindID) == filter.TargetKind {
 							entitiesToGet[ep.ID] = ep
 						}
 					}
@@ -212,7 +212,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 		for id, entity := range entitiesToGet {
 			if entity == nil {
 				storeEntity, _ := s.Get(ctx, id)
-				if filter.TargetKind == "" || storeEntity.GetKind().Name == filter.TargetKind {
+				if filter.TargetKind == "" || string(storeEntity.GetEntity().KindID) == filter.TargetKind {
 					eps = append(eps, *storeEntity)
 				}
 			} else {
