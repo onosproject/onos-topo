@@ -364,13 +364,13 @@ func createNodeToCell(s Store, a auxNodeToCell) {
 
 // creates both ways
 func createCellNeigbors(s Store, a auxCellNeigbor) {
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.srcID + "-" + a.tgtID),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neigbor"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.tgtID + "-" + a.srcID),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neigbor"), SrcEntityID: topoapi.ID(a.tgtID), TgtEntityID: topoapi.ID(a.srcID)}},
