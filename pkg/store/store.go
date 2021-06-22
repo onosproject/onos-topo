@@ -200,9 +200,9 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 				} else
 				// if object is an entity, see if satisfies the filter and set its value in entitiesToGet
 				if ep.Type == topoapi.Object_ENTITY {
-					if mapEntity, found := entitiesToGet[ep.ID]; found {
+					if _, found := entitiesToGet[ep.ID]; found {
 						if filter.TargetKind == "" || ep.GetKind().Name == filter.TargetKind {
-							*mapEntity = *ep
+							entitiesToGet[ep.ID] = ep
 						}
 					}
 				}
