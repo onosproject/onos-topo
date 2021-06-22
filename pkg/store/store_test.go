@@ -338,170 +338,133 @@ func TestList(t *testing.T) {
 }
 
 func createObjectsListTest(s Store) {
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "1234",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-node")}},
 		Labels: map[string]string{"env": "production"},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "2001",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-node")}},
 		Labels: map[string]string{"env": "production"},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902461441",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: map[string]string{"env": "production"},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902461443",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: map[string]string{"env": "dev"},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445057",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: map[string]string{"env": "dev"},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445058",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445059",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445060",
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902461441-87893172902461443",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902461441", TgtEntityID: "87893172902461443"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445057-87893172902445058",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445057", TgtEntityID: "87893172902445058"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445058-87893172902445059",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445058", TgtEntityID: "87893172902445059"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445059-87893172902445060",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445059", TgtEntityID: "87893172902445060"}},
 		Labels: map[string]string{},
 	})
-	// s.Create(context.TODO(), &topoapi.Object{
-	// 	ID:     "1234-87893172902461441",
-	// 	Type:   topoapi.Object_RELATION,
-	// 	Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "1234", TgtEntityID: "87893172902461441"}},
-	// 	Labels: map[string]string{},
-	// })
-	// s.Create(context.TODO(), &topoapi.Object{
-	// 	ID:     "1234-87893172902461443",
-	// 	Type:   topoapi.Object_RELATION,
-	// 	Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "1234", TgtEntityID: "87893172902461443"}},
-	// 	Labels: map[string]string{},
-	// })
-	// s.Create(context.TODO(), &topoapi.Object{
-	// 	ID:     "2001-87893172902445057",
-	// 	Type:   topoapi.Object_RELATION,
-	// 	Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445057"}},
-	// 	Labels: map[string]string{},
-	// })
-	// s.Create(context.TODO(), &topoapi.Object{
-	// 	ID:     "2001-87893172902445058",
-	// 	Type:   topoapi.Object_RELATION,
-	// 	Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445058"}},
-	// 	Labels: map[string]string{},
-	// })
-	// s.Create(context.TODO(), &topoapi.Object{
-	// 	ID:     "2001-87893172902445059",
-	// 	Type:   topoapi.Object_RELATION,
-	// 	Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445059"}},
-	// 	Labels: map[string]string{},
-	// })
-	// s.Create(context.TODO(), &topoapi.Object{
-	// 	ID:     "2001-87893172902445060",
-	// 	Type:   topoapi.Object_RELATION,
-	// 	Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445060"}},
-	// 	Labels: map[string]string{},
-	// })
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902461443-87893172902461441",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902461443", TgtEntityID: "87893172902461441"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445058-87893172902445057",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445058", TgtEntityID: "87893172902445057"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445059-87893172902445058",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445059", TgtEntityID: "87893172902445058"}},
 		Labels: map[string]string{},
 	})
-	//! reorder lol
-	s.Create(context.TODO(), &topoapi.Object{
-		ID:     "1234-87893172902461441",
-		Type:   topoapi.Object_RELATION,
-		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "1234", TgtEntityID: "87893172902461441"}},
-		Labels: map[string]string{},
-	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "87893172902445060-87893172902445059",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445060", TgtEntityID: "87893172902445059"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "1234-87893172902461441",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "1234", TgtEntityID: "87893172902461441"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "1234-87893172902461443",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "1234", TgtEntityID: "87893172902461443"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "2001-87893172902445057",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445057"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "2001-87893172902445058",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445058"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "2001-87893172902445059",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445059"}},
 		Labels: map[string]string{},
 	})
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     "2001-87893172902445060",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-node-cell", SrcEntityID: "2001", TgtEntityID: "87893172902445060"}},
