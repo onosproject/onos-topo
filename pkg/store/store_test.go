@@ -338,7 +338,7 @@ func createObjectsListTest(s Store) {
 }
 
 func createNode(s Store, a auxNode) {
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.id),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-node")}},
@@ -346,7 +346,7 @@ func createNode(s Store, a auxNode) {
 	})
 }
 func createCell(s Store, a auxCell) {
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.id),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
@@ -354,7 +354,7 @@ func createCell(s Store, a auxCell) {
 	})
 }
 func createNodeToCell(s Store, a auxNodeToCell) {
-	s.Create(context.TODO(), &topoapi.Object{
+	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.srcID + "-" + a.tgtID),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-node-cell"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
