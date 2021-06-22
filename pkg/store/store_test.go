@@ -245,7 +245,7 @@ func TestList(t *testing.T) {
 	// - node-cell: 2001, 87893172902445058
 	// - node-cell: 2001, 87893172902445059
 	// - node-cell: 2001, 87893172902445060
-	createObjectsListTest(store)
+	createObjectsListTest(t, store)
 
 	// List the objects
 	objects, err := store.List(context.TODO(), nil)
@@ -316,64 +316,69 @@ type auxCellNeighbor struct {
 	labels map[string]string
 }
 
-func createObjectsListTest(s Store) {
-	createNode(s, auxNode{id: "1234", labels: map[string]string{"env": "production"}})
-	createNode(s, auxNode{id: "2001", labels: map[string]string{"env": "production"}})
-	createCell(s, auxCell{id: "87893172902461441", labels: map[string]string{"env": "production"}})
-	createCell(s, auxCell{id: "87893172902461443", labels: map[string]string{"env": "dev"}})
-	createCell(s, auxCell{id: "87893172902445057", labels: map[string]string{"env": "dev"}})
-	createCell(s, auxCell{id: "87893172902445058", labels: map[string]string{}})
-	createCell(s, auxCell{id: "87893172902445059", labels: map[string]string{}})
-	createCell(s, auxCell{id: "87893172902445060", labels: map[string]string{}})
-	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902461441", tgtID: "87893172902461443", labels: map[string]string{}})
-	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902445057", tgtID: "87893172902445058", labels: map[string]string{}})
-	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902445058", tgtID: "87893172902445059", labels: map[string]string{}})
-	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902445059", tgtID: "87893172902445060", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461441", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461443", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445057", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445058", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445059", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445060", labels: map[string]string{}})
+func createObjectsListTest(t *testing.T, s Store) {
+	createNode(t, s, auxNode{id: "1234", labels: map[string]string{"env": "production"}})
+	createNode(t, s, auxNode{id: "2001", labels: map[string]string{"env": "production"}})
+	createCell(t, s, auxCell{id: "87893172902461441", labels: map[string]string{"env": "production"}})
+	createCell(t, s, auxCell{id: "87893172902461443", labels: map[string]string{"env": "dev"}})
+	createCell(t, s, auxCell{id: "87893172902445057", labels: map[string]string{"env": "dev"}})
+	createCell(t, s, auxCell{id: "87893172902445058", labels: map[string]string{}})
+	createCell(t, s, auxCell{id: "87893172902445059", labels: map[string]string{}})
+	createCell(t, s, auxCell{id: "87893172902445060", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902461441", tgtID: "87893172902461443", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902445057", tgtID: "87893172902445058", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902445058", tgtID: "87893172902445059", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902445059", tgtID: "87893172902445060", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461441", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461443", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445057", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445058", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445059", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445060", labels: map[string]string{}})
 }
 
-func createNode(s Store, a auxNode) {
-	_ = s.Create(context.TODO(), &topoapi.Object{
+func createNode(t *testing.T, s Store, a auxNode) {
+	err := s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.id),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-node")}},
 		Labels: a.labels,
 	})
+	assert.NoError(t, err)
 }
-func createCell(s Store, a auxCell) {
-	_ = s.Create(context.TODO(), &topoapi.Object{
+func createCell(t *testing.T, s Store, a auxCell) {
+	err := s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.id),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
 		Labels: a.labels,
 	})
+	assert.NoError(t, err)
 }
-func createNodeToCell(s Store, a auxNodeToCell) {
-	_ = s.Create(context.TODO(), &topoapi.Object{
+func createNodeToCell(t *testing.T, s Store, a auxNodeToCell) {
+	err := s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.srcID + "-" + a.tgtID),
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-node-cell"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,
 	})
+	assert.NoError(t, err)
 }
 
 // creates both ways
-func createCellNeighbors(s Store, a auxCellNeighbor) {
-	_ = s.Create(context.TODO(), &topoapi.Object{
+func createCellNeighbors(t *testing.T, s Store, a auxCellNeighbor) {
+	err := s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.srcID + "-" + a.tgtID),
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,
 	})
-	_ = s.Create(context.TODO(), &topoapi.Object{
+	assert.NoError(t, err)
+	err = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.tgtID + "-" + a.srcID),
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.tgtID), TgtEntityID: topoapi.ID(a.srcID)}},
 		Labels: a.labels,
 	})
+	assert.NoError(t, err)
 }
