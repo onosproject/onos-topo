@@ -167,42 +167,6 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, 1.0, loc.Lat)
 	assert.Equal(t, 2.0, loc.Lng)
 
-	// List the objects
-	objects, err := store1.List(context.TODO(), nil)
-	assert.NoError(t, err)
-	assert.Len(t, objects, 4)
-
-	// List the objects with label filter
-	objects, err = store1.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
-		{
-			Filter: &topoapi.Filter_Equal_{
-				Equal_: &topoapi.EqualFilter{Value: "production"},
-			},
-			Key: "env",
-		},
-	}})
-	assert.NoError(t, err)
-	assert.Len(t, objects, 1)
-	assert.Equal(t, "o2", string(objects[0].ID))
-
-	// List the objects with kind filter
-	objects, err = store1.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
-		{
-			Filter: &topoapi.Filter_Not{
-				Not: &topoapi.NotFilter{
-					Inner: &topoapi.Filter{
-						Filter: &topoapi.Filter_Equal_{
-							Equal_: &topoapi.EqualFilter{Value: "bar"},
-						},
-					},
-				},
-			},
-		},
-	}})
-	assert.NoError(t, err)
-	assert.Len(t, objects, 1)
-	assert.Equal(t, "o1", string(objects[0].ID))
-
 	// Delete an object
 	err = store1.Delete(context.TODO(), obj2.ID)
 	assert.NoError(t, err)
@@ -298,7 +262,6 @@ func TestList(t *testing.T) {
 	}})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 3)
-	// assert.Equal(t, "1234", string(objects[0].ID))
 
 	// List the objects with kind filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
@@ -316,7 +279,6 @@ func TestList(t *testing.T) {
 	}})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 16)
-	// assert.Equal(t, "1234", string(objects[0].ID))
 
 	// List the objects with relation filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
@@ -324,15 +286,12 @@ func TestList(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2)
-	// assert.Equal(t, "1234-87893172902461441", string(objects[0].ID))
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: ""},
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2)
-	// assert.Equal(t, "87893172902445058-87893172902445057", string(objects[0].ID))
-	// assert.Equal(t, "87893172902445058-87893172902445059", string(objects[1].ID))
 
 	// No test for relation filter with target kind: cell-neighbor, node-cell do not have different target kinds
 }
@@ -432,6 +391,54 @@ func createObjectsListTest(s Store) {
 		ID:     "87893172902445060-87893172902445059",
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445060", TgtEntityID: "87893172902445059"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902461443-87893172902461441",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902461443", TgtEntityID: "87893172902461441"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902445058-87893172902445057",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445058", TgtEntityID: "87893172902445057"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902445059-87893172902445058",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445059", TgtEntityID: "87893172902445058"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902445060-87893172902445059",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445060", TgtEntityID: "87893172902445059"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902461441-87893172902461443",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902461441", TgtEntityID: "87893172902461443"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902445057-87893172902445058",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445057", TgtEntityID: "87893172902445058"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902445058-87893172902445059",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445058", TgtEntityID: "87893172902445059"}},
+		Labels: map[string]string{},
+	})
+	_ = s.Create(context.TODO(), &topoapi.Object{
+		ID:     "87893172902445059-87893172902445060",
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: "e2-cell-neighbor", SrcEntityID: "87893172902445059", TgtEntityID: "87893172902445060"}},
 		Labels: map[string]string{},
 	})
 	_ = s.Create(context.TODO(), &topoapi.Object{
