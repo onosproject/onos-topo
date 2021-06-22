@@ -310,7 +310,7 @@ type auxNodeToCell struct {
 	tgtID  string
 	labels map[string]string
 }
-type auxCellNeigbor struct {
+type auxCellNeighbor struct {
 	srcID  string
 	tgtID  string
 	labels map[string]string
@@ -321,20 +321,20 @@ func createObjectsListTest(s Store) {
 	createNode(s, auxNode{id: "2001", labels: map[string]string{"env": "production"}})
 	createCell(s, auxCell{id: "87893172902461441", labels: map[string]string{"env": "production"}})
 	createCell(s, auxCell{id: "87893172902461443", labels: map[string]string{"env": "dev"}})
-	createCell(s, auxCell{id: "87893172902461457", labels: map[string]string{"env": "dev"}})
-	createCell(s, auxCell{id: "87893172902461458", labels: map[string]string{}})
-	createCell(s, auxCell{id: "87893172902461459", labels: map[string]string{}})
-	createCell(s, auxCell{id: "87893172902461460", labels: map[string]string{}})
-	createCellNeigbors(s, auxCellNeigbor{srcID: "87893172902461441", tgtID: "87893172902461443", labels: map[string]string{}})
-	createCellNeigbors(s, auxCellNeigbor{srcID: "87893172902445057", tgtID: "87893172902445058", labels: map[string]string{}})
-	createCellNeigbors(s, auxCellNeigbor{srcID: "87893172902445058", tgtID: "87893172902445059", labels: map[string]string{}})
-	createCellNeigbors(s, auxCellNeigbor{srcID: "87893172902445059", tgtID: "87893172902445060", labels: map[string]string{}})
+	createCell(s, auxCell{id: "87893172902445057", labels: map[string]string{"env": "dev"}})
+	createCell(s, auxCell{id: "87893172902445058", labels: map[string]string{}})
+	createCell(s, auxCell{id: "87893172902445059", labels: map[string]string{}})
+	createCell(s, auxCell{id: "87893172902445060", labels: map[string]string{}})
+	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902461441", tgtID: "87893172902461443", labels: map[string]string{}})
+	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902445057", tgtID: "87893172902445058", labels: map[string]string{}})
+	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902445058", tgtID: "87893172902445059", labels: map[string]string{}})
+	createCellNeighbors(s, auxCellNeighbor{srcID: "87893172902445059", tgtID: "87893172902445060", labels: map[string]string{}})
 	createNodeToCell(s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461441", labels: map[string]string{}})
 	createNodeToCell(s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461443", labels: map[string]string{}})
 	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445057", labels: map[string]string{}})
 	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445058", labels: map[string]string{}})
 	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445059", labels: map[string]string{}})
-	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "878931729024450560", labels: map[string]string{}})
+	createNodeToCell(s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445060", labels: map[string]string{}})
 }
 
 func createNode(s Store, a auxNode) {
@@ -356,24 +356,24 @@ func createCell(s Store, a auxCell) {
 func createNodeToCell(s Store, a auxNodeToCell) {
 	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.srcID + "-" + a.tgtID),
-		Type:   topoapi.Object_ENTITY,
+		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-node-cell"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,
 	})
 }
 
 // creates both ways
-func createCellNeigbors(s Store, a auxCellNeigbor) {
+func createCellNeighbors(s Store, a auxCellNeighbor) {
 	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.srcID + "-" + a.tgtID),
-		Type:   topoapi.Object_ENTITY,
-		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neigbor"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,
 	})
 	_ = s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.tgtID + "-" + a.srcID),
-		Type:   topoapi.Object_ENTITY,
-		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neigbor"), SrcEntityID: topoapi.ID(a.tgtID), TgtEntityID: topoapi.ID(a.srcID)}},
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.tgtID), TgtEntityID: topoapi.ID(a.srcID)}},
 		Labels: a.labels,
 	})
 }
