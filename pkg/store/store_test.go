@@ -47,6 +47,11 @@ func TestTopoStore(t *testing.T) {
 	store2, err := NewAtomixStore(client2)
 	assert.NoError(t, err)
 
+	// List the objects; there should be none
+	noobjects, err := store1.List(context.TODO(), nil)
+	assert.NoError(t, err)
+	assert.Len(t, noobjects, 0)
+
 	ch := make(chan topoapi.Event)
 	err = store2.Watch(context.Background(), ch, nil)
 	assert.NoError(t, err)
