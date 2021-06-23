@@ -176,7 +176,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 
 	eps := make([]topoapi.Object, 0)
 
-	// first make sure there are filters. if there aren't, just return everything
+	// first make sure there are filters. if there aren't, return everything with the correct type
 	if filters == nil {
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
@@ -213,17 +213,23 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 			if entity == nil {
 				storeEntity, _ := s.Get(ctx, id)
 				if filter.TargetKind == "" || string(storeEntity.GetEntity().KindID) == filter.TargetKind {
-					eps = append(eps, *storeEntity)
+					if matchType(storeEntity, filters.ObjectTypes) {
+						eps = append(eps, *storeEntity)
+					}
 				}
 			} else {
-				eps = append(eps, *entitiesToGet[id])
+				if matchType(entitiesToGet[id], filters.ObjectTypes) {
+					eps = append(eps, *entitiesToGet[id])
+				}
 			}
 		}
 	} else {
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
 				if match(ep, filters) {
-					eps = append(eps, *ep)
+					if matchType(ep, filters.ObjectTypes) {
+						eps = append(eps, *ep)
+					}
 				}
 			}
 		}

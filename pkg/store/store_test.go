@@ -250,7 +250,7 @@ func TestList(t *testing.T) {
 	// List the objects
 	objects, err := store.List(context.TODO(), nil)
 	assert.NoError(t, err)
-	assert.Len(t, objects, 22)
+	assert.Len(t, objects, 22) // 2 nodes + 6 cells + 8 cell-neighbors + 6 node-cells
 
 	// List the objects with label filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
@@ -262,7 +262,7 @@ func TestList(t *testing.T) {
 		},
 	}})
 	assert.NoError(t, err)
-	assert.Len(t, objects, 3)
+	assert.Len(t, objects, 3) // node 1234, node 2001, and cell 87893172902461441 have the "env": "production" label
 
 	// List the objects with kind filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
@@ -279,20 +279,27 @@ func TestList(t *testing.T) {
 		},
 	}})
 	assert.NoError(t, err)
-	assert.Len(t, objects, 16)
+	assert.Len(t, objects, 16) // 2 nodes + 8 cell-neighbors + 6 node-cells
 
 	// List the objects with relation filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: ""},
 	})
 	assert.NoError(t, err)
-	assert.Len(t, objects, 2)
+	assert.Len(t, objects, 2) // the 1234 node has two cells
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: ""},
 	})
 	assert.NoError(t, err)
-	assert.Len(t, objects, 2)
+	assert.Len(t, objects, 2) // connection from 57 to 58 and 58 to 59 (bidirectional connection)
+
+	// List the objects with object type filter
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		ObjectTypes: []topoapi.Object_Type{topo.Object_ENTITY},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 8) // nodes + cells
 
 	// No test for relation filter with target kind: cell-neighbor, node-cell do not have different target kinds
 }
