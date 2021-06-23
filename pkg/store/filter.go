@@ -17,7 +17,7 @@ package store
 import topoapi "github.com/onosproject/onos-api/go/onos/topo"
 
 func match(object *topoapi.Object, filters *topoapi.Filters) bool {
-	return filters == nil || (matchKinds(object, filters.KindFilters) && matchLabels(object, filters.LabelFilters))
+	return filters == nil || (matchKind(object, filters.KindFilter) && matchLabels(object, filters.LabelFilters))
 }
 
 func matchLabels(object *topoapi.Object, filters []*topoapi.Filter) bool {
@@ -25,13 +25,6 @@ func matchLabels(object *topoapi.Object, filters []*topoapi.Filter) bool {
 		if !matchLabel(object, filter) {
 			return false
 		}
-	}
-	return true
-}
-
-func matchKinds(object *topoapi.Object, filters []*topoapi.Filter) bool {
-	if len(filters) > 0 {
-		return matchKind(object, filters[0])
 	}
 	return true
 }
@@ -59,6 +52,9 @@ func matchLabel(object *topoapi.Object, filter *topoapi.Filter) bool {
 }
 
 func matchKind(object *topoapi.Object, filter *topoapi.Filter) bool {
+	if filter == nil {
+		return true
+	}
 	if object.Type != topoapi.Object_ENTITY && object.Type != topoapi.Object_RELATION {
 		return false
 	}
