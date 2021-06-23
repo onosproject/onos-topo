@@ -270,19 +270,18 @@ func TestList(t *testing.T) {
 	assert.Len(t, objects, 3) // node 1234, node 2001, and cell 87893172902461441 have the "env": "production" label
 
 	// List the objects with kind filter
-	objects, err = store.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
-		{
-			Filter: &topoapi.Filter_Not{
-				Not: &topoapi.NotFilter{
-					Inner: &topoapi.Filter{
-						Filter: &topoapi.Filter_Equal_{
-							Equal_: &topoapi.EqualFilter{Value: "e2-cell"},
-						},
+	objects, err = store.List(context.TODO(), &topoapi.Filters{KindFilter: &topoapi.Filter{
+		Filter: &topoapi.Filter_Not{
+			Not: &topoapi.NotFilter{
+				Inner: &topoapi.Filter{
+					Filter: &topoapi.Filter_Equal_{
+						Equal_: &topoapi.EqualFilter{Value: "e2-cell"},
 					},
 				},
 			},
 		},
-	}})
+	},
+	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 16) // 2 nodes + 8 cell-neighbors + 6 node-cells
 
