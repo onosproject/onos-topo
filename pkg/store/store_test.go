@@ -16,13 +16,15 @@ package store
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/atomix/atomix-go-client/pkg/atomix/test"
 	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
+	"github.com/onosproject/onos-api/go/onos/topo"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestTopoStore(t *testing.T) {
@@ -171,42 +173,6 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, 1.0, loc.Lat)
 	assert.Equal(t, 2.0, loc.Lng)
 
-	// List the objects
-	objects, err := store1.List(context.TODO(), nil)
-	assert.NoError(t, err)
-	assert.Len(t, objects, 4)
-
-	// List the objects with label filter
-	objects, err = store1.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
-		{
-			Filter: &topoapi.Filter_Equal_{
-				Equal_: &topoapi.EqualFilter{Value: "production"},
-			},
-			Key: "env",
-		},
-	}})
-	assert.NoError(t, err)
-	assert.Len(t, objects, 1)
-	assert.Equal(t, "o2", string(objects[0].ID))
-
-	// List the objects with kind filter
-	objects, err = store1.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
-		{
-			Filter: &topoapi.Filter_Not{
-				Not: &topoapi.NotFilter{
-					Inner: &topoapi.Filter{
-						Filter: &topoapi.Filter_Equal_{
-							Equal_: &topoapi.EqualFilter{Value: "bar"},
-						},
-					},
-				},
-			},
-		},
-	}})
-	assert.NoError(t, err)
-	assert.Len(t, objects, 1)
-	assert.Equal(t, "o1", string(objects[0].ID))
-
 	// Delete an object
 	err = store1.Delete(context.TODO(), obj2.ID)
 	assert.NoError(t, err)
@@ -248,4 +214,183 @@ func nextEvent(t *testing.T, ch chan topoapi.Event) *topoapi.Object {
 		t.FailNow()
 	}
 	return nil
+}
+
+func TestList(t *testing.T) {
+	test := test.NewTest(
+		rsm.NewProtocol(),
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+	// Define client, store, and objects
+
+	// Client def
+	client, _ := test.NewClient("client")
+
+	// Store def
+	store, _ := NewAtomixStore(client)
+
+	// Objects def:
+	// - node 1234
+	// - node 2001
+	// - cell 87893172902461441
+	// - cell 87893172902461443
+	// - cell 87893172902445057
+	// - cell 87893172902445058
+	// - cell 87893172902445059
+	// - cell 87893172902445060
+	// - cell-neighbor: 87893172902461441, 87893172902461443 + vice versa
+	// - cell-neighbor: 87893172902445057, 87893172902445058 + vice versa
+	// - cell-neighbor: 87893172902445058, 87893172902445059 + vice versa
+	// - cell-neighbor: 87893172902445059, 87893172902445060 + vice versa
+	// - node-cell: 1234, 87893172902461441
+	// - node-cell: 1234, 87893172902461443
+	// - node-cell: 2001, 87893172902445057
+	// - node-cell: 2001, 87893172902445058
+	// - node-cell: 2001, 87893172902445059
+	// - node-cell: 2001, 87893172902445060
+	createObjectsListTest(t, store)
+
+	// List the objects
+	objects, err := store.List(context.TODO(), nil)
+	assert.NoError(t, err)
+	assert.Len(t, objects, 22) // 2 nodes + 6 cells + 8 cell-neighbors + 6 node-cells
+
+	// List the objects with label filter
+	objects, err = store.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
+		{
+			Filter: &topoapi.Filter_Equal_{
+				Equal_: &topoapi.EqualFilter{Value: "production"},
+			},
+			Key: "env",
+		},
+	}})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 3) // node 1234, node 2001, and cell 87893172902461441 have the "env": "production" label
+
+	// List the objects with kind filter
+	objects, err = store.List(context.TODO(), &topoapi.Filters{KindFilters: []*topoapi.Filter{
+		{
+			Filter: &topoapi.Filter_Not{
+				Not: &topoapi.NotFilter{
+					Inner: &topoapi.Filter{
+						Filter: &topoapi.Filter_Equal_{
+							Equal_: &topoapi.EqualFilter{Value: "e2-cell"},
+						},
+					},
+				},
+			},
+		},
+	}})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 16) // 2 nodes + 8 cell-neighbors + 6 node-cells
+
+	// List the objects with relation filter
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: ""},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // the 1234 node has two cells
+
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: ""},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // connection from 57 to 58 and 58 to 59 (bidirectional connection)
+
+	// List the objects with object type filter
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		ObjectTypes: []topoapi.Object_Type{topo.Object_ENTITY},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 8) // nodes + cells
+
+	// No test for relation filter with target kind: cell-neighbor, node-cell do not have different target kinds
+}
+
+type auxNode struct {
+	id     string
+	labels map[string]string
+}
+type auxCell struct {
+	id     string
+	labels map[string]string
+}
+type auxNodeToCell struct {
+	srcID  string
+	tgtID  string
+	labels map[string]string
+}
+type auxCellNeighbor struct {
+	srcID  string
+	tgtID  string
+	labels map[string]string
+}
+
+func createObjectsListTest(t *testing.T, s Store) {
+	createNode(t, s, auxNode{id: "1234", labels: map[string]string{"env": "production"}})
+	createNode(t, s, auxNode{id: "2001", labels: map[string]string{"env": "production"}})
+	createCell(t, s, auxCell{id: "87893172902461441", labels: map[string]string{"env": "production"}})
+	createCell(t, s, auxCell{id: "87893172902461443", labels: map[string]string{"env": "dev"}})
+	createCell(t, s, auxCell{id: "87893172902445057", labels: map[string]string{"env": "dev"}})
+	createCell(t, s, auxCell{id: "87893172902445058", labels: map[string]string{}})
+	createCell(t, s, auxCell{id: "87893172902445059", labels: map[string]string{}})
+	createCell(t, s, auxCell{id: "87893172902445060", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902461441", tgtID: "87893172902461443", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902445057", tgtID: "87893172902445058", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902445058", tgtID: "87893172902445059", labels: map[string]string{}})
+	createCellNeighbors(t, s, auxCellNeighbor{srcID: "87893172902445059", tgtID: "87893172902445060", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461441", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "1234", tgtID: "87893172902461443", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445057", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445058", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445059", labels: map[string]string{}})
+	createNodeToCell(t, s, auxNodeToCell{srcID: "2001", tgtID: "87893172902445060", labels: map[string]string{}})
+}
+
+func createNode(t *testing.T, s Store, a auxNode) {
+	err := s.Create(context.TODO(), &topoapi.Object{
+		ID:     topo.ID(a.id),
+		Type:   topoapi.Object_ENTITY,
+		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-node")}},
+		Labels: a.labels,
+	})
+	assert.NoError(t, err)
+}
+func createCell(t *testing.T, s Store, a auxCell) {
+	err := s.Create(context.TODO(), &topoapi.Object{
+		ID:     topo.ID(a.id),
+		Type:   topoapi.Object_ENTITY,
+		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-cell")}},
+		Labels: a.labels,
+	})
+	assert.NoError(t, err)
+}
+func createNodeToCell(t *testing.T, s Store, a auxNodeToCell) {
+	err := s.Create(context.TODO(), &topoapi.Object{
+		ID:     topo.ID(a.srcID + "-" + a.tgtID),
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-node-cell"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
+		Labels: a.labels,
+	})
+	assert.NoError(t, err)
+}
+
+// creates both ways
+func createCellNeighbors(t *testing.T, s Store, a auxCellNeighbor) {
+	err := s.Create(context.TODO(), &topoapi.Object{
+		ID:     topo.ID(a.srcID + "-" + a.tgtID),
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
+		Labels: a.labels,
+	})
+	assert.NoError(t, err)
+	err = s.Create(context.TODO(), &topoapi.Object{
+		ID:     topo.ID(a.tgtID + "-" + a.srcID),
+		Type:   topoapi.Object_RELATION,
+		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.tgtID), TgtEntityID: topoapi.ID(a.srcID)}},
+		Labels: a.labels,
+	})
+	assert.NoError(t, err)
 }

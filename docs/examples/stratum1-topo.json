@@ -1,0 +1,27 @@
+{
+  "Stratum": {
+    "type": "kind",
+    "name": "Stratum"
+  },
+  "stratum-1": {
+    "type": "entity",
+    "kind": "Stratum",
+    "onos.topo.Location": {
+      "lat": 52.5150,
+      "lng": 13.3885
+    },
+    "onos.topo.Configurable": {
+      "address": "192.168.8.103:50001",
+      "version": "1.0.0",
+      "type": "Stratum"
+    },
+    "onos.topo.TLSOptions": {
+      "insecure": true,
+      "plain": true
+    },
+    "onos.topo.Asset": {
+      "name": "Stratum-1"
+    },
+    "onos.topo.MastershipState": {}
+  }
+}

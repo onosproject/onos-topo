@@ -91,3 +91,15 @@ func matchKind(object *topoapi.Object, filter *topoapi.Filter) bool {
 	}
 	return false
 }
+
+func matchType(object *topoapi.Object, types []topoapi.Object_Type) bool {
+	if len(types) != 0 {
+		for i := range types {
+			if object.Type == types[i] {
+				return true
+			}
+		}
+		return false
+	}
+	return true
+}

@@ -16,12 +16,13 @@ package store
 
 import (
 	"context"
+	"io"
+	"time"
+
 	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
-	"io"
-	"time"
 
 	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
 	"github.com/gogo/protobuf/proto"
@@ -175,10 +176,61 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 
 	eps := make([]topoapi.Object, 0)
 
-	for entry := range mapCh {
-		if ep, err := decodeObject(entry); err == nil {
-			if match(ep, filters) {
+	// first make sure there are filters. if there aren't, return everything with the correct type
+	if filters == nil {
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
 				eps = append(eps, *ep)
+			}
+		}
+		return eps, nil
+	}
+
+	if filters.RelationFilter != nil {
+		filter := filters.RelationFilter
+
+		// contains _all_ relations that have the same kind as the filter and same SrcId as the filter
+		entitiesToGet := make(map[topoapi.ID]*topoapi.Object)
+
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
+				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
+				if ep.Type == topoapi.Object_RELATION && string(ep.GetRelation().KindID) == filter.GetRelationKind() && string(ep.GetRelation().GetSrcEntityID()) == filter.SrcId {
+					entitiesToGet[ep.GetRelation().TgtEntityID] = nil
+				} else
+				// if object is an entity, see if satisfies the filter and set its value in entitiesToGet
+				if ep.Type == topoapi.Object_ENTITY {
+					if _, found := entitiesToGet[ep.ID]; found {
+						if filter.TargetKind == "" || string(ep.GetEntity().KindID) == filter.TargetKind {
+							entitiesToGet[ep.ID] = ep
+						}
+					}
+				}
+			}
+		}
+		// iterate over entitiesToGet to obtain missed entities and push onto eps
+		for id, entity := range entitiesToGet {
+			if entity == nil {
+				storeEntity, _ := s.Get(ctx, id)
+				if filter.TargetKind == "" || string(storeEntity.GetEntity().KindID) == filter.TargetKind {
+					if matchType(storeEntity, filters.ObjectTypes) {
+						eps = append(eps, *storeEntity)
+					}
+				}
+			} else {
+				if matchType(entitiesToGet[id], filters.ObjectTypes) {
+					eps = append(eps, *entitiesToGet[id])
+				}
+			}
+		}
+	} else {
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
+				if match(ep, filters) {
+					if matchType(ep, filters.ObjectTypes) {
+						eps = append(eps, *ep)
+					}
+				}
 			}
 		}
 	}
