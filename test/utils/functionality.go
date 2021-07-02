@@ -37,11 +37,11 @@ func getE2CellRelationID(deviceID topoapi.ID, cellID topoapi.ID) (topoapi.ID, er
 	return cellRelationID, nil
 }
 
-func (r *Rnib) DeleteE2Relation(ctx context.Context, relationID topoapi.ID) error {
+func (r *Rnib) DeleteRelation(ctx context.Context, relationID topoapi.ID) error {
 	return r.store.Delete(ctx, relationID)
 }
 
-func (r *Rnib) GetE2Relation(ctx context.Context, deviceID topoapi.ID) (topoapi.ID, error) {
+func (r *Rnib) GetRelation(ctx context.Context, deviceID topoapi.ID) (topoapi.ID, error) {
 	objects, err := r.store.List(ctx, &topoapi.Filters{
 		KindFilter: &topoapi.Filter{
 			Filter: &topoapi.Filter_Equal_{
@@ -68,7 +68,7 @@ func (r *Rnib) GetE2Relation(ctx context.Context, deviceID topoapi.ID) (topoapi.
 	return "", errors.NewNotFound("E2 relation ID is not found")
 }
 
-func (r *Rnib) CreateOrUpdateE2Relation(ctx context.Context, deviceID topoapi.ID, relationID topoapi.ID) error {
+func (r *Rnib) CreateOrUpdateRelation(ctx context.Context, deviceID topoapi.ID, relationID topoapi.ID) error {
 	return backoff.Retry(func() error {
 		_, err := r.store.Get(ctx, deviceID)
 		if err != nil {
@@ -114,7 +114,7 @@ func (r *Rnib) CreateOrUpdateE2Relation(ctx context.Context, deviceID topoapi.ID
 	}, newExpBackoff())
 }
 
-func (r *Rnib) CreateOrUpdateE2CellRelation(ctx context.Context, deviceID topoapi.ID, cellID topoapi.ID) error {
+func (r *Rnib) CreateOrUpdateCellRelation(ctx context.Context, deviceID topoapi.ID, cellID topoapi.ID) error {
 	return backoff.Retry(func() error {
 		cellRelationID, err := getE2CellRelationID(deviceID, cellID)
 		if err != nil {
@@ -157,7 +157,7 @@ func (r *Rnib) CreateOrUpdateE2CellRelation(ctx context.Context, deviceID topoap
 }
 
 // CreateOrUpdateE2Cells creates or update E2 cells entities and relations
-func (r *Rnib) CreateOrUpdateE2Cells(ctx context.Context, deviceID topoapi.ID, e2Cells []*topoapi.E2Cell) error {
+func (r *Rnib) CreateOrUpdateCells(ctx context.Context, deviceID topoapi.ID, e2Cells []*topoapi.E2Cell) error {
 	return backoff.Retry(func() error {
 		_, err := r.store.Get(ctx, deviceID)
 		if err != nil {
@@ -195,7 +195,7 @@ func (r *Rnib) CreateOrUpdateE2Cells(ctx context.Context, deviceID topoapi.ID, e
 					return err
 				}
 
-				err = r.CreateOrUpdateE2CellRelation(ctx, deviceID, cellID)
+				err = r.CreateOrUpdateCellRelation(ctx, deviceID, cellID)
 				if err != nil {
 					return backoff.Permanent(err)
 				}
@@ -213,7 +213,7 @@ func (r *Rnib) CreateOrUpdateE2Cells(ctx context.Context, deviceID topoapi.ID, e
 					return err
 				}
 
-				err = r.CreateOrUpdateE2CellRelation(ctx, deviceID, cellID)
+				err = r.CreateOrUpdateCellRelation(ctx, deviceID, cellID)
 				if err != nil {
 					return backoff.Permanent(err)
 				}
@@ -224,7 +224,7 @@ func (r *Rnib) CreateOrUpdateE2Cells(ctx context.Context, deviceID topoapi.ID, e
 }
 
 // CreateOrUpdateE2Node creates or updates E2 entities
-func (r *Rnib) CreateOrUpdateE2Node(ctx context.Context, deviceID topoapi.ID, serviceModels map[string]*topoapi.ServiceModelInfo) error {
+func (r *Rnib) CreateOrUpdateNode(ctx context.Context, deviceID topoapi.ID, serviceModels map[string]*topoapi.ServiceModelInfo) error {
 	return backoff.Retry(func() error {
 		e2NodeAspects := &topoapi.E2Node{
 			ServiceModels: serviceModels,
@@ -275,7 +275,7 @@ func (r *Rnib) CreateOrUpdateE2Node(ctx context.Context, deviceID topoapi.ID, se
 	}, newExpBackoff())
 }
 
-func (r *Rnib) WatchE2Relations(ctx context.Context, ch chan<- topoapi.ID) error {
+func (r *Rnib) WatchRelations(ctx context.Context, ch chan<- topoapi.ID) error {
 	eventCh := make(chan topoapi.Event)
 	go func() {
 		podID := getPodID()
@@ -302,13 +302,13 @@ func (r *Rnib) WatchE2Relations(ctx context.Context, ch chan<- topoapi.ID) error
 
 // Manager topology manager
 type Manager interface {
-	CreateOrUpdateE2Cells(ctx context.Context, deviceID topoapi.ID, e2Cells []*topoapi.E2Cell) error
-	CreateOrUpdateE2CellRelation(ctx context.Context, deviceID topoapi.ID, cellID topoapi.ID) error
-	CreateOrUpdateE2Node(ctx context.Context, deviceID topoapi.ID, serviceModels map[string]*topoapi.ServiceModelInfo) error
-	CreateOrUpdateE2Relation(ctx context.Context, deviceID topoapi.ID, relationID topoapi.ID) error
-	DeleteE2Relation(ctx context.Context, relationID topoapi.ID) error
-	GetE2Relation(ctx context.Context, deviceID topoapi.ID) (topoapi.ID, error)
-	WatchE2Relations(ctx context.Context, ch chan<- topoapi.ID) error
+	CreateOrUpdateCells(ctx context.Context, deviceID topoapi.ID, e2Cells []*topoapi.E2Cell) error
+	CreateOrUpdateCellRelation(ctx context.Context, deviceID topoapi.ID, cellID topoapi.ID) error
+	CreateOrUpdateNode(ctx context.Context, deviceID topoapi.ID, serviceModels map[string]*topoapi.ServiceModelInfo) error
+	CreateOrUpdateRelation(ctx context.Context, deviceID topoapi.ID, relationID topoapi.ID) error
+	DeleteRelation(ctx context.Context, relationID topoapi.ID) error
+	GetRelation(ctx context.Context, deviceID topoapi.ID) (topoapi.ID, error)
+	WatchRelations(ctx context.Context, ch chan<- topoapi.ID) error
 }
 
 // NewManager creates topology manager
