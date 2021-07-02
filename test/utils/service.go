@@ -17,14 +17,8 @@ package utils
 import (
 	"context"
 	"fmt"
-	"github.com/atomix/atomix-go-client/pkg/atomix/test"
-	"github.com/onosproject/onos-lib-go/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc/test/bufconn"
-	"net"
-	"testing"
-
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
+	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
@@ -211,46 +205,4 @@ func (s *Server) ValidateObject(ctx context.Context, object *topoapi.Object) err
 		}
 	}
 	return nil
-}
-
-var lis *bufconn.Listener
-
-func bufDialer(context.Context, string) (net.Conn, error) {
-	return lis.Dial()
-}
-
-func newTestService(test *test.Test) (northbound.Service, error) {
-	client, err := test.NewClient("test")
-	if err != nil {
-		return nil, err
-	}
-	store, err := store.NewAtomixStore(client)
-	if err != nil {
-		return nil, err
-	}
-	return &Service{
-		store: store,
-	}, nil
-}
-
-func CreateServerConnection(t *testing.T, test *test.Test) *grpc.ClientConn {
-	lis = bufconn.Listen(1024 * 1024)
-	s, err := newTestService(test)
-	assert.NoError(t, err)
-	assert.NotNil(t, s)
-	server := grpc.NewServer()
-	s.Register(server)
-
-	go func() {
-		if err := server.Serve(lis); err != nil {
-			assert.NoError(t, err, "Server exited with error: %v", err)
-		}
-	}()
-
-	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
-	if err != nil {
-		t.Fatalf("Failed to dial bufnet: %v", err)
-	}
-	return conn
 }

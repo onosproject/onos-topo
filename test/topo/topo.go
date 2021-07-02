@@ -1,6 +1,16 @@
-// SPDX-FileCopyrightText: 2020-present Open Networking Foundation <info@opennetworking.org>
+// Copyright 2019-present Open Networking Foundation.
 //
-// SPDX-License-Identifier: LicenseRef-ONF-Member-1.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package topo
 
@@ -14,19 +24,18 @@ import (
 	"gotest.tools/assert"
 )
 
-//var (
-//	initialEnbID  = 155000
-//	serviceModels = []string{"kpm2", "rcpre2"}
-//	controllers   = []string{"e2t-1"}
-//)
-
 var log = logging.GetLogger("topo")
 
+// TestAddRemoveDevice adds devices to the storage, lists and checks that they are in database and removes devices from the storage
 func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 
+	log.Debugf("Creating connection")
 	conn, err := utils.CreateConnection()
+	assert.NilError(t, err)
+	log.Debugf("Creating Topo Client")
 	client := topoapi.NewTopoClient(conn)
 
+	log.Debugf("Adding first device to the topo store")
 	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:   "1",
@@ -35,6 +44,7 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	})
 	assert.NilError(t, err)
 
+	log.Debugf("Adding second device to the topo store")
 	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:   "2",
@@ -43,14 +53,17 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	})
 	assert.NilError(t, err)
 
+	log.Debugf("Checking whether added device exists")
 	gres, err := client.Get(context.Background(), &topoapi.GetRequest{
 		ID: "1",
 	})
 	assert.NilError(t, err)
 	assert.Equal(t, topoapi.ID("1"), gres.Object.ID)
 
+	log.Debugf("Listing all devices")
 	res, err := client.List(context.Background(), &topoapi.ListRequest{})
 	assert.NilError(t, err)
+	log.Debugf("Verifying that there are two devices stored")
 	assert.Equal(t, len(res.Objects) == 2 &&
 		(res.Objects[0].ID == "1" || res.Objects[1].ID == "1"), true)
 	//assert.Condition(t, func() bool {
@@ -58,6 +71,7 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	//		(res.Objects[0].ID == "1" || res.Objects[1].ID == "1")
 	//})
 
+	log.Debugf("Updating first device")
 	obj := gres.Object
 	//obj.Attributes = make(map[string]string)
 	//obj.Attributes["foo"] = "bar"
@@ -68,11 +82,13 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	assert.Assert(t, ures != nil)
 	//assert.Equal(t, ures.Object.Attributes["foo"], "bar")
 
+	log.Debugf("Deleting first device")
 	_, err = client.Delete(context.Background(), &topoapi.DeleteRequest{
 		ID: "1",
 	})
 	assert.NilError(t, err)
 
+	log.Debugf("Listing all devices and verifying that there is only second device left")
 	res, err = client.List(context.Background(), &topoapi.ListRequest{})
 	assert.NilError(t, err)
 	assert.Equal(t, len(res.Objects) == 1 && res.Objects[0].ID == "2", true)
