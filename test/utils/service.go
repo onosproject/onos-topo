@@ -19,20 +19,10 @@ import (
 	"fmt"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
-	"github.com/onosproject/onos-lib-go/pkg/logging"
-	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
+	"github.com/prometheus/common/log"
 	"google.golang.org/grpc"
 )
-
-var log = logging.GetLogger("northbound", "topo")
-
-// NewService returns a new topo Service
-func NewService(store store.Store) northbound.Service {
-	return &Service{
-		store: store,
-	}
-}
 
 // Service is a Service implementation for administration.
 type Service struct {
