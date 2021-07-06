@@ -17,14 +17,11 @@ package topo
 import (
 	"context"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
-	"github.com/onosproject/onos-lib-go/pkg/logging"
 	utils "github.com/onosproject/onos-topo/test/utils"
 	"testing"
 
 	"gotest.tools/assert"
 )
-
-var log = logging.GetLogger("topo")
 
 // TestAddRemoveDevice adds devices to the storage, lists and checks that they are in database and removes devices from the storage
 func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
