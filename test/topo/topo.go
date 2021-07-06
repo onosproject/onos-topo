@@ -29,13 +29,13 @@ var log = logging.GetLogger("topo")
 // TestAddRemoveDevice adds devices to the storage, lists and checks that they are in database and removes devices from the storage
 func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 
-	log.Debugf("Creating connection")
+	t.Logf("Creating connection")
 	conn, err := utils.CreateConnection()
 	assert.NilError(t, err)
-	log.Debugf("Creating Topo Client")
+	t.Logf("Creating Topo Client")
 	client := topoapi.NewTopoClient(conn)
 
-	log.Debugf("Adding first device to the topo store")
+	t.Logf("Adding first device to the topo store")
 	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:   "1",
@@ -44,7 +44,7 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	})
 	assert.NilError(t, err)
 
-	log.Debugf("Adding second device to the topo store")
+	t.Logf("Adding second device to the topo store")
 	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:   "2",
@@ -53,46 +53,36 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	})
 	assert.NilError(t, err)
 
-	log.Debugf("Checking whether added device exists")
+	t.Logf("Checking whether added device exists")
 	gres, err := client.Get(context.Background(), &topoapi.GetRequest{
 		ID: "1",
 	})
 	assert.NilError(t, err)
 	assert.Equal(t, topoapi.ID("1"), gres.Object.ID)
 
-	log.Debugf("Listing all devices")
+	t.Logf("Listing all devices")
 	res, err := client.List(context.Background(), &topoapi.ListRequest{})
 	assert.NilError(t, err)
-	log.Debugf("Verifying that there are two devices stored")
+	t.Logf("Verifying that there are two devices stored")
 	assert.Equal(t, len(res.Objects) == 2 &&
 		(res.Objects[0].ID == "1" || res.Objects[1].ID == "1"), true)
-	//assert.Condition(t, func() bool {
-	//	return len(res.Objects) == 2 &&
-	//		(res.Objects[0].ID == "1" || res.Objects[1].ID == "1")
-	//})
 
-	log.Debugf("Updating first device")
+	t.Logf("Updating first device")
 	obj := gres.Object
-	//obj.Attributes = make(map[string]string)
-	//obj.Attributes["foo"] = "bar"
 	ures, err := client.Update(context.Background(), &topoapi.UpdateRequest{
 		Object: obj,
 	})
 	assert.NilError(t, err)
 	assert.Assert(t, ures != nil)
-	//assert.Equal(t, ures.Object.Attributes["foo"], "bar")
 
-	log.Debugf("Deleting first device")
+	t.Logf("Deleting first device")
 	_, err = client.Delete(context.Background(), &topoapi.DeleteRequest{
 		ID: "1",
 	})
 	assert.NilError(t, err)
 
-	log.Debugf("Listing all devices and verifying that there is only second device left")
+	t.Logf("Listing all devices and verifying that there is only second device left")
 	res, err = client.List(context.Background(), &topoapi.ListRequest{})
 	assert.NilError(t, err)
 	assert.Equal(t, len(res.Objects) == 1 && res.Objects[0].ID == "2", true)
-	//assert.Condition(t, func() bool {
-	//	return len(res.Objects) == 1 && res.Objects[0].ID == "2"
-	//})
 }
