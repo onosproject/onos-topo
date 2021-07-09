@@ -17,6 +17,8 @@ package northbound
 import (
 	"context"
 	"fmt"
+	"sort"
+
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
@@ -119,6 +121,15 @@ func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.L
 	if err != nil {
 		log.Warnf("ListRequest %+v failed: %v", req, err)
 		return nil, errors.Status(err).Err()
+	}
+
+	if req.SortOrder != topoapi.SortOrder_UNORDERED {
+		sort.Slice(objects, func(i, j int) bool {
+			if req.SortOrder == topoapi.SortOrder_DESCENDING {
+				return objects[i].ID > objects[j].ID
+			}
+			return objects[i].ID < objects[j].ID
+		})
 	}
 
 	res := &topoapi.ListResponse{
