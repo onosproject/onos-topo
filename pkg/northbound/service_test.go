@@ -16,6 +16,10 @@ package northbound
 
 import (
 	"context"
+	"net"
+	"sync"
+	"testing"
+
 	"github.com/atomix/atomix-go-client/pkg/atomix/test"
 	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
@@ -24,9 +28,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
-	"net"
-	"sync"
-	"testing"
 )
 
 var lis *bufconn.Listener
@@ -245,4 +246,57 @@ func TestBadRemove(t *testing.T) {
 
 	_, err := client.Delete(context.Background(), &topoapi.DeleteRequest{})
 	assert.Error(t, err)
+}
+
+func TestSort(t *testing.T) {
+	test := test.NewTest(
+		rsm.NewProtocol(),
+		test.WithReplicas(1),
+		test.WithPartitions(1))
+	assert.NoError(t, test.Start())
+	defer test.Stop()
+
+	conn := createServerConnection(t, test)
+	client := topoapi.NewTopoClient(conn)
+
+	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
+		Object: &topoapi.Object{
+			ID:   "a",
+			Type: topoapi.Object_ENTITY,
+		},
+	})
+	assert.NoError(t, err)
+
+	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
+		Object: &topoapi.Object{
+			ID:   "b",
+			Type: topoapi.Object_ENTITY,
+		},
+	})
+	assert.NoError(t, err)
+
+	_, err = client.Create(context.Background(), &topoapi.CreateRequest{
+		Object: &topoapi.Object{
+			ID:   "c",
+			Type: topoapi.Object_ENTITY,
+		},
+	})
+	assert.NoError(t, err)
+
+	res, err := client.List(context.Background(), &topoapi.ListRequest{
+		SortOrder: topoapi.SortOrder_ASCENDING,
+	})
+	assert.NoError(t, err)
+	assert.Condition(t, func() bool {
+		return len(res.Objects) == 3 &&
+			(res.Objects[0].ID == "a" && res.Objects[1].ID == "b" && res.Objects[2].ID == "c")
+	})
+	res, err = client.List(context.Background(), &topoapi.ListRequest{
+		SortOrder: topoapi.SortOrder_DESCENDING,
+	})
+	assert.NoError(t, err)
+	assert.Condition(t, func() bool {
+		return len(res.Objects) == 3 &&
+			(res.Objects[0].ID == "c" && res.Objects[1].ID == "b" && res.Objects[2].ID == "a")
+	})
 }
