@@ -7,13 +7,19 @@ If you don't have a cluster running and want to try on your local machine please
 the [Kubernetes] setup steps outlined in [deploy with Helm](https://docs.onosproject.org/developers/deploy_with_helm/).
 The following steps assume you have the setup outlined in that page, including the `micro-onos` namespace configured. 
 
-## Installing the Chart
-
-To install the chart in the `micro-onos` namespace run from the root directory of the `onos-helm-charts` repo the command:
+## Installing
+To install the `onos-topo` published chart in the `micro-onos` namespace run:
 ```bash
-helm install -n micro-onos onos-topo onos-topo
+$ helm -n micro-onos install onos-topo onosproject/onos-topo
 ```
-The output should be:
+Note, that this assumes that `https://charts.onosproject.org` was added as `onosproject` Helm repo.
+
+Alternately, you can deploy your own version of the chart from the root directory of the `onos-helm-charts`
+repo via the following:
+```bash
+$ helm install -n micro-onos onos-uenib onos-uenib
+```
+In either case, the output of the `helm install` command should look similar to the following:
 ```bash
 NAME: onos-topo
 LAST DEPLOYED: Wed Jul 14 14:30:27 2021
@@ -32,8 +38,7 @@ NAME     	NAMESPACE 	REVISION	UPDATED                            	STATUS  	CHART
 onos-topo	micro-onos	1       	2021-07-14 14:30:27.81784 -0700 PDT	deployed	onos-topo-1.0.15	v0.7.9
 ```
 
-### Topology Partition Set
-
+### Partition Set
 The `onos-topo` chart also deploys a custom Atomix `PartitionSet` resource to store all the 
 topology information in a replicated and fail-safe manner. 
 In the following example there is only one partition set deployed `onos-topo-consensus-store-1-0`.
@@ -52,33 +57,24 @@ partitions: 1
 partitionSize: 1
 ```
 
-### Installing the chart in a different namespace.
+## Uninstalling
 
-Issue the `helm install` command substituting `micro-onos` with your namespace.
+To uninstall the `onos-topo` chart, run the following:
 ```bash
-helm install -n <your_name_space> onos-topo onos-topo
+ helm delete -n micro-onos onos-topo
 ```
 
-### Troubleshoot
+## Troubleshooting
 
-Helm offers two flags to help you debug your chart. This can be useful if your chart does not install, 
+Helm offers two flags to help you debug your chart. This can be useful if your chart does not install,
 the pod is not running for some reason, or you want to trouble-shoot custom configuration values,
 
-* `--dry-run` check the chart without actually installing the pod. 
+* `--dry-run` check the chart without actually installing the pod.
 * `--debug` prints out more information about your chart
 
 ```bash
 helm install -n micro-onos onos-topo --debug --dry-run onos-topo/
 ```
-## Uninstalling the chart.
-
-To remove the `onos-topo` pod issue
-```bash
- helm delete -n micro-onos onos-topo
-```
-## Pod Information
-
-To view the pods that are deployed, run `kubectl -n micro-onos get pods`.
 
 [Helm]: https://helm.sh/
 [Kubernetes]: https://kubernetes.io/
