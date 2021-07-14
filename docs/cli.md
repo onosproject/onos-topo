@@ -2,15 +2,14 @@
 The project provides a command-line facilities for remotely 
 interacting with the topology subsystem.
 
-The commands are available at run-time using the consolidated `onos` client hosted in 
-the `onos-cli` repository, but their implementation is hosted and built here.
+The commands are available at run-time using the consolidated `onos` client hosted in the `onos-cli` repository.
 
-The documentation about building and deploying the consolidate `onos` client or its Docker container
+The documentation about building and deploying the consolidated `onos` client or its Docker container
 is available in the `onos-cli` GitHub repository.
 
 ## Usage
 ```bash
-> onos topo --help
+$ onos topo --help
 ONOS topology resource commands
 
 Usage:
@@ -36,9 +35,7 @@ Flags:
 
 Use "onos topo [command] --help" for more information about a command.
 ```
-## CLI
-The µONOS CLI (`onos-cli`) contains a series of [topology subcommands] accessible via `onos topo ...` usage.
-
+## Examples
 Here are some concrete examples of usage:
 
 List all entities.

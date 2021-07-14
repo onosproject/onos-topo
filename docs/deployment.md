@@ -1,6 +1,6 @@
 # Deploying onos-topo
 
-This guide deploys `onos-topo` through it's [Helm] chart assumes you have a [Kubernetes] cluster running 
+This guide deploys `onos-topo` through its [Helm] chart assumes you have a [Kubernetes] cluster running 
 with an atomix controller deployed in a namespace.
 `onos-topo` Helm chart is based on Helm 3.0 version, with no need for the Tiller pod to be present. 
 If you don't have a cluster running and want to try on your local machine please follow first 
@@ -16,8 +16,8 @@ helm install -n micro-onos onos-topo onos-topo
 The output should be:
 ```bash
 NAME: onos-topo
-LAST DEPLOYED: Tue Nov 26 13:31:42 2019
-NAMESPACE: default
+LAST DEPLOYED: Wed Jul 14 14:30:27 2021
+NAMESPACE: micro-onos
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
@@ -27,24 +27,22 @@ TEST SUITE: None
 created by it. To list the charts that are installed and view their statuses, run `helm ls`:
 
 ```bash
-helm ls
-NAME          	REVISION	UPDATED                 	STATUS  	CHART                    	APP VERSION	NAMESPACE
-...
-onos-topo	1       	Tue May 14 18:56:39 2019	DEPLOYED	onos-topo-0.0.1	        0.0.1      	default
+$ helm -n micro-onos ls
+NAME     	NAMESPACE 	REVISION	UPDATED                            	STATUS  	CHART           	APP VERSION
+onos-topo	micro-onos	1       	2021-07-14 14:30:27.81784 -0700 PDT	deployed	onos-topo-1.0.15	v0.7.9
 ```
 
-### Onos Topo Partition Set
+### Topology Partition Set
 
-The `onos-topo` chart also deployes a `PartitionSet` custom Atomix resource to store all the 
-configuration in a replicated and fail safe manner. 
-In the following example there is only one partition set deployed
-`onos-topo-1-0`.
+The `onos-topo` chart also deploys a custom Atomix `PartitionSet` resource to store all the 
+topology information in a replicated and fail-safe manner. 
+In the following example there is only one partition set deployed `onos-topo-consensus-store-1-0`.
 
 ```bash
-NAMESPACE     NAME                                         READY   STATUS    RESTARTS   AGE
-default       atomix-controller-b579b9f48-lgvxf            1/1     Running   0          63m
-default       onos-topo-1-0                              1/1     Running   0          61m
-default       onos-topo-77765c9dc4-vsjjn                 1/1     Running   0          61m
+$ kubectl -n micro-onos get pods
+NAME                            READY   STATUS    RESTARTS   AGE
+onos-topo-854bf799f-lrnkd       3/3     Running   0          2m42s
+onos-topo-consensus-store-1-0   1/1     Running   0          2m41s
 ```
 
 One can customize the number of partitions and replicas by modifying, in `values.yaml`, under `store/raft` 
@@ -60,21 +58,11 @@ Issue the `helm install` command substituting `micro-onos` with your namespace.
 ```bash
 helm install -n <your_name_space> onos-topo onos-topo
 ```
-### Installing the chart with debug. 
-`onos-topo` offers the capability to open a debug port (4000) to the image.
-To enable the debug capabilities please set the debug flag to true in `values.yaml` or pass it to `helm install`
-```bash
-helm install -n micro-onos onos-topo onos-topo --set debug=true
-```
-Also to verify how template values are expanded, run:
-```bash
-helm install template onos-gui
-```
 
 ### Troubleshoot
 
-If your chart does not install or the pod is not running for some reason and/or you modified values Helm offers two flags to help you
-debug your chart:  
+Helm offers two flags to help you debug your chart. This can be useful if your chart does not install, 
+the pod is not running for some reason, or you want to trouble-shoot custom configuration values,
 
 * `--dry-run` check the chart without actually installing the pod. 
 * `--debug` prints out more information about your chart
