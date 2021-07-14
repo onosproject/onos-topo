@@ -7,10 +7,99 @@
 
 ## Overview
 
-The µONOS Topology subsystem provides topology management for µONOS core services and applications. The topology is exposed to services via an implementation of the onos-topo gRPC API as defined by the [onos-api]. The toplogy API is generalized as a set of entities and relations, where `Entity` models objects within the system (e.g. devices, nodes, etc) and `Relation` models the associations between objects.
+The µONOS Topology subsystem provides topology management for µONOS core services and applications.
+The topology subsystem structures the topology information as a set of objects, which can be either 
+`Entity`, `Relation` or a `Kind`.
 
-The topology subsystem is shipped as a [Docker] image and deployed with [Helm]. To build the Docker image, run `make images`.
+* `Entity` objects are nodes in a graph and are generally intended to represent network devices, control entities, 
+control domains, and so on.
+* `Relation` objects are edges in a graph and are intended to represent various types of relations between two 
+`Entity` objects, e.g. `contains`, `controls`, `implements`.
+* `Kind` objects can be thought of as template or schema objects that represent an entity or a relation kind. 
+Strictly speaking, `Entity` or `Relation` instances do not have to be associated with a `Kind`, 
+but maintaining `Kind` associations can be used for schema validation and speeding up queries and is 
+therefore highly encouraged.
 
-[onos-api]: https://github.com/onosproject/onos-api
+## API
+The `onos-topo` subsystem exposes the topology information via a [gRPC API] that supports the above abstractions.
+
+### Unique ID
+Each `Entity`, `Relation` and `Kind` objects has a unique identifier that can be used to directly look it up, 
+update or delete it.
+
+### Aspects
+The `Entity` and `Relation` objects themselves carry only the essential information for identifying them, 
+associating them with a particular kind and in case of `Relation`, for associating the two - source and target - 
+`Entity` objects. Clearly, while this is necessary, it is not sufficient to allow the platform or applications to 
+track other pertinent information about the entities and relations.
+
+Since different use-cases or applications require tracking different information, and these may vary for different 
+types of devices or network domains, the topology schema must be extensible to carry various aspects of information.
+This is where the notion of `Aspect` comes in. An `Aspect` is a collection of structured information, modeled as a 
+Protobuf message (although this is not strictly necessary), which is attached to any type of object; generally 
+mostly an `Entity` or a `Relation`.
+
+Each object carries a mapping of aspect type (`TypeURL`) and Protobuf `Any` message. For example, to track a geo-location 
+of a network element, one can associate `onos.topo.Location` instance, populated with the appropriate longitude and
+latitude with the `Entity` that represents that network element, with the `Location` being defined as follows:
+```proto
+// Geographical location; expected value type of "location" aspect
+message Location {
+    double lat = 1;
+    double lng = 2;
+}
+```
+
+Similarly, to track information about the cone of signal coverage for a radio-unit, one can attach `onos.topo.Coverage`
+instance to an `Entity` representing the radio unit, with `Coverage` being defined as follows:
+```proto
+// Area of coverage; expected value type of "coverage" aspect
+message Coverage {
+    int32 height = 1;
+    int32 arc_width = 2;
+    int32 azimuth = 3;
+    int32 tilt = 4;
+}
+```
+
+The above are merely examples of aspects. Network control platforms and applications can supply their own depending on
+the needs of a particular use-case.
+
+#### Labels
+To assist in categorization of the topology objects, each object can carry a number of labels as meta-data. 
+Each label carries a value. 
+
+For example the `deployment` label can have `production` or `staging` or `testing` as values. Or similarly,
+`tier` label can have `access`, `fabric` or `backhaul` as values to indicate the area of network where the entity
+belongs.
+
+### Filters
+The topology API provides a `List` method to obtain a collection of objects. The caller can specify a number of
+different filters to narrow the results. All topology objects will be returned if the request does not contain 
+any filters.
+
+* Type Filter - specifies which type(s) of objects - `Entity`, `Relation` or `Kind` - should be included.
+* Kind Filter - specifies which kind(s) of objects should be included, e.g. `contains`, `controls`
+* Labels Filter - specifies which label name/value(s) should be included, e.g. `tier=fabric`
+* Relation Filter - specifies target entities related to a given source entity via a relation of a given kind
+   
+Support for other filters may be added in the future.
+
+## CLI
+The µONOS CLI (`onos-cli`) contains a series of [topology subcommands] accessible via `onos topo ...` usage.
+
+Here are some concrete examples of usage:
+```shell
+# List all location and coverage aspects of all entities of `e2cell` kind.
+onos topo get entities --kind e2cell
+```
+
+
+## Distribution
+The topology subsystem is available as a [Docker] image and deployed with [Helm]. To build the Docker image,
+run `make images`.
+
+[gRPC API]: https://github.com/onosproject/onos-api/blob/master/proto/onos/topo/topo.proto
+[topology subcommands]: https://github.com/onosproject/onos-cli/blob/master/docs/cli/onos_topo.md
 [Docker]: https://www.docker.com/
 [Helm]: https://helm.sh
