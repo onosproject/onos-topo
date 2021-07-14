@@ -8,33 +8,9 @@ The documentation about building and deploying the consolidated `onos` client or
 is available in the `onos-cli` GitHub repository.
 
 ## Usage
-```bash
-$ onos topo --help
-ONOS topology resource commands
+To see the detailed usage help for the `onos topo ...` family of commands, 
+please see the [CLI documentation](https://github.com/onosproject/onos-cli/blob/master/docs/cli/onos_topo.md)
 
-Usage:
-  onos topo [command]
-
-Available Commands:
-  config      Manage the CLI configuration
-  create      Create a topology resource
-  delete      Delete a topology resource
-  get         Get topology resources
-  load        Load topology resources in JSON format
-  log         logging api commands
-  set         Update a topology resource
-  watch       Watch for changes to a topology resource type
-
-Flags:
-      --auth-header string       Auth header in the form 'Bearer <base64>'
-  -h, --help                     help for topo
-      --no-tls                   if present, do not use TLS
-      --service-address string   the gRPC endpoint (default "onos-topo:5150")
-      --tls-cert-path string     the path to the TLS certificate
-      --tls-key-path string      the path to the TLS key
-
-Use "onos topo [command] --help" for more information about a command.
-```
 ## Examples
 Here are some concrete examples of usage:
 
