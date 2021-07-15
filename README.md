@@ -62,6 +62,18 @@ message Coverage {
 }
 ```
 
+The [current list of aspects](https://github.com/onosproject/onos-api/tree/master/proto/onos/topo) defined in `onos-api` includes the following:
+* `onos.topo.Asset` - basic asset information for the device: model, HW, SW versions, serial number, etc.
+* `onos.topo.Location` - geo location coordinates
+* `onos.topo.Configurable` - info for devices that support configuration via gNMI
+* `onos.topo.MastershipState` - for tracking mastership role
+* `onos.topo.TLSOptoins` - TLS connection options
+* `onos.topo.Protocols` - for tracking connectivity state of supported device control protocols
+* `onos.topo.Coverage` - radio unit signal coverage cone information
+* `onos.topo.E2Node` - information about an O-RAN E2 node
+* `onos.topo.E2Cell` - information about an O-RAN E2 cell
+* `onos.topo.AdHoc` - for tracking ad-hoc key/value string attributes (not labels)
+
 The above are merely examples of aspects. Network control platforms and applications can supply their own depending on
 the needs of a particular use-case.
 
