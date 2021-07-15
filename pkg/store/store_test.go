@@ -368,7 +368,7 @@ func createCell(t *testing.T, s Store, a auxCell) {
 }
 func createNodeToCell(t *testing.T, s Store, a auxNodeToCell) {
 	err := s.Create(context.TODO(), &topoapi.Object{
-		ID:     topo.ID(a.srcID + "-" + a.tgtID),
+		// ID: intentionally left empty for the auto-generation to take place
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-node-cell"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,

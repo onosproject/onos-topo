@@ -36,10 +36,11 @@ resp, err := client.Create(ctx, &topo.CreateRequest{Object: cell})
 
 ## Create a Relation
 Here we can see an example of creating `Relation` of `neighbors` kind, representing one cell being a neighbor 
-of another. There are no aspects annotating this relation.
+of another. There are no aspects annotating this relation. Also, note that if the relation ID is unspecified 
+during the creation, one will be automatically generated using the `topo.RelationID(...)` method, based on
+the source, kind and the target IDs.
 ```go
 relation := &topo.Object{
-    ID:   topo.RelationID(cellID, topo.NEIGHBORS, neighborID), // unique relation ID
     Type: topo.Object_RELATION,
     Obj: &topo.Object_Relation{
         Entity: &topo.Relation{
