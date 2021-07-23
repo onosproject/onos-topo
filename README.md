@@ -77,7 +77,7 @@ The [current list of aspects](https://github.com/onosproject/onos-api/tree/maste
 The above are merely examples of aspects. Network control platforms and applications can supply their own depending on
 the needs of a particular use-case.
 
-#### Labels
+### Labels
 To assist in categorization of the topology objects, each object can carry a number of labels as meta-data. 
 Each label carries a value. 
 
