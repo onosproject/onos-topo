@@ -74,6 +74,12 @@ type WatchOption interface {
 type watchReplayOption struct {
 }
 
+// Temporary container used to help return relations, source entities, and target entities for relation filter
+type relationTargetContainer struct {
+	relation *topoapi.Object
+	entity   *topoapi.Object
+}
+
 func (o watchReplayOption) apply(opts []_map.WatchOption) []_map.WatchOption {
 	return append(opts, _map.WithReplay())
 }
@@ -195,36 +201,66 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 		filter := filters.RelationFilter
 
 		// contains _all_ relations that have the same kind as the filter and same SrcId as the filter
-		entitiesToGet := make(map[topoapi.ID]*topoapi.Object)
-
+		entitiesToGet := make(map[topoapi.ID]relationTargetContainer)
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
 				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
 				if ep.Type == topoapi.Object_RELATION && string(ep.GetRelation().KindID) == filter.GetRelationKind() && string(ep.GetRelation().GetSrcEntityID()) == filter.SrcId {
-					entitiesToGet[ep.GetRelation().TgtEntityID] = nil
+					entitiesToGet[ep.GetRelation().TgtEntityID] = relationTargetContainer{relation: ep, entity: nil}
 				} else
 				// if object is an entity, see if satisfies the filter and set its value in entitiesToGet
 				if ep.Type == topoapi.Object_ENTITY {
-					if _, found := entitiesToGet[ep.ID]; found {
+					if value, found := entitiesToGet[ep.ID]; found {
 						if filter.TargetKind == "" || string(ep.GetEntity().KindID) == filter.TargetKind {
-							entitiesToGet[ep.ID] = ep
+							temp := value
+							temp.entity = ep
+							log.Infof("temp = %+v", temp)
+							entitiesToGet[ep.ID] = temp
 						}
 					}
 				}
 			}
 		}
+		// to prevent adding a node twice. each relation filter must specify a source id, so we will only ever want to add one node (source)
+		foundSource := false
+		log.Infof("found source set to false")
 		// iterate over entitiesToGet to obtain missed entities and push onto eps
-		for id, entity := range entitiesToGet {
-			if entity == nil {
+		for id, relationEntity := range entitiesToGet {
+			log.Infof("foundSource =%t", foundSource)
+
+			if relationEntity.entity == nil {
 				storeEntity, _ := s.Get(ctx, id)
 				if filter.TargetKind == "" || string(storeEntity.GetEntity().KindID) == filter.TargetKind {
 					if matchType(storeEntity, filters.ObjectTypes) {
 						eps = append(eps, *storeEntity)
+						if filter.Scope == topoapi.RelationFilterScope_ALL {
+							eps = append(eps, *relationEntity.relation)
+						}
+						if !foundSource && (filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET) {
+							src, err := s.Get(ctx, relationEntity.relation.GetRelation().SrcEntityID)
+							if err != nil {
+								return nil, err
+							}
+							eps = append(eps, *src)
+
+							foundSource = true
+						}
 					}
 				}
 			} else {
-				if matchType(entitiesToGet[id], filters.ObjectTypes) {
-					eps = append(eps, *entitiesToGet[id])
+				if matchType(relationEntity.entity, filters.ObjectTypes) {
+					eps = append(eps, *relationEntity.entity)
+					if filter.Scope == topoapi.RelationFilterScope_ALL {
+						eps = append(eps, *relationEntity.relation)
+					}
+					if !foundSource && (filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET) {
+						src, err := s.Get(ctx, relationEntity.relation.GetRelation().SrcEntityID)
+						if err != nil {
+							return nil, err
+						}
+						eps = append(eps, *src)
+						foundSource = true
+					}
 				}
 			}
 		}

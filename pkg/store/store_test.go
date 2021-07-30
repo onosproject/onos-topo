@@ -285,12 +285,26 @@ func TestList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, objects, 16) // 2 nodes + 8 cell-neighbors + 6 node-cells
 
-	// List the objects with relation filter
+	// List the objects with relation filter. this has an implicit scope of topoapi.RelationFilterScope_TARGET_ONLY
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: ""},
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2) // the 1234 node has two cells
+
+	// List the objects with relation filter and scope All
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: "", Scope: topoapi.RelationFilterScope_ALL},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 5) // 1 node, 2 relations, 2 cells
+
+	// List the objects with relation filter and scope Source and Target
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: "", Scope: topoapi.RelationFilterScope_SOURCE_AND_TARGET},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 3) // 1 node, 2 cells
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: ""},
