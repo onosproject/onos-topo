@@ -17,6 +17,7 @@ package store
 import (
 	"context"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/atomix/atomix-go-client/pkg/atomix"
@@ -37,9 +38,45 @@ func NewAtomixStore(client atomix.Client) (Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &atomixStore{
+	store := &atomixStore{
 		objects: objects,
-	}, nil
+		relations: relationMaps{
+			targets: map[string][]topoapi.ID{},
+			sources: map[string][]topoapi.ID{},
+			tgtLock: sync.RWMutex{},
+			srcLock: sync.RWMutex{},
+		},
+	}
+
+	// watch the atomixStore for changes
+	// when relations are deleted, remove the implied relations from the store target asnd source maps
+	// when objects are deleted, remove their entries. The corresponding relations should be deleted as well by the delete method, so we do not have to search for them.
+	// when objects are added, add their entry to the map
+	// when a relation is added, add the implied relation to the store target and source maps
+	mapCh := make(chan _map.Event)
+	if err := objects.Watch(context.Background(), mapCh, make([]_map.WatchOption, 0)...); err != nil {
+		// log.Errorf("Failed to start indexer: %s", err)
+		return nil, errors.FromAtomix(err)
+	}
+	go func() {
+		for event := range mapCh {
+			obj, err := decodeObject(event.Entry)
+			if err != nil {
+				continue
+			}
+
+			switch event.Type {
+			case _map.EventReplay:
+				store.registerSrcTgt(obj)
+			case _map.EventInsert:
+				store.registerSrcTgt(obj)
+			case _map.EventRemove:
+				store.unregisterSrcTgt(obj)
+			}
+
+		}
+	}()
+	return store, nil
 }
 
 // Store stores topology information
@@ -91,7 +128,15 @@ func WithReplay() WatchOption {
 
 // atomixStore is the object implementation of the Store
 type atomixStore struct {
-	objects _map.Map
+	objects   _map.Map
+	relations relationMaps
+}
+
+type relationMaps struct {
+	targets map[string][]topoapi.ID
+	sources map[string][]topoapi.ID
+	tgtLock sync.RWMutex
+	srcLock sync.RWMutex
 }
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
@@ -162,7 +207,12 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 	if err != nil {
 		return nil, errors.FromAtomix(err)
 	}
-	return decodeObject(*entry)
+	obj, err := decodeObject(*entry)
+	if err != nil {
+		return nil, err
+	}
+	s.addSrcTgts(obj)
+	return obj, nil
 }
 
 func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
@@ -170,8 +220,36 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 		return errors.NewInvalid("ID cannot be empty")
 	}
 
+	s.relations.srcLock.Lock()
+	defer s.relations.srcLock.Unlock()
+	s.relations.tgtLock.Lock()
+	defer s.relations.tgtLock.Unlock()
+	// access the object to determine its properties
+	map_obj, err := s.objects.Get(ctx, string(id))
+	if err != nil {
+		return errors.FromAtomix(err)
+	}
+	obj, err := decodeObject(*map_obj)
+
+	if obj.GetEntity() != nil {
+		// delete the relations
+		mapCh := make(chan _map.Entry)
+		if err := s.objects.Entries(ctx, mapCh); err != nil {
+			return errors.FromAtomix(err)
+		}
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
+				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
+				if ep.Type == topoapi.Object_RELATION && (ep.GetRelation().GetSrcEntityID() == obj.ID || ep.GetRelation().GetTgtEntityID() == obj.ID) {
+					// the deletion of the relation should trigger the watch to update the store maps
+					s.objects.Remove(ctx, string(ep.ID))
+				}
+			}
+		}
+	}
+
 	log.Infof("Deleting object %s", id)
-	_, err := s.objects.Remove(ctx, string(id))
+	_, err = s.objects.Remove(ctx, string(id))
 	if err != nil {
 		log.Errorf("Failed to delete object %s: %s", id, err)
 		return errors.FromAtomix(err)
@@ -191,6 +269,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 	if filters == nil {
 		for entry := range mapCh {
 			if ep, err := decodeObject(entry); err == nil {
+				s.addSrcTgts(ep)
 				eps = append(eps, *ep)
 			}
 		}
@@ -205,6 +284,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 		if ep, err := decodeObject(entry); err == nil {
 			if match(ep, filters) {
 				if matchType(ep, filters.ObjectTypes) {
+					s.addSrcTgts(ep)
 					eps = append(eps, *ep)
 				}
 			}
@@ -246,6 +326,7 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 			storeEntity, _ := s.Get(ctx, id)
 			if filter.TargetKind == "" || string(storeEntity.GetEntity().KindID) == filter.TargetKind {
 				if matchType(storeEntity, filters.ObjectTypes) {
+					s.addSrcTgts(storeEntity)
 					eps = append(eps, *storeEntity)
 					if filter.Scope == topoapi.RelationFilterScope_ALL {
 						eps = append(eps, *relationEntity.relation)
@@ -255,6 +336,7 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 						if err != nil {
 							return nil, err
 						}
+						s.addSrcTgts(src)
 						eps = append(eps, *src)
 
 						foundSource = true
@@ -263,6 +345,7 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 			}
 		} else {
 			if matchType(relationEntity.entity, filters.ObjectTypes) {
+				s.addSrcTgts(*&relationEntity.entity)
 				eps = append(eps, *relationEntity.entity)
 				if filter.Scope == topoapi.RelationFilterScope_ALL {
 					eps = append(eps, *relationEntity.relation)
@@ -272,6 +355,7 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 					if err != nil {
 						return nil, err
 					}
+					s.addSrcTgts(src)
 					eps = append(eps, *src)
 					foundSource = true
 				}
@@ -337,4 +421,77 @@ func decodeObject(entry _map.Entry) (*topoapi.Object, error) {
 	object.ID = topoapi.ID(entry.Key)
 	object.Revision = topoapi.Revision(entry.Revision)
 	return object, nil
+}
+
+func (s *atomixStore) addSrcTgts(obj *topoapi.Object) {
+	if obj.GetEntity() != nil {
+		s.relations.srcLock.RLock()
+		defer s.relations.srcLock.RUnlock()
+		s.relations.tgtLock.RLock()
+		defer s.relations.tgtLock.RUnlock()
+		if s.relations.sources[string(obj.ID)] != nil {
+			(*obj.GetEntity()).SrcRelationIDs = s.relations.sources[string(obj.ID)]
+		}
+		if s.relations.targets[string(obj.ID)] != nil {
+			obj.GetEntity().TgtRelationIDs = s.relations.targets[string(obj.ID)]
+		}
+	}
+}
+
+// when deleting either a relation or entity, create the correspending entries in the store
+func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
+	if entity := obj.GetEntity(); entity != nil {
+		s.relations.srcLock.Lock()
+		defer s.relations.srcLock.Unlock()
+		s.relations.tgtLock.Lock()
+		defer s.relations.tgtLock.Unlock()
+		s.relations.sources[string(obj.ID)] = make([]topoapi.ID, 0)
+		s.relations.targets[string(obj.ID)] = make([]topoapi.ID, 0)
+	} else if relation := obj.GetRelation(); relation != nil {
+		s.relations.srcLock.Lock()
+		defer s.relations.srcLock.Unlock()
+		s.relations.tgtLock.Lock()
+		defer s.relations.tgtLock.Unlock()
+		if list, found := s.relations.sources[string(relation.TgtEntityID)]; found {
+			list = append(list, relation.SrcEntityID)
+		}
+		if list, found := s.relations.targets[string(relation.SrcEntityID)]; found {
+			list = append(list, relation.TgtEntityID)
+		}
+	}
+}
+
+// when deleting either a relation or entity, remove the correspending entries in the store
+func (s *atomixStore) unregisterSrcTgt(obj *topoapi.Object) {
+	if entity := obj.GetEntity(); entity != nil {
+		s.relations.srcLock.Lock()
+		defer s.relations.srcLock.Unlock()
+		s.relations.tgtLock.Lock()
+		defer s.relations.tgtLock.Unlock()
+		delete(s.relations.sources, string(obj.ID))
+		delete(s.relations.targets, string(obj.ID))
+	} else if relation := obj.GetRelation(); relation != nil {
+		s.relations.srcLock.Lock()
+		defer s.relations.srcLock.Unlock()
+		s.relations.tgtLock.Lock()
+		defer s.relations.tgtLock.Unlock()
+		if list, found := s.relations.sources[string(relation.TgtEntityID)]; found {
+			index := 0
+			for _, id := range list {
+				if id != relation.SrcEntityID {
+					list[index] = id
+					index++
+				}
+			}
+		}
+		if list, found := s.relations.targets[string(relation.SrcEntityID)]; found {
+			index := 0
+			for _, id := range list {
+				if id != relation.TgtEntityID {
+					list[index] = id
+					index++
+				}
+			}
+		}
+	}
 }
