@@ -54,28 +54,27 @@ func NewAtomixStore(client atomix.Client) (Store, error) {
 	// when a relation is added, add the implied relation to the store target and source maps
 	mapCh := make(chan _map.Event)
 	if err := objects.Watch(context.Background(), mapCh, make([]_map.WatchOption, 0)...); err != nil {
-		// log.Errorf("Failed to start indexer: %s", err)
 		return nil, errors.FromAtomix(err)
 	}
-	go func() {
-		for event := range mapCh {
-			obj, err := decodeObject(event.Entry)
-			if err != nil {
-				continue
-			}
-
-			switch event.Type {
-			case _map.EventReplay:
-				store.registerSrcTgt(obj)
-			case _map.EventInsert:
-				store.registerSrcTgt(obj)
-			case _map.EventRemove:
-				store.unregisterSrcTgt(obj)
-			}
-
-		}
-	}()
+	go store.watchStoreEvents(mapCh)
 	return store, nil
+}
+
+func (s *atomixStore) watchStoreEvents(mapCh chan _map.Event) {
+	for event := range mapCh {
+		obj, err := decodeObject(event.Entry)
+		if err != nil {
+			continue
+		}
+		switch event.Type {
+		case _map.EventReplay:
+			s.registerSrcTgt(obj)
+		case _map.EventInsert:
+			s.registerSrcTgt(obj)
+		case _map.EventRemove:
+			s.unregisterSrcTgt(obj)
+		}
+	}
 }
 
 // Store stores topology information
