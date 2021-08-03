@@ -135,7 +135,6 @@ type relationMaps struct {
 	targets map[string][]topoapi.ID
 	sources map[string][]topoapi.ID
 	lock    sync.RWMutex
-	srcLock sync.RWMutex
 }
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
