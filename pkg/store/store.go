@@ -450,14 +450,14 @@ func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
 		s.relations.lock.Lock()
 		defer s.relations.lock.Unlock()
 		if list, found := s.relations.sources[string(relation.TgtEntityID)]; found {
-			s.relations.sources[string(relation.SrcEntityID)] = append(list, relation.TgtEntityID)
+			s.relations.sources[string(relation.SrcEntityID)] = append(list, obj.ID)
 		} else {
-			s.relations.sources[string(relation.SrcEntityID)] = []topoapi.ID{relation.TgtEntityID}
+			s.relations.sources[string(relation.SrcEntityID)] = []topoapi.ID{obj.ID}
 		}
 		if list, found := s.relations.targets[string(relation.SrcEntityID)]; found {
-			s.relations.targets[string(relation.TgtEntityID)] = append(list, relation.SrcEntityID)
+			s.relations.targets[string(relation.TgtEntityID)] = append(list, obj.ID)
 		} else {
-			s.relations.targets[string(relation.TgtEntityID)] = []topoapi.ID{relation.SrcEntityID}
+			s.relations.targets[string(relation.TgtEntityID)] = []topoapi.ID{obj.ID}
 		}
 	}
 }
