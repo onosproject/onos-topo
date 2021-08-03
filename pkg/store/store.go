@@ -218,8 +218,20 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 		return errors.NewInvalid("ID cannot be empty")
 	}
 
-	s.relations.lock.Lock()
-	defer s.relations.lock.Unlock()
+	err := s.deleteRelatedRelations(ctx, id)
+	if err != nil {
+		return err
+	}
+	log.Infof("Deleting object %s", id)
+	_, err = s.objects.Remove(ctx, string(id))
+	if err != nil {
+		log.Errorf("Failed to delete object %s: %s", id, err)
+		return errors.FromAtomix(err)
+	}
+	return nil
+}
+
+func (s *atomixStore) deleteRelatedRelations(ctx context.Context, id topoapi.ID) error {
 	// access the object to determine its properties
 	mapObj, err := s.objects.Get(ctx, string(id))
 	if err != nil {
@@ -232,34 +244,19 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 
 	if obj.GetEntity() != nil {
 		// delete the relations
-		err = s.deleteRelatedRelations(ctx, obj)
-		if err != nil {
-			return err
+		mapCh := make(chan _map.Entry)
+		if err := s.objects.Entries(ctx, mapCh); err != nil {
+			return errors.FromAtomix(err)
 		}
-	}
-
-	log.Infof("Deleting object %s", id)
-	_, err = s.objects.Remove(ctx, string(id))
-	if err != nil {
-		log.Errorf("Failed to delete object %s: %s", id, err)
-		return errors.FromAtomix(err)
-	}
-	return nil
-}
-
-func (s *atomixStore) deleteRelatedRelations(ctx context.Context, obj *topoapi.Object) error {
-	mapCh := make(chan _map.Entry)
-	if err := s.objects.Entries(ctx, mapCh); err != nil {
-		return errors.FromAtomix(err)
-	}
-	for entry := range mapCh {
-		if ep, err := decodeObject(entry); err == nil {
-			// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
-			if ep.Type == topoapi.Object_RELATION && (ep.GetRelation().GetSrcEntityID() == obj.ID || ep.GetRelation().GetTgtEntityID() == obj.ID) {
-				// the deletion of the relation should trigger the watch to update the store maps
-				_, err = s.objects.Remove(ctx, string(ep.ID))
-				if err != nil {
-					return errors.FromAtomix(err)
+		for entry := range mapCh {
+			if ep, err := decodeObject(entry); err == nil {
+				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
+				if ep.Type == topoapi.Object_RELATION && (ep.GetRelation().GetSrcEntityID() == obj.ID || ep.GetRelation().GetTgtEntityID() == obj.ID) {
+					// the deletion of the relation should trigger the watch to update the store maps
+					_, err = s.objects.Remove(ctx, string(ep.ID))
+					if err != nil {
+						return errors.FromAtomix(err)
+					}
 				}
 			}
 		}
