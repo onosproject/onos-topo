@@ -225,11 +225,14 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 	s.relations.tgtLock.Lock()
 	defer s.relations.tgtLock.Unlock()
 	// access the object to determine its properties
-	map_obj, err := s.objects.Get(ctx, string(id))
+	mapObj, err := s.objects.Get(ctx, string(id))
 	if err != nil {
 		return errors.FromAtomix(err)
 	}
-	obj, err := decodeObject(*map_obj)
+	obj, err := decodeObject(*mapObj)
+	if err != nil {
+		return err
+	}
 
 	if obj.GetEntity() != nil {
 		// delete the relations
@@ -242,7 +245,10 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
 				if ep.Type == topoapi.Object_RELATION && (ep.GetRelation().GetSrcEntityID() == obj.ID || ep.GetRelation().GetTgtEntityID() == obj.ID) {
 					// the deletion of the relation should trigger the watch to update the store maps
-					s.objects.Remove(ctx, string(ep.ID))
+					_, err = s.objects.Remove(ctx, string(ep.ID))
+					if err != nil {
+						return errors.FromAtomix(err)
+					}
 				}
 			}
 		}
@@ -345,7 +351,7 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 			}
 		} else {
 			if matchType(relationEntity.entity, filters.ObjectTypes) {
-				s.addSrcTgts(*&relationEntity.entity)
+				s.addSrcTgts(relationEntity.entity)
 				eps = append(eps, *relationEntity.entity)
 				if filter.Scope == topoapi.RelationFilterScope_ALL {
 					eps = append(eps, *relationEntity.relation)
@@ -453,10 +459,10 @@ func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
 		s.relations.tgtLock.Lock()
 		defer s.relations.tgtLock.Unlock()
 		if list, found := s.relations.sources[string(relation.TgtEntityID)]; found {
-			list = append(list, relation.SrcEntityID)
+			s.relations.sources[string(relation.TgtEntityID)] = append(list, relation.SrcEntityID)
 		}
 		if list, found := s.relations.targets[string(relation.SrcEntityID)]; found {
-			list = append(list, relation.TgtEntityID)
+			s.relations.targets[string(relation.SrcEntityID)] = append(list, relation.TgtEntityID)
 		}
 	}
 }
