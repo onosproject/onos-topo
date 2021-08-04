@@ -155,7 +155,6 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		if object.ID == "" {
 			object.ID = topoapi.ID("uuid:" + string(object.UUID))
 		}
-		// TODO: add a check in the watch to make sure the entities are in fact still in the store after creation of the relation
 		_, srcErr := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
 		_, tgtErr := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
 		if srcErr != nil || tgtErr != nil {
