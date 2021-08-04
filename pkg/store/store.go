@@ -458,9 +458,16 @@ func (s *atomixStore) addSrcTgts(obj *topoapi.Object) {
 	}
 }
 
-// when creating a relation , create the corresponding entries in the store
+// when creating a relation, create the corresponding entries in the store
 func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
 	if relation := obj.GetRelation(); relation != nil {
+		// check that the connection is valid (src and tgt are in the store). otherwise remove the dangling relation
+		if _, srcErr := s.objects.Get(context.Background(), string(relation.SrcEntityID)); srcErr != nil {
+			if _, tgtErr := s.objects.Get(context.Background(), string(relation.TgtEntityID)); tgtErr != nil {
+				s.objects.Remove(context.Background(), string(obj.ID))
+				return
+			}
+		}
 		s.relations.lock.Lock()
 		defer s.relations.lock.Unlock()
 		if list, found := s.relations.sources[string(relation.TgtEntityID)]; found {
