@@ -141,9 +141,17 @@ type relationMaps struct {
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
 	// If an object is a relation and its ID is empty, build one.
-	if object.ID == "" && object.Type == topoapi.Object_RELATION {
-		relation := object.GetRelation()
-		object.ID = topoapi.RelationID(relation.SrcEntityID, relation.KindID, relation.TgtEntityID)
+	if object.Type == topoapi.Object_RELATION {
+		if object.ID == "" {
+			relation := object.GetRelation()
+			object.ID = topoapi.RelationID(relation.SrcEntityID, relation.KindID, relation.TgtEntityID)
+		}
+		_, src_err := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
+		_, tgt_err := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
+		if src_err != nil || tgt_err != nil {
+			return errors.NewInvalid("Source or Target Entity does not exist")
+		}
+
 	}
 	if object.ID == "" {
 		return errors.NewInvalid("ID cannot be empty")
