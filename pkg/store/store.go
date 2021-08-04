@@ -22,6 +22,7 @@ import (
 
 	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
+	"github.com/google/uuid"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
@@ -152,6 +153,12 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	}
 
 	log.Infof("Creating object %+v", object)
+	// set a uuid
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return errors.FromAtomix(err)
+	}
+	object.UUID = topoapi.UUID(uuid.String())
 	bytes, err := proto.Marshal(object)
 	if err != nil {
 		log.Errorf("Failed to create object %+v: %s", object, err)
