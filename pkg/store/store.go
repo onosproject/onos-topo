@@ -146,9 +146,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 			relation := object.GetRelation()
 			object.ID = topoapi.RelationID(relation.SrcEntityID, relation.KindID, relation.TgtEntityID)
 		}
-		_, src_err := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
-		_, tgt_err := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
-		if src_err != nil || tgt_err != nil {
+		_, srcErr := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
+		_, tgtErr := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
+		if srcErr != nil || tgtErr != nil {
 			return errors.NewInvalid("Source or Target Entity does not exist")
 		}
 
