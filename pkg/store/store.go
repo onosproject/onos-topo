@@ -140,33 +140,32 @@ type relationMaps struct {
 }
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
-	// If an object is a relation and its ID is empty, build one.
-	if object.Type == topoapi.Object_RELATION {
-		if object.ID == "" {
-			relation := object.GetRelation()
-			object.ID = topoapi.RelationID(relation.SrcEntityID, relation.KindID, relation.TgtEntityID)
-		}
-		_, srcErr := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
-		_, tgtErr := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
-		if srcErr != nil || tgtErr != nil {
-			return errors.NewInvalid("Source or Target Entity does not exist")
-		}
-
-	}
-	if object.ID == "" {
-		return errors.NewInvalid("ID cannot be empty")
-	}
 	if object.Type == topoapi.Object_UNSPECIFIED {
 		return errors.NewInvalid("Type cannot be unspecified")
 	}
 
-	log.Infof("Creating object %+v", object)
 	// set a uuid
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		return errors.FromAtomix(err)
 	}
 	object.UUID = topoapi.UUID(uuid.String())
+	// If an object is a relation and its ID is empty, build one.
+	if object.Type == topoapi.Object_RELATION {
+		if object.ID == "" {
+			object.ID = topoapi.ID("uuid:" + string(object.UUID))
+		}
+		// TODO: add a check in the watch to make sure the entities are in fact still in the store after creation of the relation
+		_, srcErr := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
+		_, tgtErr := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
+		if srcErr != nil || tgtErr != nil {
+			return errors.NewInvalid("Source or Target Entity does not exist")
+		}
+	} else if object.ID == "" {
+		return errors.NewInvalid("ID cannot be empty")
+	}
+
+	log.Infof("Creating object %+v", object)
 	bytes, err := proto.Marshal(object)
 	if err != nil {
 		log.Errorf("Failed to create object %+v: %s", object, err)
