@@ -464,7 +464,7 @@ func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
 		// check that the connection is valid (src and tgt are in the store). otherwise remove the dangling relation
 		if _, srcErr := s.objects.Get(context.Background(), string(relation.SrcEntityID)); srcErr != nil {
 			if _, tgtErr := s.objects.Get(context.Background(), string(relation.TgtEntityID)); tgtErr != nil {
-				s.objects.Remove(context.Background(), string(obj.ID))
+				_, _ = s.objects.Remove(context.Background(), string(obj.ID))
 				return
 			}
 		}
