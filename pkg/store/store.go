@@ -22,6 +22,7 @@ import (
 
 	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
+	"github.com/google/uuid"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
@@ -139,16 +140,28 @@ type relationMaps struct {
 }
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
-	// If an object is a relation and its ID is empty, build one.
-	if object.ID == "" && object.Type == topoapi.Object_RELATION {
-		relation := object.GetRelation()
-		object.ID = topoapi.RelationID(relation.SrcEntityID, relation.KindID, relation.TgtEntityID)
-	}
-	if object.ID == "" {
-		return errors.NewInvalid("ID cannot be empty")
-	}
 	if object.Type == topoapi.Object_UNSPECIFIED {
 		return errors.NewInvalid("Type cannot be unspecified")
+	}
+
+	// set a uuid
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return errors.FromAtomix(err)
+	}
+	object.UUID = topoapi.UUID(uuid.String())
+	// If an object is a relation and its ID is empty, build one.
+	if object.Type == topoapi.Object_RELATION {
+		if object.ID == "" {
+			object.ID = topoapi.ID("uuid:" + string(object.UUID))
+		}
+		_, srcErr := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID))
+		_, tgtErr := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID))
+		if srcErr != nil || tgtErr != nil {
+			return errors.NewInvalid("Source or Target Entity does not exist")
+		}
+	} else if object.ID == "" {
+		return errors.NewInvalid("ID cannot be empty")
 	}
 
 	log.Infof("Creating object %+v", object)
@@ -444,9 +457,16 @@ func (s *atomixStore) addSrcTgts(obj *topoapi.Object) {
 	}
 }
 
-// when creating a relation , create the corresponding entries in the store
+// when creating a relation, create the corresponding entries in the store
 func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
 	if relation := obj.GetRelation(); relation != nil {
+		// check that the connection is valid (src and tgt are in the store). otherwise remove the dangling relation
+		if _, srcErr := s.objects.Get(context.Background(), string(relation.SrcEntityID)); srcErr != nil {
+			if _, tgtErr := s.objects.Get(context.Background(), string(relation.TgtEntityID)); tgtErr != nil {
+				_, _ = s.objects.Remove(context.Background(), string(obj.ID))
+				return
+			}
+		}
 		s.relations.lock.Lock()
 		defer s.relations.lock.Unlock()
 		if list, found := s.relations.sources[string(relation.TgtEntityID)]; found {
