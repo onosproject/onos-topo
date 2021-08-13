@@ -174,7 +174,11 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	// Put the object in the map using an optimistic lock if this is an update
 	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfNotSet())
 	if err != nil {
-		log.Errorf("Failed to create object %+v: %s", object, err)
+		if !errors.IsAlreadyExists(err) {
+			log.Errorf("Failed to create object %+v: %s", object, err)
+		} else {
+			log.Warnf("Failed to create object %+v: %s", object, err)
+		}
 		return errors.FromAtomix(err)
 	}
 
@@ -203,7 +207,11 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	// Update the object in the map
 	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfMatch(meta.NewRevision(meta.Revision(object.Revision))))
 	if err != nil {
-		log.Errorf("Failed to update object %+v: %s", object, err)
+		if !errors.IsConflict(err) && !errors.IsNotFound(err) {
+			log.Errorf("Failed to update object %+v: %s", object, err)
+		} else {
+			log.Warnf("Failed to update object %+v: %s", object, err)
+		}
 		return errors.FromAtomix(err)
 	}
 	object.Revision = topoapi.Revision(entry.Revision)
@@ -239,7 +247,11 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 	log.Infof("Deleting object %s", id)
 	_, err = s.objects.Remove(ctx, string(id))
 	if err != nil {
-		log.Errorf("Failed to delete object %s: %s", id, err)
+		if !errors.IsNotFound(err) {
+			log.Errorf("Failed to delete object %s: %s", id, err)
+		} else {
+			log.Warnf("Failed to delete object %s: %s", id, err)
+		}
 		return errors.FromAtomix(err)
 	}
 	return nil
