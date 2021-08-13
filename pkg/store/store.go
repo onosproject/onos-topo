@@ -247,7 +247,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 	log.Infof("Deleting object %s", id)
 	_, err = s.objects.Remove(ctx, string(id))
 	if err != nil {
-		if !errors.IsNotFound(err) {
+		if !errors.IsConflict(err) && !errors.IsNotFound(err) {
 			log.Errorf("Failed to delete object %s: %s", id, err)
 		} else {
 			log.Warnf("Failed to delete object %s: %s", id, err)
