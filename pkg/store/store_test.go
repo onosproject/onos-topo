@@ -168,7 +168,9 @@ func TestTopoStore(t *testing.T) {
 	// Verify the attribute values
 	obj2g, err := store1.Get(context.TODO(), obj2.ID)
 	assert.NoError(t, err)
-	loc := obj2g.GetAspect(&topoapi.Location{}).(*topoapi.Location)
+	loc := &topoapi.Location{}
+	err = obj2g.GetAspect(loc)
+	assert.NoError(t, err)
 	assert.NotNil(t, loc)
 	assert.Equal(t, 1.0, loc.Lat)
 	assert.Equal(t, 2.0, loc.Lng)
