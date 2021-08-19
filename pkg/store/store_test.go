@@ -175,8 +175,12 @@ func TestTopoStore(t *testing.T) {
 	assert.Equal(t, 1.0, loc.Lat)
 	assert.Equal(t, 2.0, loc.Lng)
 
-	// Delete an object
-	err = store1.Delete(context.TODO(), obj2.ID)
+	// Delete an object; with no rev, with wrong rev and finally with right rev
+	err = store1.Delete(context.TODO(), obj2.ID, 0)
+	assert.Error(t, err)
+	err = store1.Delete(context.TODO(), obj2.ID, obj2.Revision+10)
+	assert.Error(t, err)
+	err = store1.Delete(context.TODO(), obj2.ID, obj2.Revision)
 	assert.NoError(t, err)
 	obj2, err = store2.Get(context.TODO(), "o2")
 	assert.Error(t, err)

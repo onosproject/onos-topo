@@ -92,7 +92,7 @@ type Store interface {
 	Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, error)
 
 	// Delete deletes a object from the store
-	Delete(ctx context.Context, id topoapi.ID) error
+	Delete(ctx context.Context, id topoapi.ID, revision topoapi.Revision) error
 
 	// List streams objects to the given channel
 	List(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error)
@@ -235,9 +235,12 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 	return obj, nil
 }
 
-func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
+func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID, revision topoapi.Revision) error {
 	if id == "" {
 		return errors.NewInvalid("ID cannot be empty")
+	}
+	if revision == 0 {
+		return errors.NewInvalid("object must contain a revision on update")
 	}
 
 	err := s.deleteRelatedRelations(ctx, id)
@@ -245,7 +248,7 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID) error {
 		return err
 	}
 	log.Infof("Deleting object %s", id)
-	_, err = s.objects.Remove(ctx, string(id))
+	_, err = s.objects.Remove(ctx, string(id), _map.IfMatch(meta.NewRevision(meta.Revision(revision))))
 	if err != nil {
 		if !errors.IsConflict(err) && !errors.IsNotFound(err) {
 			log.Errorf("Failed to delete object %s: %s", id, err)

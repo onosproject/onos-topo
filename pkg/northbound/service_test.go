@@ -113,17 +113,23 @@ func TestServiceBasics(t *testing.T) {
 	})
 
 	obj := gres.Object
-	//obj.Attributes = make(map[string]string)
-	//obj.Attributes["foo"] = "bar"
+	err = obj.SetAspect(&topoapi.Location{Lat: 3.14, Lng: 6.28})
+	assert.NoError(t, err)
 	ures, err := client.Update(context.Background(), &topoapi.UpdateRequest{
 		Object: obj,
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, ures)
-	//assert.Equal(t, ures.Object.Attributes["foo"], "bar")
+
+	obj = ures.Object
+	loc := &topoapi.Location{}
+	err = obj.GetAspect(loc)
+	assert.NoError(t, err)
+	assert.Equal(t, 6.28, loc.Lng)
 
 	_, err = client.Delete(context.Background(), &topoapi.DeleteRequest{
-		ID: "1",
+		ID:       obj.ID,
+		Revision: obj.Revision,
 	})
 	assert.NoError(t, err)
 
@@ -145,13 +151,14 @@ func TestWatchBasics(t *testing.T) {
 	conn := createServerConnection(t, test)
 	client := topoapi.NewTopoClient(conn)
 
-	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
+	cres, err := client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:   "1",
 			Type: topoapi.Object_ENTITY,
 		},
 	})
 	assert.NoError(t, err)
+	obj := cres.Object
 
 	res, err := client.Watch(context.Background(), &topoapi.WatchRequest{})
 	assert.NoError(t, err)
@@ -192,7 +199,8 @@ func TestWatchBasics(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = client.Delete(context.Background(), &topoapi.DeleteRequest{
-		ID: "1",
+		ID:       obj.ID,
+		Revision: obj.Revision,
 	})
 	assert.NoError(t, err)
 

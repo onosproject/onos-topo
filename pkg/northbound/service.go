@@ -104,7 +104,7 @@ func (s *Server) Update(ctx context.Context, req *topoapi.UpdateRequest) (*topoa
 // Delete removes the specified topology object
 func (s *Server) Delete(ctx context.Context, req *topoapi.DeleteRequest) (*topoapi.DeleteResponse, error) {
 	log.Infof("Received DeleteRequest %+v", req)
-	err := s.objectStore.Delete(ctx, req.ID)
+	err := s.objectStore.Delete(ctx, req.ID, req.Revision)
 	if err != nil {
 		log.Warnf("DeleteRequest %+v failed: %v", req, err)
 		return nil, errors.Status(err).Err()
