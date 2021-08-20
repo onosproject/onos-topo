@@ -239,16 +239,18 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID, revision topoap
 	if id == "" {
 		return errors.NewInvalid("ID cannot be empty")
 	}
-	if revision == 0 {
-		return errors.NewInvalid("object must contain a revision on update")
-	}
 
 	err := s.deleteRelatedRelations(ctx, id)
 	if err != nil {
 		return err
 	}
 	log.Infof("Deleting object %s", id)
-	_, err = s.objects.Remove(ctx, string(id), _map.IfMatch(meta.NewRevision(meta.Revision(revision))))
+
+	if revision == 0 {
+		_, err = s.objects.Remove(ctx, string(id))
+	} else {
+		_, err = s.objects.Remove(ctx, string(id), _map.IfMatch(meta.NewRevision(meta.Revision(revision))))
+	}
 	if err != nil {
 		if !errors.IsConflict(err) && !errors.IsNotFound(err) {
 			log.Errorf("Failed to delete object %s: %s", id, err)
