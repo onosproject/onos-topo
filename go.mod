@@ -1,6 +1,6 @@
 module github.com/onosproject/onos-topo
 
-go 1.14
+go 1.16
 
 require (
 	github.com/atomix/atomix-go-client v0.5.20
