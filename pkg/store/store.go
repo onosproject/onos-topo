@@ -207,11 +207,7 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	// Update the object in the map
 	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfMatch(meta.NewRevision(meta.Revision(object.Revision))))
 	if err != nil {
-		if !errors.IsConflict(err) && !errors.IsNotFound(err) {
-			log.Errorf("Failed to update object %+v: %s", object, err)
-		} else {
-			log.Warnf("Failed to update object %+v: %s", object, err)
-		}
+		log.Warnf("Failed to update object %+v: %s", object, err)
 		return errors.FromAtomix(err)
 	}
 	object.Revision = topoapi.Revision(entry.Revision)
