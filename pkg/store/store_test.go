@@ -311,10 +311,22 @@ func TestList(t *testing.T) {
 	assert.Len(t, objects, 3) // 1 node, 2 cells
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
-		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: ""},
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_SOURCE_AND_TARGET},
 	})
 	assert.NoError(t, err)
-	assert.Len(t, objects, 2) // connection from 57 to 58 and 58 to 59 (bidirectional connection)
+	assert.Len(t, objects, 3) // 58 and neighbors 57 and 59
+
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_TARGET_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // neighbors 57 and 59
+
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_TARGET_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // neighbors 57 and 59
 
 	// List the objects with object type filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
