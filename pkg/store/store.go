@@ -336,12 +336,73 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 	filter := filters.RelationFilter
 
 	if (len(filter.GetSrcId()) == 0 && len(filter.GetTargetId()) == 0) ||
-		(len(filter.GetSrcId()) > 0 && len(filter.GetTargetId()) > 0){
+		(len(filter.GetSrcId()) > 0 && len(filter.GetTargetId()) > 0) {
 		return nil, errors.NewInvalid("filter must contain either srcID or targetID")
 	}
 
 	// contains _all_ relations that have the same kind as the filter and same SrcId and/or TgtId as the filter
 	entitiesToGet := make(map[topoapi.ID]relationTargetContainer)
+	s.scanRelations(mapCh, filter, entitiesToGet)
+	eps, objects, err := s.scanEntities(ctx, entitiesToGet, filter, filters, eps)
+	if err != nil {
+		return objects, err
+	}
+	return eps, nil
+}
+
+func (s *atomixStore) scanEntities(ctx context.Context, entitiesToGet map[topoapi.ID]relationTargetContainer, filter *topoapi.RelationFilter, filters *topoapi.Filters, eps []topoapi.Object) ([]topoapi.Object, []topoapi.Object, error) {
+	// to prevent adding a node twice. each relation filter must specify a source id, so we will only ever want to add one node (source)
+	foundSource := false
+	// iterate over entitiesToGet to obtain missed entities and push onto eps
+	for id, relationEntity := range entitiesToGet {
+		if relationEntity.entity == nil {
+			storeEntity, _ := s.Get(ctx, id)
+			if idMatches(storeEntity.GetEntity().KindID, filter.TargetKind) {
+				if matchType(storeEntity, filters.ObjectTypes) {
+					s.addSrcTgts(storeEntity)
+					eps = append(eps, *storeEntity)
+					if filter.Scope == topoapi.RelationFilterScope_ALL {
+						eps = append(eps, *relationEntity.relation)
+					}
+					if !foundSource && (filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET) {
+						sid := relationEntity.relation.GetRelation().SrcEntityID
+						if len(filter.SrcId) == 0 {
+							sid = relationEntity.relation.GetRelation().TgtEntityID
+						}
+						src, err := s.Get(ctx, sid)
+						if err != nil {
+							return nil, nil, err
+						}
+						s.addSrcTgts(src)
+						eps = append(eps, *src)
+
+						foundSource = true
+					}
+				}
+			}
+		} else {
+			if matchType(relationEntity.entity, filters.ObjectTypes) {
+				s.addSrcTgts(relationEntity.entity)
+				eps = append(eps, *relationEntity.entity)
+				if filter.Scope == topoapi.RelationFilterScope_ALL {
+					eps = append(eps, *relationEntity.relation)
+				}
+				if !foundSource && (filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET) {
+					src, err := s.Get(ctx, relationEntity.relation.GetRelation().SrcEntityID)
+					if err != nil {
+						return nil, nil, err
+					}
+					s.addSrcTgts(src)
+					eps = append(eps, *src)
+					foundSource = true
+				}
+			}
+		}
+	}
+	return eps, nil, nil
+}
+
+func (s *atomixStore) scanRelations(mapCh chan _map.Entry, filter *topoapi.RelationFilter, entitiesToGet map[topoapi.ID]relationTargetContainer) {
 	for entry := range mapCh {
 		if ep, err := decodeObject(entry); err == nil {
 			if ep.Type == topoapi.Object_RELATION &&
@@ -367,55 +428,6 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, mapCh chan _map.En
 			}
 		}
 	}
-	// to prevent adding a node twice. each relation filter must specify a source id, so we will only ever want to add one node (source)
-	foundSource := false
-	// iterate over entitiesToGet to obtain missed entities and push onto eps
-	for id, relationEntity := range entitiesToGet {
-		if relationEntity.entity == nil {
-			storeEntity, _ := s.Get(ctx, id)
-			if idMatches(storeEntity.GetEntity().KindID, filter.TargetKind) {
-				if matchType(storeEntity, filters.ObjectTypes) {
-					s.addSrcTgts(storeEntity)
-					eps = append(eps, *storeEntity)
-					if filter.Scope == topoapi.RelationFilterScope_ALL {
-						eps = append(eps, *relationEntity.relation)
-					}
-					if !foundSource && (filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET) {
-						sid := relationEntity.relation.GetRelation().SrcEntityID
-						if len(filter.SrcId) == 0 {
-							sid = relationEntity.relation.GetRelation().TgtEntityID
-						}
-						src, err := s.Get(ctx, sid)
-						if err != nil {
-							return nil, err
-						}
-						s.addSrcTgts(src)
-						eps = append(eps, *src)
-
-						foundSource = true
-					}
-				}
-			}
-		} else {
-			if matchType(relationEntity.entity, filters.ObjectTypes) {
-				s.addSrcTgts(relationEntity.entity)
-				eps = append(eps, *relationEntity.entity)
-				if filter.Scope == topoapi.RelationFilterScope_ALL {
-					eps = append(eps, *relationEntity.relation)
-				}
-				if !foundSource && (filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET) {
-					src, err := s.Get(ctx, relationEntity.relation.GetRelation().SrcEntityID)
-					if err != nil {
-						return nil, err
-					}
-					s.addSrcTgts(src)
-					eps = append(eps, *src)
-					foundSource = true
-				}
-			}
-		}
-	}
-	return eps, nil
 }
 
 func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filters *topoapi.Filters, opts ...WatchOption) error {
