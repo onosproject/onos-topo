@@ -1,4 +1,4 @@
-FROM onosproject/golang-build:v0.6.3 as build
+FROM onosproject/golang-build:v1.0 as build
 
 ENV GO111MODULE=on
 COPY . /go/src/github.com/onosproject/onos-topo
