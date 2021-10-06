@@ -356,7 +356,10 @@ func (s *atomixStore) scanEntities(ctx context.Context, entitiesToGet map[topoap
 	// iterate over entitiesToGet to obtain missed entities and push onto eps
 	for id, relationEntity := range entitiesToGet {
 		if relationEntity.entity == nil {
-			storeEntity, _ := s.Get(ctx, id)
+			storeEntity, err := s.Get(ctx, id)
+			if err != nil || storeEntity == nil {
+				continue
+			}
 			if idMatches(storeEntity.GetEntity().KindID, filter.TargetKind) {
 				if matchType(storeEntity, filters.ObjectTypes) {
 					s.addSrcTgts(storeEntity)
