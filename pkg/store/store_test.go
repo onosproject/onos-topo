@@ -256,6 +256,11 @@ func TestList(t *testing.T) {
 	// - node-cell: 2001, 87893172902445060
 	createObjectsListTest(t, store)
 
+	object, err := store.Get(context.TODO(), "1234")
+	assert.NoError(t, err)
+	assert.Len(t, object.GetEntity().SrcRelationIDs, 2)
+	assert.Len(t, object.GetEntity().TgtRelationIDs, 0)
+
 	// List the objects
 	objects, err := store.List(context.TODO(), nil)
 	assert.NoError(t, err)
@@ -409,14 +414,14 @@ func createNodeToCell(t *testing.T, s Store, a auxNodeToCell) {
 // creates both ways
 func createCellNeighbors(t *testing.T, s Store, a auxCellNeighbor) {
 	err := s.Create(context.TODO(), &topoapi.Object{
-		ID:     topo.ID(a.srcID + "-" + a.tgtID),
+		// ID: intentionally left empty for the auto-generation to take place
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.srcID), TgtEntityID: topoapi.ID(a.tgtID)}},
 		Labels: a.labels,
 	})
 	assert.NoError(t, err)
 	err = s.Create(context.TODO(), &topoapi.Object{
-		ID:     topo.ID(a.tgtID + "-" + a.srcID),
+		// ID: intentionally left empty for the auto-generation to take place
 		Type:   topoapi.Object_RELATION,
 		Obj:    &topoapi.Object_Relation{Relation: &topoapi.Relation{KindID: topoapi.ID("e2-cell-neighbor"), SrcEntityID: topoapi.ID(a.tgtID), TgtEntityID: topoapi.ID(a.srcID)}},
 		Labels: a.labels,
