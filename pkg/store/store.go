@@ -126,9 +126,9 @@ type atomixStore struct {
 }
 
 type relationMaps struct {
-	// map of entity IDs to list of relations where that entity is a target of the relation
-	sources map[topoapi.ID][]topoapi.ID
 	// map of entity IDs to list of relations where that entity is a source of the relation
+	sources map[topoapi.ID][]topoapi.ID
+	// map of entity IDs to list of relations where that entity is a target of the relation
 	targets map[topoapi.ID][]topoapi.ID
 	lock    sync.RWMutex
 }
