@@ -17,7 +17,7 @@ package utils
 import (
 	"crypto/tls"
 	"github.com/onosproject/onos-lib-go/pkg/certs"
-	"github.com/onosproject/onos-lib-go/pkg/southbound"
+	"github.com/onosproject/onos-lib-go/pkg/grpc/retry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -45,7 +45,7 @@ func CreateConnection() (*grpc.ClientConn, error) {
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
-		grpc.WithUnaryInterceptor(southbound.RetryingUnaryClientInterceptor()),
+		grpc.WithUnaryInterceptor(retry.RetryingUnaryClientInterceptor()),
 	}
 
 	conn, err := grpc.Dial("onos-topo:5150", opts...)
