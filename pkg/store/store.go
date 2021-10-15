@@ -41,6 +41,7 @@ func NewAtomixStore(client atomix.Client) (Store, error) {
 	}
 	store := &atomixStore{
 		objects: objects,
+		cache:   make(map[topoapi.ID]topoapi.Object),
 		relations: relationMaps{
 			targets: make(map[topoapi.ID][]topoapi.ID),
 			sources: make(map[topoapi.ID][]topoapi.ID),
@@ -54,28 +55,11 @@ func NewAtomixStore(client atomix.Client) (Store, error) {
 	// when objects are added, add their entry to the map
 	// when a relation is added, add the implied relation to the store target and source maps
 	mapCh := make(chan _map.Event)
-	if err := objects.Watch(context.Background(), mapCh, make([]_map.WatchOption, 0)...); err != nil {
+	if err := objects.Watch(context.Background(), mapCh, _map.WithReplay()); err != nil {
 		return nil, errors.FromAtomix(err)
 	}
 	go store.watchStoreEvents(mapCh)
 	return store, nil
-}
-
-func (s *atomixStore) watchStoreEvents(mapCh chan _map.Event) {
-	for event := range mapCh {
-		obj, err := decodeObject(event.Entry)
-		if err != nil {
-			continue
-		}
-		switch event.Type {
-		case _map.EventReplay:
-			s.registerSrcTgt(obj, true)
-		case _map.EventInsert:
-			s.registerSrcTgt(obj, true)
-		case _map.EventRemove:
-			s.unregisterSrcTgt(obj)
-		}
-	}
 }
 
 // Store stores topology information
@@ -103,26 +87,35 @@ type Store interface {
 
 // WatchOption is a configuration option for Watch calls
 type WatchOption interface {
-	apply([]_map.WatchOption) []_map.WatchOption
+	apply(*watchOptions)
 }
 
 // watchReplyOption is an option to replay events on watch
 type watchReplayOption struct {
+	replay bool
 }
 
-func (o watchReplayOption) apply(opts []_map.WatchOption) []_map.WatchOption {
-	return append(opts, _map.WithReplay())
+func (o watchReplayOption) apply(opts *watchOptions) {
+	opts.replay = o.replay
 }
 
 // WithReplay returns a WatchOption that replays past changes
 func WithReplay() WatchOption {
-	return watchReplayOption{}
+	return watchReplayOption{true}
+}
+
+type watchOptions struct {
+	replay bool
 }
 
 // atomixStore is the object implementation of the Store
 type atomixStore struct {
-	objects   _map.Map
-	relations relationMaps
+	objects    _map.Map
+	cache      map[topoapi.ID]topoapi.Object
+	cacheMu    sync.RWMutex
+	relations  relationMaps
+	watchers   map[uuid.UUID]chan<- topoapi.Event
+	watchersMu sync.RWMutex
 }
 
 type relationMaps struct {
@@ -131,6 +124,51 @@ type relationMaps struct {
 	// map of entity IDs to list of relations where that entity is a target of the relation
 	targets map[topoapi.ID][]topoapi.ID
 	lock    sync.RWMutex
+}
+
+func (s *atomixStore) watchStoreEvents(mapCh chan _map.Event) {
+	for event := range mapCh {
+		obj, err := decodeObject(event.Entry)
+		if err != nil {
+			continue
+		}
+
+		var eventType topoapi.EventType
+		switch event.Type {
+		case _map.EventReplay:
+			eventType = topoapi.EventType_NONE
+			s.cacheMu.Lock()
+			s.cache[obj.ID] = *obj
+			s.cacheMu.Unlock()
+			s.registerSrcTgt(obj, true)
+		case _map.EventInsert:
+			eventType = topoapi.EventType_ADDED
+			s.cacheMu.Lock()
+			s.cache[obj.ID] = *obj
+			s.cacheMu.Unlock()
+			s.registerSrcTgt(obj, true)
+		case _map.EventUpdate:
+			eventType = topoapi.EventType_UPDATED
+			s.cacheMu.Lock()
+			s.cache[obj.ID] = *obj
+			s.cacheMu.Unlock()
+		case _map.EventRemove:
+			eventType = topoapi.EventType_REMOVED
+			s.cacheMu.Lock()
+			delete(s.cache, topoapi.ID(event.Entry.Key))
+			s.cacheMu.Unlock()
+			s.unregisterSrcTgt(obj)
+		}
+
+		s.watchersMu.RLock()
+		for _, watcher := range s.watchers {
+			watcher <- topoapi.Event{
+				Type:   eventType,
+				Object: *obj,
+			}
+		}
+		s.watchersMu.RUnlock()
+	}
 }
 
 func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error {
@@ -375,43 +413,53 @@ func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID,
 }
 
 func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filters *topoapi.Filters, opts ...WatchOption) error {
-	watchOpts := make([]_map.WatchOption, 0)
+	var watchOpts watchOptions
 	for _, opt := range opts {
-		watchOpts = opt.apply(watchOpts)
+		opt.apply(&watchOpts)
 	}
 
-	mapCh := make(chan _map.Event)
-	if err := s.objects.Watch(ctx, mapCh, watchOpts...); err != nil {
-		return errors.FromAtomix(err)
-	}
-
+	watchCh := make(chan topoapi.Event)
 	go func() {
 		defer close(ch)
-		for event := range mapCh {
-			if object, err := decodeObject(event.Entry); err == nil {
-				if !match(object, filters) {
-					continue
-				}
-				var eventType topoapi.EventType
-				switch event.Type {
-				case _map.EventReplay:
-					eventType = topoapi.EventType_NONE
-				case _map.EventInsert:
-					eventType = topoapi.EventType_ADDED
-				case _map.EventRemove:
-					eventType = topoapi.EventType_REMOVED
-				case _map.EventUpdate:
-					eventType = topoapi.EventType_UPDATED
-				default:
-					eventType = topoapi.EventType_UPDATED
-				}
-				ch <- topoapi.Event{
-					Type:   eventType,
-					Object: *object,
-				}
+		for event := range watchCh {
+			if !match(&event.Object, filters) {
+				continue
 			}
+			ch <- event
 		}
 	}()
+
+	watcherID := uuid.New()
+	s.watchersMu.Lock()
+	s.watchers[watcherID] = watchCh
+	s.watchersMu.Unlock()
+
+	if watchOpts.replay {
+		go func() {
+			s.cacheMu.RLock()
+			for _, object := range s.cache {
+				ch <- topoapi.Event{
+					Type:   topoapi.EventType_NONE,
+					Object: object,
+				}
+			}
+			s.cacheMu.RUnlock()
+
+			<-ctx.Done()
+			s.watchersMu.Lock()
+			delete(s.watchers, watcherID)
+			s.watchersMu.Unlock()
+			close(watchCh)
+		}()
+	} else {
+		go func() {
+			<-ctx.Done()
+			s.watchersMu.Lock()
+			delete(s.watchers, watcherID)
+			s.watchersMu.Unlock()
+			close(watchCh)
+		}()
+	}
 	return nil
 }
 
