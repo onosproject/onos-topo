@@ -40,8 +40,9 @@ func NewAtomixStore(client atomix.Client) (Store, error) {
 		return nil, err
 	}
 	store := &atomixStore{
-		objects: objects,
-		cache:   make(map[topoapi.ID]topoapi.Object),
+		objects:  objects,
+		cache:    make(map[topoapi.ID]topoapi.Object),
+		watchers: make(map[uuid.UUID]chan<- topoapi.Event),
 		relations: relationMaps{
 			targets: make(map[topoapi.ID][]topoapi.ID),
 			sources: make(map[topoapi.ID][]topoapi.ID),
