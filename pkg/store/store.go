@@ -437,7 +437,7 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 		go func() {
 			s.cacheMu.RLock()
 			for _, object := range s.cache {
-				ch <- topoapi.Event{
+				watchCh <- topoapi.Event{
 					Type:   topoapi.EventType_NONE,
 					Object: object,
 				}
