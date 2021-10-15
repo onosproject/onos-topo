@@ -271,7 +271,6 @@ func TestList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, objects, 8) // 2 nodes + 6 cells
 
-
 	// List the objects with label filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
 		{
