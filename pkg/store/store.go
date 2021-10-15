@@ -204,9 +204,6 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		return errors.NewInvalid(err.Error())
 	}
 
-	// FIXME: Provisionally update the relation indexes in-line
-	s.registerSrcTgt(object, false)
-
 	// Put the object in the map using an optimistic lock if this is an update
 	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfNotSet())
 	if err != nil {
