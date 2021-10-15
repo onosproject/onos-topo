@@ -422,10 +422,9 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 	go func() {
 		defer close(ch)
 		for event := range watchCh {
-			if !match(&event.Object, filters) {
-				continue
+			if match(&event.Object, filters) {
+				ch <- event
 			}
-			ch <- event
 		}
 	}()
 
