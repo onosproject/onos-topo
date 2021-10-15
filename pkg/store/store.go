@@ -69,9 +69,9 @@ func (s *atomixStore) watchStoreEvents(mapCh chan _map.Event) {
 		}
 		switch event.Type {
 		case _map.EventReplay:
-			s.registerSrcTgt(obj)
+			s.registerSrcTgt(obj, true)
 		case _map.EventInsert:
-			s.registerSrcTgt(obj)
+			s.registerSrcTgt(obj, true)
 		case _map.EventRemove:
 			s.unregisterSrcTgt(obj)
 		}
@@ -164,6 +164,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		log.Errorf("Failed to create object %+v: %s", object, err)
 		return errors.NewInvalid(err.Error())
 	}
+
+	// FIXME: Provisionally update the relation indexes in-line
+	s.registerSrcTgt(object, false)
 
 	// Put the object in the map using an optimistic lock if this is an update
 	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfNotSet())
@@ -439,30 +442,24 @@ func (s *atomixStore) addSrcTgts(obj *topoapi.Object) {
 }
 
 // when creating a relation, create the corresponding entries in the store
-func (s *atomixStore) registerSrcTgt(obj *topoapi.Object) {
+func (s *atomixStore) registerSrcTgt(obj *topoapi.Object, strict bool) {
 	if relation := obj.GetRelation(); relation != nil {
-		// check that the connection is valid (src and tgt are in the store). otherwise remove the dangling relation
-		if _, srcErr := s.objects.Get(context.Background(), string(relation.SrcEntityID)); srcErr != nil {
-			_, _ = s.objects.Remove(context.Background(), string(obj.ID))
-			return
-		}
-		if _, tgtErr := s.objects.Get(context.Background(), string(relation.TgtEntityID)); tgtErr != nil {
-			_, _ = s.objects.Remove(context.Background(), string(obj.ID))
-			return
+		if strict {
+			// check that the connection is valid (src and tgt are in the store). otherwise remove the dangling relation
+			if _, srcErr := s.objects.Get(context.Background(), string(relation.SrcEntityID)); srcErr != nil {
+				_, _ = s.objects.Remove(context.Background(), string(obj.ID))
+				return
+			}
+			if _, tgtErr := s.objects.Get(context.Background(), string(relation.TgtEntityID)); tgtErr != nil {
+				_, _ = s.objects.Remove(context.Background(), string(obj.ID))
+				return
+			}
 		}
 
 		s.relations.lock.Lock()
 		defer s.relations.lock.Unlock()
-		if list, found := s.relations.sources[relation.SrcEntityID]; found {
-			s.relations.sources[relation.SrcEntityID] = append(list, obj.ID)
-		} else {
-			s.relations.sources[relation.SrcEntityID] = []topoapi.ID{obj.ID}
-		}
-		if list, found := s.relations.targets[relation.TgtEntityID]; found {
-			s.relations.targets[relation.TgtEntityID] = append(list, obj.ID)
-		} else {
-			s.relations.targets[relation.TgtEntityID] = []topoapi.ID{obj.ID}
-		}
+		s.relations.sources[relation.SrcEntityID] = add(s.relations.sources[relation.SrcEntityID], obj.ID)
+		s.relations.targets[relation.TgtEntityID] = add(s.relations.targets[relation.TgtEntityID], obj.ID)
 	}
 }
 
@@ -477,25 +474,26 @@ func (s *atomixStore) unregisterSrcTgt(obj *topoapi.Object) {
 	} else if relation := obj.GetRelation(); relation != nil {
 		s.relations.lock.Lock()
 		defer s.relations.lock.Unlock()
-		if list, found := s.relations.sources[relation.SrcEntityID]; found {
-			for i, id := range list {
-				if id == relation.SrcEntityID {
-					s.relations.targets[relation.SrcEntityID] = remove(list, i)
-					break
-				}
-			}
-		}
-		if list, found := s.relations.sources[relation.SrcEntityID]; found {
-			for i, id := range list {
-				if id == relation.TgtEntityID {
-					s.relations.targets[relation.TgtEntityID] = remove(list, i)
-				}
-			}
-		}
+		s.relations.sources[relation.SrcEntityID] = remove(s.relations.sources[relation.SrcEntityID], obj.ID)
+		s.relations.targets[relation.TgtEntityID] = remove(s.relations.targets[relation.TgtEntityID], obj.ID)
 	}
 }
 
-func remove(ids []topoapi.ID, i int) []topoapi.ID {
-	ids[i] = ids[len(ids)-1]
-	return ids[:len(ids)-1]
+func add(ids []topoapi.ID, id topoapi.ID) []topoapi.ID {
+	for _, eid := range ids {
+		if eid == id {
+			return ids
+		}
+	}
+	return append(ids, id)
+}
+
+func remove(ids []topoapi.ID, id topoapi.ID) []topoapi.ID {
+	for i, eid := range ids {
+		if eid == id {
+			ids[i] = ids[len(ids)-1]
+			return ids[:len(ids)-1]
+		}
+	}
+	return ids
 }
