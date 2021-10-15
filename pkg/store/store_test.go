@@ -266,6 +266,12 @@ func TestList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, objects, 22) // 2 nodes + 6 cells + 8 cell-neighbors + 6 node-cells
 
+	// List the objects
+	objects, err = store.List(context.TODO(), &topoapi.Filters{ObjectTypes: []topoapi.Object_Type{topoapi.Object_ENTITY}})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 8) // 2 nodes + 6 cells
+
+
 	// List the objects with label filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{LabelFilters: []*topoapi.Filter{
 		{

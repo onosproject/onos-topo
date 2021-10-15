@@ -325,9 +325,6 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 func (s *atomixStore) listRelationFilter(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error) {
 	filter := filters.RelationFilter
 
-	s.relations.lock.RLock()
-	defer s.relations.lock.RUnlock()
-
 	if len(filter.GetSrcId()) > 0 {
 		return s.filterRelationEntities(ctx, topoapi.ID(filter.GetSrcId()), filters.RelationFilter, false)
 	} else if len(filter.GetTargetId()) > 0 {
@@ -480,23 +477,25 @@ func (s *atomixStore) unregisterSrcTgt(obj *topoapi.Object) {
 	} else if relation := obj.GetRelation(); relation != nil {
 		s.relations.lock.Lock()
 		defer s.relations.lock.Unlock()
-		if list, found := s.relations.targets[relation.TgtEntityID]; found {
-			index := 0
-			for _, id := range list {
-				if id != relation.SrcEntityID {
-					list[index] = id
-					index++
+		if list, found := s.relations.sources[relation.SrcEntityID]; found {
+			for i, id := range list {
+				if id == relation.SrcEntityID {
+					s.relations.targets[relation.SrcEntityID] = remove(list, i)
+					break
 				}
 			}
 		}
 		if list, found := s.relations.sources[relation.SrcEntityID]; found {
-			index := 0
-			for _, id := range list {
-				if id != relation.TgtEntityID {
-					list[index] = id
-					index++
+			for i, id := range list {
+				if id == relation.TgtEntityID {
+					s.relations.targets[relation.TgtEntityID] = remove(list, i)
 				}
 			}
 		}
 	}
+}
+
+func remove(ids []topoapi.ID, i int) []topoapi.ID {
+	ids[i] = ids[len(ids)-1]
+	return ids[:len(ids)-1]
 }
