@@ -385,7 +385,10 @@ func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID,
 
 	relations := obj.GetEntity().SrcRelationIDs
 	if useSrc {
+		log.Debugf("Object %s is target of relations: %+v", obj.ID, relations)
 		relations = obj.GetEntity().TgtRelationIDs
+	} else {
+		log.Debugf("Object %s is source of relations: %+v", obj.ID, relations)
 	}
 
 	for _, rid := range relations {
@@ -478,11 +481,13 @@ func decodeObject(entry _map.Entry) (*topoapi.Object, error) {
 }
 
 func (s *atomixStore) addSrcTgts(obj *topoapi.Object) {
-	if obj.GetEntity() != nil {
+	if obj.Type == topoapi.Object_ENTITY {
 		s.relations.lock.RLock()
 		defer s.relations.lock.RUnlock()
 		obj.GetEntity().SrcRelationIDs = s.relations.sources[obj.ID]
 		obj.GetEntity().TgtRelationIDs = s.relations.targets[obj.ID]
+		log.Debugf("Entity %s is source of %+v and target of %+v", obj.ID,
+			obj.GetEntity().SrcRelationIDs, obj.GetEntity().TgtRelationIDs)
 	}
 }
 
