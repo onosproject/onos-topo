@@ -433,17 +433,24 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 
 	if watchOpts.replay {
 		go func() {
-			log.Debug("Queueing cached objects")
+			// FIXME: Temporary fix to avoid locking up the cache for too long and at the whim of the rate at which client consumes from its own channel
+			log.Debug("Cloning cached objects")
 			s.cacheMu.RLock()
+			cache := make([]topoapi.Object, 0, len(s.cache))
 			for _, object := range s.cache {
+				cache = append(cache, object)
+			}
+			s.cacheMu.RUnlock()
+
+			log.Debug("Queueing cached objects")
+			for _, object := range cache {
 				log.Debugf("Queueing cached object: %+v", object)
 				watchCh <- topoapi.Event{
 					Type:   topoapi.EventType_NONE,
 					Object: object,
 				}
 			}
-			s.cacheMu.RUnlock()
-			log.Debug("All cached objects queued; waiting on future events")
+			log.Debug("Queued cached objects; waiting on future events")
 
 			<-ctx.Done()
 			log.Debug("Watch concluded")
