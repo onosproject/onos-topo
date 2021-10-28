@@ -433,16 +433,20 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 
 	if watchOpts.replay {
 		go func() {
+			log.Debug("Queueing cached objects")
 			s.cacheMu.RLock()
 			for _, object := range s.cache {
+				log.Debugf("Queueing cached object: %+v", object)
 				watchCh <- topoapi.Event{
 					Type:   topoapi.EventType_NONE,
 					Object: object,
 				}
 			}
 			s.cacheMu.RUnlock()
+			log.Debug("All cached objects queued; waiting on future events")
 
 			<-ctx.Done()
+			log.Debug("Watch concluded")
 			s.watchersMu.Lock()
 			delete(s.watchers, watcherID)
 			s.watchersMu.Unlock()
