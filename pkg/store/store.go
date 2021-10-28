@@ -444,6 +444,9 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 
 			log.Debug("Queueing cached objects")
 			for _, object := range cache {
+				if ctx.Err() != nil {
+					break
+				}
 				log.Debugf("Queueing cached object: %+v", object)
 				watchCh <- topoapi.Event{
 					Type:   topoapi.EventType_NONE,
