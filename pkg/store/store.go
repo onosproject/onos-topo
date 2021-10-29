@@ -416,47 +416,99 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 		opt.apply(&watchOpts)
 	}
 
-	watchCh := make(chan topoapi.Event)
+	// Create separate channels for replay and watch events
+	replayCh := make(chan topoapi.Object)
+	eventCh := make(chan topoapi.Event)
+
+	// Create a goroutine to first replay existing state to the watcher and then send events
 	go func() {
 		defer close(ch)
-		for event := range watchCh {
-			if match(&event.Object, filters) {
-				ch <- event
+
+	replayLoop:
+		// Process the replay channel first
+		for {
+			select {
+			case object, ok := <-replayCh:
+				// If the replay channel is closed, break out of the replay loop
+				if !ok {
+					break replayLoop
+				}
+				// If an object is received on the replay channel, write it to
+				// the watch channel if it matches the watch filter
+				if match(&object, filters) {
+					ch <- topoapi.Event{
+						Type:   topoapi.EventType_NONE,
+						Object: object,
+					}
+				}
+			case <-ctx.Done():
+				// If the watch context is closed, drain the replay channel and break out of the replay loop
+				go func() {
+					for range replayCh {
+					}
+				}()
+				break replayLoop
+			}
+		}
+
+	eventLoop:
+		// Once the replay channel is processed, process the event channel
+		for {
+			select {
+			case event, ok := <-eventCh:
+				// If the event channel is closed, break out of the event loop
+				if !ok {
+					break eventLoop
+				}
+				// If an event is received on the replay channel, write it to
+				// the watch channel if it matches the watch filter
+				if match(&event.Object, filters) {
+					ch <- event
+				}
+			case <-ctx.Done():
+				// If the watch context is closed, drain the event channel and break out of the event loop
+				go func() {
+					for range eventCh {
+					}
+				}()
+				break eventLoop
 			}
 		}
 	}()
 
+	// Add the watcher's event channel
 	watcherID := uuid.New()
 	s.watchersMu.Lock()
-	s.watchers[watcherID] = watchCh
+	s.watchers[watcherID] = eventCh
 	s.watchersMu.Unlock()
 
+	// Get the objects to replay
+	var objects []topoapi.Object
 	if watchOpts.replay {
-		go func() {
-			s.cacheMu.RLock()
-			for _, object := range s.cache {
-				watchCh <- topoapi.Event{
-					Type:   topoapi.EventType_NONE,
-					Object: object,
-				}
-			}
-			s.cacheMu.RUnlock()
-
-			<-ctx.Done()
-			s.watchersMu.Lock()
-			delete(s.watchers, watcherID)
-			s.watchersMu.Unlock()
-			close(watchCh)
-		}()
-	} else {
-		go func() {
-			<-ctx.Done()
-			s.watchersMu.Lock()
-			delete(s.watchers, watcherID)
-			s.watchersMu.Unlock()
-			close(watchCh)
-		}()
+		s.cacheMu.RLock()
+		objects = make([]topoapi.Object, 0, len(s.cache))
+		for _, object := range s.cache {
+			objects = append(objects, object)
+		}
+		s.cacheMu.RUnlock()
 	}
+
+	// Replay existing objects in the cache and then close the replay channel
+	go func() {
+		defer close(replayCh)
+		for _, object := range objects {
+			replayCh <- object
+		}
+	}()
+
+	// Remove the watcher and close the event channel once the watch context is done
+	go func() {
+		<-ctx.Done()
+		s.watchersMu.Lock()
+		delete(s.watchers, watcherID)
+		s.watchersMu.Unlock()
+		close(eventCh)
+	}()
 	return nil
 }
 
