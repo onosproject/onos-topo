@@ -417,8 +417,31 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 	}
 
 	watchCh := make(chan topoapi.Event)
+	replayCh := make(chan topoapi.Object)
 	go func() {
 		defer close(ch)
+	replay:
+		for {
+			select {
+			case object, ok := <-replayCh:
+				if !ok {
+					break replay
+				}
+				if match(&object, filters) {
+					ch <- topoapi.Event{
+						Type:   topoapi.EventType_NONE,
+						Object: object,
+					}
+				}
+			case <-ctx.Done():
+				go func() {
+					for range replayCh {
+					}
+				}()
+				break replay
+			}
+		}
+
 		for event := range watchCh {
 			if match(&event.Object, filters) {
 				ch <- event
@@ -426,37 +449,35 @@ func (s *atomixStore) Watch(ctx context.Context, ch chan<- topoapi.Event, filter
 		}
 	}()
 
+	var objects []topoapi.Object
+	if watchOpts.replay {
+		s.cacheMu.RLock()
+		objects = make([]topoapi.Object, 0, len(s.cache))
+		for _, object := range s.cache {
+			objects = append(objects, object)
+		}
+		s.cacheMu.RUnlock()
+	}
+
 	watcherID := uuid.New()
 	s.watchersMu.Lock()
 	s.watchers[watcherID] = watchCh
 	s.watchersMu.Unlock()
 
-	if watchOpts.replay {
-		go func() {
-			s.cacheMu.RLock()
-			for _, object := range s.cache {
-				watchCh <- topoapi.Event{
-					Type:   topoapi.EventType_NONE,
-					Object: object,
-				}
-			}
-			s.cacheMu.RUnlock()
+	go func() {
+		defer close(replayCh)
+		for _, object := range objects {
+			replayCh <- object
+		}
+	}()
 
-			<-ctx.Done()
-			s.watchersMu.Lock()
-			delete(s.watchers, watcherID)
-			s.watchersMu.Unlock()
-			close(watchCh)
-		}()
-	} else {
-		go func() {
-			<-ctx.Done()
-			s.watchersMu.Lock()
-			delete(s.watchers, watcherID)
-			s.watchersMu.Unlock()
-			close(watchCh)
-		}()
-	}
+	go func() {
+		<-ctx.Done()
+		s.watchersMu.Lock()
+		delete(s.watchers, watcherID)
+		s.watchersMu.Unlock()
+		close(watchCh)
+	}()
 	return nil
 }
 
