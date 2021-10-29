@@ -135,7 +135,7 @@ func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.L
 	res := &topoapi.ListResponse{
 		Objects: objects,
 	}
-	log.Infof("Sending ListResponse %+v", res)
+	log.Infof("Sending ListResponse with %d objects", len(res.Objects))
 	return res, nil
 }
 
