@@ -247,7 +247,7 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	log.Infof("Updating Object %+v", object)
 	bytes, err := proto.Marshal(object)
 	if err != nil {
-		log.Errorf("Failed to update object %+v: %s", object, err)
+		log.Errorf("Failed to update Object %+v", object, err)
 		return errors.NewInvalid(err.Error())
 	}
 
@@ -256,9 +256,9 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsNotFound(err) && !errors.IsConflict(err) {
-			log.Errorf("Failed to create Object %+v", object, err)
+			log.Errorf("Failed to update Object %+v", object, err)
 		} else {
-			log.Warnf("Failed to create Object %+v", object, err)
+			log.Warnf("Failed to update Object %+v", object, err)
 		}
 		return err
 	}
