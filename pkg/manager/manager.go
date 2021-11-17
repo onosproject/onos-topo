@@ -28,11 +28,11 @@ var log = logging.GetLogger("manager")
 
 // Config is a manager configuration
 type Config struct {
-	CAPath   string
-	KeyPath  string
-	CertPath string
-	GRPCPort int
-	E2Port   int
+	CAPath       string
+	KeyPath      string
+	CertPath     string
+	GRPCPort     int
+	AtomixClient atomix.Client
 }
 
 // NewManager creates a new manager
@@ -75,9 +75,11 @@ func (m *Manager) startNorthboundServer() error {
 		true,
 		northbound.SecurityConfig{}))
 
-	atomixClient := atomix.NewClient(atomix.WithClientID(os.Getenv("POD_NAME")))
+	if m.Config.AtomixClient == nil {
+		m.Config.AtomixClient = atomix.NewClient(atomix.WithClientID(os.Getenv("POD_NAME")))
+	}
 
-	topoStore, err := store.NewAtomixStore(atomixClient)
+	topoStore, err := store.NewAtomixStore(m.Config.AtomixClient)
 	if err != nil {
 		return err
 	}
