@@ -43,6 +43,9 @@ golang-ci: # @HELP install golang-ci if not present
 license_check: build-tools # @HELP examine and ensure license headers exist
 	./../build-tools/licensing/boilerplate.py -v --rootdir=${CURDIR}
 
+integration-tests: # @HELP run helmit tests locally
+	(kubectl delete ns test || exit 0) && kubectl create ns test && helmit test -n test ./cmd/onos-topo-tests
+
 onos-topo-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
 	docker build . -f build/onos-topo/Dockerfile \
