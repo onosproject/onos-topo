@@ -17,7 +17,8 @@ package store
 import topoapi "github.com/onosproject/onos-api/go/onos/topo"
 
 func match(object *topoapi.Object, filters *topoapi.Filters) bool {
-	return filters == nil || (matchKind(object, filters.KindFilter) && matchLabels(object, filters.LabelFilters))
+	return filters == nil ||
+		(matchKind(object, filters.KindFilter) && matchLabels(object, filters.LabelFilters) && matchAspects(object, filters.WithAspects))
 }
 
 func matchLabels(object *topoapi.Object, filters []*topoapi.Filter) bool {
@@ -88,6 +89,7 @@ func matchKind(object *topoapi.Object, filter *topoapi.Filter) bool {
 	return false
 }
 
+// Returns true if object type is any of the given types; false otherwise
 func matchType(object *topoapi.Object, types []topoapi.Object_Type) bool {
 	if len(types) != 0 {
 		for i := range types {
@@ -96,6 +98,16 @@ func matchType(object *topoapi.Object, types []topoapi.Object_Type) bool {
 			}
 		}
 		return false
+	}
+	return true
+}
+
+// Returns true if object has all requested aspects; false otherwise
+func matchAspects(object *topoapi.Object, aspects []string) bool {
+	for i := range aspects {
+		if _, ok := object.Aspects[aspects[i]]; !ok {
+			return false
+		}
 	}
 	return true
 }

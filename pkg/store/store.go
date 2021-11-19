@@ -379,7 +379,7 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 	for entry := range mapCh {
 		if ep, err := decodeObject(entry); err == nil {
 			if match(ep, filters) {
-				if matchType(ep, filters.ObjectTypes) {
+				if matchType(ep, filters.ObjectTypes) && matchAspects(ep, filters.WithAspects) {
 					s.addSrcTgts(ep)
 					eps = append(eps, *ep)
 				}
@@ -394,21 +394,22 @@ func (s *atomixStore) listRelationFilter(ctx context.Context, filters *topoapi.F
 	filter := filters.RelationFilter
 
 	if len(filter.GetSrcId()) > 0 {
-		return s.filterRelationEntities(ctx, topoapi.ID(filter.GetSrcId()), filters.RelationFilter, false)
+		return s.filterRelationEntities(ctx, topoapi.ID(filter.GetSrcId()), filters, false)
 	} else if len(filter.GetTargetId()) > 0 {
-		return s.filterRelationEntities(ctx, topoapi.ID(filter.GetTargetId()), filters.RelationFilter, true)
+		return s.filterRelationEntities(ctx, topoapi.ID(filter.GetTargetId()), filters, true)
 	}
 	return nil, errors.NewInvalid("filter must contain either srcID or targetID")
 }
 
-func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID, filter *topoapi.RelationFilter, useSrc bool) ([]topoapi.Object, error) {
+func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID, filters *topoapi.Filters, useSrc bool) ([]topoapi.Object, error) {
 	results := make([]topoapi.Object, 0)
 	obj, err := s.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	if filter.Scope == topoapi.RelationFilterScope_ALL || filter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET {
+	rfilter := filters.RelationFilter
+	if rfilter.Scope == topoapi.RelationFilterScope_ALL || rfilter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET {
 		results = append(results, *obj)
 	}
 
@@ -421,14 +422,14 @@ func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID,
 		robj, err := s.Get(ctx, rid)
 		if err == nil && robj.Type == topoapi.Object_RELATION {
 			rel := robj.GetRelation()
-			if len(filter.RelationKind) == 0 || string(rel.KindID) == filter.RelationKind {
+			if len(rfilter.RelationKind) == 0 || string(rel.KindID) == rfilter.RelationKind {
 				oid := rel.GetSrcEntityID()
 				if !useSrc {
 					oid = rel.GetTgtEntityID()
 				}
 				ent, err := s.Get(ctx, oid)
-				if err == nil && (len(filter.TargetKind) == 0 || string(ent.GetEntity().KindID) == filter.TargetKind) {
-					if filter.Scope == topoapi.RelationFilterScope_ALL {
+				if err == nil && (len(rfilter.TargetKind) == 0 || string(ent.GetEntity().KindID) == rfilter.TargetKind) && matchAspects(ent, filters.WithAspects) {
+					if rfilter.Scope == topoapi.RelationFilterScope_ALL {
 						results = append(results, *robj)
 					}
 					results = append(results, *ent)
