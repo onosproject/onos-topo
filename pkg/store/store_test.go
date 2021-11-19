@@ -338,12 +338,25 @@ func TestList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2) // neighbors 57 and 59
 
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_TARGET_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // neighbors 57 and 59
+
 	// List the objects with object type filter
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		ObjectTypes: []topoapi.Object_Type{topo.Object_ENTITY},
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 8) // nodes + cells
+
+	// List the objects with object type filter and aspect Location
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		WithAspects: []string{"onos.topo.Location"},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // nodes
 
 	// No test for relation filter with target kind: cell-neighbor, node-cell do not have different target kinds
 }
@@ -389,14 +402,18 @@ func createObjectsListTest(t *testing.T, s Store) {
 }
 
 func createNode(t *testing.T, s Store, a auxNode) {
-	err := s.Create(context.TODO(), &topoapi.Object{
+	object := &topoapi.Object{
 		ID:     topo.ID(a.id),
 		Type:   topoapi.Object_ENTITY,
 		Obj:    &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID("e2-node")}},
 		Labels: a.labels,
-	})
+	}
+	err := object.SetAspect(&topoapi.Location{Lat: 3.14, Lng: 6.28})
+	assert.NoError(t, err)
+	err = s.Create(context.TODO(), object)
 	assert.NoError(t, err)
 }
+
 func createCell(t *testing.T, s Store, a auxCell) {
 	err := s.Create(context.TODO(), &topoapi.Object{
 		ID:     topo.ID(a.id),
