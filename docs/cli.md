@@ -70,3 +70,8 @@ Relation ID         Kind ID     Source ID   Target ID   Labels   Aspects
 14550003-14550002   neighbors   14550003    14550002    <None>   <None>
 14550003-14550001   neighbors   14550003    14550001    <None>   <None>
 ```
+
+Create a new entity with sparsely populated `Configurable` aspect
+```bash
+$ onos topo create entity "virtual" --aspect onos.topo.Configurable='{"type": "devicesim-1.0.x", "version": "1.0.0"}'
+```
