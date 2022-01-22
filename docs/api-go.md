@@ -95,7 +95,7 @@ ascending order of their IDs:
 filters := &topo.Filters{
 	KindFilter: &topoapi.Filter{
         Filter: &topoapi.Filter_In{In: &topoapi.InFilter{Values: []string{topo.E2NODE, topo.E2CELL}}},
-    }
+    },
 }
 resp, err := client.List(ctx, &topo.ListRequest{Filters: filters, SortOrder: topo.SortOrder_ASCENDING})
 ```
