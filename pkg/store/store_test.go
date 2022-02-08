@@ -331,24 +331,41 @@ func TestList(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2) // neighbors 57 and 59
+	assert.Equal(t, topoapi.Object_ENTITY, objects[0].Type)
+
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_RELATIONS_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 2) // neighbors 57 and 59 relations
+	assert.Equal(t, topoapi.Object_RELATION, objects[0].Type)
+
+	objects, err = store.List(context.TODO(), &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_RELATIONS_AND_TARGETS},
+	})
+	assert.NoError(t, err)
+	assert.Len(t, objects, 4) // neighbors 57 and 59 entities and corresponding relations
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_TARGETS_ONLY},
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2) // neighbors 57 and 59
+	assert.Equal(t, topoapi.Object_ENTITY, objects[0].Type)
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_TARGETS_ONLY},
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2) // neighbors 57 and 59
+	assert.Equal(t, topoapi.Object_ENTITY, objects[0].Type)
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_RELATIONS_ONLY},
 	})
 	assert.NoError(t, err)
 	assert.Len(t, objects, 2) // neighbors 57 and 59 relations
+	assert.Equal(t, topoapi.Object_RELATION, objects[0].Type)
 
 	objects, err = store.List(context.TODO(), &topoapi.Filters{
 		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_RELATIONS_AND_TARGETS},
