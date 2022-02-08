@@ -409,7 +409,7 @@ func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID,
 	}
 
 	rfilter := filters.RelationFilter
-	if rfilter.Scope == topoapi.RelationFilterScope_ALL || rfilter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGET {
+	if rfilter.Scope == topoapi.RelationFilterScope_ALL || rfilter.Scope == topoapi.RelationFilterScope_SOURCE_AND_TARGETS {
 		results = append(results, *obj)
 	}
 
@@ -429,10 +429,15 @@ func (s *atomixStore) filterRelationEntities(ctx context.Context, id topoapi.ID,
 				}
 				ent, err := s.Get(ctx, oid)
 				if err == nil && (len(rfilter.TargetKind) == 0 || string(ent.GetEntity().KindID) == rfilter.TargetKind) && matchAspects(ent, filters.WithAspects) {
-					if rfilter.Scope == topoapi.RelationFilterScope_ALL {
+					if rfilter.Scope == topoapi.RelationFilterScope_ALL ||
+						rfilter.Scope == topoapi.RelationFilterScope_RELATIONS_ONLY ||
+						rfilter.Scope == topoapi.RelationFilterScope_RELATIONS_AND_TARGETS {
 						results = append(results, *robj)
 					}
-					results = append(results, *ent)
+
+					if rfilter.Scope != topoapi.RelationFilterScope_RELATIONS_ONLY {
+						results = append(results, *ent)
+					}
 				}
 			}
 		}
