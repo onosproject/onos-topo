@@ -16,12 +16,13 @@ package main
 
 import (
 	"flag"
+
 	"github.com/onosproject/onos-lib-go/pkg/certs"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-topo/pkg/manager"
 )
 
-var log = logging.GetLogger("main")
+var log = logging.GetLogger()
 
 // The main entry point
 func main() {

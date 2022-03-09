@@ -31,7 +31,7 @@ import (
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 )
 
-var log = logging.GetLogger("store", "topo")
+var log = logging.GetLogger()
 
 // NewAtomixStore returns a new persistent Store
 func NewAtomixStore(client atomix.Client) (Store, error) {

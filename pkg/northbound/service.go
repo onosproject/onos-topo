@@ -28,7 +28,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var log = logging.GetLogger("northbound", "topo")
+var log = logging.GetLogger()
 
 // NewService returns a new topo Service
 func NewService(store store.Store) northbound.Service {
