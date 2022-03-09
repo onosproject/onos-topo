@@ -16,15 +16,16 @@
 package manager
 
 import (
+	"os"
+
 	"github.com/atomix/atomix-go-client/pkg/atomix"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	service "github.com/onosproject/onos-topo/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
-	"os"
 )
 
-var log = logging.GetLogger("manager")
+var log = logging.GetLogger()
 
 // Config is a manager configuration
 type Config struct {
