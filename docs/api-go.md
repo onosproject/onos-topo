@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2019-present Open Networking Foundation <info@opennetworking.org>
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # API Examples for Golang
 The following are a few examples on how to use the [Golang API] generated from the `onos-topo` gRPC API.
 
