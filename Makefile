@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019-present Open Networking Foundation <info@opennetworking.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 export CGO_ENABLED=1
 export GO111MODULE=on
 
@@ -13,12 +17,19 @@ build:
 build-tools:=$(shell if [ ! -d "./build/build-tools" ]; then cd build && git clone https://github.com/onosproject/build-tools.git; fi)
 include ./build/build-tools/make/onf-common.mk
 
+mod-update: # @HELP Download the dependencies to the vendor folder
+	go mod tidy
+	go mod vendor
+mod-lint: mod-update # @HELP ensure that the required dependencies are in place
+	# dependencies are vendored, but not committed, go.sum is the only thing we need to check
+	bash -c "diff -u <(echo -n) <(git diff go.sum)"
+
 test: # @HELP run the unit tests and source code validation producing a golang style report
-test: build deps license_check linters
+test: mod-lint build license_check_apache linters license
 	go test -race github.com/onosproject/onos-topo/...
 
 jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
-jenkins-test: build deps license_check linters
+jenkins-test: mod-lint build license_check_apache linters license
 	TEST_PACKAGES=github.com/onosproject/onos-topo/pkg/... ./build/build-tools/build/jenkins/make-unit
 
 integration-tests: # @HELP run helmit tests locally

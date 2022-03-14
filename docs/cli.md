@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2019-present Open Networking Foundation <info@opennetworking.org>
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Command-Line Interface
 The project provides a command-line facilities for remotely 
 interacting with the topology subsystem.
