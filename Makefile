@@ -25,11 +25,11 @@ mod-lint: mod-update # @HELP ensure that the required dependencies are in place
 	bash -c "diff -u <(echo -n) <(git diff go.sum)"
 
 test: # @HELP run the unit tests and source code validation producing a golang style report
-test: mod-lint build license_check_apache linters license
+test: mod-lint build linters license
 	go test -race github.com/onosproject/onos-topo/...
 
 jenkins-test: # @HELP run the unit tests and source code validation producing a junit style report for Jenkins
-jenkins-test: mod-lint build license_check_apache linters license
+jenkins-test: mod-lint build linters license
 	TEST_PACKAGES=github.com/onosproject/onos-topo/pkg/... ./build/build-tools/build/jenkins/make-unit
 
 integration-tests: # @HELP run helmit tests locally
