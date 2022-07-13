@@ -1,0 +1,13 @@
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.Entity_Id}} # network-layer:type/name
+  kind:
+    name: network-layer
+  aspects:
+    onos.topo.NetworkLayer:
+      type: "UNDERLAY"
+      display_name: "{{.Display_Name}}"
+---

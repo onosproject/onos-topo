@@ -1,0 +1,78 @@
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.URI_Name}}  # source port uri-destination port uri
+spec:
+  uri: {{.URI}}
+  kind:
+    name: link
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: {{.UUID_Source_Name}} # we can assign uuid for each originates relation
+spec:
+  uri: {{.UUID_Source}}
+  kind:
+    name: originates
+  source:
+    uri:  {{.Source}}
+    name: {{.Source_Name}}
+  target:
+    uri:  {{.URI}}
+    name: {{.URI_Name}}
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: {{.UUID_Dest_Name}} # we can assign uuid for each terminates relation
+spec:
+  uri: {{.UUID_Dest}}
+  kind:
+    name: terminates
+  source:
+    uri:  {{.Destination}}
+    name: {{.Dest_Name}}
+  target:
+    uri:  {{.URI}}
+    name: {{.URI_Name}}
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.URI1_Name}}  # source port uri-destination port uri
+spec:
+  uri: {{.URI1}}
+  kind:
+    name: link
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: {{.UUID_Dest1_Name}} # we can assign uuid for each originates relation
+spec:
+  uri: {{.UUID_Dest1}}
+  kind:
+    name: originates
+  source:
+    uri:  {{.Destination}}
+    name: {{.Dest_Name}}
+  target:
+    uri:  {{.URI1}}
+    name: {{.URI1_Name}}
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: {{.UUID_Source1_Name}} # we can assign uuid for each terminates relation
+spec:
+  uri: {{.UUID_Source1}}
+  kind:
+    name: terminates
+  source:
+    uri:  {{.Source}}
+    name: {{.Source_Name}}
+  target:
+    uri:  {{.URI1}}
+    name: {{.URI1_Name}}
+---

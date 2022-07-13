@@ -1,0 +1,15 @@
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.Entity_Id}} # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: {{.Port_Number}}
+      display_name: "{{.Display_Name}}"
+      speed: {{.Speed}}
+      channel_number: {{.Channel_Number}}
+---

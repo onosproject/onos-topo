@@ -1,0 +1,20 @@
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.Entity_Id}} # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "{{.Model_Id}}"
+      role: "{{.Role}}"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: {{.P4RT_Address}}
+        port: {{.P4RT_Port}}
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: {{.Insecure}}
+---
