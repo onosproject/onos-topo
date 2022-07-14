@@ -13,6 +13,7 @@ ONOS_PROTOC_VERSION := v0.6.3
 build: # @HELP build the Go binaries and run all validations (default)
 build:
 	CGO_ENABLED=1 go build -o build/_output/onos-topo ./cmd/onos-topo
+	go build -o build/_output/topo-generator ./cmd/topo-generator
 
 build-tools:=$(shell if [ ! -d "./build/build-tools" ]; then cd build && git clone https://github.com/onosproject/build-tools.git; fi)
 include ./build/build-tools/make/onf-common.mk
