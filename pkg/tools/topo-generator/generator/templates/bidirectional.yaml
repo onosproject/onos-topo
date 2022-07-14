@@ -1,7 +1,11 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 apiVersion: topo.onosproject.org/v1beta1
 kind: Entity
 metadata:
-  name: {{.URI_Name}}  # source port uri-destination port uri
+  name: {{.URIName}}  # source port uri-destination port uri
 spec:
   uri: {{.URI}}
   kind:
@@ -10,69 +14,70 @@ spec:
 apiVersion: topo.onosproject.org/v1beta1
 kind: Relation
 metadata:
-  name: {{.UUID_Source_Name}} # we can assign uuid for each originates relation
+  name: {{.UUID1Name}} # we can assign uuid for each originates relation
 spec:
-  uri: {{.UUID_Source}}
+  uri: {{.UUID1}}
   kind:
     name: originates
   source:
     uri:  {{.Source}}
-    name: {{.Source_Name}}
+    name: {{.SourceName}}
   target:
     uri:  {{.URI}}
-    name: {{.URI_Name}}
+    name: {{.URIName}}
 ---
 apiVersion: topo.onosproject.org/v1beta1
 kind: Relation
 metadata:
-  name: {{.UUID_Dest_Name}} # we can assign uuid for each terminates relation
+  name: {{.UUID2Name}} # we can assign uuid for each terminates relation
 spec:
-  uri: {{.UUID_Dest}}
+  uri: {{.UUID2}}
   kind:
     name: terminates
   source:
     uri:  {{.Destination}}
-    name: {{.Dest_Name}}
+    name: {{.DestName}}
   target:
     uri:  {{.URI}}
-    name: {{.URI_Name}}
+    name: {{.URIName}}
 ---
 apiVersion: topo.onosproject.org/v1beta1
 kind: Entity
 metadata:
-  name: {{.URI1_Name}}  # source port uri-destination port uri
+  name: {{.FlippedURIName}}  # source port uri-destination port uri
 spec:
-  uri: {{.URI1}}
+  uri: {{.FlippedURI}}
   kind:
     name: link
 ---
 apiVersion: topo.onosproject.org/v1beta1
 kind: Relation
 metadata:
-  name: {{.UUID_Dest1_Name}} # we can assign uuid for each originates relation
+  name: {{.UUID3Name}} # we can assign uuid for each originates relation
 spec:
-  uri: {{.UUID_Dest1}}
+  uri: {{.UUID3}}
   kind:
     name: originates
   source:
     uri:  {{.Destination}}
-    name: {{.Dest_Name}}
+    name: {{.DestName}}
   target:
-    uri:  {{.URI1}}
-    name: {{.URI1_Name}}
+    uri:  {{.FlippedURI}}
+    name: {{.FlippedURIName}}
 ---
 apiVersion: topo.onosproject.org/v1beta1
 kind: Relation
 metadata:
-  name: {{.UUID_Source1_Name}} # we can assign uuid for each terminates relation
+  name: {{.UUID4Name}} # we can assign uuid for each terminates relation
 spec:
-  uri: {{.UUID_Source1}}
+  uri: {{.UUID4}}
   kind:
     name: terminates
   source:
     uri:  {{.Source}}
-    name: {{.Source_Name}}
+    name: {{.SourceName}}
   target:
-    uri:  {{.URI1}}
-    name: {{.URI1_Name}}
+    uri:  {{.FlippedURI}}
+    name: {{.FlippedURIName}}
 ---
+

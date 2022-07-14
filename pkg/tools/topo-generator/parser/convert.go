@@ -5,96 +5,102 @@
 package parser
 
 import (
-	"strings"
-	"regexp"
-	"strconv"
 	"github.com/google/uuid"
 	"github.com/onosproject/onos-topo/pkg/tools/topo-generator/reader"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
+// Underlay keeps track of the networks
 type Underlay struct {
-	Networks	[]Network 
+	Networks []Network
 }
 
+// Network contains all the info required for the e-k-r file
 type Network struct {
-	Entity_Id		string      
-	Name			string		
-    	Display_Name		string  
-	Switches		[]Switches 
-	Links			[]Link		
+	EntityID    string
+	Name        string
+	DisplayName string
+	Switches    []Switches
+	Links       []Link
 }
 
+// Switches contains all required switch info
 type Switches struct {
-    	Entity_Id		string          
-	Name			string
-	Model_Id		string	        
-	Role			string	        
-	P4RT_Address		string
-	P4RT_Port		int
-	Insecure		bool
-	Ports			[]Ports 
+	EntityID    string
+	Name        string
+	ModelID     string
+	Role        string
+	P4RTAddress string
+	P4RTPort    int
+	Insecure    bool
+	Ports       []Ports
 }
 
+// Ports contains relevant port information
 type Ports struct {
-	Entity_Id		string	
-	Name			string
-	Display_Name		string	
-	Speed			string	
-	Port_Number		int		
-	Channel_Number		int		
+	EntityID      string
+	Name          string
+	DisplayName   string
+	Speed         string
+	PortNumber    int
+	ChannelNumber int
 }
 
+// Link contains information for both unidirectional and bidirectional links
 type Link struct {
-	Source				string	
-	Source_Name			string
-	Destination			string	
-	Dest_Name			string
-	Link_Type			string
+	Source      string
+	SourceName  string
+	Destination string
+	DestName    string
+	LinkType    string
 	// for both unidirectional and bidirectional
-	URI				string
-	URI_Name			string
-	UUID_Source			string
-	UUID_Dest			string
-	UUID_Source_Name		string
-	UUID_Dest_Name			string
+	URI       string
+	URIName   string
+	UUID1     string
+	UUID2     string
+	UUID1Name string
+	UUID2Name string
 	// for bi-directional case (default)
-	URI1 				string
-	URI1_Name 			string
-	UUID_Source1			string
-	UUID_Dest1			string
-	UUID_Source1_Name		string
-	UUID_Dest1_Name			string
+	FlippedURI     string
+	FlippedURIName string
+	UUID3          string
+	UUID4          string
+	UUID3Name      string
+	UUID4Name      string
 }
 
+// Convert takes the struct system from reader and converts it to these structs
 func Convert(result reader.Underlay) Underlay {
 	var underlay Underlay
 	var networks []Network
-	
+
 	// writing the entity-kind-relationship file
 	reg, _ := regexp.Compile("[/:]+")
 
 	for _, n := range result.Networks {
 		// network
 		var network Network
-		network.Entity_Id = n.Entity_Id
-		network.Display_Name = n.Display_Name
-		network.Name = reg.ReplaceAllString(n.Entity_Id, ".")
+		network.EntityID = n.EntityID
+		network.DisplayName = n.DisplayName
+		network.Name = reg.ReplaceAllString(n.EntityID, ".")
 		var switches []Switches
 		var links []Link
-		
+
 		// switches
 		for _, s := range n.Switches {
 			var sw Switches
-			sw.Entity_Id = s.Entity_Id
-			sw.Name = reg.ReplaceAllString(s.Entity_Id, ".")
-			sw.Model_Id = s.Model_Id
+			sw.EntityID = s.EntityID
+			sw.Name = reg.ReplaceAllString(s.EntityID, ".")
+			sw.ModelID = s.ModelID
 			sw.Role = s.Role
-			split := strings.Split(s.P4RT_Server_Endpoint, ":")
-			sw.P4RT_Address = split[0]
+			split := strings.Split(s.P4RTServerEndpoint, ":")
+			sw.P4RTAddress = split[0]
 			intVar, _ := strconv.Atoi(split[1])
-			sw.P4RT_Port = intVar
+			sw.P4RTPort = intVar
 			// default is false
-			if s.TLS_insecure == 0 {
+			if s.TLSInsecure == 0 {
 				sw.Insecure = true
 			}
 			var ports []Ports
@@ -102,12 +108,12 @@ func Convert(result reader.Underlay) Underlay {
 			// ports
 			for _, p := range s.Ports {
 				var port Ports
-				port.Entity_Id = p.Entity_Id
-				port.Display_Name = p.Display_Name
-				port.Name = reg.ReplaceAllString(p.Entity_Id, ".")
+				port.EntityID = p.EntityID
+				port.DisplayName = p.DisplayName
+				port.Name = reg.ReplaceAllString(p.EntityID, ".")
 				port.Speed = p.Speed
-				port.Port_Number = p.Port_Number
-				port.Channel_Number = p.Channel_Number
+				port.PortNumber = p.PortNumber
+				port.ChannelNumber = p.ChannelNumber
 				ports = append(ports, port)
 			}
 
@@ -121,30 +127,30 @@ func Convert(result reader.Underlay) Underlay {
 		for _, l := range n.Links {
 			var link Link
 			link.Source = l.Source
-			link.Source_Name = reg.ReplaceAllString(l.Source, ".")
+			link.SourceName = reg.ReplaceAllString(l.Source, ".")
 			link.Destination = l.Destination
-			link.Dest_Name = reg.ReplaceAllString(l.Destination, ".")
-			link.Link_Type = l.Link_Type
+			link.DestName = reg.ReplaceAllString(l.Destination, ".")
+			link.LinkType = l.LinkType
 			link.URI = l.Source + "-" + l.Destination
-			link.URI_Name = reg.ReplaceAllString(link.URI, ".")
-			link.UUID_Source = "uuid:" + uuid.New().String()
-			link.UUID_Source_Name = reg.ReplaceAllString(link.UUID_Source, ".")
-			link.UUID_Dest = "uuid:" + uuid.New().String()
-			link.UUID_Dest_Name = reg.ReplaceAllString(link.UUID_Dest, ".")
-			
+			link.URIName = reg.ReplaceAllString(link.URI, ".")
+			link.UUID1 = "uuid:" + uuid.New().String()
+			link.UUID1Name = reg.ReplaceAllString(link.UUID1, ".")
+			link.UUID2 = "uuid:" + uuid.New().String()
+			link.UUID2Name = reg.ReplaceAllString(link.UUID2, ".")
+
 			// handles whether the link is  bidirectional
-			if l.Link_Type == "" {
-				link.URI1 = l.Destination + "-" + l.Source
-				link.URI1_Name = reg.ReplaceAllString(link.URI1, ".")
-				link.UUID_Dest1 = "uuid:" + uuid.New().String()
-				link.UUID_Dest1_Name = reg.ReplaceAllString(link.UUID_Dest1, ".")
-				link.UUID_Source1 = "uuid:" + uuid.New().String()
-				link.UUID_Source1_Name = reg.ReplaceAllString(link.UUID_Source1, ".")
+			if l.LinkType == "" {
+				link.FlippedURI = l.Destination + "-" + l.Source
+				link.FlippedURIName = reg.ReplaceAllString(link.FlippedURI, ".")
+				link.UUID3 = "uuid:" + uuid.New().String()
+				link.UUID3Name = reg.ReplaceAllString(link.UUID3, ".")
+				link.UUID4 = "uuid:" + uuid.New().String()
+				link.UUID4Name = reg.ReplaceAllString(link.UUID4, ".")
 			}
-			
+
 			links = append(links, link)
 		}
-		
+
 		network.Links = links
 		networks = append(networks, network)
 	}

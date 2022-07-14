@@ -1,20 +1,25 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 apiVersion: topo.onosproject.org/v1beta1
 kind: Entity
 metadata:
   name: {{.Name}}
 spec:
-  uri: {{.Entity_Id}} # protocol:switch_id
+  uri: {{.EntityID}} # protocol:switch_id
   kind:
     name: switch
   aspects:
     onos.topo.Switch:
-      model_id: "{{.Model_Id}}"
+      model_id: "{{.ModelID}}"
       role: "{{.Role}}"
     onos.topo.P4RTServerInfo:
       control_endpoint:
-        address: {{.P4RT_Address}}
-        port: {{.P4RT_Port}}
+        address: {{.P4RTAddress}}
+        port: {{.P4RTPort}}
     onos.topo.TLSOptions:
       plain: true
       insecure: {{.Insecure}}
 ---
+

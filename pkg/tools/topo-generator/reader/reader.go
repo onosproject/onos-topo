@@ -5,49 +5,55 @@
 package reader
 
 import (
-	"io/ioutil"
-	"gopkg.in/yaml.v3"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
 )
 
+// Underlay stores all the networks
 type Underlay struct {
-	Networks	[]Network	`yaml:"underlay_networks,flow"`
+	Networks []Network `yaml:"underlay_networks,flow"`
 }
 
+// Network stores information pertaining each network
 type Network struct {
-	Entity_Id	string		`yaml:"entity_id"`
-	Display_Name	string		`yaml:"display_name"`
-	Switches	[]Switches	`yaml:"switches,flow"`
-	Links		[]Link		`yaml:"links,flow"`
+	EntityID    string     `yaml:"entity_id"`
+	DisplayName string     `yaml:"display_name"`
+	Switches    []Switches `yaml:"switches,flow"`
+	Links       []Link     `yaml:"links,flow"`
 }
 
+// Switches stores info for each switch
 type Switches struct {
-	Entity_Id		string		`yaml:"entity_id"`
-	Display_Name 		string		`yaml:"display_name"`
-	Model_Id		string		`yaml:"model_id"`
-	Role			string		`yaml:"role"`
-	Management_Endpoint	string		`yaml:"management_endpoint"`
-	P4RT_Server_Endpoint	string		`yaml:"p4rt_server_endpoint"`
-	TLS_insecure		int		`yaml:"tls_insecure"`
-	Ports                 	[]Ports		`yaml:"ports,flow"`
+	EntityID           string  `yaml:"entity_id"`
+	DisplayName        string  `yaml:"display_name"`
+	ModelID            string  `yaml:"model_id"`
+	Role               string  `yaml:"role"`
+	ManagementEndpoint string  `yaml:"management_endpoint"`
+	P4RTServerEndpoint string  `yaml:"p4rt_server_endpoint"`
+	TLSInsecure        int     `yaml:"tls_insecure"`
+	Ports              []Ports `yaml:"ports,flow"`
 }
 
+// Ports contains the port info
 type Ports struct {
-	Entity_Id	string	`yaml:"entity_id"`
-	Display_Name	string	`yaml:"display_name"`
-	Speed		string	`yaml:"speed"`
-	Port_Number	int	`yaml:"port_number"`
-	Channel_Number	int	`yaml:"channel_number"`
+	EntityID      string `yaml:"entity_id"`
+	DisplayName   string `yaml:"display_name"`
+	Speed         string `yaml:"speed"`
+	PortNumber    int    `yaml:"port_number"`
+	ChannelNumber int    `yaml:"channel_number"`
 }
 
+// Link handles links between ports
 type Link struct {
-	Source		string	`yaml:"src"`
-	Destination	string	`yaml:"dst"`
-	Link_Type	string	`yaml:"link_type"`
+	Source      string `yaml:"src"`
+	Destination string `yaml:"dst"`
+	LinkType    string `yaml:"link_type"`
 }
 
 var log = logging.GetLogger()
 
+// ReadFile converts the human-readable file into the struct system above
 func ReadFile(filename string) Underlay {
 	// reading in the human-readable schema
 	var result Underlay
