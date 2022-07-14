@@ -20,7 +20,7 @@ func WriteFile(underlay parser.Underlay, filename string) {
 
 	for _, n := range underlay.Networks {
 		// network
-		t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml")
+		t, err := template.ParseFiles("../../pkg/tools/topo-generator/generator/templates/network.yaml")
 		if err != nil {
 			log.Error(err.Error())
 			return
@@ -32,7 +32,7 @@ func WriteFile(underlay parser.Underlay, filename string) {
 
 		// switches
 		for _, s := range n.Switches {
-			t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml")
+			t, err := template.ParseFiles("../../pkg/tools/topo-generator/generator/templates/switch.yaml")
 			if err != nil {
 				log.Error(err.Error())
 				return
@@ -45,7 +45,7 @@ func WriteFile(underlay parser.Underlay, filename string) {
 
 			// ports
 			for _, p := range s.Ports {
-				t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml")
+				t, err := template.ParseFiles("../../pkg/tools/topo-generator/generator/templates/port.yaml")
 				if err != nil {
 					log.Error(err.Error())
 					return
@@ -61,28 +61,37 @@ func WriteFile(underlay parser.Underlay, filename string) {
 		// links
 		for _, l := range n.Links {
 			// handles whether the link is unidirectional or bidirectional
-			if l.LinkType == "unidirectional" {
-				t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/unidirectional.yaml")
-				if err != nil {
-					log.Error(err.Error())
-					return
-				}
-				err = t.Execute(file, l)
-				if err != nil {
-					log.Error(err.Error())
-					return
-				}
-			} else {
-				t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/bidirectional.yaml")
-				if err != nil {
-					log.Error(err.Error())
-					return
-				}
-				err = t.Execute(file, l)
-				if err != nil {
-					log.Error(err.Error())
-					return
-				}
+			t, err := template.ParseFiles("../../pkg/tools/topo-generator/generator/templates/link.yaml")
+			if err != nil {
+				log.Error(err.Error())
+				return
+			}
+			err = t.Execute(file, l)
+			if err != nil {
+				log.Error(err.Error())
+				return
+			}
+
+			t1, err1 := template.ParseFiles("../../pkg/tools/topo-generator/generator/templates/originates.yaml")
+			if err1 != nil {
+				log.Error(err1.Error())
+				return
+			}
+			err1 = t1.Execute(file, l.OriginatesRelation)
+			if err1 != nil {
+				log.Error(err1.Error())
+				return
+			}
+
+			t2, err2 := template.ParseFiles("../../pkg/tools/topo-generator/generator/templates/terminates.yaml")
+			if err2 != nil {
+				log.Error(err2.Error())
+				return
+			}
+			err2 = t2.Execute(file, l.TerminatesRelation)
+			if err2 != nil {
+				log.Error(err2.Error())
+				return
 			}
 		}
 	}

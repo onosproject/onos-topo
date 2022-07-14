@@ -48,27 +48,32 @@ type Ports struct {
 	ChannelNumber int
 }
 
-// Link contains information for both unidirectional and bidirectional links
+// Link contains the entity information
 type Link struct {
-	Source      string
-	SourceName  string
+	URI                string
+	URIName            string
+	OriginatesRelation Originates
+	TerminatesRelation Terminates
+}
+
+// Originates contains the relation information
+type Originates struct {
+	URI        string
+	URIName    string
+	UUID       string
+	UUIDName   string
+	Source     string
+	SourceName string
+}
+
+// Terminates contains the relation information
+type Terminates struct {
+	URI         string
+	URIName     string
+	UUID        string
+	UUIDName    string
 	Destination string
 	DestName    string
-	LinkType    string
-	// for both unidirectional and bidirectional
-	URI       string
-	URIName   string
-	UUID1     string
-	UUID2     string
-	UUID1Name string
-	UUID2Name string
-	// for bi-directional case (default)
-	FlippedURI     string
-	FlippedURIName string
-	UUID3          string
-	UUID4          string
-	UUID3Name      string
-	UUID4Name      string
 }
 
 // Convert takes the struct system from reader and converts it to these structs
@@ -126,29 +131,55 @@ func Convert(result reader.Underlay) Underlay {
 		// links
 		for _, l := range n.Links {
 			var link Link
-			link.Source = l.Source
-			link.SourceName = reg.ReplaceAllString(l.Source, ".")
-			link.Destination = l.Destination
-			link.DestName = reg.ReplaceAllString(l.Destination, ".")
-			link.LinkType = l.LinkType
 			link.URI = l.Source + "-" + l.Destination
 			link.URIName = reg.ReplaceAllString(link.URI, ".")
-			link.UUID1 = "uuid:" + uuid.New().String()
-			link.UUID1Name = reg.ReplaceAllString(link.UUID1, ".")
-			link.UUID2 = "uuid:" + uuid.New().String()
-			link.UUID2Name = reg.ReplaceAllString(link.UUID2, ".")
+
+			var originate Originates
+			originate.URI = link.URI
+			originate.URIName = link.URIName
+			originate.Source = l.Source
+			originate.SourceName = reg.ReplaceAllString(l.Source, ".")
+			originate.UUID = "uuid:" + uuid.New().String()
+			originate.UUIDName = reg.ReplaceAllString(originate.UUID, ".")
+			link.OriginatesRelation = originate
+
+			var terminate Terminates
+			terminate.URI = link.URI
+			terminate.URIName = link.URIName
+			terminate.Destination = l.Destination
+			terminate.DestName = reg.ReplaceAllString(l.Destination, ".")
+			terminate.UUID = "uuid:" + uuid.New().String()
+			terminate.UUIDName = reg.ReplaceAllString(terminate.UUID, ".")
+			link.TerminatesRelation = terminate
+
+			links = append(links, link)
 
 			// handles whether the link is  bidirectional
 			if l.LinkType == "" {
-				link.FlippedURI = l.Destination + "-" + l.Source
-				link.FlippedURIName = reg.ReplaceAllString(link.FlippedURI, ".")
-				link.UUID3 = "uuid:" + uuid.New().String()
-				link.UUID3Name = reg.ReplaceAllString(link.UUID3, ".")
-				link.UUID4 = "uuid:" + uuid.New().String()
-				link.UUID4Name = reg.ReplaceAllString(link.UUID4, ".")
-			}
+				var link Link
+				link.URI = l.Destination + "-" + l.Source
+				link.URIName = reg.ReplaceAllString(link.URI, ".")
 
-			links = append(links, link)
+				var originate Originates
+				originate.URI = link.URI
+				originate.URIName = link.URIName
+				originate.Source = l.Destination
+				originate.SourceName = reg.ReplaceAllString(l.Destination, ".")
+				originate.UUID = "uuid:" + uuid.New().String()
+				originate.UUIDName = reg.ReplaceAllString(originate.UUID, ".")
+				link.OriginatesRelation = originate
+
+				var terminate Terminates
+				terminate.URI = link.URI
+				terminate.URIName = link.URIName
+				terminate.Destination = l.Source
+				terminate.DestName = reg.ReplaceAllString(l.Source, ".")
+				terminate.UUID = "uuid:" + uuid.New().String()
+				terminate.UUIDName = reg.ReplaceAllString(terminate.UUID, ".")
+				link.TerminatesRelation = terminate
+
+				links = append(links, link)
+			}
 		}
 
 		network.Links = links
