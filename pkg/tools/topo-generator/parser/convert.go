@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022-present Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package parser
 
 import (
@@ -9,67 +13,65 @@ import (
 )
 
 type Underlay struct {
-	Networks []Network 
+	Networks	[]Network 
 }
 
 type Network struct {
-    Entity_Id       string      
+	Entity_Id		string      
 	Name			string		
-    Display_Name    string  
-	Switches        []Switches 
+    	Display_Name		string  
+	Switches		[]Switches 
 	Links			[]Link		
 }
 
 type Switches struct {
-    Entity_Id		string          
+    	Entity_Id		string          
 	Name			string
 	Model_Id		string	        
 	Role			string	        
-	P4RT_Address	string
+	P4RT_Address		string
 	P4RT_Port		int
 	Insecure		bool
-	Ports           []Ports 
+	Ports			[]Ports 
 }
 
 type Ports struct {
 	Entity_Id		string	
 	Name			string
-	Display_Name	string	
+	Display_Name		string	
 	Speed			string	
 	Port_Number		int		
-	Channel_Number	int		
+	Channel_Number		int		
 }
 
 type Link struct {
-	Source			string	
-	Source_Name		string
-	Destination		string	
-	Dest_Name		string
-	Link_Type		string
+	Source				string	
+	Source_Name			string
+	Destination			string	
+	Dest_Name			string
+	Link_Type			string
 	// for both unidirectional and bidirectional
-	URI					string
+	URI				string
 	URI_Name			string
 	UUID_Source			string
 	UUID_Dest			string
-	UUID_Source_Name	string
-	UUID_Dest_Name		string
+	UUID_Source_Name		string
+	UUID_Dest_Name			string
 	// for bi-directional case (default)
 	URI1 				string
 	URI1_Name 			string
-	UUID_Source1		string
+	UUID_Source1			string
 	UUID_Dest1			string
-	UUID_Source1_Name	string
-	UUID_Dest1_Name		string
+	UUID_Source1_Name		string
+	UUID_Dest1_Name			string
 }
-
-//var log = logging.GetLogger()
 
 func Convert(result reader.Underlay) Underlay {
 	var underlay Underlay
 	var networks []Network
 	
 	// writing the entity-kind-relationship file
-    reg, _ := regexp.Compile("[/:]+")
+	reg, _ := regexp.Compile("[/:]+")
 
 	for _, n := range result.Networks {
 		// network

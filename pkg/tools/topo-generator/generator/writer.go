@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2022-present Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package generator
 
 import (
 	"html/template"
-    "os"
-	//"topo-generator/parser"
+	"os"
 	"github.com/onosproject/onos-topo/pkg/tools/topo-generator/parser"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 )
@@ -18,7 +21,7 @@ func WriteFile(underlay parser.Underlay, filename string) {
 		// network
 		t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml")
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Error(err.Error())
 			return
 		}
 		err = t.Execute(file, n)
@@ -27,7 +30,7 @@ func WriteFile(underlay parser.Underlay, filename string) {
 		for _, s := range n.Switches {
 			t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml")
 			if err != nil {
-				log.Fatal(err.Error())
+				log.Error(err.Error())
 				return
 			}
 			err = t.Execute(file, s)
@@ -36,7 +39,7 @@ func WriteFile(underlay parser.Underlay, filename string) {
 			for _, p := range s.Ports {
 				t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml")
 				if err != nil {
-					log.Fatal(err.Error())
+					log.Error(err.Error())
 					return
 				}
 				err = t.Execute(file, p)
@@ -49,14 +52,14 @@ func WriteFile(underlay parser.Underlay, filename string) {
 			if l.Link_Type == "unidirectional" {
 				t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/unidirectional.yaml")
 				if err != nil {
-					log.Fatal(err.Error())
+					log.Error(err.Error())
 					return
 				}
 				err = t.Execute(file, l)
 			} else {
 				t, err := template.ParseFiles("github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/bidirectional.yaml")
 				if err != nil {
-					log.Fatal(err.Error())
+					log.Error(err.Error())
 					return
 				}
 				err = t.Execute(file, l)
