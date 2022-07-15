@@ -12,8 +12,8 @@ import (
 	"strings"
 )
 
-// Underlay keeps track of the networks
-type Underlay struct {
+// NetworkLayer keeps track of the networks
+type NetworkLayer struct {
 	Networks []Network
 }
 
@@ -22,12 +22,12 @@ type Network struct {
 	EntityID    string
 	Name        string
 	DisplayName string
-	Switches    []Switches
+	Switches    []Switch
 	Links       []Link
 }
 
-// Switches contains all required switch info
-type Switches struct {
+// Switch contains all required switch info
+type Switch struct {
 	EntityID    string
 	Name        string
 	ModelID     string
@@ -35,11 +35,11 @@ type Switches struct {
 	P4RTAddress string
 	P4RTPort    int
 	Insecure    bool
-	Ports       []Ports
+	Ports       []Port
 }
 
-// Ports contains relevant port information
-type Ports struct {
+// Port contains relevant port information
+type Port struct {
 	EntityID      string
 	Name          string
 	DisplayName   string
@@ -77,8 +77,8 @@ type Terminates struct {
 }
 
 // Convert takes the struct system from reader and converts it to these structs
-func Convert(result reader.Underlay) Underlay {
-	var underlay Underlay
+func Convert(result reader.NetworkLayer) NetworkLayer {
+	var networkLayer NetworkLayer
 	var networks []Network
 
 	// writing the entity-kind-relationship file
@@ -90,12 +90,12 @@ func Convert(result reader.Underlay) Underlay {
 		network.EntityID = n.EntityID
 		network.DisplayName = n.DisplayName
 		network.Name = reg.ReplaceAllString(n.EntityID, ".")
-		var switches []Switches
+		var switches []Switch
 		var links []Link
 
 		// switches
 		for _, s := range n.Switches {
-			var sw Switches
+			var sw Switch
 			sw.EntityID = s.EntityID
 			sw.Name = reg.ReplaceAllString(s.EntityID, ".")
 			sw.ModelID = s.ModelID
@@ -108,11 +108,11 @@ func Convert(result reader.Underlay) Underlay {
 			if s.TLSInsecure == 0 {
 				sw.Insecure = true
 			}
-			var ports []Ports
+			var ports []Port
 
 			// ports
 			for _, p := range s.Ports {
-				var port Ports
+				var port Port
 				port.EntityID = p.EntityID
 				port.DisplayName = p.DisplayName
 				port.Name = reg.ReplaceAllString(p.EntityID, ".")
@@ -186,6 +186,6 @@ func Convert(result reader.Underlay) Underlay {
 		networks = append(networks, network)
 	}
 
-	underlay.Networks = networks
-	return underlay
+	networkLayer.Networks = networks
+	return networkLayer
 }
