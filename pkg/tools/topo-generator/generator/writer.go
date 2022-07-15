@@ -9,7 +9,7 @@ import (
 	"github.com/onosproject/onos-topo/pkg/tools/topo-generator/parser"
 	"html/template"
 	"os"
-	//"strings"
+	"strings"
 )
 
 var log = logging.GetLogger()
@@ -17,21 +17,14 @@ var log = logging.GetLogger()
 // WriteFile will create the output file we desire (e-k-r file)
 func WriteFile(result parser.NetworkLayer, filename string) error {
 	// writing the entity-kind-relationship file
-	//pwd, _ := os.Getwd()
-	//s := strings.Split(pwd, "onos-topo")
-	//networkPath := s[0] + "onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml"
-	//switchPath := s[0] + "onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml"
-	//portPath := s[0] + "onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml"
-	//linkPath := s[0] + "onos-topo/pkg/tools/topo-generator/generator/templates/link.yaml"
-	//originatesPath := s[0] + "onos-topo/pkg/tools/topo-generator/generator/templates/originates.yaml"
-	//terminatesPath := s[0] + "onos-topo/pkg/tools/topo-generator/generator/templates/terminates.yaml"
-
-	networkPath := "github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml"
-	switchPath := "github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml"
-	portPath := "github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml"
-	linkPath := "github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/link.yaml"
-	originatesPath := "github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/originates.yaml"
-	terminatesPath := "github.com/onosproject/onos-topo/pkg/tools/topo-generator/generator/templates/terminates.yaml"
+	pwd, _ := os.Getwd()
+	s := strings.Split(pwd, "/onos-topo/")
+	networkPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml"
+	switchPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml"
+	portPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml"
+	linkPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/link.yaml"
+	originatesPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/originates.yaml"
+	terminatesPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/terminates.yaml"
 
 	file, _ := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
