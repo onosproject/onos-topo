@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+underlay_networks:
+  - entity_id: network-layer:0/underlay-1
+    display_name: "underlay-1"
+    switches:
+      - entity_id: "p4rt:1"
+        display_name: "p4rt:1"
+        model_id: "test"
+        role: "leaf"
+        management_endpoint: ""
+        p4rt_server_endpoint: "stratum-simulator:50002"
+        tls_insecure: 0
+        ports:
+          - entity_id: "p4rt:1/1/0"
+            display_name: "p4rt:1/1/0"
+            speed: "40G"
+            port_number: 1
+            channel_number: 0
+      - entity_id: "p4rt:2"
+        display_name: "p4rt:2"
+        model_id: "test"
+        role: "leaf"
+        management_endpoint: ""
+        p4rt_server_endpoint: "stratum-simulator:50001"
+        tls_insecure: 0
+        ports:
+          - entity_id: "p4rt:2/1/0"
+            display_name: "p4rt:2/1/0"
+            speed: "40G"
+            port_number: 1
+            channel_number: 0
+    links:
+      - src: p4rt:1/1/0
+        dst: p4rt:2/1/0
+        type: ""
+

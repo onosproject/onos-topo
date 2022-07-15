@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.URIName}}  # source port uri-destination port uri
+spec:
+  uri: {{.URI}}
+  kind:
+    name: link
+---
+

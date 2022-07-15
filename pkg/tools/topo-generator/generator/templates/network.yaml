@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.EntityID}} # network-layer:type/name
+  kind:
+    name: network-layer
+  aspects:
+    onos.topo.NetworkLayer:
+      type: "UNDERLAY"
+      display_name: "{{.DisplayName}}"
+---
+
