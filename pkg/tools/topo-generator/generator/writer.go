@@ -12,6 +12,15 @@ import (
 	"strings"
 )
 
+const (
+	networkTemplatePath    = "/onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml"
+	switchTemplatePath     = "/onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml"
+	portTemplatePath       = "/onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml"
+	linkTemplatePath       = "/onos-topo/pkg/tools/topo-generator/generator/templates/link.yaml"
+	originatesTemplatePath = "/onos-topo/pkg/tools/topo-generator/generator/templates/originates.yaml"
+	terminatesTemplatePath = "/onos-topo/pkg/tools/topo-generator/generator/templates/terminates.yaml"
+)
+
 var log = logging.GetLogger()
 
 // WriteFile will create the output file we desire (e-k-r file)
@@ -19,12 +28,12 @@ func WriteFile(result parser.NetworkLayer, filename string) error {
 	// writing the entity-kind-relationship file
 	pwd, _ := os.Getwd()
 	s := strings.Split(pwd, "/onos-topo/")
-	networkPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/network.yaml"
-	switchPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/switch.yaml"
-	portPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/port.yaml"
-	linkPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/link.yaml"
-	originatesPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/originates.yaml"
-	terminatesPath := s[0] + "/onos-topo/pkg/tools/topo-generator/generator/templates/terminates.yaml"
+	networkPath := s[0] + networkTemplatePath
+	switchPath := s[0] + switchTemplatePath
+	portPath := s[0] + portTemplatePath
+	linkPath := s[0] + linkTemplatePath
+	originatesPath := s[0] + originatesTemplatePath
+	terminatesPath := s[0] + terminatesTemplatePath
 
 	file, _ := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
