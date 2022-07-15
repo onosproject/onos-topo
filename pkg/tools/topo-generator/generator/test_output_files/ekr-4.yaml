@@ -1,0 +1,486 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: network-layer.0.underlay-1
+spec:
+  uri: network-layer:0/underlay-1 # network-layer:type/name
+  kind:
+    name: network-layer
+  aspects:
+    onos.topo.NetworkLayer:
+      type: "UNDERLAY"
+      display_name: "underlay-1"
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1
+spec:
+  uri: p4rt:1 # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "test"
+      role: "leaf"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: stratum-simulator
+        port: 50002
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: true
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1.1.0
+spec:
+  uri: p4rt:1/1/0 # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: 1
+      display_name: "p4rt:1/1/0"
+      speed: 40G
+      channel_number: 0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.2
+spec:
+  uri: p4rt:2 # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "test"
+      role: "leaf"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: stratum-simulator
+        port: 50001
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: true
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.2.1.0
+spec:
+  uri: p4rt:2/1/0 # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: 1
+      display_name: "p4rt:2/1/0"
+      speed: 40G
+      channel_number: 0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1.1.0-p4rt.2.1.0  # source port uri-destination port uri
+spec:
+  uri: p4rt:1/1/0-p4rt:2/1/0
+  kind:
+    name: link
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: uuid.6247af61-96fe-4858-84e5-22b453363271 # we can assign uuid for each originates relation
+spec:
+  uri: uuid:6247af61-96fe-4858-84e5-22b453363271
+  kind:
+    name: originates
+  source:
+    uri:  p4rt:1/1/0
+    name: p4rt.1.1.0
+  target:
+    uri:  p4rt:1/1/0-p4rt:2/1/0
+    name: p4rt.1.1.0-p4rt.2.1.0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: uuid.b65bbd04-dd72-4bb4-8211-edad055b78e6 # we can assign uuid for each terminates relation
+spec:
+  uri: uuid:b65bbd04-dd72-4bb4-8211-edad055b78e6
+  kind:
+    name: terminates
+  source:
+    uri:  p4rt:2/1/0
+    name: p4rt.2.1.0
+  target:
+    uri:  p4rt:1/1/0-p4rt:2/1/0
+    name: p4rt.1.1.0-p4rt.2.1.0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: network-layer.0.underlay-1
+spec:
+  uri: network-layer:0/underlay-1 # network-layer:type/name
+  kind:
+    name: network-layer
+  aspects:
+    onos.topo.NetworkLayer:
+      type: "UNDERLAY"
+      display_name: "underlay-1"
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1
+spec:
+  uri: p4rt:1 # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "test"
+      role: "leaf"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: stratum-simulator
+        port: 50002
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: true
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1.1.0
+spec:
+  uri: p4rt:1/1/0 # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: 1
+      display_name: "p4rt:1/1/0"
+      speed: 40G
+      channel_number: 0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.2
+spec:
+  uri: p4rt:2 # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "test"
+      role: "leaf"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: stratum-simulator
+        port: 50001
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: true
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.2.1.0
+spec:
+  uri: p4rt:2/1/0 # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: 1
+      display_name: "p4rt:2/1/0"
+      speed: 40G
+      channel_number: 0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1.1.0-p4rt.2.1.0  # source port uri-destination port uri
+spec:
+  uri: p4rt:1/1/0-p4rt:2/1/0
+  kind:
+    name: link
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: uuid.a6300fc0-6e00-4882-ad93-0f96ecf6b9c2 # we can assign uuid for each originates relation
+spec:
+  uri: uuid:a6300fc0-6e00-4882-ad93-0f96ecf6b9c2
+  kind:
+    name: originates
+  source:
+    uri:  p4rt:1/1/0
+    name: p4rt.1.1.0
+  target:
+    uri:  p4rt:1/1/0-p4rt:2/1/0
+    name: p4rt.1.1.0-p4rt.2.1.0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: uuid.07852fab-32a9-42dc-8a10-f6a1fea24935 # we can assign uuid for each terminates relation
+spec:
+  uri: uuid:07852fab-32a9-42dc-8a10-f6a1fea24935
+  kind:
+    name: terminates
+  source:
+    uri:  p4rt:2/1/0
+    name: p4rt.2.1.0
+  target:
+    uri:  p4rt:1/1/0-p4rt:2/1/0
+    name: p4rt.1.1.0-p4rt.2.1.0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: network-layer.0.underlay-1
+spec:
+  uri: network-layer:0/underlay-1 # network-layer:type/name
+  kind:
+    name: network-layer
+  aspects:
+    onos.topo.NetworkLayer:
+      type: "UNDERLAY"
+      display_name: "underlay-1"
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1
+spec:
+  uri: p4rt:1 # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "test"
+      role: "leaf"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: stratum-simulator
+        port: 50002
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: true
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1.1.0
+spec:
+  uri: p4rt:1/1/0 # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: 1
+      display_name: "p4rt:1/1/0"
+      speed: 40G
+      channel_number: 0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.2
+spec:
+  uri: p4rt:2 # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "test"
+      role: "leaf"
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: stratum-simulator
+        port: 50001
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: true
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.2.1.0
+spec:
+  uri: p4rt:2/1/0 # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: 1
+      display_name: "p4rt:2/1/0"
+      speed: 40G
+      channel_number: 0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: p4rt.1.1.0-p4rt.2.1.0  # source port uri-destination port uri
+spec:
+  uri: p4rt:1/1/0-p4rt:2/1/0
+  kind:
+    name: link
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: uuid.7d7ba6a6-0ae5-4f0a-bcb5-d4b943413897 # we can assign uuid for each originates relation
+spec:
+  uri: uuid:7d7ba6a6-0ae5-4f0a-bcb5-d4b943413897
+  kind:
+    name: originates
+  source:
+    uri:  p4rt:1/1/0
+    name: p4rt.1.1.0
+  target:
+    uri:  p4rt:1/1/0-p4rt:2/1/0
+    name: p4rt.1.1.0-p4rt.2.1.0
+---
+
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: uuid.6f1d6a2c-8ec5-45b1-9424-77036cd5089b # we can assign uuid for each terminates relation
+spec:
+  uri: uuid:6f1d6a2c-8ec5-45b1-9424-77036cd5089b
+  kind:
+    name: terminates
+  source:
+    uri:  p4rt:2/1/0
+    name: p4rt.2.1.0
+  target:
+    uri:  p4rt:1/1/0-p4rt:2/1/0
+    name: p4rt.1.1.0-p4rt.2.1.0
+---
+
