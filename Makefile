@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
 # SPDX-FileCopyrightText: 2019-present Open Networking Foundation <info@opennetworking.org>
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -8,7 +9,7 @@ export GO111MODULE=on
 .PHONY: build
 
 ONOS_TOPO_VERSION := latest
-ONOS_PROTOC_VERSION := v0.6.3
+PLATFORM ?= --platform linux/x86_64
 
 build: # @HELP build the Go binaries and run all validations (default)
 build:
@@ -38,7 +39,7 @@ integration-tests: # @HELP run helmit tests locally
 
 onos-topo-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
-	docker build . -f build/onos-topo/Dockerfile \
+	docker build ${PLATFORM} . -f build/onos-topo/Dockerfile \
 		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
 	@rm -rf vendor
 
