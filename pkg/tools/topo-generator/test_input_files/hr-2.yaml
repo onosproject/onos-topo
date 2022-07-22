@@ -12,6 +12,7 @@ underlay_networks:
         role: "leaf"
         management_endpoint: ""
         p4rt_server_endpoint: "stratum-simulator:50002"
+        p4rt_device_id: 1
         tls_insecure: 0
   - entity_id: network-layer:0/underlay-2
     display_name: "underlay-2"

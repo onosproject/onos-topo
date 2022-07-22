@@ -31,6 +31,7 @@ type Switch struct {
 	Role               string `yaml:"role"`
 	ManagementEndpoint string `yaml:"management_endpoint"`
 	P4RTServerEndpoint string `yaml:"p4rt_server_endpoint"`
+	DeviceID           int    `yaml:"p4rt_device_id"`
 	TLSInsecure        int    `yaml:"tls_insecure"`
 	Ports              []Port `yaml:"ports,flow"`
 }
