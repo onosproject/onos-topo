@@ -34,6 +34,7 @@ type Switch struct {
 	Role        string
 	P4RTAddress string
 	P4RTPort    int
+	DeviceID    int
 	Insecure    bool
 	Ports       []Port
 }
@@ -104,6 +105,7 @@ func Convert(result reader.NetworkLayer) NetworkLayer {
 			sw.P4RTAddress = split[0]
 			intVar, _ := strconv.Atoi(split[1])
 			sw.P4RTPort = intVar
+			sw.DeviceID = s.DeviceID
 			// default is false
 			if s.TLSInsecure == 0 {
 				sw.Insecure = true

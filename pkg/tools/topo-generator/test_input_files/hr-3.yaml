@@ -12,6 +12,7 @@ underlay_networks:
         role: "leaf"
         management_endpoint: ""
         p4rt_server_endpoint: "stratum-simulator:50001"
+        p4rt_device_id: 1
         tls_insecure: 0
         ports:
           - entity_id: "p4rt:1/1/0"
@@ -30,6 +31,7 @@ underlay_networks:
         role: "leaf"
         management_endpoint: ""
         p4rt_server_endpoint: "stratum-simulator:50002"
+        p4rt_device_id: 1
         tls_insecure: 0
         ports:
           - entity_id: "p4rt:2/1/0"
@@ -48,6 +50,7 @@ underlay_networks:
         role: "leaf"
         management_endpoint: ""
         p4rt_server_endpoint: "stratum-simulator:50003"
+        p4rt_device_id: 1
         tls_insecure: 0
         ports:
           - entity_id: "p4rt:3/1/0"
@@ -66,6 +69,7 @@ underlay_networks:
         role: "leaf"
         management_endpoint: ""
         p4rt_server_endpoint: "stratum-simulator:50004"
+        p4rt_device_id: 1
         tls_insecure: 0
         ports:
           - entity_id: "p4rt:4/1/0"

@@ -18,6 +18,7 @@ spec:
       control_endpoint:
         address: {{.P4RTAddress}}
         port: {{.P4RTPort}}
+      device_id: {{.DeviceID}}
     onos.topo.TLSOptions:
       plain: true
       insecure: {{.Insecure}}
