@@ -1,0 +1,110 @@
+# SPDX-FileCopyrightText: 2022-present Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+{{- range .Networks}}
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.EntityID}} # network-layer:type/name
+  kind:
+    name: network-layer
+  aspects:
+    onos.topo.NetworkLayer:
+      type: "UNDERLAY"
+      display_name: "{{.DisplayName}}"
+---
+{{- range .Switches}}
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.EntityID}} # protocol:switch_id
+  kind:
+    name: switch
+  aspects:
+    onos.topo.Switch:
+      model_id: "{{.ModelID}}"
+      role: "{{.Role}}"
+    onos.topo.TLSOptions:
+      plain: true
+      insecure: {{.Insecure}}
+    onos.topo.P4RTServerInfo:
+      control_endpoint:
+        address: {{.P4RTAddress}}
+        port: {{.P4RTPort}}
+      device_id: {{.DeviceID -}}
+    {{ if .Pipelines }}
+      pipelines:
+      {{- range .Pipelines}}
+      - name: {{.Name}}
+        version: {{.Version}}
+        architecture: {{.Architecture}}
+      {{- end -}}
+    {{- end}}
+---
+{{- range .Ports}}
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.Name}}
+spec:
+  uri: {{.EntityID}} # protocol:switchID/port_number/channel_number
+  kind:
+    name: port
+  aspects:
+    onos.topo.PhyPort:
+      port_number: {{.PortNumber}}
+      display_name: "{{.DisplayName}}"
+      speed: {{.Speed}}
+      channel_number: {{.ChannelNumber}}
+---
+{{- end -}}
+{{- end -}}
+{{- range .Links}}
+apiVersion: topo.onosproject.org/v1beta1
+kind: Entity
+metadata:
+  name: {{.URIName}}  # source port uri-destination port uri
+spec:
+  uri: {{.URI}}
+  kind:
+    name: link
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: {{.OriginatesRelation.UUIDName}} # we can assign uuid for each originates relation
+spec:
+  uri: {{.OriginatesRelation.UUID}}
+  kind:
+    name: originates
+  source:
+    uri:  {{.OriginatesRelation.Source}}
+    name: {{.OriginatesRelation.SourceName}}
+  target:
+    uri:  {{.OriginatesRelation.URI}}
+    name: {{.OriginatesRelation.URIName}}
+---
+apiVersion: topo.onosproject.org/v1beta1
+kind: Relation
+metadata:
+  name: {{.TerminatesRelation.UUIDName}} # we can assign uuid for each terminates relation
+spec:
+  uri: {{.TerminatesRelation.UUID}}
+  kind:
+    name: terminates
+  source:
+    uri:  {{.TerminatesRelation.Destination}}
+    name: {{.TerminatesRelation.DestName}}
+  target:
+    uri:  {{.TerminatesRelation.URI}}
+    name: {{.TerminatesRelation.URIName}}
+---
+{{- end -}}
+{{- end -}}
+
+
