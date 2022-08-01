@@ -37,6 +37,14 @@ type Switch struct {
 	DeviceID    int
 	Insecure    bool
 	Ports       []Port
+	Pipelines   []Pipeline
+}
+
+// Pipeline contains the pipeline info
+type Pipeline struct {
+	Name         string
+	Version      string
+	Architecture string
 }
 
 // Port contains relevant port information
@@ -110,9 +118,9 @@ func Convert(result reader.NetworkLayer) NetworkLayer {
 			if s.TLSInsecure == 0 {
 				sw.Insecure = true
 			}
-			var ports []Port
 
 			// ports
+			var ports []Port
 			for _, p := range s.Ports {
 				var port Port
 				port.EntityID = p.EntityID
@@ -123,8 +131,19 @@ func Convert(result reader.NetworkLayer) NetworkLayer {
 				port.ChannelNumber = p.ChannelNumber
 				ports = append(ports, port)
 			}
-
 			sw.Ports = ports
+
+			// pipelines
+			var pipelines []Pipeline
+			for _, p := range s.Pipelines {
+				var pipeline Pipeline
+				pipeline.Name = p.Name
+				pipeline.Version = p.Version
+				pipeline.Architecture = p.Architecture
+				pipelines = append(pipelines, pipeline)
+			}
+			sw.Pipelines = pipelines
+
 			switches = append(switches, sw)
 		}
 

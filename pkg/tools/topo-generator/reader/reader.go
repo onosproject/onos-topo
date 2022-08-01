@@ -25,15 +25,23 @@ type Network struct {
 
 // Switch stores info for each switch
 type Switch struct {
-	EntityID           string `yaml:"entity_id"`
-	DisplayName        string `yaml:"display_name"`
-	ModelID            string `yaml:"model_id"`
-	Role               string `yaml:"role"`
-	ManagementEndpoint string `yaml:"management_endpoint"`
-	P4RTServerEndpoint string `yaml:"p4rt_server_endpoint"`
-	DeviceID           int    `yaml:"p4rt_device_id"`
-	TLSInsecure        int    `yaml:"tls_insecure"`
-	Ports              []Port `yaml:"ports,flow"`
+	EntityID           string     `yaml:"entity_id"`
+	DisplayName        string     `yaml:"display_name"`
+	ModelID            string     `yaml:"model_id"`
+	Role               string     `yaml:"role"`
+	ManagementEndpoint string     `yaml:"management_endpoint"`
+	P4RTServerEndpoint string     `yaml:"p4rt_server_endpoint"`
+	DeviceID           int        `yaml:"p4rt_device_id"`
+	TLSInsecure        int        `yaml:"tls_insecure"`
+	Ports              []Port     `yaml:"ports,flow"`
+	Pipelines          []Pipeline `yaml:"pipelines,flow"`
+}
+
+// Pipeline contains the pipeline info
+type Pipeline struct {
+	Name         string `yaml:"name"`
+	Version      string `yaml:"version"`
+	Architecture string `yaml:"architecture"`
 }
 
 // Port contains the port info
