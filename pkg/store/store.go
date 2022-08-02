@@ -181,7 +181,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		if _, err := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID)); err != nil {
 			err = errors.FromAtomix(err)
 			if !errors.IsNotFound(err) {
-				log.Errorf("Failed to create Object %+v", object, err)
+				log.Errorf("Failed to create Object %+v: %v", object, err)
 				return err
 			}
 			log.Warnf("Source Entity does not exist")
@@ -190,7 +190,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		if _, err := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID)); err != nil {
 			err = errors.FromAtomix(err)
 			if !errors.IsNotFound(err) {
-				log.Errorf("Failed to create Object %+v", object, err)
+				log.Errorf("Failed to create Object %+v: %v", object, err)
 				return err
 			}
 			log.Warnf("Target Entity does not exist")
@@ -203,7 +203,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	log.Infof("Creating Object %+v", object)
 	bytes, err := proto.Marshal(object)
 	if err != nil {
-		log.Errorf("Failed to create Object %+v", object, err)
+		log.Errorf("Failed to create Object %+v: %v", object, err)
 		return errors.NewInvalid(err.Error())
 	}
 
@@ -212,9 +212,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsAlreadyExists(err) {
-			log.Errorf("Failed to create Object %+v", object, err)
+			log.Errorf("Failed to create Object %+v: %v", object, err)
 		} else {
-			log.Warnf("Failed to create Object %+v", object, err)
+			log.Warnf("Failed to create Object %+v: %v", object, err)
 		}
 		return err
 	}
@@ -246,9 +246,9 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsNotFound(err) && !errors.IsConflict(err) {
-			log.Errorf("Failed to update Object %+v", object, err)
+			log.Errorf("Failed to update Object %+v: %v", object, err)
 		} else {
-			log.Warnf("Failed to update Object %+v", object, err)
+			log.Warnf("Failed to update Object %+v: %v", object, err)
 		}
 		return err
 	}
@@ -265,9 +265,9 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsNotFound(err) {
-			log.Errorf("Failed to get Object '%s'", id, err)
+			log.Errorf("Failed to get Object '%s': %v", id, err)
 		} else {
-			log.Warnf("Failed to get Object '%s'", id, err)
+			log.Warnf("Failed to get Object '%s': %v", id, err)
 		}
 		return nil, err
 	}
@@ -298,9 +298,9 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID, revision topoap
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsNotFound(err) && !errors.IsConflict(err) {
-			log.Errorf("Failed to delete Object '%s'", id, err)
+			log.Errorf("Failed to delete Object '%s': %v", id, err)
 		} else {
-			log.Warnf("Failed to delete Object '%s'", id, err)
+			log.Warnf("Failed to delete Object '%s': %v", id, err)
 		}
 		return err
 	}
