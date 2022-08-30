@@ -42,7 +42,6 @@ SPDX-License-Identifier: Apache-2.0
     const details = document.getElementById("details");
     let nodes = [], links = [], shownItem;
 
-    let sameNodesLinks = {};
     const curvatureMinMax = 0.1;
 
     const graph = ForceGraph()(canvas)
@@ -90,13 +89,13 @@ SPDX-License-Identifier: Apache-2.0
         if (data.event === "replay" || data.event === "added") {
             processAspects(data);
             if (data.entity) {
-                nodes = [...nodes, {id: data.id, data: data}];
                 delete data.relation;
                 delete data.kind;
+                nodes = [...nodes, {id: data.id, data: data}];
             } else if (data.relation) {
-                links = [...links, {id: data.id, source: data.relation.src, target: data.relation.tgt, data: data}];
                 delete data.entity;
                 delete data.kind;
+                links = [...links, {id: data.id, source: data.relation.src, target: data.relation.tgt, data: data}];
             }
             delete data.event;
 
@@ -121,40 +120,47 @@ SPDX-License-Identifier: Apache-2.0
             }
         }
         // console.log("nodes:", nodes, "links:", links)
-        processLinks();
         graph.graphData({nodes: nodes, links: links});
+        processLinks();
 
         if (shownItem && shownItem.id === data.id) {
             showDetails(shownItem, null);
         }
     }
 
+    function getLID(link) {
+        if (typeof link.source === "object") {
+            return link.source.id <= link.target.id ? link.source.id + "_" + link.target.id : link.target.id + "_" + link.source.id;
+        }
+        return link.source <= link.target ? link.source + "_" + link.target : link.target + "_" + link.source;
+    }
+
     function processLinks() {
-        sameNodesLinks = {};
+        let map = {};
         links.forEach(link => {
-            link.nodePairId = link.source <= link.target ? (link.source + "_" + link.target) : (link.target + "_" + link.source);
-            if (!sameNodesLinks[link.nodePairId]) {
-                sameNodesLinks[link.nodePairId] = [];
+            link.lid = getLID(link);
+            if (!map[link.lid]) {
+                map[link.lid] = [];
             }
-            sameNodesLinks[link.nodePairId].push(link);
+            map[link.lid].push(link);
         });
 
         // Compute the curvature for links sharing the same two nodes to avoid overlaps
-        Object.keys(sameNodesLinks).forEach(nodePairId => {
-            let links = sameNodesLinks[nodePairId];
-            if (links.length > 1) {
-                let lastIndex = links.length - 1;
-                let lastLink = links[lastIndex];
+        Object.keys(map).forEach(lid => {
+            let same = map[lid];
+            if (same && same.length > 1) {
+                let lastIndex = same.length - 1;
+                let lastLink = same[lastIndex];
                 lastLink.curvature = curvatureMinMax;
                 let delta = 2 * curvatureMinMax / lastIndex;
                 for (let i = 0; i < lastIndex; i++) {
-                    links[i].curvature = -curvatureMinMax + i * delta;
-                    if (lastLink.source !== links[i].source) {
-                        links[i].curvature *= -1; // flip it around, otherwise they overlap
+                    same[i].curvature = -curvatureMinMax + i * delta;
+                    if (lastLink.source !== same[i].source) {
+                        same[i].curvature *= -1; // flip it around, otherwise they overlap
                     }
                 }
-            } else {
-                links[0].curvature = 0;
+            } else if (same.length === 1) {
+                same[0].curvature = 0;
             }
         });
     }
