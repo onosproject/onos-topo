@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script>
+        window.addEventListener("load", function(evt) {
+            var ws;
+            var output = document.getElementById("output");
+            var print = function(message) {
+                var d = document.createElement("div");
+                d.textContent = message;
+                output.appendChild(d);
+                output.scroll(0, output.scrollHeight);
+            };
+
+            ws = new WebSocket("{{.}}");
+            ws.onopen = function(evt) {
+                print("Connected");
+            }
+            ws.onclose = function(evt) {
+                print("Disconnected");
+                ws = null;
+            }
+            ws.onmessage = function(evt) {
+                print("Event: " + evt.data);
+            }
+            ws.onerror = function(evt) {
+                print("ERROR: " + evt.data);
+            }
+
+        });
+    </script>
+</head>
+<body>
+<div id="output" style="max-height: 70vh;overflow-y: scroll;"></div>
+</body>
+</html>
