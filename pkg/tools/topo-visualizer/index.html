@@ -74,6 +74,17 @@ SPDX-License-Identifier: Apache-2.0
         processTopoEvent(JSON.parse(evt.data));
     }
 
+    window.addEventListener("keypress", evt => {
+        if (evt.key === "r") {
+            graph.zoomToFit(500, 10);
+        } else if (evt.key === "Escape") {
+            hideDetails();
+        }
+        // console.log(evt);
+    });
+
+    setTimeout(() => { graph.zoomToFit(500, 10); }, 1000)
+
     function processTopoEvent(data) {
         // console.log(data);
         if (data.event === "replay" || data.event === "added") {
