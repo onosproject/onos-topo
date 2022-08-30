@@ -104,6 +104,7 @@ SPDX-License-Identifier: Apache-2.0
         let data = JSON.parse(evt.data);
         console.log(data);
         if (data.event === "replay" || data.event === "added") {
+            processAspects(data);
             if (data.entity) {
                 nodes = [...nodes, {id: data.id, data: data}];
             } else if (data.relation) {
@@ -111,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0
             }
 
         } else if (data.event === "updated") {
+            processAspects(data);
             if (data.entity) {
                 update(nodes, data);
             } else if (data.relation) {
@@ -126,6 +128,14 @@ SPDX-License-Identifier: Apache-2.0
         }
         console.log('nodes:', nodes, 'links:', links)
         Graph.graphData({nodes: nodes, links: links});
+    }
+
+    function processAspects(data) {
+        if (data.aspects) {
+            for (let [key, value] of Object.entries(data.aspects)) {
+                data.aspects[key] = JSON.parse(value);
+            }
+        }
     }
 
     function update(list, data) {

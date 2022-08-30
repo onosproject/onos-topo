@@ -11,14 +11,15 @@ import (
 
 // TopoEvent is used to serialize topology events to JSON
 type TopoEvent struct {
-	Event    string        `json:"event"`
-	Type     string        `json:"type"`
-	UUID     topo.UUID     `json:"uuid"`
-	ID       topo.ID       `json:"id"`
-	Revision topo.Revision `json:"revision"`
-	Entity   *TopoEntity   `json:"entity"`
-	Relation *TopoRelation `json:"relation"`
-	Kind     *TopoKind     `json:"kind"`
+	Event    string            `json:"event"`
+	Type     string            `json:"type"`
+	UUID     topo.UUID         `json:"uuid"`
+	ID       topo.ID           `json:"id"`
+	Revision topo.Revision     `json:"revision"`
+	Entity   *TopoEntity       `json:"entity"`
+	Relation *TopoRelation     `json:"relation"`
+	Kind     *TopoKind         `json:"kind"`
+	Aspects  map[string]string `json:"aspects"`
 	// TODO: add aspects and labels
 }
 
@@ -47,6 +48,7 @@ func EncodeTopoEvent(msg *topo.WatchResponse) ([]byte, error) {
 		UUID:     o.UUID,
 		ID:       o.ID,
 		Revision: o.Revision,
+		Aspects:  make(map[string]string),
 	}
 
 	switch o.Type {
@@ -70,6 +72,10 @@ func EncodeTopoEvent(msg *topo.WatchResponse) ([]byte, error) {
 		te.Kind = &TopoKind{
 			Name: kind.Name,
 		}
+	}
+
+	for at, av := range o.Aspects {
+		te.Aspects[at] = string(av.Value)
 	}
 
 	return json.Marshal(te)
