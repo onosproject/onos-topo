@@ -104,6 +104,30 @@ Support for other filters may be added in the future.
 The topology subsystem is available as a [Docker] image and deployed with [Helm]. To build the Docker image,
 run `make images`.
 
+### Visualizer
+To assist developers in visualizing the entities and relations tracked by `onos-topo`, a simple graphic visualization
+tool is available. It can be run locally via:
+```bash
+# Requires 'kubectl port-forward deploy/onos-topo 5150' to forward topo gRPC API
+> go run cmd/topo-visualizer/topo-visualizer.go --service-address localhost:5150
+```
+and then simply opening `http://localhost:5152` using your web browser of choice.
+
+Alternatively, the visualizer can be run directly from the `onos-topo` docker container via:
+```bash
+# Requires 'kubectl port-forward deploy/onos-topo 5152' to forward visualizer HTTP/WS traffic
+> k exec -it deploy/onos-topo -- /usr/local/bin/topo-visualizer
+```
+
+The visualizer uses `onos-topo` API to watch changes occurring on the topology and forwards
+these changes via web-socket to the browser where it renders the various entities and relations using
+a simple force layout graph. This allows the view to dynamically adjust to reflect the current topology state.
+
+Clicking on nodes (entities) and links (relations) will show the full contents of the entity or relation 
+as JSON structure. Nodes can be dragged around and the entire graph can be zoomed and panned within the viewport.
+
+The visualizer is presently under active development.
+
 ## See Also
 * [Deployment](docs/deployment.md)
 * [CLI examples](docs/cli.md)
