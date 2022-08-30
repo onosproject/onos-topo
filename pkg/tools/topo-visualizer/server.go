@@ -13,14 +13,23 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"os"
 	"sync"
+)
+
+const (
+	devIndexPath = "pkg/tools/topo-visualizer/index.html"
+	indexPath    = "/var/topo-visualizer/index.html"
 )
 
 var (
 	log      = logging.GetLogger("visualizer")
 	upgrader = websocket.Upgrader{}
 	maxID    = uint32(0)
+	devMode  = false
 )
+
+var homeTemplate *template.Template
 
 type webClient struct {
 	id uint32
@@ -44,11 +53,26 @@ func NewServer(conn *grpc.ClientConn) *Server {
 
 // Serve starts the HTTP/WS server
 func (s *Server) Serve() error {
+	loadTemplate()
 	http.HandleFunc("/watch", s.watchChanges)
 	http.HandleFunc("/", s.home)
 	return http.ListenAndServe(":5152", nil)
 }
 
+// Load index.html template from its expected production location; sets devMode if not found
+func loadTemplate() {
+	if _, err := os.Stat(indexPath); err == nil {
+		if homeTemplate, err = template.New("index.html").ParseFiles(indexPath); err != nil {
+			log.Errorf("Unable to parse template %s: %+v", indexPath, err)
+		}
+		log.Infof("Running with production template...")
+		return
+	}
+	log.Infof("Running in dev mode...")
+	devMode = true
+}
+
+// Sets up a new web-client and Watch topology changes and relay them onto the web-client
 func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Received new web client connection")
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -59,19 +83,18 @@ func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {
 	defer ws.Close()
 
 	s.lock.Lock()
-	defer s.lock.Unlock()
 	maxID++
-	newClient := &webClient{
+	wc := &webClient{
 		id: maxID,
 		ch: make(chan *topo.WatchResponse),
 	}
-	s.clients[newClient.id] = newClient
+	s.clients[wc.id] = wc
 	s.lock.Unlock()
-	log.Infof("Web client %d connected", newClient.id)
+	log.Infof("Web client %d connected", wc.id)
 
-	go s.watchTopology(newClient)
+	go s.watchTopology(wc)
 
-	for msg := range newClient.ch {
+	for msg := range wc.ch {
 		b, err := EncodeTopoEvent(msg)
 		if err != nil {
 			log.Warn("Unable to encode:", err)
@@ -82,9 +105,10 @@ func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	log.Infof("Web client %d disconnected")
+	log.Infof("Web client %d disconnected", wc.id)
 }
 
+// Watch topology changes and relay them onto the web-client
 func (s *Server) watchTopology(wc *webClient) {
 	client := topo.NewTopoClient(s.topoConn)
 	ctx := context.Background()
@@ -113,10 +137,12 @@ func (s *Server) watchTopology(wc *webClient) {
 }
 
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {
-	homeTemplate, err := template.New("index.html").ParseFiles("pkg/tools/topo-visualizer/index.html")
-	if err != nil {
-		log.Errorf("Unable to parse template: %+v", err)
-		return
+	if devMode {
+		var err error
+		if homeTemplate, err = template.New("index.html").ParseFiles(devIndexPath); err != nil {
+			log.Errorf("Unable to parse template %s: %+v", devIndexPath, err)
+			return
+		}
 	}
 	_ = homeTemplate.Execute(w, "ws://"+r.Host+"/watch")
 }
