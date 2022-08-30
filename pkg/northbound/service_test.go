@@ -6,6 +6,7 @@ package northbound
 
 import (
 	"context"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"sync"
 	"testing"
@@ -55,7 +56,7 @@ func createServerConnection(t *testing.T, test *test.Test) *grpc.ClientConn {
 	}()
 
 	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Fatalf("Failed to dial bufnet: %v", err)
 	}
