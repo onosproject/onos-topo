@@ -23,10 +23,8 @@ var (
 )
 
 type webClient struct {
-	id     uint32
-	ch     chan *topo.WatchResponse
-	ws     *websocket.Conn
-	client topo.TopoClient
+	id uint32
+	ch chan *topo.WatchResponse
 }
 
 // Server is an HTTP/WS server for the web-based visualizer client
@@ -66,7 +64,6 @@ func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {
 	newClient := &webClient{
 		id: maxID,
 		ch: make(chan *topo.WatchResponse),
-		ws: ws,
 	}
 	s.clients[newClient.id] = newClient
 	s.lock.Unlock()
@@ -89,9 +86,9 @@ func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) watchTopology(wc *webClient) {
-	wc.client = topo.NewTopoClient(s.topoConn)
+	client := topo.NewTopoClient(s.topoConn)
 	ctx := context.Background()
-	stream, err := wc.client.Watch(ctx, &topo.WatchRequest{})
+	stream, err := client.Watch(ctx, &topo.WatchRequest{})
 	if err != nil {
 		log.Errorf("Unable to connect to onos-topo: %+v", err)
 		return
@@ -116,119 +113,10 @@ func (s *Server) watchTopology(wc *webClient) {
 }
 
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {
+	homeTemplate, err := template.New("index.html").ParseFiles("pkg/tools/topo-visualizer/index.html")
+	if err != nil {
+		log.Errorf("Unable to parse template: %+v", err)
+		return
+	}
 	_ = homeTemplate.Execute(w, "ws://"+r.Host+"/watch")
 }
-
-var homeTemplate = template.Must(template.New("index").Parse(`
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-    <style> body { margin: 0; } </style>
-    <script src="//unpkg.com/force-graph"></script>
-</head>
-<body>
-  	<div id="graph"></div>
-    <script>  
-		const canvas = document.getElementById("graph");
-		var nodes = [], links = [];
-
-		const Graph = ForceGraph()(canvas)
-			//.onNodeClick(inspectNode)
-			.graphData({nodes: nodes, links: links})
- 			.nodeCanvasObject((node, ctx, globalScale) => {
-				  const label = node.id;
-				  const fontSize = 12/globalScale;
-				  ctx.font = '' + fontSize + 'px Sans-Serif';
-				  const textWidth = ctx.measureText(label).width;
-				  const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-	
-				  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-				  ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-	
-				  ctx.textAlign = 'center';
-				  ctx.textBaseline = 'middle';
-				  ctx.fillStyle = '#000';
-				  ctx.fillText(label, node.x, node.y);
-	
-				  node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
-			})
-     		.linkDirectionalArrowLength(5)
-	        .linkDirectionalArrowRelPos(1)
-			.linkCanvasObjectMode(() => 'after')
-    		.linkCanvasObject((link, ctx, globalScale) => {
-    			const MAX_FONT_SIZE = 12/globalScale;
-    			const LABEL_NODE_MARGIN = Graph.nodeRelSize() * 1.5;
-    			
-    			const start = link.source;
-    			const end = link.target;
-    			
-    			// ignore unbound links
-    			if (typeof start !== 'object' || typeof end !== 'object') return;
-    			
-    			// calculate label positioning
-    			const textPos = Object.assign(...['x', 'y'].map(c => ({
-    			  [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
-    			})));
-    			
-    			const relLink = { x: end.x - start.x, y: end.y - start.y };
-    			
-    			const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
-    			
-    			let textAngle = Math.atan2(relLink.y, relLink.x);
-    			// maintain label vertical orientation for legibility
-    			if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
-    			if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
-    			
-    			const label = link.data.id;
-
-    			// estimate fontSize to fit in link length
-    			ctx.font = '1px Sans-Serif';
-    			const fontSize = Math.min(MAX_FONT_SIZE, maxTextLength / ctx.measureText(label).width);
-    			ctx.font = '' + fontSize + 'px Sans-Serif';
-    			const textWidth = ctx.measureText(label).width;
-    			const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-
-    			// draw text label (with background rect)
-    			ctx.save();
-    			ctx.translate(textPos.x, textPos.y);
-    			ctx.rotate(textAngle);
-
-    			ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    			ctx.fillRect(- bckgDimensions[0] / 2, - bckgDimensions[1] / 2, ...bckgDimensions);
-
-    			ctx.textAlign = 'center';
-    			ctx.textBaseline = 'middle';
-    			ctx.fillStyle = 'darkgrey';
-    			ctx.fillText(label, 0, 0);
-    			ctx.restore();
-    		});
-
-		var ws = new WebSocket("{{.}}");
-		ws.onopen = function(evt) {
-			console.log("Connected");
-		}
-		ws.onclose = function(evt) {
-			console.log("Disconnected");
-			ws = null;
-		}
-		ws.onmessage = function(evt) {
-			//print("Event: " + evt.data);
-			data = JSON.parse(evt.data);
-			console.log(data);
-			if (data.event === "replay" || data.event === "added") {
-				if (data.entity) {
-					nodes = [...nodes, { id: data.id, data: data }];
-				} else if (data.relation) {
-					links = [...links, { source: data.relation.src, target: data.relation.tgt, data: data }];
-				}
-				Graph.graphData({nodes: nodes, links: links})
-			}
-		}
-		ws.onerror = function(evt) {
-			console.error("ERROR: " + evt.data);
-		}
-    </script>
-</body>
-</html>
-`))
