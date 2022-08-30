@@ -46,7 +46,7 @@ func NewServer(conn *grpc.ClientConn) *Server {
 func (s *Server) Serve() error {
 	http.HandleFunc("/watch", s.watchChanges)
 	http.HandleFunc("/", s.home)
-	return http.ListenAndServe(":12345", nil)
+	return http.ListenAndServe(":5152", nil)
 }
 
 func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {

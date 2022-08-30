@@ -11,83 +11,53 @@ SPDX-License-Identifier: Apache-2.0
         margin: 0;
     } </style>
     <script src="//unpkg.com/force-graph"></script>
+    <style>
+        #details {
+            display: block;
+            background-color: #eee;
+            visibility: hidden;
+            border: 1px solid #888;
+            border-radius: 4px;
+            padding: 8px;
+            z-index: 2;
+        }
+
+        #details h1 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        #details pre {
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
+<div id="details"></div>
 <div id="graph"></div>
 <script>
     const canvas = document.getElementById("graph");
-    let nodes = [], links = [];
+    const details = document.getElementById("details");
+    let nodes = [], links = [], shownItem;
 
-    const Graph = ForceGraph()(canvas)
-        //.onNodeClick(inspectNode)
+    let sameNodesLinks = {};
+    const curvatureMinMax = 0.1;
+
+    const graph = ForceGraph()(canvas)
         .graphData({nodes: nodes, links: links})
-        .nodeCanvasObject((node, ctx, globalScale) => {
-            const label = node.id;
-            const fontSize = 12 / globalScale;
-            ctx.font = '' + fontSize + 'px Sans-Serif';
-            const textWidth = ctx.measureText(label).width;
-            const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
-
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#000';
-            ctx.fillText(label, node.x, node.y);
-
-            node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
-        })
-        .linkDirectionalArrowLength(5)
+        .onNodeClick(inspectNode)
+        .onLinkClick(inspectLink)
+        .onBackgroundClick(hideDetails)
+        .nodeCanvasObject(drawNode)
+        .linkCurvature('curvature')
+        .linkWidth(2)
+        .linkDirectionalArrowLength(2)
         .linkDirectionalArrowRelPos(1)
-        .linkCanvasObjectMode(() => 'after')
-        .linkCanvasObject((link, ctx, globalScale) => {
-            const MAX_FONT_SIZE = 12 / globalScale;
-            const LABEL_NODE_MARGIN = Graph.nodeRelSize() * 1.5;
-
-            const start = link.source;
-            const end = link.target;
-
-            // ignore unbound links
-            if (typeof start !== 'object' || typeof end !== 'object') return;
-
-            // calculate label positioning
-            const textPos = Object.assign(...['x', 'y'].map(c => ({
-                [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
-            })));
-
-            const relLink = {x: end.x - start.x, y: end.y - start.y};
-
-            const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - LABEL_NODE_MARGIN * 2;
-
-            let textAngle = Math.atan2(relLink.y, relLink.x);
-            // maintain label vertical orientation for legibility
-            if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
-            if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
-
-            const label = link.data.id;
-
-            // estimate fontSize to fit in link length
-            ctx.font = '1px Sans-Serif';
-            const fontSize = Math.min(MAX_FONT_SIZE, maxTextLength / ctx.measureText(label).width);
-            ctx.font = '' + fontSize + 'px Sans-Serif';
-            const textWidth = ctx.measureText(label).width;
-            const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
-
-            // draw text label (with background rect)
-            ctx.save();
-            ctx.translate(textPos.x, textPos.y);
-            ctx.rotate(textAngle);
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(-bckgDimensions[0] / 2, -bckgDimensions[1] / 2, ...bckgDimensions);
-
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#555';
-            ctx.fillText(label, 0, 0);
-            ctx.restore();
-        });
+        .linkLineDash(linkTypeDash)
+        .linkCanvasObjectMode(() => "after")
+        .linkCanvasObject(drawLink);
 
     let ws = new WebSocket("{{.}}");
     ws.onopen = function (evt) {
@@ -101,23 +71,36 @@ SPDX-License-Identifier: Apache-2.0
         console.error("ERROR: " + evt.data);
     }
     ws.onmessage = function (evt) {
-        let data = JSON.parse(evt.data);
-        console.log(data);
+        processTopoEvent(JSON.parse(evt.data));
+    }
+
+    function processTopoEvent(data) {
+        // console.log(data);
         if (data.event === "replay" || data.event === "added") {
             processAspects(data);
             if (data.entity) {
                 nodes = [...nodes, {id: data.id, data: data}];
+                delete data.relation;
+                delete data.kind;
             } else if (data.relation) {
                 links = [...links, {id: data.id, source: data.relation.src, target: data.relation.tgt, data: data}];
+                delete data.entity;
+                delete data.kind;
             }
+            delete data.event;
 
         } else if (data.event === "updated") {
             processAspects(data);
             if (data.entity) {
                 update(nodes, data);
+                delete data.relation;
+                delete data.kind;
             } else if (data.relation) {
                 update(links, data);
+                delete data.entity;
+                delete data.kind;
             }
+            delete data.event;
 
         } else if (data.event === "removed") {
             if (data.entity) {
@@ -126,8 +109,43 @@ SPDX-License-Identifier: Apache-2.0
                 links = remove(links, data.id);
             }
         }
-        console.log('nodes:', nodes, 'links:', links)
-        Graph.graphData({nodes: nodes, links: links});
+        // console.log("nodes:", nodes, "links:", links)
+        processLinks();
+        graph.graphData({nodes: nodes, links: links});
+
+        if (shownItem && shownItem.id === data.id) {
+            showDetails(shownItem, null);
+        }
+    }
+
+    function processLinks() {
+        sameNodesLinks = {};
+        links.forEach(link => {
+            link.nodePairId = link.source <= link.target ? (link.source + "_" + link.target) : (link.target + "_" + link.source);
+            if (!sameNodesLinks[link.nodePairId]) {
+                sameNodesLinks[link.nodePairId] = [];
+            }
+            sameNodesLinks[link.nodePairId].push(link);
+        });
+
+        // Compute the curvature for links sharing the same two nodes to avoid overlaps
+        Object.keys(sameNodesLinks).forEach(nodePairId => {
+            let links = sameNodesLinks[nodePairId];
+            if (links.length > 1) {
+                let lastIndex = links.length - 1;
+                let lastLink = links[lastIndex];
+                lastLink.curvature = curvatureMinMax;
+                let delta = 2 * curvatureMinMax / lastIndex;
+                for (let i = 0; i < lastIndex; i++) {
+                    links[i].curvature = -curvatureMinMax + i * delta;
+                    if (lastLink.source !== links[i].source) {
+                        links[i].curvature *= -1; // flip it around, otherwise they overlap
+                    }
+                }
+            } else {
+                links[0].curvature = 0;
+            }
+        });
     }
 
     function processAspects(data) {
@@ -141,7 +159,7 @@ SPDX-License-Identifier: Apache-2.0
     function update(list, data) {
         for (let i = 0; i < list.length; i++) {
             if (list[i].id === data.id) {
-                list[id].data = data;
+                list[i].data = data;
                 return;
             }
         }
@@ -150,12 +168,113 @@ SPDX-License-Identifier: Apache-2.0
     function remove(list, id) {
         for (let i = 0; i < list.length; i++) {
             if (list[i].id === id) {
-                console.log("!removing", list[i])
                 list.splice(i, 1);
                 return list;
             }
         }
         return list
+    }
+
+    function linkTypeDash(link) {
+        if (link.data.relation.kind === "control" || link.data.relation.kind === "controls") {
+            return [2, 1];
+        }
+        return null;
+    }
+
+    function drawNode(node, ctx, globalScale) {
+        const label = node.id;
+        const maxFontSize = 24, minFontSize = 2;
+        const fontSize = Math.max(Math.min(maxFontSize, 14 / globalScale), minFontSize);
+        ctx.font = `${fontSize}px Sans-Serif`;
+        const textWidth = ctx.measureText(label).width;
+        const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#000";
+        ctx.fillText(label, node.x, node.y);
+
+        node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+    }
+
+    function drawLink(link, ctx, globalScale) {
+        if (globalScale < 7) {
+            return;
+        }
+        const maxFontSize = 10 / globalScale;
+        const labelMargin = graph.nodeRelSize() * 1.5;
+
+        const start = link.source;
+        const end = link.target;
+
+        // ignore unbound links
+        if (typeof start !== "object" || typeof end !== "object") return;
+
+        // calculate label positioning
+        const textPos = Object.assign(...["x", "y"].map(c => ({
+            [c]: end[c] + (start[c] - end[c]) / 1.2 // calc position
+        })));
+        // [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
+
+        const relLink = {x: end.x - start.x, y: end.y - start.y};
+
+        const maxTextLength = Math.sqrt(Math.pow(relLink.x, 2) + Math.pow(relLink.y, 2)) - labelMargin * 2;
+
+        let textAngle = Math.atan2(relLink.y, relLink.x);
+        // maintain label vertical orientation for legibility
+        if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
+        if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
+
+        const label = link.data.relation.kind;
+
+        // estimate fontSize to fit in link length
+        ctx.font = "1px Sans-Serif";
+        const fontSize = Math.min(maxFontSize, maxTextLength / ctx.measureText(label).width);
+        ctx.font = `${fontSize}px Sans-Serif`;
+        const textWidth = ctx.measureText(label).width;
+        const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+
+        // draw text label (with background rect)
+        ctx.save();
+        ctx.translate(textPos.x, textPos.y);
+        ctx.rotate(textAngle);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.fillRect(-bckgDimensions[0] / 2, -bckgDimensions[1] / 2, ...bckgDimensions);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#555";
+        ctx.fillText(label, 0, 0);
+        ctx.restore();
+    }
+
+    function inspectNode(node) {
+        showDetails(node, pos = graph.graph2ScreenCoords(node.x, node.y));
+    }
+
+    function inspectLink(link) {
+        showDetails(link, pos = graph.graph2ScreenCoords((link.source.x + link.target.x) / 2, (link.source.y + link.target.y) / 2));
+    }
+
+    function showDetails(obj, pos) {
+        shownItem = obj;
+        details.innerHTML = `<h1>${obj.data.type} ${obj.id}</h1><pre>${JSON.stringify(obj.data, null, 2)}</pre>`;
+        if (pos) {
+            details.style.left = "" + pos.x + "px";
+            details.style.top = "" + pos.y + "px";
+            details.style.position = "absolute";
+            details.style.visibility = "visible";
+        }
+    }
+
+    function hideDetails() {
+        shownItem = null;
+        details.style.visibility = "hidden";
     }
 </script>
 </body>
