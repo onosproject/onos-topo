@@ -63,8 +63,10 @@ SPDX-License-Identifier: Apache-2.0
 <div id="graph"></div>
 <div id="details"></div>
 <div id="item-menu">
-    <div class="item" id="collapse">Collapse</div>
-    <div class="item" id="focus">Highlight</div>
+    <div class="item" id="unpin">Unpin</div>
+    <hr>
+    <div class="item" id="collapse">Collapse (Not implemented)</div>
+    <div class="item" id="focus">Highlight (Not implemented)</div>
 </div>
 <script>
     const canvas = document.getElementById("graph");
@@ -83,13 +85,13 @@ SPDX-License-Identifier: Apache-2.0
         .maxZoom(12)
         .minZoom(0.2)
         .graphData({nodes: nodes, links: links})
-        .onNodeClick(inspectNode)
+        .onNodeClick(showDetails)
         .onNodeRightClick(nodeMenu)
         .onNodeDragEnd(pinNode)
         .onNodeHover(node => {
             overNode = node
         })
-        .onLinkClick(inspectLink)
+        .onLinkClick(showDetails)
         .onBackgroundClick(hideExtras)
         .onBackgroundRightClick(hideExtras)
         .nodeCanvasObject(drawNode)
@@ -132,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0
 
     setTimeout(() => {
         graph.zoomToFit(500, 10);
-    }, 1000)
+    }, 2000)
 
     function processTopoEvent(data) {
         // console.log(data);
@@ -365,14 +367,6 @@ SPDX-License-Identifier: Apache-2.0
         ctx.restore();
     }
 
-    function inspectNode(node) {
-        showDetails(node, pos = graph.graph2ScreenCoords(node.x, node.y));
-    }
-
-    function inspectLink(link) {
-        showDetails(link, pos = graph.graph2ScreenCoords((link.source.x + link.target.x) / 2, (link.source.y + link.target.y) / 2));
-    }
-
     function showDetails(obj, pos) {
         hideNodeMenu();
         shownItem = obj;
@@ -391,14 +385,11 @@ SPDX-License-Identifier: Apache-2.0
 
     function nodeMenu(node, pos) {
         hideDetails();
-        // TODO: Not fully implemented yet
-        if (false) {
-            actionNode = node;
-            if (pos) {
-                itemMenu.style.left = `${pos.x}px`;
-                itemMenu.style.top = `${pos.y}px`;
-                itemMenu.style.visibility = "visible";
-            }
+        actionNode = node;
+        if (pos) {
+            itemMenu.style.left = `${pos.x}px`;
+            itemMenu.style.top = `${pos.y}px`;
+            itemMenu.style.visibility = "visible";
         }
     }
 
@@ -411,6 +402,11 @@ SPDX-License-Identifier: Apache-2.0
         hideNodeMenu();
         hideDetails();
     }
+
+    document.getElementById("unpin").addEventListener("click", evt => {
+        unpinNode(actionNode);
+        hideNodeMenu();
+    });
 
     document.getElementById("collapse").addEventListener("click", evt => {
         console.log("toggle node collapsed", evt, actionNode);
