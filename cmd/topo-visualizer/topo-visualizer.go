@@ -29,7 +29,7 @@ func getRootCommand() *cobra.Command {
 		Short: "Starts HTTP/WS server for visualizing topology entities and relations",
 		RunE:  runServer,
 	}
-	cli.AddEndpointFlags(cmd, serviceAddress)
+	AddEndpointFlags(cmd, serviceAddress)
 	return cmd
 }
 
@@ -40,4 +40,25 @@ func runServer(cmd *cobra.Command, args []string) error {
 	}
 	defer conn.Close()
 	return visualizer.NewServer(conn).Serve()
+}
+
+// FIXME: Remove this after clearing up the onos-lib-go fiasco.
+
+const (
+	// ServiceAddress command option
+	ServiceAddress = "service-address"
+	// TLSCertPathFlag command option
+	TLSCertPathFlag = "tls-cert-path"
+	// TLSKeyPathFlag command option
+	TLSKeyPathFlag = "tls-key-path"
+	// NoTLSFlag command option
+	NoTLSFlag = "no-tls"
+)
+
+// AddEndpointFlags adds service address, TLS cert path and TLS key path option to the command.
+func AddEndpointFlags(cmd *cobra.Command, defaultAddress string) {
+	cmd.Flags().String(ServiceAddress, defaultAddress, "service address; defaults to "+defaultAddress)
+	cmd.Flags().String(TLSKeyPathFlag, "", "path to client private key")
+	cmd.Flags().String(TLSCertPathFlag, "", "path to client certificate")
+	cmd.Flags().Bool(NoTLSFlag, false, "if present, do not use TLS")
 }
