@@ -40,21 +40,26 @@ SPDX-License-Identifier: Apache-2.0
 <script>
     const canvas = document.getElementById("graph");
     const details = document.getElementById("details");
-    let nodes = [], links = [], shownItem;
+    let nodes = [], links = [], shownItem, overNode;
 
     const curvatureMinMax = 0.1;
 
     const graph = ForceGraph()(canvas)
         .graphData({nodes: nodes, links: links})
         .onNodeClick(inspectNode)
+        .onNodeDragEnd(pinNode)
+        .onNodeHover(node => {
+            overNode = node
+        })
         .onLinkClick(inspectLink)
         .onBackgroundClick(hideDetails)
         .nodeCanvasObject(drawNode)
         .linkCurvature('curvature')
-        .linkWidth(2)
+        .linkColor(linkTypeColor)
+        .linkWidth(linkTypeWidth)
+        .linkLineDash(linkTypeDash)
         .linkDirectionalArrowLength(2)
         .linkDirectionalArrowRelPos(1)
-        .linkLineDash(linkTypeDash)
         .linkCanvasObjectMode(() => "after")
         .linkCanvasObject(drawLink);
 
@@ -76,13 +81,17 @@ SPDX-License-Identifier: Apache-2.0
     window.addEventListener("keypress", evt => {
         if (evt.key === "r") {
             graph.zoomToFit(500, 10);
+        } else if (evt.key === "u") {
+            unpinNode(overNode);
         } else if (evt.key === "Escape") {
             hideDetails();
         }
         // console.log(evt);
     });
 
-    setTimeout(() => { graph.zoomToFit(500, 10); }, 1000)
+    setTimeout(() => {
+        graph.zoomToFit(500, 10);
+    }, 1000)
 
     function processTopoEvent(data) {
         // console.log(data);
@@ -192,12 +201,45 @@ SPDX-License-Identifier: Apache-2.0
         return list
     }
 
-    function linkTypeDash(link) {
-        if (link.data.relation.kind === "control" || link.data.relation.kind === "controls") {
-            return [2, 1];
-        }
-        return null;
+    const kindDash = {
+        "control": [2, 1],
+        "controls": [2, 1],
+        "neighbors": [4, 1],
     }
+
+    function linkTypeDash(link) {
+        return kindDash[link.data.relation.kind] || null;
+    }
+
+    const kindColor = {
+        "contains": "#a55",
+        "neighbors": "#55a",
+    }
+
+    function linkTypeColor(link) {
+        return kindColor[link.data.relation.kind] || "#aaa";
+    }
+
+    const kindWidth = {
+        "contains": 1,
+    }
+
+    function linkTypeWidth(link) {
+        return kindWidth[link.data.relation.kind] || 2;
+    }
+
+    function pinNode(node) {
+        node.fx = node.x;
+        node.fy = node.y;
+    }
+
+    function unpinNode(node) {
+        if (node) {
+            delete node.fx;
+            delete node.fy;
+        }
+    }
+
 
     function drawNode(node, ctx, globalScale) {
         const label = node.id;
