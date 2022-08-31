@@ -6,6 +6,7 @@ package store
 
 import (
 	"context"
+	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"testing"
 	"time"
 
@@ -172,9 +173,7 @@ func TestTopoStore(t *testing.T) {
 	obj2, err = store2.Get(context.TODO(), "o2")
 	assert.Error(t, err)
 	assert.Nil(t, obj2)
-
-	// FIXME: Re-enable this once we settle the Atomix/onos-lib-go/Golang version transition
-	//assert.True(t, errors.IsNotFound(err))
+	assert.True(t, errors.IsNotFound(err))
 
 	obj := &topoapi.Object{
 		ID: "o1",
