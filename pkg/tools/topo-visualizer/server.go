@@ -15,11 +15,14 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 )
 
 const (
 	devIndexPath = "pkg/tools/topo-visualizer/index.html"
 	indexPath    = "/var/topo-visualizer/index.html"
+
+	pingPeriod = 10 * time.Second
 )
 
 var (
@@ -32,8 +35,9 @@ var (
 var homeTemplate *template.Template
 
 type webClient struct {
-	id uint32
-	ch chan *topo.WatchResponse
+	id  uint32
+	ch  chan *topo.WatchResponse
+	ctx context.Context
 }
 
 // Server is an HTTP/WS server for the web-based visualizer client
@@ -85,46 +89,69 @@ func (s *Server) watchChanges(w http.ResponseWriter, r *http.Request) {
 	s.lock.Lock()
 	maxID++
 	wc := &webClient{
-		id: maxID,
-		ch: make(chan *topo.WatchResponse),
+		id:  maxID,
+		ch:  make(chan *topo.WatchResponse),
+		ctx: context.Background(),
 	}
 	s.clients[wc.id] = wc
 	s.lock.Unlock()
-	log.Infof("Web client %d connected", wc.id)
+	log.Infof("Client %d: Connected", wc.id)
 
 	go s.watchTopology(wc)
 
-	for msg := range wc.ch {
-		b, err := EncodeTopoEvent(msg)
-		if err != nil {
-			log.Warn("Unable to encode:", err)
-		}
-		err = ws.WriteMessage(websocket.TextMessage, b)
-		if err != nil {
-			log.Errorf("Unable to write:", err)
-			break
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+
+	ws.SetPongHandler(func(data string) error {
+		log.Infof("Client %d: pong received", wc.id)
+		return nil
+	})
+
+WriteLoop:
+	for {
+		select {
+		case msg, ok := <-wc.ch:
+			if !ok {
+				log.Infof("Client %d: Event channel closed", wc.id)
+				break WriteLoop
+			}
+			b, err := EncodeTopoEvent(msg)
+			if err != nil {
+				log.Warnf("Client %d: Unable to encode topo event: %v", wc.id, err)
+			}
+			err = ws.WriteMessage(websocket.TextMessage, b)
+			if err != nil {
+				log.Warnf("Client %d: Unable to write topo event: %v", wc.id, err)
+				break WriteLoop
+			}
+		case <-ticker.C:
+			// For now, this is merely to force failure at a later time; we expect no pongs currently
+			if err := ws.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Warnf("Client %d: Unable to write ping: %v", wc.id, err)
+				break WriteLoop
+			}
 		}
 	}
-	log.Infof("Web client %d disconnected", wc.id)
+	log.Infof("Client %d: Disconnected", wc.id)
 }
 
 // Watch topology changes and relay them onto the web-client
 func (s *Server) watchTopology(wc *webClient) {
 	client := topo.NewTopoClient(s.topoConn)
-	ctx := context.Background()
-	stream, err := client.Watch(ctx, &topo.WatchRequest{})
+	stream, err := client.Watch(wc.ctx, &topo.WatchRequest{})
 	if err != nil {
-		log.Errorf("Unable to connect to onos-topo: %+v", err)
+		log.Errorf("Client %d: Unable to monitor topology: %v", wc.id, err)
 		return
 	}
 
+	log.Infof("Client %d: Topology monitoring started", wc.id)
 	for {
 		msg, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			log.Errorf("Unable read from onos-topo stream: %+v", err)
+			log.Errorf("Client %d: Unable read from onos-topo stream: %v", wc.id, err)
 			break
 		}
 		wc.ch <- msg
@@ -133,7 +160,7 @@ func (s *Server) watchTopology(wc *webClient) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	delete(s.clients, wc.id)
-	log.Infof("Web client %d disconnected")
+	log.Infof("Client %d: Topology monitoring stopped", wc.id)
 }
 
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {

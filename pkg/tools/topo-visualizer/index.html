@@ -7,12 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <html>
 <head>
     <meta charset="utf-8">
-    <style> body {
-        margin: 0;
-    } </style>
     <script src="//unpkg.com/force-graph"></script>
     <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
         #details {
+            position: absolute;
             display: block;
             background-color: #eee;
             visibility: hidden;
@@ -23,7 +26,6 @@ SPDX-License-Identifier: Apache-2.0
         }
 
         #details h1 {
-            font-family: Arial, Helvetica, sans-serif;
             font-size: 16px;
             font-weight: bold;
             margin: 0;
@@ -32,28 +34,66 @@ SPDX-License-Identifier: Apache-2.0
         #details pre {
             margin: 0;
         }
+
+        #item-menu {
+            position: absolute;
+            display: block;
+            background-color: #eee;
+            visibility: hidden;
+            border: 1px solid #888;
+            margin: 0px;
+            z-index: 3;
+        }
+
+        .item {
+            display: block;
+            cursor: pointer;
+            padding: 4px;
+            color: inherit;
+            background-color: inherit;
+        }
+
+        .item:hover {
+            color: #eee;
+            background-color: #3b78e7;
+        }
     </style>
 </head>
 <body>
-<div id="details"></div>
 <div id="graph"></div>
+<div id="details"></div>
+<div id="item-menu">
+    <div class="item" id="collapse">Collapse</div>
+    <div class="item" id="focus">Highlight</div>
+</div>
 <script>
     const canvas = document.getElementById("graph");
     const details = document.getElementById("details");
-    let nodes = [], links = [], shownItem, overNode;
+    const itemMenu = document.getElementById("item-menu");
+    let nodes = [], links = [], shownItem, overNode, actionNode;
 
     const curvatureMinMax = 0.1;
+    const selectionColor = "#3b78e7";
+    const nodeShapeColor = "#999";
+    const nodeTextColor = "#333";
+    const nodeSelectedTextColor = "#eee";
+    const linkTextColor = "#555";
 
     const graph = ForceGraph()(canvas)
+        .maxZoom(12)
+        .minZoom(0.2)
         .graphData({nodes: nodes, links: links})
         .onNodeClick(inspectNode)
+        .onNodeRightClick(nodeMenu)
         .onNodeDragEnd(pinNode)
         .onNodeHover(node => {
             overNode = node
         })
         .onLinkClick(inspectLink)
-        .onBackgroundClick(hideDetails)
+        .onBackgroundClick(hideExtras)
+        .onBackgroundRightClick(hideExtras)
         .nodeCanvasObject(drawNode)
+        .nodePointerAreaPaint(nodeAreaPaint)
         .linkCurvature('curvature')
         .linkColor(linkTypeColor)
         .linkWidth(linkTypeWidth)
@@ -85,6 +125,7 @@ SPDX-License-Identifier: Apache-2.0
             unpinNode(overNode);
         } else if (evt.key === "Escape") {
             hideDetails();
+            hideNodeMenu();
         }
         // console.log(evt);
     });
@@ -240,30 +281,43 @@ SPDX-License-Identifier: Apache-2.0
         }
     }
 
-
     function drawNode(node, ctx, globalScale) {
-        const label = node.id;
-        const maxFontSize = 24, minFontSize = 2;
-        const fontSize = Math.max(Math.min(maxFontSize, 14 / globalScale), minFontSize);
-        ctx.font = `${fontSize}px Sans-Serif`;
-        const textWidth = ctx.measureText(label).width;
-        const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+        if (globalScale > 1.5) {
+            const label = node.id;
+            const maxFontSize = 256;
+            const fontSize = Math.min(12 / globalScale, maxFontSize);
+            ctx.font = `${fontSize}px Sans-Serif`;
+            const textWidth = ctx.measureText(label).width;
+            const bckgDimensions = [textWidth + 4, fontSize + 2].map(n => n + fontSize * 0.2); // some padding
+            ctx.fillStyle = overNode === node ? selectionColor : "rgba(255, 255, 255, 0.8)";
+            ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = overNode === node ? nodeSelectedTextColor : nodeTextColor;
+            ctx.fillText(label, node.x, node.y);
 
-        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+            node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+        } else {
+            ctx.fillStyle = overNode === node ? selectionColor : nodeShapeColor;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 3, 0, 2 * Math.PI, false);
+            ctx.fill();
+            node.__bckgDimensions = [ 3, 3 ];
+        }
+    }
 
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "#000";
-        ctx.fillText(label, node.x, node.y);
-
-        node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+    function nodeAreaPaint(node, color, ctx) {
+        ctx.fillStyle = color;
+        const bckgDimensions = node.__bckgDimensions;
+        bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
     }
 
     function drawLink(link, ctx, globalScale) {
-        if (globalScale < 7) {
+        if (globalScale < 5) {
             return;
         }
+
+        // TODO: Clean this up
         const maxFontSize = 10 / globalScale;
         const labelMargin = graph.nodeRelSize() * 1.5;
 
@@ -275,9 +329,8 @@ SPDX-License-Identifier: Apache-2.0
 
         // calculate label positioning
         const textPos = Object.assign(...["x", "y"].map(c => ({
-            [c]: end[c] + (start[c] - end[c]) / 1.2 // calc position
+            [c]: end[c] + (start[c] - end[c]) / 1.4 // calc position
         })));
-        // [c]: start[c] + (end[c] - start[c]) / 2 // calc middle point
 
         const relLink = {x: end.x - start.x, y: end.y - start.y};
 
@@ -307,7 +360,7 @@ SPDX-License-Identifier: Apache-2.0
 
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "#555";
+        ctx.fillStyle = linkTextColor;
         ctx.fillText(label, 0, 0);
         ctx.restore();
     }
@@ -321,12 +374,12 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     function showDetails(obj, pos) {
+        hideNodeMenu();
         shownItem = obj;
         details.innerHTML = `<h1>${obj.data.type} ${obj.id}</h1><pre>${JSON.stringify(obj.data, null, 2)}</pre>`;
         if (pos) {
-            details.style.left = "" + pos.x + "px";
-            details.style.top = "" + pos.y + "px";
-            details.style.position = "absolute";
+            details.style.left = `${pos.x}px`;
+            details.style.top = `${pos.y}px`;
             details.style.visibility = "visible";
         }
     }
@@ -335,6 +388,40 @@ SPDX-License-Identifier: Apache-2.0
         shownItem = null;
         details.style.visibility = "hidden";
     }
+
+    function nodeMenu(node, pos) {
+        hideDetails();
+        // TODO: Not fully implemented yet
+        if (false) {
+            actionNode = node;
+            if (pos) {
+                itemMenu.style.left = `${pos.x}px`;
+                itemMenu.style.top = `${pos.y}px`;
+                itemMenu.style.visibility = "visible";
+            }
+        }
+    }
+
+    function hideNodeMenu() {
+        actionNode = null;
+        itemMenu.style.visibility = "hidden";
+    }
+
+    function hideExtras() {
+        hideNodeMenu();
+        hideDetails();
+    }
+
+    document.getElementById("collapse").addEventListener("click", evt => {
+        console.log("toggle node collapsed", evt, actionNode);
+        hideNodeMenu();
+    });
+
+    document.getElementById("focus").addEventListener("click", evt => {
+        console.log("focusing on node", evt, actionNode);
+        hideNodeMenu();
+    });
+
 </script>
 </body>
 </html>
