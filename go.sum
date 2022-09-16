@@ -822,8 +822,8 @@ github.com/olekukonko/tablewriter v0.0.4/go.mod h1:zq6QwlOf5SlnkVbMSr5EoBv3636FW
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
 github.com/onosproject/helmit v0.6.19 h1:2Il7qhJhUjYFdweDaOzgPanUArDNGRs8SaLV3tx0aGQ=
 github.com/onosproject/helmit v0.6.19/go.mod h1:4LUwMtLcV0njiCEcAoVdzoiRfit+04z4Yn7z8lXSuMk=
-github.com/onosproject/onos-api/go v0.9.22 h1:5qpeSImCcGYb676Qsj0CN+++28e2OMOy1n6D1Ed0424=
-github.com/onosproject/onos-api/go v0.9.22/go.mod h1:0hdMkFFN2AyKLHMiJVP3ZE61QgSYfNXHiI4BJ/Ry7UI=
+github.com/onosproject/onos-api/go v0.9.43 h1:jlNdFL/VcsHg6zPPygcc9/kT16ZBhfaFQ9Hae65Cj6Q=
+github.com/onosproject/onos-api/go v0.9.43/go.mod h1:0hdMkFFN2AyKLHMiJVP3ZE61QgSYfNXHiI4BJ/Ry7UI=
 github.com/onosproject/onos-lib-go v0.8.1/go.mod h1:1klcUPfLoXPVu4fzM/sYi1V3Pggm2NRbY2fTzG2W1HY=
 github.com/onosproject/onos-lib-go v0.8.16 h1:AYzCk+YJIAS2pdqWEm6P5XwSGRRbmjA5xbr6gQzAel0=
 github.com/onosproject/onos-lib-go v0.8.16/go.mod h1:rWssBjfhahhHQy4wW5PBUtjTPwJlXAixHxgfq/3PO3E=
