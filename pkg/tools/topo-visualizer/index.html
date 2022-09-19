@@ -14,7 +14,8 @@ SPDX-License-Identifier: Apache-2.0
             font-family: Arial, Helvetica, sans-serif;
             font-size: 14px;
         }
-        #details {
+
+        .popup {
             position: absolute;
             display: block;
             background-color: #eee;
@@ -22,17 +23,26 @@ SPDX-License-Identifier: Apache-2.0
             border: 1px solid #888;
             border-radius: 4px;
             padding: 8px;
-            z-index: 2;
         }
 
-        #details h1 {
+        .popup h1 {
             font-size: 16px;
             font-weight: bold;
             margin: 0;
         }
 
+        #details {
+            z-index: 2;
+        }
+
         #details pre {
             margin: 0;
+        }
+
+        #filters {
+            top: 20px;
+            left: 20px;
+            z-index: 1;
         }
 
         #item-menu {
@@ -61,7 +71,8 @@ SPDX-License-Identifier: Apache-2.0
 </head>
 <body>
 <div id="graph"></div>
-<div id="details"></div>
+<div id="details" class="popup"></div>
+<div id="filters" class="popup"></div>
 <div id="item-menu">
     <div class="item" id="unpin">Unpin</div>
     <hr>
@@ -71,8 +82,10 @@ SPDX-License-Identifier: Apache-2.0
 <script>
     const canvas = document.getElementById("graph");
     const details = document.getElementById("details");
+    const filters = document.getElementById("filters");
     const itemMenu = document.getElementById("item-menu");
     let nodes = [], links = [], shownItem, overNode, actionNode;
+    let entityKinds = new Map(), relationKinds = new Map();
 
     const curvatureMinMax = 0.1;
     const selectionColor = "#3b78e7";
@@ -96,6 +109,7 @@ SPDX-License-Identifier: Apache-2.0
         .onBackgroundRightClick(hideExtras)
         .nodeCanvasObject(drawNode)
         .nodePointerAreaPaint(nodeAreaPaint)
+        .nodeVisibility(filterNodes)
         .linkCurvature('curvature')
         .linkColor(linkTypeColor)
         .linkWidth(linkTypeWidth)
@@ -103,7 +117,9 @@ SPDX-License-Identifier: Apache-2.0
         .linkDirectionalArrowLength(2)
         .linkDirectionalArrowRelPos(1)
         .linkCanvasObjectMode(() => "after")
-        .linkCanvasObject(drawLink);
+        .linkCanvasObject(drawLink)
+        .linkVisibility(filterLinks)
+    ;
 
     let ws = new WebSocket("{{.}}");
     ws.onopen = function (evt) {
@@ -125,9 +141,10 @@ SPDX-License-Identifier: Apache-2.0
             graph.zoomToFit(500, 10);
         } else if (evt.key === "u") {
             unpinNode(overNode);
+        } else if (evt.key === "f") {
+            showFilters();
         } else if (evt.key === "Escape") {
-            hideDetails();
-            hideNodeMenu();
+            hideExtras();
         }
         // console.log(evt);
     });
@@ -144,10 +161,12 @@ SPDX-License-Identifier: Apache-2.0
                 delete data.relation;
                 delete data.kind;
                 nodes = [...nodes, {id: data.id, data: data}];
+                data.entity.kind && entityKinds.set(data.entity.kind, true);
             } else if (data.relation) {
                 delete data.entity;
                 delete data.kind;
                 links = [...links, {id: data.id, source: data.relation.src, target: data.relation.tgt, data: data}];
+                data.relation.kind && relationKinds.set(data.relation.kind, true);
             }
             delete data.event;
 
@@ -248,6 +267,8 @@ SPDX-License-Identifier: Apache-2.0
         "control": [2, 1],
         "controls": [2, 1],
         "neighbors": [4, 1],
+        "originates": [3, 1],
+        "terminates": [3, 1],
     }
 
     function linkTypeDash(link) {
@@ -255,8 +276,11 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     const kindColor = {
+        "controls": "#5a5",
         "contains": "#a55",
         "neighbors": "#55a",
+        "originates": "#b007b0",
+        "terminates": "#f555d4"
     }
 
     function linkTypeColor(link) {
@@ -264,11 +288,11 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     const kindWidth = {
-        "contains": 1,
+        "controls": 2,
     }
 
     function linkTypeWidth(link) {
-        return kindWidth[link.data.relation.kind] || 2;
+        return kindWidth[link.data.relation.kind] || 1;
     }
 
     function pinNode(node) {
@@ -304,7 +328,7 @@ SPDX-License-Identifier: Apache-2.0
             ctx.beginPath();
             ctx.arc(node.x, node.y, 3, 0, 2 * Math.PI, false);
             ctx.fill();
-            node.__bckgDimensions = [ 3, 3 ];
+            node.__bckgDimensions = [3, 3];
         }
     }
 
@@ -398,9 +422,52 @@ SPDX-License-Identifier: Apache-2.0
         itemMenu.style.visibility = "hidden";
     }
 
+    function showFilters() {
+        let eks = "", rks = "";
+        new Map([...entityKinds.entries()].sort()).forEach((v, k) => {
+            let checked = v ? "checked" : "";
+            eks = eks + `<p><input type="checkbox" class="ek" id="ek_${k}" value="${k}" ${checked}><label for="ek_${k}">${k}</label>`
+        });
+        new Map([...relationKinds.entries()].sort()).forEach((v, k) => {
+            let checked = v ? "checked" : "";
+            rks = rks + `<p><input type="checkbox" class="rk" id="rk_${k}" value="${k}" ${checked}><label for="rk_${k}">${k}</label>`
+        });
+        filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}`;
+
+        Array.from(filters.getElementsByTagName("input")).forEach(e => e.addEventListener("change", evt => {
+            if (evt.target.className === "ek") {
+                entityKinds.set(evt.target.value, evt.target.checked);
+            } else {
+                relationKinds.set(evt.target.value, evt.target.checked);
+            }
+        }));
+        filters.style.visibility = "visible";
+        graph.autoPauseRedraw(false);
+    }
+
+    function hideFilters() {
+        filters.style.visibility = "hidden";
+        graph.autoPauseRedraw(true);
+    }
+
+    function filterNodes(node) {
+        if (entityKinds.get(node.data.entity.kind)) {
+            return true;
+        }
+        return false;
+    }
+
+    function filterLinks(link) {
+        if (relationKinds.get(link.data.relation.kind) && filterNodes(link.source) && filterNodes(link.target)) {
+            return true;
+        }
+        return false;
+    }
+
     function hideExtras() {
         hideNodeMenu();
         hideDetails();
+        hideFilters();
     }
 
     document.getElementById("unpin").addEventListener("click", evt => {
