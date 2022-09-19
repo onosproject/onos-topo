@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <!DOCTYPE html>
-<html>
+<html lang="us_en">
 <head>
     <meta charset="utf-8">
     <script src="//unpkg.com/force-graph"></script>
@@ -45,13 +45,20 @@ SPDX-License-Identifier: Apache-2.0
             z-index: 1;
         }
 
+        #legend {
+            bottom: 20px;
+            left: 20px;
+            width: 250px;
+            z-index: 1;
+        }
+
         #item-menu {
             position: absolute;
             display: block;
             background-color: #eee;
             visibility: hidden;
             border: 1px solid #888;
-            margin: 0px;
+            margin: 0;
             z-index: 3;
         }
 
@@ -68,11 +75,13 @@ SPDX-License-Identifier: Apache-2.0
             background-color: #3b78e7;
         }
     </style>
+    <title>µONOS Topology Visualizer</title>
 </head>
 <body>
 <div id="graph"></div>
 <div id="details" class="popup"></div>
 <div id="filters" class="popup"></div>
+<div id="legend" class="popup"></div>
 <div id="item-menu">
     <div class="item" id="unpin">Unpin</div>
     <hr>
@@ -83,6 +92,7 @@ SPDX-License-Identifier: Apache-2.0
     const canvas = document.getElementById("graph");
     const details = document.getElementById("details");
     const filters = document.getElementById("filters");
+    const legend = document.getElementById("legend");
     const itemMenu = document.getElementById("item-menu");
     let nodes = [], links = [], shownItem, overNode, actionNode;
     let entityKinds = new Map(), relationKinds = new Map();
@@ -143,6 +153,8 @@ SPDX-License-Identifier: Apache-2.0
             unpinNode(overNode);
         } else if (evt.key === "f") {
             showFilters();
+        } else if (evt.key === "l") {
+            showLegend();
         } else if (evt.key === "Escape") {
             hideExtras();
         }
@@ -464,10 +476,40 @@ SPDX-License-Identifier: Apache-2.0
         return false;
     }
 
+    function showLegend() {
+        legend.innerHTML = `<h1>Relations Legend</h1><br><canvas id="legend-canvas"></canvas>`;
+        let x = 10, c = document.getElementById("legend-canvas");
+        c.height = 15 * relationKinds.size + 20;
+        const ctx = c.getContext('2d');
+        new Map([...relationKinds.entries()].sort()).forEach((v, k) => {
+            drawLegendLine(ctx, k, x, kindColor[k], kindDash[k], kindWidth[k])
+            x = x + 15;
+        });
+        drawLegendLine(ctx, "other", x, null, null, null);
+        legend.style.visibility = "visible";
+    }
+
+    function drawLegendLine(ctx, name, x, color, dash, width) {
+        ctx.beginPath();
+        ctx.setLineDash(dash || []);
+        ctx.strokeStyle = color || "#555";
+        ctx.lineWidth = width || 1;
+        ctx.moveTo(10, x-5);
+        ctx.lineTo(150, x-5);
+        ctx.stroke();
+        ctx.font = "12px Arial";
+        ctx.fillText(name, 170, x);
+    }
+
+    function hideLegend() {
+        legend.style.visibility = "hidden";
+    }
+
     function hideExtras() {
         hideNodeMenu();
         hideDetails();
         hideFilters();
+        hideLegend();
     }
 
     document.getElementById("unpin").addEventListener("click", evt => {
