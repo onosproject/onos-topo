@@ -31,12 +31,23 @@ SPDX-License-Identifier: Apache-2.0
             margin: 0;
         }
 
+        #help {
+            visibility: visible;
+            bottom: 20px;
+            right: 20px;
+        }
+
         #details {
             z-index: 2;
         }
 
         #details pre {
             margin: 0;
+        }
+
+        #search {
+            top: 20px;
+            right: 20px;
         }
 
         #filters {
@@ -80,6 +91,11 @@ SPDX-License-Identifier: Apache-2.0
 <body>
 <div id="graph"></div>
 <div id="details" class="popup"></div>
+<div id="search" class="popup">
+    <h1>Search</h1>
+    <br>
+    <input type="text" id="searchERE" width="30" placeholder="Search ERE">
+</div>
 <div id="filters" class="popup"></div>
 <div id="legend" class="popup"></div>
 <div id="item-menu">
@@ -88,23 +104,51 @@ SPDX-License-Identifier: Apache-2.0
     <div class="item" id="collapse">Collapse (Not implemented)</div>
     <div class="item" id="focus">Highlight (Not implemented)</div>
 </div>
+<div id="help" class="popup">
+    <h1>Keyboard Commands</h1>
+    <br>
+    <b>/</b> - search labels using extended regular expressions<br>
+    <b>F</b> - toggle filter of entities and relations by their kind<br>
+    <b>L</b> - toggle display of legend for relations<br>
+    <b>H</b> - toggle display of this help overlay<br>
+    <br>
+    <b>click item</b> - display entity or relation details<br>
+    <b>click item &amp; drag</b> - move and pin selected entity<br>
+    <br>
+    <b>U</b> - unpin selected node<br>
+    <b>R</b> - adjust zoom to fit entire graph into viewport<br>
+    <br>
+    <b>scroll-up/down</b> - zoom out/in<br>
+    <b>click background &amp; drag</b> - pan view<br>
+    <br>
+    <b>esc</b> - dismiss search window or any overlay windows<br>
+</div>
+
 <script>
     const canvas = document.getElementById("graph");
     const details = document.getElementById("details");
+    const search = document.getElementById("search");
+    const searchField = document.getElementById("searchERE");
     const filters = document.getElementById("filters");
     const legend = document.getElementById("legend");
     const itemMenu = document.getElementById("item-menu");
-    const detailScale = 3.0;
-    let nodes = [], links = [], shownItem, overNode, actionNode;
-    let entityKinds = new Map(), relationKinds = new Map(), relayout = false;
-    let linkSources = new Map(), hideDeadEnds = false;
 
+    const detailScale = 3.0;
     const curvatureMinMax = 0.1;
+    const minSearchLength = 3;
     const selectionColor = "#3b78e7";
     const nodeShapeColor = "#999";
     const nodeTextColor = "#333";
     const nodeSelectedTextColor = "#eee";
     const linkTextColor = "#555";
+    const searchMatchColor = "#ff9100";
+    const searchMatchTextColor = "#eee";
+
+    let nodes = [], links = [];
+    let shownItem, overNode, actionNode;
+    let entityKinds = new Map(), relationKinds = new Map(), relayout = false;
+    let linkSources = new Map(), hideDeadEnds = false;
+    let searchPattern;
 
     const graph = ForceGraph()(canvas)
         .maxZoom(6.666)
@@ -148,20 +192,41 @@ SPDX-License-Identifier: Apache-2.0
         processTopoEvent(JSON.parse(evt.data));
     }
 
-    window.addEventListener("keypress", evt => {
+    window.addEventListener("keypress", processKey);
+    searchField.addEventListener("keypress", cancelEscape);
+    searchField.addEventListener("input", processSearch);
+
+    function processKey(evt) {
         if (evt.key === "r") {
             graph.zoomToFit(500, 10);
         } else if (evt.key === "u") {
             unpinNode(overNode);
         } else if (evt.key === "f") {
-            showFilters();
+            toggleFilters();
         } else if (evt.key === "l") {
-            showLegend();
+            toggleLegend();
+        } else if (evt.key === "/") {
+            showSearch();
+        } else if (evt.key === "h") {
+            toggleHelp();
         } else if (evt.key === "Escape") {
             hideExtras();
         }
         // console.log(evt);
-    });
+    }
+
+    function cancelEscape(evt) {
+        if (evt.key === "Escape") {
+            hideSearch();
+        }
+        evt.stopPropagation();
+    }
+
+    function processSearch(evt) {
+        if (searchField.value.length >= minSearchLength) {
+            searchPattern = new RegExp(searchField.value);
+        }
+    }
 
     setTimeout(() => {
         graph.zoomToFit(500, 10);
@@ -410,9 +475,10 @@ SPDX-License-Identifier: Apache-2.0
     const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 
     function drawNode(node, ctx, globalScale) {
+        const label = node.id;
+        const matches = searchPattern && searchPattern.test(label);
         // console.log(globalScale);
         if (globalScale > 1.6) {
-            const label = node.id;
             const iconScale = 0.045;
             const fontSize = 10 / globalScale;
             const icon = kindIcons[node.data.entity.kind]
@@ -421,11 +487,11 @@ SPDX-License-Identifier: Apache-2.0
             ctx.font = `${fontSize}px Sans-Serif`;
             const textWidth = ctx.measureText(label).width;
             const bckgDimensions = [iconWidth + textWidth + 4, fontSize + 2]; // .map(n => n + fontSize * 0.15); // some padding
-            ctx.fillStyle = overNode === node ? selectionColor : "rgba(255, 255, 255, 0.8)";
+            ctx.fillStyle = overNode === node ? selectionColor : (matches ? searchMatchColor : "rgba(255, 255, 255, 0.8)");
             ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillStyle = overNode === node ? nodeSelectedTextColor : nodeTextColor;
+            ctx.fillStyle = overNode === node ? nodeSelectedTextColor : (matches ? searchMatchTextColor : nodeTextColor);
             ctx.fillText(label, node.x + iconWidth, node.y);
             if (drawIcon) {
                 ctx.save();
@@ -523,6 +589,24 @@ SPDX-License-Identifier: Apache-2.0
         details.style.visibility = "hidden";
     }
 
+    function showSearch() {
+        if (searchField.value.length >= minSearchLength) {
+            searchPattern = new RegExp((searchField.value));
+        }
+        search.style.visibility = "visible";
+        setTimeout(() => {
+            searchField.focus()
+        }, 100);
+    }
+
+    function hideSearch() {
+        searchPattern = null;
+        setTimeout(() => {
+            searchField.blur()
+        }, 100);
+        search.style.visibility = "hidden";
+    }
+
     function nodeMenu(node, pos) {
         hideDetails();
         actionNode = node;
@@ -538,44 +622,48 @@ SPDX-License-Identifier: Apache-2.0
         itemMenu.style.visibility = "hidden";
     }
 
-    function showFilters() {
-        let eks = "", rks = "";
-        new Map([...entityKinds.entries()].sort()).forEach((v, k) => {
-            let checked = v ? "checked" : "";
-            eks = eks + `<p><input type="checkbox" class="ek" id="ek_${k}" value="${k}" ${checked}><label for="ek_${k}">${k}</label>`
-        });
-        new Map([...relationKinds.entries()].sort()).forEach((v, k) => {
-            let checked = v ? "checked" : "";
-            rks = rks + `<p><input type="checkbox" class="rk" id="rk_${k}" value="${k}" ${checked}><label for="rk_${k}">${k}</label>`
-        });
+    function toggleFilters() {
+        if (filters.style.visibility !== "visible") {
+            let eks = "", rks = "";
+            new Map([...entityKinds.entries()].sort()).forEach((v, k) => {
+                let checked = v ? "checked" : "";
+                eks = eks + `<p><input type="checkbox" class="ek" id="ek_${k}" value="${k}" ${checked}><label for="ek_${k}">${k}</label>`
+            });
+            new Map([...relationKinds.entries()].sort()).forEach((v, k) => {
+                let checked = v ? "checked" : "";
+                rks = rks + `<p><input type="checkbox" class="rk" id="rk_${k}" value="${k}" ${checked}><label for="rk_${k}">${k}</label>`
+            });
 
-        let layout = `<br><br><br><input type="checkbox" id="relayout"><label for="relayout">Force Layout</label>`
-        let deadends = `<br><br><input type="checkbox" id="deadends"><label for="deadends">Hide Dead-Ends</label>`
-        filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}${layout}${deadends}`;
+            let layout = `<br><br><br><input type="checkbox" id="relayout"><label for="relayout">Force Layout</label>`
+            let deadends = `<br><br><input type="checkbox" id="deadends"><label for="deadends">Hide Dead-Ends</label>`
+            filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}${layout}${deadends}`;
 
-        Array.from(filters.getElementsByTagName("input")).forEach(e => e.addEventListener("change", evt => {
-            if (evt.target.className === "ek") {
-                entityKinds.set(evt.target.value, evt.target.checked);
-            } else if (evt.target.className === "rk") {
-                relationKinds.set(evt.target.value, evt.target.checked);
-            }
-            filterGraphData();
-        }));
+            Array.from(filters.getElementsByTagName("input")).forEach(e => e.addEventListener("change", evt => {
+                if (evt.target.className === "ek") {
+                    entityKinds.set(evt.target.value, evt.target.checked);
+                } else if (evt.target.className === "rk") {
+                    relationKinds.set(evt.target.value, evt.target.checked);
+                }
+                filterGraphData();
+            }));
 
-        document.getElementById("relayout").checked = relayout;
-        document.getElementById("relayout").addEventListener("change", evt => {
-            relayout = evt.target.checked;
-            filterGraphData();
-        });
+            document.getElementById("relayout").checked = relayout;
+            document.getElementById("relayout").addEventListener("change", evt => {
+                relayout = evt.target.checked;
+                filterGraphData();
+            });
 
-        document.getElementById("deadends").checked = hideDeadEnds;
-        document.getElementById("deadends").addEventListener("change", evt => {
-            hideDeadEnds = evt.target.checked;
-            filterGraphData();
-        });
+            document.getElementById("deadends").checked = hideDeadEnds;
+            document.getElementById("deadends").addEventListener("change", evt => {
+                hideDeadEnds = evt.target.checked;
+                filterGraphData();
+            });
 
-        filters.style.visibility = "visible";
-        graph.autoPauseRedraw(false);
+            filters.style.visibility = "visible";
+            graph.autoPauseRedraw(false);
+        } else {
+            hideFilters();
+        }
     }
 
     function hideFilters() {
@@ -598,17 +686,21 @@ SPDX-License-Identifier: Apache-2.0
         return false;
     }
 
-    function showLegend() {
-        legend.innerHTML = `<h1>Relation Kinds Legend</h1><br><canvas id="legend-canvas"></canvas>`;
-        let x = 10, c = document.getElementById("legend-canvas");
-        c.height = 15 * relationKinds.size + 20;
-        const ctx = c.getContext('2d');
-        new Map([...relationKinds.entries()].sort()).forEach((v, k) => {
-            drawLegendLine(ctx, k, x, kindColor[k], kindDash[k], kindWidth[k])
-            x = x + 15;
-        });
-        drawLegendLine(ctx, "other", x, null, null, null);
-        legend.style.visibility = "visible";
+    function toggleLegend() {
+        if (legend.style.visibility !== "visible") {
+            legend.innerHTML = `<h1>Relation Kinds Legend</h1><br><canvas id="legend-canvas"></canvas>`;
+            let x = 10, c = document.getElementById("legend-canvas");
+            c.height = 15 * relationKinds.size + 20;
+            const ctx = c.getContext('2d');
+            new Map([...relationKinds.entries()].sort()).forEach((v, k) => {
+                drawLegendLine(ctx, k, x, kindColor[k], kindDash[k], kindWidth[k])
+                x = x + 15;
+            });
+            drawLegendLine(ctx, "other", x, null, null, null);
+            legend.style.visibility = "visible";
+        } else {
+            hideLegend()
+        }
     }
 
     function drawLegendLine(ctx, name, x, color, dash, width) {
@@ -627,11 +719,25 @@ SPDX-License-Identifier: Apache-2.0
         legend.style.visibility = "hidden";
     }
 
+    function toggleHelp() {
+        if (help.style.visibility !== "visible") {
+            help.style.visibility = "visible";
+        } else {
+            hideHelp();
+        }
+    }
+
+    function hideHelp() {
+        help.style.visibility = "hidden";
+    }
+
     function hideExtras() {
         hideNodeMenu();
         hideDetails();
+        hideSearch();
         hideFilters();
         hideLegend();
+        hideHelp();
     }
 
     document.getElementById("unpin").addEventListener("click", evt => {
@@ -648,6 +754,8 @@ SPDX-License-Identifier: Apache-2.0
         console.log("focusing on node", evt, actionNode);
         hideNodeMenu();
     });
+
+    setTimeout(hideHelp, 5000);
 
 </script>
 </body>
