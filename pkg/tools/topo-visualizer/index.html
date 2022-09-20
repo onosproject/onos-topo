@@ -97,6 +97,7 @@ SPDX-License-Identifier: Apache-2.0
     const detailScale = 3.0;
     let nodes = [], links = [], shownItem, overNode, actionNode;
     let entityKinds = new Map(), relationKinds = new Map(), relayout = false;
+    let linkSources = new Map(), hideDeadEnds = false;
 
     const curvatureMinMax = 0.1;
     const selectionColor = "#3b78e7";
@@ -267,6 +268,17 @@ SPDX-License-Identifier: Apache-2.0
             } else if (same.length === 1) {
                 same[0].curvature = 0;
             }
+        });
+
+        findLinkSources();
+    }
+
+    function findLinkSources() {
+        linkSources = new Map();
+        links.forEach(link => {
+            let id = (typeof link.source === "object") ? link.source.id : link.source;
+            let c = linkSources.get(id) || 0;
+            linkSources.set(id, c + 1);
         });
     }
 
@@ -538,12 +550,13 @@ SPDX-License-Identifier: Apache-2.0
         });
 
         let layout = `<br><br><br><input type="checkbox" id="relayout"><label for="relayout">Force Layout</label>`
-        filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}${layout}`;
+        let deadends = `<br><br><input type="checkbox" id="deadends"><label for="deadends">Hide Dead-Ends</label>`
+        filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}${layout}${deadends}`;
 
         Array.from(filters.getElementsByTagName("input")).forEach(e => e.addEventListener("change", evt => {
             if (evt.target.className === "ek") {
                 entityKinds.set(evt.target.value, evt.target.checked);
-            } else {
+            } else if (evt.target.className === "rk") {
                 relationKinds.set(evt.target.value, evt.target.checked);
             }
             filterGraphData();
@@ -552,6 +565,12 @@ SPDX-License-Identifier: Apache-2.0
         document.getElementById("relayout").checked = relayout;
         document.getElementById("relayout").addEventListener("change", evt => {
             relayout = evt.target.checked;
+            filterGraphData();
+        });
+
+        document.getElementById("deadends").checked = hideDeadEnds;
+        document.getElementById("deadends").addEventListener("change", evt => {
+            hideDeadEnds = evt.target.checked;
             filterGraphData();
         });
 
@@ -565,7 +584,8 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     function filterNodes(node) {
-        if (typeof node === "object" && entityKinds.get(node.data.entity.kind)) {
+        if (typeof node === "object" && entityKinds.get(node.data.entity.kind) &&
+            (!hideDeadEnds || linkSources.get(node.id))) {
             return true;
         }
         return false;
