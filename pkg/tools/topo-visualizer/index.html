@@ -380,6 +380,7 @@ SPDX-License-Identifier: Apache-2.0
         "neighbors": [4, 1],
         "originates": [3, 1],
         "terminates": [3, 1],
+        "pairs": [1, 1]
     }
 
     function linkTypeDash(link) {
@@ -391,7 +392,8 @@ SPDX-License-Identifier: Apache-2.0
         "contains": "#a55",
         "neighbors": "#55a",
         "originates": "#7695e5",
-        "terminates": "#f555d4"
+        "terminates": "#f555d4",
+        "pairs": "#777"
     }
 
     function linkTypeColor(link) {
@@ -469,7 +471,12 @@ SPDX-License-Identifier: Apache-2.0
             'a2.5,2.5,0,0,0-.1-3.4l-7-7a6.2,6.2,0,0,1,8.8-8.8L59.3,59.3' +
             'a2.5,2.5,0,0,0,3.5-3.5l-6.2-6.2a6.2,6.2,0,0,1,0-8.8l6.1-6.1' +
             'a1.8,1.8,0,0,1,2.6,2.6l-6.1,6.1a2.5,2.5,0,0,0,0,3.5l6.2,6.2' +
-            'A6.2,6.2,0,0,1,65.4,61.9Z')
+            'A6.2,6.2,0,0,1,65.4,61.9Z'),
+        nic: new Path2D('M10,15a5,5,0,0,1,5-5h65a5,5,0,0,1,5,5v80a5,5,0,0,1' +
+            '-5,5h-65a5,5,0,0,1-5-5zM87.5,14l11,11a3,10,0,0,1,2,10v40a3,10,' +
+            '0,0,1,-2,10l-11,11zM17,19a2,2,0,0,1,2-2h56a2,2,0,0,1,2,2v26a2,' +
+            '2,0,0,1-2,2h-56a2,2,0,0,1-2-2zM20,20h54v10h-54zM20,33h54v10h' +
+            '-54zM42,70a5,5,0,0,1,10,0a5,5,0,0,1-10,0z')
     }
 
     const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
