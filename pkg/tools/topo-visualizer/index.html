@@ -94,8 +94,9 @@ SPDX-License-Identifier: Apache-2.0
     const filters = document.getElementById("filters");
     const legend = document.getElementById("legend");
     const itemMenu = document.getElementById("item-menu");
+    const detailScale = 3.0;
     let nodes = [], links = [], shownItem, overNode, actionNode;
-    let entityKinds = new Map(), relationKinds = new Map();
+    let entityKinds = new Map(), relationKinds = new Map(), relayout = false;
 
     const curvatureMinMax = 0.1;
     const selectionColor = "#3b78e7";
@@ -105,8 +106,8 @@ SPDX-License-Identifier: Apache-2.0
     const linkTextColor = "#555";
 
     const graph = ForceGraph()(canvas)
-        .maxZoom(12)
-        .minZoom(0.2)
+        .maxZoom(6.666)
+        .minZoom(0.3)
         .graphData({nodes: nodes, links: links})
         .onNodeClick(showDetails)
         .onNodeRightClick(nodeMenu)
@@ -202,13 +203,34 @@ SPDX-License-Identifier: Apache-2.0
                 links = remove(links, data.id);
             }
         }
-        // console.log("nodes:", nodes, "links:", links)
-        graph.graphData({nodes: nodes, links: links});
+        filterGraphData();
         processLinks();
 
         if (shownItem && shownItem.id === data.id) {
             showDetails(shownItem, null);
         }
+    }
+
+    function filterGraphData() {
+        let tnodes = [], tlinks = [];
+        if (relayout) {
+            nodes.forEach(node => {
+                if (entityKinds.get(node.data.entity.kind)) {
+                    tnodes.push(node);
+                }
+            });
+            links.forEach(link => {
+                if (relationKinds.get(link.data.relation.kind) &&
+                    typeof link.source === "object" && entityKinds.get(link.source.data.entity.kind) &&
+                    typeof link.target === "object" && entityKinds.get(link.target.data.entity.kind)) {
+                    tlinks.push(link);
+                }
+            });
+            graph.graphData({nodes: tnodes, links: tlinks});
+        } else {
+            graph.graphData({nodes: nodes, links: links});
+        }
+        graph.autoPauseRedraw(relayout);
     }
 
     function getLID(link) {
@@ -291,7 +313,7 @@ SPDX-License-Identifier: Apache-2.0
         "controls": "#5a5",
         "contains": "#a55",
         "neighbors": "#55a",
-        "originates": "#b007b0",
+        "originates": "#7695e5",
         "terminates": "#f555d4"
     }
 
@@ -319,20 +341,90 @@ SPDX-License-Identifier: Apache-2.0
         }
     }
 
+    kindIcons = {
+        "controller": new Path2D('M15,100a5,5,0,0,1-5-5v-65a5,5,0,0,1,5-5h80a5,5,0,0,1,5,5' +
+            'v65a5,5,0,0,1-5,5zM14,22.5l11-11a10,3,0,0,1,10-2h40a10,3,0,0,1,' +
+            '10,2l11,11zM16,35a5,5,0,0,1,10,0a5,5,0,0,1-10,0z'),
+        "port": new Path2D('M85.5,37.7c0-0.7-0.4-1.3-0.9-1.3H26.2c-0.5,0-' +
+            '0.9,0.6-0.9,1.3v34.6c0,0.7,0.4,1.3,0.9,1.3h11v9.6c0,1.1,0.5,2,' +
+            '1.2,2h9.1c0,0.2,0,0.3,0,0.5v3c0,1.1,0.5,2,1.2,2h13.5c0.6,0,1.2-' +
+            '0.9,1.2-2v-3c0-0.2,0-0.3,0-0.5h9.1c0.6,0,1.2-0.9,1.2-2v-9.6h11' +
+            'c0.5,0,0.9-0.6,0.9-1.3V37.7z M30.2,40h-1v8h1V40zM75.2,40h-2.1v8' +
+            'h2.1V40z M67.7,40h-2.1v8h2.1V40z M60.2,40h-2.1v8h2.1V40z M52.7,' +
+            '40h-2.1v8h2.1V40z M45.2,40h-2.1v8h2.1V40zM37.7,40h-2.1v8h2.1V40' +
+            'z M81.6,40h-1v8h1V40z'),
+        "switch": new Path2D('M60,42.1l-0.9-.3a1.8,1.8,0,0,1-.9-1.6V33.8' +
+            'a1.8,1.8,0,0,1,3.7,0v3.3l13-7.1L61.9,23v3.3' +
+            'A1.8,1.8,0,0,1,60,28.2h-7v3.7h1.7a1.8,1.8,0,0,1,0,3.7H51.2' +
+            'a1.8,1.8,0,0,1-1.8-1.8V26.4a1.8,1.8,0,0,1,1.8-1.8h7V20' +
+            'a1.8,1.8,0,0,1,2.7-1.6l18.7,10a1.8,1.8,0,0,1,0,3.2L60.9,41.8Z' +
+            'M60,69.2l-0.9-.3a1.8,1.8,0,0,1-.9-1.6V60.9a1.8,1.8,0,0,1,3.7,0' +
+            'v3.3l13-7.1-13-6.9v3.3A1.8,1.8,0,0,1,60,55.3h-7V59h1.7' +
+            'a1.8,1.8,0,0,1,0,3.7H51.2a1.8,1.8,0,0,1-1.8-1.8V53.5' +
+            'a1.8,1.8,0,0,1,1.8-1.8h7V47.1a1.8,1.8,0,0,1,2.7-1.6l18.7,10' +
+            'a1.8,1.8,0,0,1,0,3.2L60.9,69ZM40,54.8l-0.9-.2L20.4,44.2' +
+            'a1.8,1.8,0,0,1,0-3.2L39.1,31a1.8,1.8,0,0,1,2.7,1.6v4.5h7' +
+            'A1.8,1.8,0,0,1,50.6,39v7.4a1.8,1.8,0,0,1-1.8,1.8H45.2' +
+            'a1.8,1.8,0,0,1,0-3.7h1.7V40.9H40A1.8,1.8,0,0,1,38.1,39' +
+            'V35.7l-13,6.9,13,7.1V46.4a1.8,1.8,0,0,1,3.7,0v6.5' +
+            'a1.8,1.8,0,0,1-.9,1.6ZM40,81.9l-0.9-.2L20.4,71.4' +
+            'a1.8,1.8,0,0,1,0-3.2l18.7-10a1.8,1.8,0,0,1,2.7,1.6v4.5h7' +
+            'a1.8,1.8,0,0,1,1.8,1.8v7.4a1.8,1.8,0,0,1-1.8,1.8H45.2' +
+            'a1.8,1.8,0,0,1,0-3.7h1.7V68H40a1.8,1.8,0,0,1-1.8-1.8V62.9' +
+            'l-13,6.9,13,7.1V73.6a1.8,1.8,0,0,1,3.7,0V80a1.8,1.8,0,0,1-.9,1.6Z'),
+        "link": new Path2D('M83.2,20L80,16.8a4.8,4.8,0,0,0-6.8,0l-1.4,1.4' +
+            'a4.8,4.8,0,0,0-1.4,3.4l-4.5,5.9a3.8,3.8,0,0,0,.4,5l1.2,1.2' +
+            'a3.8,3.8,0,0,0,5,.4l5.4-3.9,0.5-.6h0a4.8,4.8,0,0,0,3.4-1.4' +
+            'l1.4-1.4A4.8,4.8,0,0,0,83.2,20ZM70.3,31.1H70.1l-1.2-1.2' +
+            'a0.2,0.2,0,0,1,0-.2l3.3-4.4,2.6,2.6Zm10.3-6.9-1.4,1.4' +
+            'a1.1,1.1,0,0,1-1.6,0l-3.2-3.2a1.1,1.1,0,0,1,0-1.6l1.4-1.4' +
+            'a1.1,1.1,0,0,1,1.6,0l3.2,3.2A1.1,1.1,0,0,1,80.6,24.2Z' +
+            'M33.7,67.5l-1.2-1.2a3.8,3.8,0,0,0-5-.4l-5.9,4.5' +
+            'a4.8,4.8,0,0,0-3.4,1.4l-1.4,1.4a4.8,4.8,0,0,0,0,6.8L20,83.2' +
+            'a4.8,4.8,0,0,0,6.8,0l1.4-1.4a4.8,4.8,0,0,0,1.4-3.5l4.5-5.9' +
+            'A3.8,3.8,0,0,0,33.7,67.5ZM25.6,79.3l-1.4,1.4' +
+            'a1.2,1.2,0,0,1-1.6,0l-3.2-3.2a1.1,1.1,0,0,1,0-1.6l1.4-1.4' +
+            'a1.1,1.1,0,0,1,.8-0.3,1.1,1.1,0,0,1,.8.3l3.2,3.2' +
+            'A1.1,1.1,0,0,1,25.6,79.3Zm5.6-9-3.3,4.4-2.5-2.5,4.3-3.3h0.2' +
+            'l1.2,1.2A0.2,0.2,0,0,1,31.1,70.3ZM65.4,61.9a6.2,6.2,0,0,1-8.8,0' +
+            'L37.2,42.5A2.5,2.5,0,1,0,33.7,46l7,7a6.2,6.2,0,0,1,.4,8.3h0' +
+            'l-0.2.2-0.2.2-3.6,3.6a1.8,1.8,0,0,1-2.6-2.6l3.6-3.6h0.1' +
+            'a2.5,2.5,0,0,0-.1-3.4l-7-7a6.2,6.2,0,0,1,8.8-8.8L59.3,59.3' +
+            'a2.5,2.5,0,0,0,3.5-3.5l-6.2-6.2a6.2,6.2,0,0,1,0-8.8l6.1-6.1' +
+            'a1.8,1.8,0,0,1,2.6,2.6l-6.1,6.1a2.5,2.5,0,0,0,0,3.5l6.2,6.2' +
+            'A6.2,6.2,0,0,1,65.4,61.9Z')
+    }
+
+    const map = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+
     function drawNode(node, ctx, globalScale) {
-        if (globalScale > 1.5) {
+        // console.log(globalScale);
+        if (globalScale > 1.6) {
             const label = node.id;
-            const maxFontSize = 256;
-            const fontSize = Math.min(12 / globalScale, maxFontSize);
+            const iconScale = 0.045;
+            const fontSize = 10 / globalScale;
+            const icon = kindIcons[node.data.entity.kind]
+            const drawIcon = icon && globalScale > detailScale;
+            const iconWidth = drawIcon ? fontSize + 1 : 0;
             ctx.font = `${fontSize}px Sans-Serif`;
             const textWidth = ctx.measureText(label).width;
-            const bckgDimensions = [textWidth + 4, fontSize + 2].map(n => n + fontSize * 0.2); // some padding
+            const bckgDimensions = [iconWidth + textWidth + 4, fontSize + 2]; // .map(n => n + fontSize * 0.15); // some padding
             ctx.fillStyle = overNode === node ? selectionColor : "rgba(255, 255, 255, 0.8)";
             ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillStyle = overNode === node ? nodeSelectedTextColor : nodeTextColor;
-            ctx.fillText(label, node.x, node.y);
+            ctx.fillText(label, node.x + iconWidth, node.y);
+            if (drawIcon) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#555";
+                ctx.translate(node.x - bckgDimensions[0] / 2, node.y - 0.5 - bckgDimensions[1] / 2);
+                ctx.scale(iconScale, iconScale);
+                ctx.stroke(icon);
+                ctx.restore();
+            }
 
             node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
         } else {
@@ -351,7 +443,7 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     function drawLink(link, ctx, globalScale) {
-        if (globalScale < 5) {
+        if (globalScale < detailScale) {
             return;
         }
 
@@ -444,7 +536,9 @@ SPDX-License-Identifier: Apache-2.0
             let checked = v ? "checked" : "";
             rks = rks + `<p><input type="checkbox" class="rk" id="rk_${k}" value="${k}" ${checked}><label for="rk_${k}">${k}</label>`
         });
-        filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}`;
+
+        let layout = `<br><br><br><input type="checkbox" id="relayout"><label for="relayout">Force Layout</label>`
+        filters.innerHTML = `<h1>Entity Kinds</h1>${eks}<br><br><h1>Relation Kinds</h1>${rks}${layout}`;
 
         Array.from(filters.getElementsByTagName("input")).forEach(e => e.addEventListener("change", evt => {
             if (evt.target.className === "ek") {
@@ -452,7 +546,15 @@ SPDX-License-Identifier: Apache-2.0
             } else {
                 relationKinds.set(evt.target.value, evt.target.checked);
             }
+            filterGraphData();
         }));
+
+        document.getElementById("relayout").checked = relayout;
+        document.getElementById("relayout").addEventListener("change", evt => {
+            relayout = evt.target.checked;
+            filterGraphData();
+        });
+
         filters.style.visibility = "visible";
         graph.autoPauseRedraw(false);
     }
@@ -463,7 +565,7 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     function filterNodes(node) {
-        if (entityKinds.get(node.data.entity.kind)) {
+        if (typeof node === "object" && entityKinds.get(node.data.entity.kind)) {
             return true;
         }
         return false;
@@ -477,7 +579,7 @@ SPDX-License-Identifier: Apache-2.0
     }
 
     function showLegend() {
-        legend.innerHTML = `<h1>Relations Legend</h1><br><canvas id="legend-canvas"></canvas>`;
+        legend.innerHTML = `<h1>Relation Kinds Legend</h1><br><canvas id="legend-canvas"></canvas>`;
         let x = 10, c = document.getElementById("legend-canvas");
         c.height = 15 * relationKinds.size + 20;
         const ctx = c.getContext('2d');
@@ -494,8 +596,8 @@ SPDX-License-Identifier: Apache-2.0
         ctx.setLineDash(dash || []);
         ctx.strokeStyle = color || "#555";
         ctx.lineWidth = width || 1;
-        ctx.moveTo(10, x-5);
-        ctx.lineTo(150, x-5);
+        ctx.moveTo(10, x - 5);
+        ctx.lineTo(150, x - 5);
         ctx.stroke();
         ctx.font = "12px Arial";
         ctx.fillText(name, 170, x);
