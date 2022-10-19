@@ -7,7 +7,7 @@ package reader
 import (
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"os"
 )
 
 // NetworkLayer stores all the networks
@@ -66,7 +66,7 @@ var log = logging.GetLogger()
 func ReadFile(filename string) NetworkLayer {
 	// reading in the human-readable schema
 	var result NetworkLayer
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		log.Error(err.Error())
 		return result
