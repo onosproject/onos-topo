@@ -6,9 +6,8 @@
 package manager
 
 import (
-	"os"
-
-	"github.com/atomix/atomix-go-client/pkg/atomix"
+	"github.com/atomix/go-client/pkg/client"
+	"github.com/atomix/go-client/pkg/primitive"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	service "github.com/onosproject/onos-topo/pkg/northbound"
@@ -23,7 +22,7 @@ type Config struct {
 	KeyPath      string
 	CertPath     string
 	GRPCPort     int
-	AtomixClient atomix.Client
+	AtomixClient primitive.Client
 }
 
 // NewManager creates a new manager
@@ -67,7 +66,7 @@ func (m *Manager) startNorthboundServer() error {
 		northbound.SecurityConfig{}))
 
 	if m.Config.AtomixClient == nil {
-		m.Config.AtomixClient = atomix.NewClient(atomix.WithClientID(os.Getenv("POD_NAME")))
+		m.Config.AtomixClient = client.NewClient()
 	}
 
 	topoStore, err := store.NewAtomixStore(m.Config.AtomixClient)

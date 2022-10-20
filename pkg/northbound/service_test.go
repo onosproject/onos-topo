@@ -6,13 +6,13 @@ package northbound
 
 import (
 	"context"
+	"github.com/atomix/go-client/pkg/primitive"
+	"github.com/atomix/go-client/pkg/test"
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"sync"
 	"testing"
 
-	"github.com/atomix/atomix-go-client/pkg/atomix/test"
-	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	"github.com/onosproject/onos-topo/pkg/store"
@@ -27,11 +27,7 @@ func bufDialer(context.Context, string) (net.Conn, error) {
 	return lis.Dial()
 }
 
-func newTestService(test *test.Test) (northbound.Service, error) {
-	client, err := test.NewClient("test")
-	if err != nil {
-		return nil, err
-	}
+func newTestService(client primitive.Client) (northbound.Service, error) {
 	store, err := store.NewAtomixStore(client)
 	if err != nil {
 		return nil, err
@@ -41,9 +37,9 @@ func newTestService(test *test.Test) (northbound.Service, error) {
 	}, nil
 }
 
-func createServerConnection(t *testing.T, test *test.Test) *grpc.ClientConn {
+func createServerConnection(t *testing.T, client primitive.Client) *grpc.ClientConn {
 	lis = bufconn.Listen(1024 * 1024)
-	s, err := newTestService(test)
+	s, err := newTestService(client)
 	assert.NoError(t, err)
 	assert.NotNil(t, s)
 	server := grpc.NewServer()
@@ -64,14 +60,10 @@ func createServerConnection(t *testing.T, test *test.Test) *grpc.ClientConn {
 }
 
 func TestServiceBasics(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Cleanup()
 
-	conn := createServerConnection(t, test)
+	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -132,14 +124,10 @@ func TestServiceBasics(t *testing.T) {
 }
 
 func TestWatchBasics(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Cleanup()
 
-	conn := createServerConnection(t, test)
+	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
 
 	cres, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -199,14 +187,10 @@ func TestWatchBasics(t *testing.T) {
 }
 
 func TestBadIDAdd(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Cleanup()
 
-	conn := createServerConnection(t, test)
+	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -216,14 +200,10 @@ func TestBadIDAdd(t *testing.T) {
 }
 
 func TestBadTypeAdd(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Cleanup()
 
-	conn := createServerConnection(t, test)
+	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
@@ -233,14 +213,10 @@ func TestBadTypeAdd(t *testing.T) {
 }
 
 func TestBadRemove(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Cleanup()
 
-	conn := createServerConnection(t, test)
+	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Delete(context.Background(), &topoapi.DeleteRequest{})
@@ -248,14 +224,10 @@ func TestBadRemove(t *testing.T) {
 }
 
 func TestSort(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Cleanup()
 
-	conn := createServerConnection(t, test)
+	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
 
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
