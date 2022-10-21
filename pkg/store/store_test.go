@@ -18,7 +18,7 @@ import (
 
 func TestTopoStore(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	store1, err := NewAtomixStore(cluster)
 	assert.NoError(t, err)
@@ -201,7 +201,7 @@ func nextEvent(t *testing.T, ch chan topoapi.Event) *topoapi.Object {
 
 func TestList(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	// Store def
 	store, _ := NewAtomixStore(cluster)

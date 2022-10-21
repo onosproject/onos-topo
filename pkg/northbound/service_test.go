@@ -61,7 +61,7 @@ func createServerConnection(t *testing.T, client primitive.Client) *grpc.ClientC
 
 func TestServiceBasics(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
@@ -125,7 +125,7 @@ func TestServiceBasics(t *testing.T) {
 
 func TestWatchBasics(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
@@ -188,7 +188,7 @@ func TestWatchBasics(t *testing.T) {
 
 func TestBadIDAdd(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
@@ -201,7 +201,7 @@ func TestBadIDAdd(t *testing.T) {
 
 func TestBadTypeAdd(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
@@ -214,7 +214,7 @@ func TestBadTypeAdd(t *testing.T) {
 
 func TestBadRemove(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
@@ -225,7 +225,7 @@ func TestBadRemove(t *testing.T) {
 
 func TestSort(t *testing.T) {
 	cluster := test.NewClient()
-	defer cluster.Cleanup()
+	defer cluster.Close()
 
 	conn := createServerConnection(t, cluster)
 	client := topoapi.NewTopoClient(conn)
