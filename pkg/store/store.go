@@ -25,6 +25,7 @@ var log = logging.GetLogger()
 // NewAtomixStore returns a new persistent Store
 func NewAtomixStore(client primitive.Client) (Store, error) {
 	objects, err := _map.NewBuilder[topoapi.ID, *topoapi.Object](client, "onos-topo-objects").
+		Tag("onos-topo", "objects").
 		Codec(generic.Proto[*topoapi.Object](&topoapi.Object{})).
 		Get(context.Background())
 	if err != nil {
@@ -47,11 +48,15 @@ func NewAtomixStore(client primitive.Client) (Store, error) {
 	// when objects are deleted, remove their entries. The corresponding relations should be deleted as well by the delete method, so we do not have to search for them.
 	// when objects are added, add their entry to the map
 	// when a relation is added, add the implied relation to the store target and source maps
-	stream, err := objects.Watch(context.Background())
+	events, err := objects.Events(context.Background())
 	if err != nil {
 		return nil, errors.FromAtomix(err)
 	}
-	go store.watchStoreEvents(stream)
+	entries, err := objects.List(context.Background())
+	if err != nil {
+		return nil, errors.FromAtomix(err)
+	}
+	go store.watchStoreEvents(entries, events)
 	return store, nil
 }
 
@@ -119,53 +124,79 @@ type relationMaps struct {
 	lock    sync.RWMutex
 }
 
-func (s *atomixStore) watchStoreEvents(stream _map.EntryStream[topoapi.ID, *topoapi.Object]) {
-	var lastVersion primitive.Version
+func (s *atomixStore) watchStoreEvents(entries _map.EntryStream[topoapi.ID, *topoapi.Object], events _map.EventStream[topoapi.ID, *topoapi.Object]) {
 	for {
-		entry, err := stream.Next()
+		entry, err := entries.Next()
 		if err == io.EOF {
-			return
+			break
 		}
 		if err != nil {
 			log.Error(err)
 			continue
 		}
 
-		if entry.Version <= lastVersion {
+		object := entry.Value
+		object.Revision = topoapi.Revision(entry.Version)
+
+		s.cacheMu.Lock()
+		s.cache[object.ID] = *object
+		s.cacheMu.Unlock()
+
+		s.registerSrcTgt(object, true)
+
+		s.watchersMu.RLock()
+		for _, watcher := range s.watchers {
+			watcher <- topoapi.Event{
+				Type:   topoapi.EventType_NONE,
+				Object: *object,
+			}
+		}
+		s.watchersMu.RUnlock()
+	}
+
+	for {
+		event, err := events.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Error(err)
 			continue
 		}
 
 		var eventType topoapi.EventType
-		var object topoapi.Object
-		if entry.Value != nil {
-			object = *entry.Value
-			object.Revision = topoapi.Revision(entry.Version)
+		var object *topoapi.Object
+		switch e := event.(type) {
+		case *_map.Inserted[topoapi.ID, *topoapi.Object]:
+			object = e.Entry.Value
+			object.Revision = topoapi.Revision(e.Entry.Version)
+			eventType = topoapi.EventType_ADDED
 			s.cacheMu.Lock()
-			if _, ok := s.cache[entry.Key]; !ok {
-				eventType = topoapi.EventType_ADDED
-			} else {
-				eventType = topoapi.EventType_UPDATED
-			}
-			s.cache[entry.Key] = object
+			s.cache[object.ID] = *object
 			s.cacheMu.Unlock()
-		} else {
+			s.registerSrcTgt(object, true)
+		case *_map.Updated[topoapi.ID, *topoapi.Object]:
+			object = e.NewEntry.Value
+			object.Revision = topoapi.Revision(e.NewEntry.Version)
+			eventType = topoapi.EventType_UPDATED
 			s.cacheMu.Lock()
-			if obj, ok := s.cache[entry.Key]; ok {
-				object = obj
-				delete(s.cache, entry.Key)
-				eventType = topoapi.EventType_REMOVED
-			} else {
-				s.cacheMu.Unlock()
-				continue
-			}
+			s.cache[object.ID] = *object
 			s.cacheMu.Unlock()
+		case *_map.Removed[topoapi.ID, *topoapi.Object]:
+			object = e.Entry.Value
+			object.Revision = topoapi.Revision(e.Entry.Version)
+			eventType = topoapi.EventType_REMOVED
+			s.cacheMu.Lock()
+			delete(s.cache, e.Entry.Key)
+			s.cacheMu.Unlock()
+			s.unregisterSrcTgt(object)
 		}
 
 		s.watchersMu.RLock()
 		for _, watcher := range s.watchers {
 			watcher <- topoapi.Event{
 				Type:   eventType,
-				Object: object,
+				Object: *object,
 			}
 		}
 		s.watchersMu.RUnlock()
