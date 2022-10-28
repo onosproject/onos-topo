@@ -6,8 +6,8 @@ package store
 
 import (
 	"context"
-	"github.com/atomix/go-client/pkg/generic"
-	"github.com/atomix/go-client/pkg/primitive"
+	"github.com/atomix/go-sdk/pkg/generic"
+	"github.com/atomix/go-sdk/pkg/primitive"
 	"io"
 	"sync"
 	"time"
@@ -16,7 +16,7 @@ import (
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
-	_map "github.com/atomix/go-client/pkg/primitive/map"
+	_map "github.com/atomix/go-sdk/pkg/primitive/map"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 )
 

@@ -6,7 +6,7 @@ package store
 
 import (
 	"context"
-	"github.com/atomix/go-client/pkg/test"
+	"github.com/atomix/go-sdk/pkg/test"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"testing"
 	"time"

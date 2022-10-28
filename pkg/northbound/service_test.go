@@ -6,8 +6,8 @@ package northbound
 
 import (
 	"context"
-	"github.com/atomix/go-client/pkg/primitive"
-	"github.com/atomix/go-client/pkg/test"
+	"github.com/atomix/go-sdk/pkg/primitive"
+	"github.com/atomix/go-sdk/pkg/test"
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"sync"

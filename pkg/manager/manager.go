@@ -6,8 +6,8 @@
 package manager
 
 import (
-	"github.com/atomix/go-client/pkg/client"
-	"github.com/atomix/go-client/pkg/primitive"
+	"github.com/atomix/go-sdk/pkg/client"
+	"github.com/atomix/go-sdk/pkg/primitive"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
 	service "github.com/onosproject/onos-topo/pkg/northbound"

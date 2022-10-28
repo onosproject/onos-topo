@@ -3,7 +3,7 @@ module github.com/onosproject/onos-topo
 go 1.19
 
 require (
-	github.com/atomix/go-client v0.9.0
+	github.com/atomix/go-sdk v0.10.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
@@ -33,9 +33,9 @@ require (
 	github.com/Shopify/sarama v1.31.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	github.com/atomix/runtime/api v0.7.0 // indirect
-	github.com/atomix/runtime/primitives v0.7.0 // indirect
+	github.com/atomix/runtime/primitives v0.7.1 // indirect
 	github.com/atomix/runtime/proxy v0.10.0 // indirect
-	github.com/atomix/runtime/sdk v0.7.0 // indirect
+	github.com/atomix/runtime/sdk v0.7.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/bits-and-blooms/bloom/v3 v3.2.0 // indirect
