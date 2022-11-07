@@ -33,8 +33,8 @@ require (
 	github.com/Shopify/sarama v1.31.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	github.com/atomix/runtime/api v0.7.0 // indirect
-	github.com/atomix/runtime/primitives v0.7.1 // indirect
-	github.com/atomix/runtime/proxy v0.10.0 // indirect
+	github.com/atomix/runtime/primitives v0.7.2 // indirect
+	github.com/atomix/runtime/proxy v0.12.0 // indirect
 	github.com/atomix/runtime/sdk v0.7.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
