@@ -6,35 +6,24 @@ package store
 
 import (
 	"context"
+	"github.com/atomix/go-sdk/pkg/test"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"testing"
 	"time"
 
-	"github.com/atomix/atomix-go-client/pkg/atomix/test"
-	"github.com/atomix/atomix-go-client/pkg/atomix/test/rsm"
 	"github.com/onosproject/onos-api/go/onos/topo"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTopoStore(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
+	cluster := test.NewClient()
+	defer cluster.Close()
 
-	client1, err := test.NewClient("node-1")
+	store1, err := NewAtomixStore(cluster)
 	assert.NoError(t, err)
 
-	client2, err := test.NewClient("node-2")
-	assert.NoError(t, err)
-
-	store1, err := NewAtomixStore(client1)
-	assert.NoError(t, err)
-
-	store2, err := NewAtomixStore(client2)
+	store2, err := NewAtomixStore(cluster)
 	assert.NoError(t, err)
 
 	// List the objects; there should be none
@@ -211,19 +200,11 @@ func nextEvent(t *testing.T, ch chan topoapi.Event) *topoapi.Object {
 }
 
 func TestList(t *testing.T) {
-	test := test.NewTest(
-		rsm.NewProtocol(),
-		test.WithReplicas(1),
-		test.WithPartitions(1))
-	assert.NoError(t, test.Start())
-	defer test.Stop()
-	// Define client, store, and objects
-
-	// Client def
-	client, _ := test.NewClient("client")
+	cluster := test.NewClient()
+	defer cluster.Close()
 
 	// Store def
-	store, _ := NewAtomixStore(client)
+	store, _ := NewAtomixStore(cluster)
 
 	// Objects def:
 	// - node 1234

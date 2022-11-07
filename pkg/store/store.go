@@ -6,29 +6,32 @@ package store
 
 import (
 	"context"
+	"github.com/atomix/go-sdk/pkg/generic"
+	"github.com/atomix/go-sdk/pkg/primitive"
 	"io"
 	"sync"
 	"time"
 
-	"github.com/atomix/atomix-go-client/pkg/atomix"
-	"github.com/atomix/atomix-go-framework/pkg/atomix/meta"
 	"github.com/google/uuid"
 	"github.com/onosproject/onos-lib-go/pkg/errors"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 
-	_map "github.com/atomix/atomix-go-client/pkg/atomix/map"
-	"github.com/gogo/protobuf/proto"
+	_map "github.com/atomix/go-sdk/pkg/primitive/map"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 )
 
 var log = logging.GetLogger()
 
 // NewAtomixStore returns a new persistent Store
-func NewAtomixStore(client atomix.Client) (Store, error) {
-	objects, err := client.GetMap(context.Background(), "onos-topo-objects")
+func NewAtomixStore(client primitive.Client) (Store, error) {
+	objects, err := _map.NewBuilder[topoapi.ID, *topoapi.Object](client, "onos-topo-objects").
+		Tag("onos-topo", "objects").
+		Codec(generic.Proto[*topoapi.Object](&topoapi.Object{})).
+		Get(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, errors.FromAtomix(err)
 	}
+
 	store := &atomixStore{
 		objects:  objects,
 		cache:    make(map[topoapi.ID]topoapi.Object),
@@ -45,11 +48,15 @@ func NewAtomixStore(client atomix.Client) (Store, error) {
 	// when objects are deleted, remove their entries. The corresponding relations should be deleted as well by the delete method, so we do not have to search for them.
 	// when objects are added, add their entry to the map
 	// when a relation is added, add the implied relation to the store target and source maps
-	mapCh := make(chan _map.Event)
-	if err := objects.Watch(context.Background(), mapCh, _map.WithReplay()); err != nil {
+	events, err := objects.Events(context.Background())
+	if err != nil {
 		return nil, errors.FromAtomix(err)
 	}
-	go store.watchStoreEvents(mapCh)
+	entries, err := objects.List(context.Background())
+	if err != nil {
+		return nil, errors.FromAtomix(err)
+	}
+	go store.watchStoreEvents(entries, events)
 	return store, nil
 }
 
@@ -101,7 +108,7 @@ type watchOptions struct {
 
 // atomixStore is the object implementation of the Store
 type atomixStore struct {
-	objects    _map.Map
+	objects    _map.Map[topoapi.ID, *topoapi.Object]
 	cache      map[topoapi.ID]topoapi.Object
 	cacheMu    sync.RWMutex
 	relations  relationMaps
@@ -117,45 +124,79 @@ type relationMaps struct {
 	lock    sync.RWMutex
 }
 
-func (s *atomixStore) watchStoreEvents(mapCh chan _map.Event) {
-	for event := range mapCh {
-		obj, err := decodeObject(event.Entry)
+func (s *atomixStore) watchStoreEvents(entries _map.EntryStream[topoapi.ID, *topoapi.Object], events _map.EventStream[topoapi.ID, *topoapi.Object]) {
+	for {
+		entry, err := entries.Next()
+		if err == io.EOF {
+			break
+		}
 		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		object := entry.Value
+		object.Revision = topoapi.Revision(entry.Version)
+
+		s.cacheMu.Lock()
+		s.cache[object.ID] = *object
+		s.cacheMu.Unlock()
+
+		s.registerSrcTgt(object, true)
+
+		s.watchersMu.RLock()
+		for _, watcher := range s.watchers {
+			watcher <- topoapi.Event{
+				Type:   topoapi.EventType_NONE,
+				Object: *object,
+			}
+		}
+		s.watchersMu.RUnlock()
+	}
+
+	for {
+		event, err := events.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Error(err)
 			continue
 		}
 
 		var eventType topoapi.EventType
-		switch event.Type {
-		case _map.EventReplay:
-			eventType = topoapi.EventType_NONE
-			s.cacheMu.Lock()
-			s.cache[obj.ID] = *obj
-			s.cacheMu.Unlock()
-			s.registerSrcTgt(obj, true)
-		case _map.EventInsert:
+		var object *topoapi.Object
+		switch e := event.(type) {
+		case *_map.Inserted[topoapi.ID, *topoapi.Object]:
+			object = e.Entry.Value
+			object.Revision = topoapi.Revision(e.Entry.Version)
 			eventType = topoapi.EventType_ADDED
 			s.cacheMu.Lock()
-			s.cache[obj.ID] = *obj
+			s.cache[object.ID] = *object
 			s.cacheMu.Unlock()
-			s.registerSrcTgt(obj, true)
-		case _map.EventUpdate:
+			s.registerSrcTgt(object, true)
+		case *_map.Updated[topoapi.ID, *topoapi.Object]:
+			object = e.NewEntry.Value
+			object.Revision = topoapi.Revision(e.NewEntry.Version)
 			eventType = topoapi.EventType_UPDATED
 			s.cacheMu.Lock()
-			s.cache[obj.ID] = *obj
+			s.cache[object.ID] = *object
 			s.cacheMu.Unlock()
-		case _map.EventRemove:
+		case *_map.Removed[topoapi.ID, *topoapi.Object]:
+			object = e.Entry.Value
+			object.Revision = topoapi.Revision(e.Entry.Version)
 			eventType = topoapi.EventType_REMOVED
 			s.cacheMu.Lock()
-			delete(s.cache, topoapi.ID(event.Entry.Key))
+			delete(s.cache, e.Entry.Key)
 			s.cacheMu.Unlock()
-			s.unregisterSrcTgt(obj)
+			s.unregisterSrcTgt(object)
 		}
 
 		s.watchersMu.RLock()
 		for _, watcher := range s.watchers {
 			watcher <- topoapi.Event{
 				Type:   eventType,
-				Object: *obj,
+				Object: *object,
 			}
 		}
 		s.watchersMu.RUnlock()
@@ -178,7 +219,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		if object.ID == "" {
 			object.ID = topoapi.ID("uuid:" + string(object.UUID))
 		}
-		if _, err := s.objects.Get(ctx, string(object.GetRelation().SrcEntityID)); err != nil {
+		if _, err := s.objects.Get(ctx, object.GetRelation().SrcEntityID); err != nil {
 			err = errors.FromAtomix(err)
 			if !errors.IsNotFound(err) {
 				log.Errorf("Failed to create Object %+v: %v", object, err)
@@ -187,7 +228,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 			log.Warnf("Source Entity does not exist")
 			return errors.NewInvalid("Source Entity does not exist")
 		}
-		if _, err := s.objects.Get(ctx, string(object.GetRelation().TgtEntityID)); err != nil {
+		if _, err := s.objects.Get(ctx, object.GetRelation().TgtEntityID); err != nil {
 			err = errors.FromAtomix(err)
 			if !errors.IsNotFound(err) {
 				log.Errorf("Failed to create Object %+v: %v", object, err)
@@ -201,14 +242,9 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 	}
 
 	log.Infof("Creating Object %+v", object)
-	bytes, err := proto.Marshal(object)
-	if err != nil {
-		log.Errorf("Failed to create Object %+v: %v", object, err)
-		return errors.NewInvalid(err.Error())
-	}
 
-	// Put the object in the map using an optimistic lock if this is an update
-	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfNotSet())
+	// Insert the object into the map
+	entry, err := s.objects.Insert(ctx, object.ID, object)
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsAlreadyExists(err) {
@@ -219,7 +255,7 @@ func (s *atomixStore) Create(ctx context.Context, object *topoapi.Object) error 
 		return err
 	}
 
-	object.Revision = topoapi.Revision(entry.Revision)
+	object.Revision = topoapi.Revision(entry.Version)
 	return nil
 }
 
@@ -235,14 +271,9 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 	}
 
 	log.Infof("Updating Object %+v", object)
-	bytes, err := proto.Marshal(object)
-	if err != nil {
-		log.Errorf("Failed to update Object %+v", object, err)
-		return errors.NewInvalid(err.Error())
-	}
 
 	// Update the object in the map
-	entry, err := s.objects.Put(ctx, string(object.ID), bytes, _map.IfMatch(meta.NewRevision(meta.Revision(object.Revision))))
+	entry, err := s.objects.Update(ctx, object.ID, object, _map.IfVersion(primitive.Version(object.Revision)))
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsNotFound(err) && !errors.IsConflict(err) {
@@ -252,7 +283,7 @@ func (s *atomixStore) Update(ctx context.Context, object *topoapi.Object) error 
 		}
 		return err
 	}
-	object.Revision = topoapi.Revision(entry.Revision)
+	object.Revision = topoapi.Revision(entry.Version)
 	return nil
 }
 
@@ -261,7 +292,7 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 		return nil, errors.NewInvalid("ID cannot be empty")
 	}
 
-	entry, err := s.objects.Get(ctx, string(id))
+	entry, err := s.objects.Get(ctx, id)
 	if err != nil {
 		err = errors.FromAtomix(err)
 		if !errors.IsNotFound(err) {
@@ -271,10 +302,8 @@ func (s *atomixStore) Get(ctx context.Context, id topoapi.ID) (*topoapi.Object, 
 		}
 		return nil, err
 	}
-	obj, err := decodeObject(*entry)
-	if err != nil {
-		return nil, err
-	}
+	obj := entry.Value
+	obj.Revision = topoapi.Revision(entry.Version)
 	s.addSrcTgts(obj)
 	return obj, nil
 }
@@ -291,9 +320,9 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID, revision topoap
 	log.Infof("Deleting Object '%s'", id)
 
 	if revision == 0 {
-		_, err = s.objects.Remove(ctx, string(id))
+		_, err = s.objects.Remove(ctx, id)
 	} else {
-		_, err = s.objects.Remove(ctx, string(id), _map.IfMatch(meta.NewRevision(meta.Revision(revision))))
+		_, err = s.objects.Remove(ctx, id, _map.IfVersion(primitive.Version(revision)))
 	}
 	if err != nil {
 		err = errors.FromAtomix(err)
@@ -309,32 +338,34 @@ func (s *atomixStore) Delete(ctx context.Context, id topoapi.ID, revision topoap
 
 func (s *atomixStore) deleteRelatedRelations(ctx context.Context, id topoapi.ID) error {
 	// access the object to determine its properties
-	mapObj, err := s.objects.Get(ctx, string(id))
+	entry, err := s.objects.Get(ctx, id)
 	if err != nil {
 		return errors.FromAtomix(err)
 	}
-	obj, err := decodeObject(*mapObj)
-	if err != nil {
-		return err
-	}
-
+	obj := entry.Value
 	if obj.GetEntity() != nil {
 		// delete the relations
-		mapCh := make(chan _map.Entry)
-		if err := s.objects.Entries(ctx, mapCh); err != nil {
+		objs, err := s.objects.List(ctx)
+		if err != nil {
 			return errors.FromAtomix(err)
 		}
-		for entry := range mapCh {
-			if ep, err := decodeObject(entry); err == nil {
-				// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
-				if ep.Type == topoapi.Object_RELATION && (ep.GetRelation().GetSrcEntityID() == obj.ID || ep.GetRelation().GetTgtEntityID() == obj.ID) {
-					// the deletion of the relation should trigger the watch to update the store maps
-					_, err = s.objects.Remove(ctx, string(ep.ID))
-					if err != nil {
-						err = errors.FromAtomix(err)
-						if !errors.IsNotFound(err) {
-							return err
-						}
+		for {
+			entry, err := objs.Next()
+			if err == io.EOF {
+				return nil
+			}
+			if err != nil {
+				return errors.FromAtomix(err)
+			}
+			ep := entry.Value
+			// if object is a relation and its kind and src id matches the filter, create blank entry for its target id
+			if ep.Type == topoapi.Object_RELATION && (ep.GetRelation().GetSrcEntityID() == obj.ID || ep.GetRelation().GetTgtEntityID() == obj.ID) {
+				// the deletion of the relation should trigger the watch to update the store maps
+				_, err = s.objects.Remove(ctx, ep.ID)
+				if err != nil {
+					err = errors.FromAtomix(err)
+					if !errors.IsNotFound(err) {
+						return err
 					}
 				}
 			}
@@ -348,8 +379,8 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 		return s.listRelationFilter(ctx, filters)
 	}
 
-	mapCh := make(chan _map.Entry)
-	if err := s.objects.Entries(ctx, mapCh); err != nil {
+	list, err := s.objects.List(ctx)
+	if err != nil {
 		return nil, errors.FromAtomix(err)
 	}
 
@@ -357,27 +388,33 @@ func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]top
 
 	// first make sure there are filters. if there aren't, return everything with the correct type
 	if filters == nil {
-		for entry := range mapCh {
-			if ep, err := decodeObject(entry); err == nil {
-				s.addSrcTgts(ep)
-				eps = append(eps, *ep)
+		for {
+			entry, err := list.Next()
+			if err == io.EOF {
+				return eps, nil
 			}
-		}
-		return eps, nil
-	}
-
-	for entry := range mapCh {
-		if ep, err := decodeObject(entry); err == nil {
-			if match(ep, filters) {
-				if matchType(ep, filters.ObjectTypes) && matchAspects(ep, filters.WithAspects) {
-					s.addSrcTgts(ep)
-					eps = append(eps, *ep)
-				}
+			if err != nil {
+				return nil, errors.FromAtomix(err)
 			}
+			eps = append(eps, *entry.Value)
 		}
 	}
 
-	return eps, nil
+	for {
+		entry, err := list.Next()
+		if err == io.EOF {
+			return eps, nil
+		}
+		if err != nil {
+			return nil, errors.FromAtomix(err)
+		}
+		if match(entry.Value, filters) {
+			if matchType(entry.Value, filters.ObjectTypes) && matchAspects(entry.Value, filters.WithAspects) {
+				s.addSrcTgts(entry.Value)
+				eps = append(eps, *entry.Value)
+			}
+		}
+	}
 }
 
 func (s *atomixStore) listRelationFilter(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error) {
@@ -547,16 +584,6 @@ func (s *atomixStore) Close() error {
 	return nil
 }
 
-func decodeObject(entry _map.Entry) (*topoapi.Object, error) {
-	object := &topoapi.Object{}
-	if err := proto.Unmarshal(entry.Value, object); err != nil {
-		return nil, errors.NewInvalid(err.Error())
-	}
-	object.ID = topoapi.ID(entry.Key)
-	object.Revision = topoapi.Revision(entry.Revision)
-	return object, nil
-}
-
 func (s *atomixStore) addSrcTgts(obj *topoapi.Object) {
 	if obj.GetEntity() != nil {
 		s.relations.lock.RLock()
@@ -571,19 +598,19 @@ func (s *atomixStore) registerSrcTgt(obj *topoapi.Object, strict bool) {
 	if relation := obj.GetRelation(); relation != nil {
 		if strict {
 			// check that the connection is valid (src and tgt are in the store). otherwise remove the dangling relation
-			if _, err := s.objects.Get(context.Background(), string(relation.SrcEntityID)); err != nil {
+			if _, err := s.objects.Get(context.Background(), relation.SrcEntityID); err != nil {
 				err = errors.FromAtomix(err)
 				if errors.IsNotFound(err) {
-					_, _ = s.objects.Remove(context.Background(), string(obj.ID))
+					_, _ = s.objects.Remove(context.Background(), obj.ID)
 				} else {
 					log.Error(err)
 				}
 				return
 			}
-			if _, err := s.objects.Get(context.Background(), string(relation.TgtEntityID)); err != nil {
+			if _, err := s.objects.Get(context.Background(), relation.TgtEntityID); err != nil {
 				err = errors.FromAtomix(err)
 				if errors.IsNotFound(err) {
-					_, _ = s.objects.Remove(context.Background(), string(obj.ID))
+					_, _ = s.objects.Remove(context.Background(), obj.ID)
 				} else {
 					log.Error(err)
 				}
