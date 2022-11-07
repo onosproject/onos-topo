@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/onosproject/helmit v0.6.19
 	github.com/onosproject/onos-api/go v0.9.43
-	github.com/onosproject/onos-lib-go v0.8.16
+	github.com/onosproject/onos-lib-go v0.9.5
 	github.com/onosproject/onos-test v0.6.6
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
@@ -35,7 +35,7 @@ require (
 	github.com/atomix/runtime/api v0.7.0 // indirect
 	github.com/atomix/runtime/primitives v0.7.1 // indirect
 	github.com/atomix/runtime/proxy v0.10.0 // indirect
-	github.com/atomix/runtime/sdk v0.7.2 // indirect
+	github.com/atomix/runtime/sdk v0.7.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/bits-and-blooms/bloom/v3 v3.2.0 // indirect
@@ -185,5 +185,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
-
-replace github.com/onosproject/onos-lib-go => github.com/kuujo/onos-lib-go v0.0.0-20221020215300-9ee1ced02fa6
