@@ -76,8 +76,11 @@ type Store interface {
 	// Delete deletes a object from the store
 	Delete(ctx context.Context, id topoapi.ID, revision topoapi.Revision) error
 
-	// List streams objects to the given channel
+	// DEPRECATED: List returns an array of objects
 	List(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error)
+
+	// Query streams objects to the given channel
+	Query(ctx context.Context, ch chan<- *topoapi.Object, filters *topoapi.Filters) error
 
 	// Watch streams object events to the given channel
 	Watch(ctx context.Context, ch chan<- topoapi.Event, filters *topoapi.Filters, opts ...WatchOption) error
@@ -372,6 +375,60 @@ func (s *atomixStore) deleteRelatedRelations(ctx context.Context, id topoapi.ID)
 		}
 	}
 	return nil
+}
+
+// Query streams objects to the given channel
+func (s *atomixStore) Query(ctx context.Context, ch chan<- *topoapi.Object, filters *topoapi.Filters) error {
+	if filters != nil && filters.RelationFilter != nil {
+		objects, err := s.listRelationFilter(ctx, filters)
+		if err != nil {
+			return err
+		}
+		for _, object := range objects {
+			ch <- &object //nolint:gosec
+		}
+		close(ch)
+		return nil
+	}
+
+	stream, err := s.objects.List(ctx)
+	if err != nil {
+		return errors.FromAtomix(err)
+	}
+
+	// If there are no filters, stream everything back
+	if filters == nil {
+		for {
+			entry, err := stream.Next()
+			if err == io.EOF {
+				close(ch)
+				return nil
+			}
+			if err != nil {
+				return errors.FromAtomix(err)
+			}
+			ch <- entry.Value
+		}
+	}
+
+	// Otherwise filter the stream using the supplied filters
+	for {
+		entry, err := stream.Next()
+		if err == io.EOF {
+			close(ch)
+			return nil
+		}
+		if err != nil {
+			return errors.FromAtomix(err)
+		}
+
+		if match(entry.Value, filters) {
+			if matchType(entry.Value, filters.ObjectTypes) && matchAspects(entry.Value, filters.WithAspects) {
+				s.addSrcTgts(entry.Value)
+				ch <- entry.Value
+			}
+		}
+	}
 }
 
 func (s *atomixStore) List(ctx context.Context, filters *topoapi.Filters) ([]topoapi.Object, error) {

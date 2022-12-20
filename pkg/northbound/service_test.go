@@ -9,6 +9,7 @@ import (
 	"github.com/atomix/go-sdk/pkg/primitive"
 	"github.com/atomix/go-sdk/pkg/test"
 	"google.golang.org/grpc/credentials/insecure"
+	"io"
 	"net"
 	"sync"
 	"testing"
@@ -110,11 +111,30 @@ func TestServiceBasics(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 6.28, loc.Lng)
 
+	qst, err := client.Query(context.Background(), &topoapi.QueryRequest{})
+	assert.NoError(t, err)
+	_, err = qst.Recv()
+	assert.NoError(t, err)
+	_, err = qst.Recv()
+	assert.NoError(t, err)
+	_, err = qst.Recv()
+	assert.True(t, err == io.EOF)
+
 	_, err = client.Delete(context.Background(), &topoapi.DeleteRequest{
 		ID:       obj.ID,
 		Revision: obj.Revision,
 	})
 	assert.NoError(t, err)
+
+	qst, err = client.Query(context.Background(), &topoapi.QueryRequest{})
+	assert.NoError(t, err)
+	qres, err := qst.Recv()
+	assert.NoError(t, err)
+	assert.Condition(t, func() bool {
+		return qres.Object.ID == "2"
+	})
+	qres, err = qst.Recv()
+	assert.True(t, err == io.EOF)
 
 	res, err = client.List(context.Background(), &topoapi.ListRequest{})
 	assert.NoError(t, err)
