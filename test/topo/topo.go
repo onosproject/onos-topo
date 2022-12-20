@@ -14,7 +14,8 @@ import (
 	"gotest.tools/assert"
 )
 
-func createEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any) error {
+// CreateEntity creates an entity object
+func CreateEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any) error {
 	aspects := map[string]*types.Any{}
 	for _, aspect := range aspectList {
 		aspects[aspect.TypeUrl] = aspect
@@ -30,7 +31,8 @@ func createEntity(client topoapi.TopoClient, id string, kindID string, aspectLis
 	return err
 }
 
-func createRelation(client topoapi.TopoClient, src string, tgt string, kindID string) error {
+// CreateRelation creates a relation object
+func CreateRelation(client topoapi.TopoClient, src string, tgt string, kindID string) error {
 	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:   topoapi.ID(src + tgt + kindID),
@@ -56,14 +58,14 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	client := topoapi.NewTopoClient(conn)
 
 	t.Logf("Adding first device to the topo store")
-	err = createEntity(client, "1", "testKind", []*types.Any{
+	err = CreateEntity(client, "1", "testKind", []*types.Any{
 		{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123, "lng": 321}`)},
 		{TypeUrl: "foo", Value: []byte(`{"s": "barfoo", "n": 314, "b": true}`)},
 	})
 	assert.NilError(t, err)
 
 	t.Logf("Adding second device to the topo store")
-	err = createEntity(client, "2", "testKind", []*types.Any{
+	err = CreateEntity(client, "2", "testKind", []*types.Any{
 		{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 111, "lng": 222}`)},
 		{TypeUrl: "foo", Value: []byte(`{"s": "foobar", "n": 628, "b": true}`)},
 	})

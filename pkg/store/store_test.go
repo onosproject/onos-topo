@@ -361,6 +361,195 @@ func TestList(t *testing.T) {
 	// No test for relation filter with target kind: cell-neighbor, node-cell do not have different target kinds
 }
 
+const depth = 512
+
+func TestQuery(t *testing.T) {
+	cluster := test.NewClient()
+	defer cluster.Close()
+
+	// Store def
+	store, _ := NewAtomixStore(cluster)
+
+	// Objects def:
+	// - node 1234
+	// - node 2001
+	// - cell 87893172902461441
+	// - cell 87893172902461443
+	// - cell 87893172902445057
+	// - cell 87893172902445058
+	// - cell 87893172902445059
+	// - cell 87893172902445060
+	// - cell-neighbor: 87893172902461441, 87893172902461443 + vice versa
+	// - cell-neighbor: 87893172902445057, 87893172902445058 + vice versa
+	// - cell-neighbor: 87893172902445058, 87893172902445059 + vice versa
+	// - cell-neighbor: 87893172902445059, 87893172902445060 + vice versa
+	// - node-cell: 1234, 87893172902461441
+	// - node-cell: 1234, 87893172902461443
+	// - node-cell: 2001, 87893172902445057
+	// - node-cell: 2001, 87893172902445058
+	// - node-cell: 2001, 87893172902445059
+	// - node-cell: 2001, 87893172902445060
+	createObjectsListTest(t, store)
+
+	object, err := store.Get(context.TODO(), "1234")
+	assert.NoError(t, err)
+	assert.Len(t, object.GetEntity().SrcRelationIDs, 2)
+	assert.Len(t, object.GetEntity().TgtRelationIDs, 0)
+
+	// List the objects
+	ch := make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, consume(ch), 22) // 2 nodes + 6 cells + 8 cell-neighbors + 6 node-cells
+
+	// List the objects
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{ObjectTypes: []topoapi.Object_Type{topoapi.Object_ENTITY}})
+	assert.NoError(t, err)
+	assert.Equal(t, consume(ch), 8) // 2 nodes + 6 cells
+
+	// List the objects with label filter
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{LabelFilters: []*topoapi.Filter{
+		{
+			Filter: &topoapi.Filter_Equal_{
+				Equal_: &topoapi.EqualFilter{Value: "production"},
+			},
+			Key: "env",
+		},
+	}})
+	assert.NoError(t, err)
+	assert.Equal(t, 3, consume(ch)) // node 1234, node 2001, and cell 87893172902461441 have the "env": "production" label
+
+	// List the objects with kind filter
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{KindFilter: &topoapi.Filter{
+		Filter: &topoapi.Filter_Not{
+			Not: &topoapi.NotFilter{
+				Inner: &topoapi.Filter{
+					Filter: &topoapi.Filter_Equal_{
+						Equal_: &topoapi.EqualFilter{Value: "e2-cell"},
+					},
+				},
+			},
+		},
+	},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 16, consume(ch)) // 2 nodes + 8 cell-neighbors + 6 node-cells
+
+	// List the objects with relation filter. this has an implicit scope of topoapi.RelationFilterScope_TARGET_ONLY
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: ""},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // the 1234 node has two cells
+
+	// List the objects with relation filter and scope All
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: "", Scope: topoapi.RelationFilterScope_ALL},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 5, consume(ch)) // 1 node, 2 relations, 2 cells
+
+	// List the objects with relation filter and scope Source and Target
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "1234", RelationKind: "e2-node-cell", TargetKind: "", Scope: topoapi.RelationFilterScope_SOURCE_AND_TARGETS},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 3, consume(ch)) // 1 node, 2 cells
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_SOURCE_AND_TARGETS},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 3, consume(ch)) // 58 and neighbors 57 and 59
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_TARGETS_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // neighbors 57 and 59
+	//assert.Equal(t, topoapi.Object_ENTITY, objects[0].Type)
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_RELATIONS_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // neighbors 57 and 59 relations
+	//assert.Equal(t, topoapi.Object_RELATION, objects[0].Type)
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{SrcId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_RELATIONS_AND_TARGETS},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 4, consume(ch)) // neighbors 57 and 59 entities and corresponding relations
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "", Scope: topoapi.RelationFilterScope_TARGETS_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // neighbors 57 and 59
+	//assert.Equal(t, topoapi.Object_ENTITY, objects[0].Type)
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_TARGETS_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // neighbors 57 and 59
+	//assert.Equal(t, topoapi.Object_ENTITY, objects[0].Type)
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_RELATIONS_ONLY},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // neighbors 57 and 59 relations
+	//assert.Equal(t, topoapi.Object_RELATION, objects[0].Type)
+
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		RelationFilter: &topoapi.RelationFilter{TargetId: "87893172902445058", RelationKind: "e2-cell-neighbor", TargetKind: "e2-cell", Scope: topoapi.RelationFilterScope_RELATIONS_AND_TARGETS},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 4, consume(ch)) // neighbors 57 and 59 entities and corresponding relations
+
+	// List the objects with object type filter
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		ObjectTypes: []topoapi.Object_Type{topo.Object_ENTITY},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 8, consume(ch)) // nodes + cells
+
+	// List the objects with object type filter and aspect Location
+	ch = make(chan *topoapi.Object, depth)
+	err = store.Query(context.TODO(), ch, &topoapi.Filters{
+		WithAspects: []string{"onos.topo.Location"},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, consume(ch)) // nodes
+
+	// No test for relation filter with target kind: cell-neighbor, node-cell do not have different target kinds
+}
+
+func consume(ch chan *topoapi.Object) int {
+	count := 0
+	for range ch {
+		count++
+	}
+	return count
+}
+
 type auxNode struct {
 	id     string
 	labels map[string]string

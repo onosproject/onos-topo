@@ -104,6 +104,28 @@ func (s *Server) Delete(ctx context.Context, req *topoapi.DeleteRequest) (*topoa
 	return res, nil
 }
 
+// Query streams back results of a query
+func (s *Server) Query(req *topoapi.QueryRequest, server topoapi.Topo_QueryServer) error {
+	log.Infof("Received QueryRequest %+v", req)
+
+	ch := make(chan *topoapi.Object, 512)
+	go func() {
+		if err := s.objectStore.Query(server.Context(), ch, req.Filters); err != nil {
+			log.Warnf("QueryRequest %+v failed: %v", req, err)
+		}
+	}()
+
+	for object := range ch {
+		res := &topoapi.QueryResponse{Object: object}
+		log.Debugf("Sending QueryResponse %+v", res)
+		if err := server.Send(res); err != nil {
+			log.Warnf("QueryResponse %+v failed: %v", res, err)
+			return err
+		}
+	}
+	return nil
+}
+
 // List returns list of all objects
 func (s *Server) List(ctx context.Context, req *topoapi.ListRequest) (*topoapi.ListResponse, error) {
 	log.Infof("Received ListRequest %+v", req)
@@ -153,7 +175,7 @@ func (s *Server) Stream(server topoapi.Topo_WatchServer, ch chan topoapi.Event) 
 			Event: event,
 		}
 
-		log.Infof("Sending WatchResponse %+v", res)
+		log.Debugf("Sending WatchResponse %+v", res)
 		if err := server.Send(res); err != nil {
 			log.Warnf("WatchResponse %+v failed: %v", res, err)
 			return err
