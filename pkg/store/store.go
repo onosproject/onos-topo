@@ -384,8 +384,8 @@ func (s *atomixStore) Query(ctx context.Context, ch chan<- *topoapi.Object, filt
 		if err != nil {
 			return err
 		}
-		for _, object := range objects {
-			ch <- &object //nolint:gosec
+		for i := range objects {
+			ch <- &objects[i]
 		}
 		close(ch)
 		return nil

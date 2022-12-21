@@ -14,6 +14,7 @@ import (
 	"github.com/onosproject/onos-topo/test/topo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"sync"
 )
 
 // Utility to populate onos-topo with a large scale topology for testing purposes.
@@ -24,13 +25,15 @@ func main() {
 var log = logging.GetLogger("topo-scale")
 
 const (
-	superSpineCount    = 4
-	portsPerSuperSpine = 64
+	superSpineCount      = 4
+	portsPerSuperSpine   = 64
+	spineSuperSpineTrunk = 2
 
-	podCount      = 16
-	spinePerPod   = 2
-	rackPerPod    = 6
-	serversPerPod = 12
+	podCount       = 16
+	spinePerPod    = 2
+	rackPerPod     = 6
+	serversPerPod  = 12
+	leafSpineTrunk = 4
 
 	maxVMsPerServer = 20
 	portsPerSpine   = 32
@@ -47,6 +50,7 @@ func assertNoError(err error) {
 
 // Builder hods state to assist generating various fabric topologies
 type Builder struct {
+	lock     sync.RWMutex
 	nextPort map[string]int
 }
 
@@ -59,6 +63,8 @@ func NewBuilder() *Builder {
 
 // NextDevicePortID reserves the next available port ID and returns it
 func (b *Builder) NextDevicePortID(deviceID string) string {
+	b.lock.Lock()
+	defer b.lock.Unlock()
 	portNumber, ok := b.nextPort[deviceID]
 	if !ok {
 		portNumber = 1
@@ -111,16 +117,23 @@ func createPodDeployment() {
 		createDevice(client, "switch", fmt.Sprintf("superspine-%d", ssi), portsPerSuperSpine)
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(podCount)
 	for pi := 1; pi <= podCount; pi++ {
 		podName := fmt.Sprintf("pod-%02d", pi)
-		createPod(client, pi, podName, builder)
+		createPod(client, pi, podName, builder, &wg)
 	}
+	wg.Wait()
 
-	// TODO create rack contains for super-spines
-
+	for ssi := 1; ssi <= superSpineCount; ssi++ {
+		podNumber := (ssi-1)*podCount/superSpineCount + 1
+		rackName := fmt.Sprintf("rack-%02d-1", podNumber)
+		err = topo.CreateRelation(client, rackName, fmt.Sprintf("superspine-%d", ssi), "contains")
+		assertNoError(err)
+	}
 }
 
-func createPod(client topoapi.TopoClient, podID int, podName string, builder *Builder) {
+func createPod(client topoapi.TopoClient, podID int, podName string, builder *Builder, wg *sync.WaitGroup) {
 	log.Infof("Creating pod %s...", podName)
 	err := topo.CreateEntity(client, podName, "pod", nil)
 	assertNoError(err)
@@ -133,24 +146,33 @@ func createPod(client topoapi.TopoClient, podID int, podName string, builder *Bu
 
 		for ssi := 1; ssi <= superSpineCount; ssi++ {
 			superSpineName := fmt.Sprintf("superspine-%d", ssi)
-			createLinkTrunk(client, superSpineName, spineName, 2, "link", builder)
+			createLinkTrunk(client, superSpineName, spineName, spineSuperSpineTrunk, "link", builder)
 		}
 	}
 
-	for ri := 1; ri <= rackPerPod; ri++ {
-		rackName := fmt.Sprintf("rack-%02d-%d", podID, ri)
-		createRack(client, podID, ri, rackName)
-		err = topo.CreateRelation(client, podName, rackName, "contains")
-		assertNoError(err)
+	go func() {
+		for ri := 1; ri <= rackPerPod; ri++ {
+			rackName := fmt.Sprintf("rack-%02d-%d", podID, ri)
+			createRack(client, podID, ri, rackName)
+			err = topo.CreateRelation(client, podName, rackName, "contains")
+			assertNoError(err)
 
-		leafName := fmt.Sprintf("leaf-%02d-%d", podID, ri)
+			leafName := fmt.Sprintf("leaf-%02d-%d", podID, ri)
+			for si := 1; si <= spinePerPod; si++ {
+				spineName := fmt.Sprintf("spine-%02d-%d", podID, si)
+				createLinkTrunk(client, spineName, leafName, leafSpineTrunk, "link", builder)
+			}
+		}
+
 		for si := 1; si <= spinePerPod; si++ {
-			spineName := fmt.Sprintf("spine-%02d-%d", podID, si)
-			createLinkTrunk(client, spineName, leafName, 2, "link", builder)
+			rackID := (si-1)*rackPerPod/spinePerPod + 1
+			rackName := fmt.Sprintf("rack-%02d-%d", podID, rackID)
+			err = topo.CreateRelation(client, rackName, fmt.Sprintf("spine-%02d-%d", podID, si), "contains")
+			assertNoError(err)
 		}
-	}
 
-	// TODO create rack contains for spines
+		wg.Done()
+	}()
 }
 
 func createRack(client topoapi.TopoClient, podID int, rackID int, rackName string) {
@@ -178,6 +200,7 @@ func createServer(client topoapi.TopoClient, podID int, rackID int, serverID int
 	ipuName := fmt.Sprintf("ipu-%02d-%d-%02d", podID, rackID, serverID)
 	createDevice(client, "ipu", ipuName, portsPerIPU+maxVMsPerServer)
 	err = topo.CreateRelation(client, serverName, ipuName, "contains")
+	createBidirectionalLink(client, ipuName, fmt.Sprintf("leaf-%02d-%d", podID, rackID), "link")
 	assertNoError(err)
 
 	for i := 1; i <= maxVMsPerServer; i++ {
