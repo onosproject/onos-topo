@@ -144,6 +144,7 @@ SPDX-License-Identifier: Apache-2.0
     const searchMatchColor = "#ff9100";
     const searchMatchTextColor = "#eee";
 
+    let timeout = null, eventCount = 0;
     let nodes = [], links = [];
     let shownItem, overNode, actionNode;
     let entityKinds = new Map(), relationKinds = new Map(), relayout = false;
@@ -269,12 +270,24 @@ SPDX-License-Identifier: Apache-2.0
                 links = remove(links, data.id);
             }
         }
-        filterGraphData();
-        processLinks();
+        eventCount++;
+        if ((eventCount % 1000) === 0) {
+            console.log(eventCount);
+        }
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(updateGraph, 100);
 
         if (shownItem && shownItem.id === data.id) {
             showDetails(shownItem, null);
         }
+    }
+
+    function updateGraph() {
+        console.log('Updating graph...');
+        filterGraphData();
+        processLinks();
     }
 
     function filterGraphData() {
