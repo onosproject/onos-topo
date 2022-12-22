@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-// Package manager is is the main coordinator for the ONOS topology subsystem.
+// Package manager is the main coordinator for the ONOS topology subsystem.
 package manager
 
 import (
@@ -19,7 +19,6 @@ var log = logging.GetLogger("manager")
 
 // Config is a manager configuration
 type Config struct {
-	AtomixClient primitive.Client
 	ServiceFlags *cli.ServiceEndpointFlags
 }
 
@@ -34,48 +33,31 @@ func NewManager(config Config) *Manager {
 // Manager single point of entry for the topology system.
 type Manager struct {
 	cli.Daemon
-	Config Config
+	Config       Config
+	atomixClient primitive.Client
+	topoStore    store.Store
 }
 
 // Start starts the manager
 func (m *Manager) Start() error {
 	log.Info("Starting Manager")
-	err := m.startNorthboundServer()
-	if err != nil {
+
+	var err error
+	if m.atomixClient == nil {
+		m.atomixClient = client.NewClient()
+	}
+	if m.topoStore, err = store.NewAtomixStore(m.atomixClient); err != nil {
 		return err
 	}
-	return nil
+
+	s := northbound.NewServer(cli.ServerConfigFromFlags(m.Config.ServiceFlags, northbound.SecurityConfig{}))
+	s.AddService(logging.Service{})
+	s.AddService(service.NewService(m.topoStore))
+	return s.StartInBackground()
 }
 
 // Stop stops the channels and manager related objects
 func (m *Manager) Stop() {
 	log.Info("Stopping Manager")
-}
-
-// startNorthboundServer starts the northbound gRPC server
-func (m *Manager) startNorthboundServer() error {
-	s := northbound.NewServer(cli.ServerConfigFromFlags(m.Config.ServiceFlags, northbound.SecurityConfig{}))
-	if m.Config.AtomixClient == nil {
-		m.Config.AtomixClient = client.NewClient()
-	}
-
-	topoStore, err := store.NewAtomixStore(m.Config.AtomixClient)
-	if err != nil {
-		return err
-	}
-
-	s.AddService(logging.Service{})
-	s.AddService(service.NewService(topoStore))
-
-	doneCh := make(chan error)
-	go func() {
-		err := s.Serve(func(started string) {
-			log.Info("Started NBI on ", started)
-			close(doneCh)
-		})
-		if err != nil {
-			doneCh <- err
-		}
-	}()
-	return <-doneCh
+	_ = m.topoStore.Close()
 }
