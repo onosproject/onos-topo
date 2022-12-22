@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/onosproject/helmit v0.6.19
 	github.com/onosproject/onos-api/go v0.10.7
-	github.com/onosproject/onos-lib-go v0.9.5
+	github.com/onosproject/onos-lib-go v0.10.3
 	github.com/onosproject/onos-test v0.6.6
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
