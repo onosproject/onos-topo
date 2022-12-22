@@ -7,7 +7,6 @@ package manager
 
 import (
 	"github.com/atomix/go-sdk/pkg/client"
-	"github.com/atomix/go-sdk/pkg/primitive"
 	"github.com/onosproject/onos-lib-go/pkg/cli"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
 	"github.com/onosproject/onos-lib-go/pkg/northbound"
@@ -33,9 +32,8 @@ func NewManager(config Config) *Manager {
 // Manager single point of entry for the topology system.
 type Manager struct {
 	cli.Daemon
-	Config       Config
-	atomixClient primitive.Client
-	topoStore    store.Store
+	Config    Config
+	topoStore store.Store
 }
 
 // Start starts the manager
@@ -43,10 +41,7 @@ func (m *Manager) Start() error {
 	log.Info("Starting Manager")
 
 	var err error
-	if m.atomixClient == nil {
-		m.atomixClient = client.NewClient()
-	}
-	if m.topoStore, err = store.NewAtomixStore(m.atomixClient); err != nil {
+	if m.topoStore, err = store.NewAtomixStore(client.NewClient()); err != nil {
 		return err
 	}
 
