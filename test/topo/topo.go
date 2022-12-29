@@ -15,7 +15,7 @@ import (
 )
 
 // CreateEntity creates an entity object
-func CreateEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any) error {
+func CreateEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any, labels map[string]string) error {
 	aspects := map[string]*types.Any{}
 	for _, aspect := range aspectList {
 		aspects[aspect.TypeUrl] = aspect
@@ -26,6 +26,7 @@ func CreateEntity(client topoapi.TopoClient, id string, kindID string, aspectLis
 			Type:    topoapi.Object_ENTITY,
 			Aspects: aspects,
 			Obj:     &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID(kindID)}},
+			Labels:  labels,
 		},
 	})
 	return err
@@ -61,14 +62,14 @@ func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
 	err = CreateEntity(client, "1", "testKind", []*types.Any{
 		{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123, "lng": 321}`)},
 		{TypeUrl: "foo", Value: []byte(`{"s": "barfoo", "n": 314, "b": true}`)},
-	})
+	}, nil)
 	assert.NilError(t, err)
 
 	t.Logf("Adding second device to the topo store")
 	err = CreateEntity(client, "2", "testKind", []*types.Any{
 		{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 111, "lng": 222}`)},
 		{TypeUrl: "foo", Value: []byte(`{"s": "foobar", "n": 628, "b": true}`)},
-	})
+	}, nil)
 	assert.NilError(t, err)
 
 	t.Logf("Checking whether added device exists")

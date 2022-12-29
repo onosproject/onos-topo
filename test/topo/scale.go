@@ -25,11 +25,11 @@ func (s *TestSuite) TestScale(t *testing.T) {
 
 	t.Logf("Creating 100 nodes, with 6 cells each Nd 6 node-cell relations")
 	for n := 0; n < 100; n++ {
-		err = CreateEntity(client, fmt.Sprintf("node%d", n+1), "e2node", []*types.Any{{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123.0, "lng": 321.0}`)}})
+		err = CreateEntity(client, fmt.Sprintf("node%d", n+1), "e2node", []*types.Any{{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123.0, "lng": 321.0}`)}}, nil)
 		assert.NilError(t, err)
 
 		for c := 0; c < 6; c++ {
-			err = CreateEntity(client, fmt.Sprintf("cell%d%d", n+1, c+1), "e2cell", []*types.Any{{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123.0, "lng": 321.0}`)}})
+			err = CreateEntity(client, fmt.Sprintf("cell%d%d", n+1, c+1), "e2cell", []*types.Any{{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123.0, "lng": 321.0}`)}}, nil)
 			assert.NilError(t, err)
 			err = CreateRelation(client, fmt.Sprintf("node%d", n+1), fmt.Sprintf("cell%d%d", n+1, c+1), "contains")
 			assert.NilError(t, err)
