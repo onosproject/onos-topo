@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/onosproject/helmit v0.6.19
-	github.com/onosproject/onos-api/go v0.10.13
+	github.com/onosproject/onos-api/go v0.10.14
 	github.com/onosproject/onos-lib-go v0.10.4
 	github.com/onosproject/onos-test v0.6.6
 	github.com/spf13/cobra v1.4.0
