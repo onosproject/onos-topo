@@ -8,11 +8,11 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/gogo/protobuf/types"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	"github.com/onosproject/onos-lib-go/pkg/certs"
 	"github.com/onosproject/onos-lib-go/pkg/grpc/retry"
 	"github.com/onosproject/onos-lib-go/pkg/logging"
-	"github.com/onosproject/onos-topo/test/topo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"sync"
@@ -132,7 +132,7 @@ func createPodDeployment() {
 		rackName := fmt.Sprintf("rack-%02d-1", podNumber)
 		superspineName := fmt.Sprintf("superspine-%d", ssi)
 		assertNoError(addLabels(client, superspineName, Labels{"pod": podName, "rack": rackName}))
-		assertNoError(topo.CreateRelation(client, rackName, superspineName, "contains"))
+		assertNoError(createRelation(client, rackName, superspineName, "contains"))
 	}
 }
 
@@ -142,13 +142,13 @@ type Labels map[string]string
 func createPod(client topoapi.TopoClient, podID int, podName string, builder *Builder, wg *sync.WaitGroup) {
 	log.Infof("Creating pod %s...", podName)
 	podLabels := Labels{"pod": podName}
-	err := topo.CreateEntity(client, podName, "pod", nil, podLabels)
+	err := createEntity(client, podName, "pod", nil, podLabels)
 	assertNoError(err)
 
 	for si := 1; si <= spinePerPod; si++ {
 		spineName := fmt.Sprintf("spine-%02d-%d", podID, si)
 		createDevice(client, "switch", spineName, portsPerSpine, podLabels)
-		assertNoError(topo.CreateRelation(client, podName, spineName, "contains"))
+		assertNoError(createRelation(client, podName, spineName, "contains"))
 
 		for ssi := 1; ssi <= superSpineCount; ssi++ {
 			superSpineName := fmt.Sprintf("superspine-%d", ssi)
@@ -161,7 +161,7 @@ func createPod(client topoapi.TopoClient, podID int, podName string, builder *Bu
 			rackName := fmt.Sprintf("rack-%02d-%d", podID, ri)
 			rackLabels := Labels{"pod": podName, "rack": rackName}
 			createRack(client, podID, ri, rackName, rackLabels)
-			assertNoError(topo.CreateRelation(client, podName, rackName, "contains"))
+			assertNoError(createRelation(client, podName, rackName, "contains"))
 
 			leafName := fmt.Sprintf("leaf-%02d-%d", podID, ri)
 			for si := 1; si <= spinePerPod; si++ {
@@ -175,7 +175,7 @@ func createPod(client topoapi.TopoClient, podID int, podName string, builder *Bu
 			rackName := fmt.Sprintf("rack-%02d-%d", podID, rackID)
 			spineName := fmt.Sprintf("spine-%02d-%d", podID, si)
 			assertNoError(addLabels(client, spineName, Labels{"rack": rackName}))
-			assertNoError(topo.CreateRelation(client, rackName, spineName, "contains"))
+			assertNoError(createRelation(client, rackName, spineName, "contains"))
 		}
 
 		wg.Done()
@@ -201,37 +201,37 @@ func addLabels(client topoapi.TopoClient, id string, labels Labels) error {
 
 func createRack(client topoapi.TopoClient, podID int, rackID int, rackName string, labels Labels) {
 	log.Infof("Creating rack %s...", rackName)
-	err := topo.CreateEntity(client, rackName, "rack", nil, labels)
+	err := createEntity(client, rackName, "rack", nil, labels)
 	assertNoError(err)
 
 	leafName := fmt.Sprintf("leaf-%02d-%d", podID, rackID)
 	createDevice(client, "leaf", leafName, portsPerLeaf, labels)
-	err = topo.CreateRelation(client, rackName, leafName, "contains")
+	err = createRelation(client, rackName, leafName, "contains")
 	assertNoError(err)
 
 	for si := 1; si <= serversPerPod; si++ {
 		serverName := fmt.Sprintf("server-%02d-%d-%02d", podID, rackID, si)
 		createServer(client, podID, rackID, si, serverName, labels)
-		err = topo.CreateRelation(client, rackName, serverName, "contains")
+		err = createRelation(client, rackName, serverName, "contains")
 		assertNoError(err)
 	}
 }
 
 func createServer(client topoapi.TopoClient, podID int, rackID int, serverID int, serverName string, labels Labels) {
-	err := topo.CreateEntity(client, serverName, "server", nil, labels)
+	err := createEntity(client, serverName, "server", nil, labels)
 	assertNoError(err)
 
 	ipuName := fmt.Sprintf("ipu-%02d-%d-%02d", podID, rackID, serverID)
 	createDevice(client, "ipu", ipuName, portsPerIPU+maxVMsPerServer, labels)
-	err = topo.CreateRelation(client, serverName, ipuName, "contains")
+	err = createRelation(client, serverName, ipuName, "contains")
 	createBidirectionalLink(client, ipuName, fmt.Sprintf("leaf-%02d-%d", podID, rackID), "link", labels)
 	assertNoError(err)
 
 	for i := 1; i <= maxVMsPerServer; i++ {
 		vmName := fmt.Sprintf("vm-%02d-%d-%02d-%02d", podID, rackID, serverID, i)
-		err := topo.CreateEntity(client, vmName, "vm", nil, labels)
+		err := createEntity(client, vmName, "vm", nil, labels)
 		assertNoError(err)
-		err = topo.CreateRelation(client, serverName, vmName, "contains")
+		err = createRelation(client, serverName, vmName, "contains")
 		assertNoError(err)
 
 		createBidirectionalLink(client, fmt.Sprintf("%s/%d", ipuName, i), vmName, "edge-link", labels)
@@ -241,14 +241,14 @@ func createServer(client topoapi.TopoClient, podID int, rackID int, serverID int
 
 func createDevice(client topoapi.TopoClient, kindID string, deviceName string, portCount int, labels Labels) {
 	log.Infof("Creating %s %s with %d ports...", kindID, deviceName, portCount)
-	err := topo.CreateEntity(client, deviceName, kindID, nil, labels)
+	err := createEntity(client, deviceName, kindID, nil, labels)
 	assertNoError(err)
 
 	for pn := 1; pn <= portCount; pn++ {
 		portName := fmt.Sprintf("%s/%d", deviceName, pn)
-		err = topo.CreateEntity(client, portName, "port", nil, labels)
+		err = createEntity(client, portName, "port", nil, labels)
 		assertNoError(err)
-		err = topo.CreateRelation(client, deviceName, portName, "has")
+		err = createRelation(client, deviceName, portName, "has")
 		assertNoError(err)
 	}
 }
@@ -260,11 +260,11 @@ func createBidirectionalLink(client topoapi.TopoClient, id1 string, id2 string, 
 
 func createLink(client topoapi.TopoClient, id1 string, id2 string, kindID string, labels Labels) {
 	linkName := fmt.Sprintf("%s-%s", id1, id2)
-	err := topo.CreateEntity(client, linkName, kindID, nil, labels)
+	err := createEntity(client, linkName, kindID, nil, labels)
 	assertNoError(err)
-	err = topo.CreateRelation(client, id1, linkName, "originates")
+	err = createRelation(client, id1, linkName, "originates")
 	assertNoError(err)
-	err = topo.CreateRelation(client, id2, linkName, "terminates")
+	err = createRelation(client, id2, linkName, "terminates")
 	assertNoError(err)
 }
 
@@ -274,4 +274,40 @@ func createLinkTrunk(client topoapi.TopoClient, src string, tgt string, count in
 	for i := 0; i < count; i++ {
 		createBidirectionalLink(client, builder.NextDevicePortID(src), builder.NextDevicePortID(tgt), kindID, labels)
 	}
+}
+
+// createEntity creates an entity object
+func createEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any, labels map[string]string) error {
+	aspects := map[string]*types.Any{}
+	for _, aspect := range aspectList {
+		aspects[aspect.TypeUrl] = aspect
+	}
+	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
+		Object: &topoapi.Object{
+			ID:      topoapi.ID(id),
+			Type:    topoapi.Object_ENTITY,
+			Aspects: aspects,
+			Obj:     &topoapi.Object_Entity{Entity: &topoapi.Entity{KindID: topoapi.ID(kindID)}},
+			Labels:  labels,
+		},
+	})
+	return err
+}
+
+// CreateRelation creates a relation object
+func createRelation(client topoapi.TopoClient, src string, tgt string, kindID string) error {
+	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
+		Object: &topoapi.Object{
+			ID:   topoapi.ID(src + tgt + kindID),
+			Type: topoapi.Object_RELATION,
+			Obj: &topoapi.Object_Relation{
+				Relation: &topoapi.Relation{
+					SrcEntityID: topoapi.ID(src),
+					TgtEntityID: topoapi.ID(tgt),
+					KindID:      topoapi.ID(kindID),
+				},
+			},
+		},
+	})
+	return err
 }

@@ -35,8 +35,10 @@ jenkins-test: # @HELP run the unit tests and source code validation producing a 
 jenkins-test: mod-lint build linters license
 	TEST_PACKAGES=github.com/onosproject/onos-topo/pkg/... ./build/build-tools/build/jenkins/make-unit
 
-integration-tests: # @HELP run helmit tests locally
-	(kubectl delete ns test || exit 0) && kubectl create ns test && helmit test -n test ./cmd/onos-topo-tests
+helmit-topo: integration-test-namespace # @HELP run helmit gnmi tests locally
+	make helmit-topo -C test
+
+integration-tests: helmit-topo
 
 onos-topo-docker: # @HELP build onos-topo base Docker image
 	@go mod vendor
