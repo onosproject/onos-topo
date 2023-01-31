@@ -9,4 +9,4 @@ export CGO_ENABLED=1
 export GO111MODULE=on
 
 helmit-topo: # @HELP run helmit topo tests locally
-	helmit test -n test ./onos-topo-tests --suite topo --no-teardown --timeout 40m
+	helmit test -n test ./onos-topo-tests --suite topo --no-teardown --timeout 15m
