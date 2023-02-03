@@ -179,8 +179,8 @@ func (s *atomixStore) watchStoreEvents(entries _map.EntryStream[topoapi.ID, *top
 			s.cacheMu.Unlock()
 			s.registerSrcTgt(object, true)
 		case *_map.Updated[topoapi.ID, *topoapi.Object]:
-			object = e.NewEntry.Value
-			object.Revision = topoapi.Revision(e.NewEntry.Version)
+			object = e.Entry.Value
+			object.Revision = topoapi.Revision(e.Entry.Version)
 			eventType = topoapi.EventType_UPDATED
 			s.cacheMu.Lock()
 			s.cache[object.ID] = *object
