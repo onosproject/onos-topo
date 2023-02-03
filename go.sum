@@ -47,8 +47,6 @@ github.com/Shopify/toxiproxy/v2 v2.3.0/go.mod h1:KvQTtB6RjCJY4zqNJn7C7JDFgsG5uoH
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/atomix/atomix/api v0.9.2 h1:BpT4zsXiKQWoIHQzGeCDQuC4BxcWvfrsMrPuUoSNLTI=
 github.com/atomix/atomix/api v0.9.2/go.mod h1:Fz8zXQH6n28U0NTu5xctKhkNrN5RsWgX56lrMhqXlPg=
-github.com/atomix/atomix/protocols/rsm v0.5.2 h1:CH7qbIFM0RQaL599+9Df7/2LOkEYueFw/877cdnSF9A=
-github.com/atomix/atomix/protocols/rsm v0.5.2/go.mod h1:SgkK3PVLqx1KmNjxw8OY7AY7T6t6TuPLmnP6Rr/oFAQ=
 github.com/atomix/atomix/protocols/rsm v0.5.6 h1:55u/qIIUuLakypf1d1CQ5xxj/E720f6FRGDtv1VUOSs=
 github.com/atomix/atomix/protocols/rsm v0.5.6/go.mod h1:SgkK3PVLqx1KmNjxw8OY7AY7T6t6TuPLmnP6Rr/oFAQ=
 github.com/atomix/atomix/runtime v0.9.0 h1:yDViPymoOkR5gMJkk25CZP2Tjf2j1JMAWNd/I38ws8I=
@@ -57,8 +55,6 @@ github.com/atomix/atomix/sidecar v0.4.4 h1:CjLPA3p1V83Tx2yxUGz4JLyQkeyXC8/1xXaiZ
 github.com/atomix/atomix/sidecar v0.4.4/go.mod h1:psygbD10K+EdWS1XINexXP0QmiAd+yY2tGkIGqrVMHM=
 github.com/atomix/go-sdk v0.12.0 h1:dSTi1vd0vgJbudq4PF0A8yWyHpmTMKQn7Kho1ItTO0o=
 github.com/atomix/go-sdk v0.12.0/go.mod h1:Ua1SPP/5qms2DZrpVeH+RrIvbviIEExKEijlgZHMWng=
-github.com/atomix/go-sdk v1.0.1-0.20230202224811-a2c2ed5496f0 h1:OFFkWkkzCAPnZBkc6m9EFwjtRi1NSQXJhuFK1h0fTzc=
-github.com/atomix/go-sdk v1.0.1-0.20230202224811-a2c2ed5496f0/go.mod h1:z05UbwkVsHRb5wIFsh8dNMkMzmYThMqkmTbHcdfNYo0=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/bits-and-blooms/bitset v1.3.1 h1:y+qrlmq3XsWi+xZqSaueaE8ry8Y127iMxlMfqcK8p0g=
 github.com/bits-and-blooms/bitset v1.3.1/go.mod h1:gIdJ4wp64HaoK2YrL1Q5/N7Y16edYb8uY+O0FJTyyDA=
