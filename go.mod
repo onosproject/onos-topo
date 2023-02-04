@@ -3,7 +3,7 @@ module github.com/onosproject/onos-topo
 go 1.19
 
 require (
-	github.com/atomix/go-sdk v0.12.6
+	github.com/atomix/go-sdk v0.12.7
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
