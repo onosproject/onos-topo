@@ -6,8 +6,8 @@ package store
 
 import (
 	"context"
-	"github.com/atomix/go-sdk/pkg/generic"
 	"github.com/atomix/go-sdk/pkg/primitive"
+	"github.com/atomix/go-sdk/pkg/types"
 	"io"
 	"sync"
 	"time"
@@ -26,7 +26,7 @@ var log = logging.GetLogger()
 func NewAtomixStore(client primitive.Client) (Store, error) {
 	objects, err := _map.NewBuilder[topoapi.ID, *topoapi.Object](client, "onos-topo-objects").
 		Tag("onos-topo", "objects").
-		Codec(generic.Proto[*topoapi.Object](&topoapi.Object{})).
+		Codec(types.Proto[*topoapi.Object](&topoapi.Object{})).
 		Get(context.Background())
 	if err != nil {
 		return nil, errors.FromAtomix(err)
@@ -179,8 +179,8 @@ func (s *atomixStore) watchStoreEvents(entries _map.EntryStream[topoapi.ID, *top
 			s.cacheMu.Unlock()
 			s.registerSrcTgt(object, true)
 		case *_map.Updated[topoapi.ID, *topoapi.Object]:
-			object = e.NewEntry.Value
-			object.Revision = topoapi.Revision(e.NewEntry.Version)
+			object = e.Entry.Value
+			object.Revision = topoapi.Revision(e.Entry.Version)
 			eventType = topoapi.EventType_UPDATED
 			s.cacheMu.Lock()
 			s.cache[object.ID] = *object
