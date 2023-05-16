@@ -9,18 +9,15 @@ import (
 	"github.com/gogo/protobuf/types"
 	topoapi "github.com/onosproject/onos-api/go/onos/topo"
 	utils "github.com/onosproject/onos-topo/test/utils"
-	"testing"
-
-	"gotest.tools/assert"
 )
 
 // CreateEntity creates an entity object
-func CreateEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any, labels map[string]string) error {
+func (s *TestSuite) CreateEntity(client topoapi.TopoClient, id string, kindID string, aspectList []*types.Any, labels map[string]string) error {
 	aspects := map[string]*types.Any{}
 	for _, aspect := range aspectList {
 		aspects[aspect.TypeUrl] = aspect
 	}
-	_, err := client.Create(context.Background(), &topoapi.CreateRequest{
+	_, err := client.Create(s.Context(), &topoapi.CreateRequest{
 		Object: &topoapi.Object{
 			ID:      topoapi.ID(id),
 			Type:    topoapi.Object_ENTITY,
@@ -51,59 +48,71 @@ func CreateRelation(client topoapi.TopoClient, src string, tgt string, kindID st
 }
 
 // TestAddRemoveDevice adds devices to the storage, lists and checks that they are in database and removes devices from the storage
-func (s *TestSuite) TestAddRemoveDevice(t *testing.T) {
-	t.Logf("Creating connection")
+func (s *TestSuite) TestAddRemoveDevice() {
+	s.T().Logf("Creating connection")
 	conn, err := utils.CreateConnection()
-	assert.NilError(t, err)
-	t.Logf("Creating Topo Client")
+	s.NoError(err)
+	s.T().Logf("Creating Topo Client")
 	client := topoapi.NewTopoClient(conn)
 
-	t.Logf("Adding first device to the topo store")
-	err = CreateEntity(client, "1", "testKind", []*types.Any{
+	s.T().Logf("Adding first device to the topo store")
+	err = s.CreateEntity(client, "1", "testKind", []*types.Any{
 		{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123, "lng": 321}`)},
 		{TypeUrl: "foo", Value: []byte(`{"s": "barfoo", "n": 314, "b": true}`)},
 	}, nil)
-	assert.NilError(t, err)
+	s.NoError(err)
 
-	t.Logf("Adding second device to the topo store")
-	err = CreateEntity(client, "2", "testKind", []*types.Any{
+	s.T().Logf("Adding second device to the topo store")
+	err = s.CreateEntity(client, "2", "testKind", []*types.Any{
 		{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 111, "lng": 222}`)},
 		{TypeUrl: "foo", Value: []byte(`{"s": "foobar", "n": 628, "b": true}`)},
 	}, nil)
-	assert.NilError(t, err)
+	s.NoError(err)
 
-	t.Logf("Checking whether added device exists")
+	s.T().Logf("Checking whether added device exists")
 	gres, err := client.Get(context.Background(), &topoapi.GetRequest{
 		ID: "1",
 	})
-	assert.NilError(t, err)
-	assert.Equal(t, topoapi.ID("1"), gres.Object.ID)
+	s.NoError(err)
+	s.Equal(topoapi.ID("1"), gres.Object.ID)
 
-	t.Logf("Listing all devices")
-	res, err := client.List(context.Background(), &topoapi.ListRequest{})
-	assert.NilError(t, err)
-	t.Logf("Verifying that there are two devices stored")
-	assert.Equal(t, len(res.Objects) == 2 &&
-		(res.Objects[0].ID == "1" || res.Objects[1].ID == "1"), true)
+	equalFilter := &topoapi.Filter_Equal_{Equal_: &topoapi.EqualFilter{Value: "testKind"}}
+	filters := &topoapi.Filters{
+		KindFilter: &topoapi.Filter{
+			Filter: equalFilter,
+		},
+	}
 
-	t.Logf("Updating first device")
+	s.T().Logf("Listing all devices")
+	res, err := client.List(context.Background(), &topoapi.ListRequest{
+		Filters: filters,
+	})
+	s.NoError(err)
+	s.T().Logf("Verifying that there are two devices stored")
+	s.Len(res.Objects, 2)
+	s.True(string(res.Objects[0].ID) == "1" || string(res.Objects[1].ID) == "1")
+
+	s.T().Logf("Updating first device")
 	obj := gres.Object
 	obj.Aspects["onos.topo.Location"] = &types.Any{TypeUrl: "onos.topo.Location", Value: []byte(`{"lat": 123, "lng": 321}`)}
 
 	ures, err := client.Update(context.Background(), &topoapi.UpdateRequest{
 		Object: obj,
 	})
-	assert.NilError(t, err)
-	assert.Assert(t, ures != nil)
+	s.NoError(err)
+	s.NotNil(ures)
 
-	t.Logf("Deleting first device")
+	s.T().Logf("Deleting first device")
 	_, err = client.Delete(context.Background(), &topoapi.DeleteRequest{
 		ID: "1",
 	})
-	assert.NilError(t, err)
+	s.NoError(err)
 
-	t.Logf("Listing all devices and verifying that there is only second device left")
-	res, err = client.List(context.Background(), &topoapi.ListRequest{})
-	assert.NilError(t, err)
-	assert.Equal(t, len(res.Objects) == 1 && res.Objects[0].ID == "2", true)
+	s.T().Logf("Listing all devices and verifying that there is only second device left")
+	res, err = client.List(context.Background(), &topoapi.ListRequest{
+		Filters: filters,
+	})
+	s.NoError(err)
+	s.Len(res.Objects, 1)
+	s.Equal("2", string(res.Objects[0].ID))
 }

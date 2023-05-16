@@ -24,7 +24,7 @@ func main() {
 	cli.Run(cmd)
 }
 
-func runRootCommand(cmd *cobra.Command, args []string) error {
+func runRootCommand(cmd *cobra.Command, _ []string) error {
 	flags, err := cli.ExtractServiceEndpointFlags(cmd)
 	if err != nil {
 		return err

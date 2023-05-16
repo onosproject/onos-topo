@@ -9,4 +9,5 @@ export CGO_ENABLED=1
 export GO111MODULE=on
 
 helmit-topo: # @HELP run helmit topo tests locally
-	helmit test -n test ./onos-topo-tests --suite topo --no-teardown --timeout 15m
+	kubectl delete ns test 2>/dev/null || exit 0
+	helmit test --create-namespace --namespace test --no-teardown --context ../ ./topo/... --set global.image.registry=mirror.registry.opennetworking.org --image mirror.registry.opennetworking.org/onosproject/helmit-runner:latest --set onos-topo.global.image.tag=latest --timeout 15m
