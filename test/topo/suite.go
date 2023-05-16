@@ -5,34 +5,37 @@
 package topo
 
 import (
-	"github.com/onosproject/helmit/pkg/helm"
-	"github.com/onosproject/helmit/pkg/input"
 	"github.com/onosproject/helmit/pkg/test"
 	"github.com/onosproject/onos-test/pkg/onostest"
 )
 
-type testSuite struct {
-	test.Suite
-}
-
 // TestSuite is the onos-topo test suite
 type TestSuite struct {
-	testSuite
+	test.Suite
 }
 
 const onosTopoComponentName = "onos-topo"
 
-// SetupTestSuite sets up the onos-topo test suite
-func (s *TestSuite) SetupTestSuite(c *input.Context) error {
+// SetupSuite sets up the onos-topo test suite
+func (s *TestSuite) SetupSuite() {
+	registry := s.Arg("registry").String()
 
-	registry := c.GetArg("registry").String("")
-	err := helm.Chart(onosTopoComponentName, onostest.OnosChartRepo).
-		Release(onosTopoComponentName).
-		Set("image.tag", "latest").
-		Set("global.image.registry", registry).
-		Install(true)
-	if err != nil {
-		return err
+	install := s.Helm().
+		Install(onosTopoComponentName, "onos-umbrella").
+		RepoURL(onostest.OnosChartRepo).
+		Set("onos-topo.global.image.tag", "latest")
+
+	if registry != "" {
+		install.Set("onos-topo.global.image.registry", registry).
+			Set("onos-config.global.image.registry", registry).
+			Set("onos-umbrella.global.image.registry", registry).
+			Set("topo-discovery.global.image.registry", registry).
+			Set("device-provisioner.global.image.registry", registry).
+			Set("onos-cli.global.image.registry", registry)
 	}
-	return nil
+
+	_, err := install.Wait().Get(s.Context())
+	s.NoError(err)
 }
+
+var _ test.SetupSuite = (*TestSuite)(nil)

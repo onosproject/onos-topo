@@ -45,7 +45,6 @@ const (
 func assertNoError(err error) {
 	if err != nil {
 		log.Fatal(err)
-		panic(err)
 	}
 }
 

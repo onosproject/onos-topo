@@ -33,7 +33,7 @@ func getRootCommand() *cobra.Command {
 	return cmd
 }
 
-func runServer(cmd *cobra.Command, args []string) error {
+func runServer(cmd *cobra.Command, _ []string) error {
 	conn, err := cli.GetConnection(cmd)
 	if err != nil {
 		return err
