@@ -44,8 +44,7 @@ jobs:
           go-version-file: 'go.mod'
       - name: Unit tests
         run: |
-          # go test -race github.com/onosproject/onos-topo/...
-          go test -race ./...
+          go test -race github.com/onosproject/onos-topo/...
 
   docker-build:
     runs-on: ubuntu-latest
