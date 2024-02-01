@@ -44,7 +44,7 @@ jobs:
           go-version-file: 'go.mod'
       - name: Unit tests
         run: |
-          ${{ github.workspace }}
+          cat ${{ github.workspace }}
           go test -race github.com/onosproject/onos-topo/...
 
   docker-build:
