@@ -36,16 +36,17 @@ jobs:
           args: -v --config ./.golangci.yml --timeout=15m
 
   unit-tests:
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./onos-topo
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
       - name: Unit tests
-        run: |
-          ${{ github.workspace }} 
-          go test -race github.com/onosproject/onos-topo/...
+        run: go test -race github.com/onosproject/onos-topo/...
 
   docker-build:
     runs-on: ubuntu-latest
