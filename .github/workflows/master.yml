@@ -43,7 +43,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Unit tests
-        run: go test -race github.com/onosproject/onos-topo/...
+        run: go test -race ./...
 
   docker-build:
     runs-on: self-hosted
