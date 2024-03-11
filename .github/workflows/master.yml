@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - GHA-integration
   pull_request:
 
 jobs:
@@ -21,7 +22,6 @@ jobs:
           go build -o build/_output/onos-topo ./cmd/onos-topo
           go build -o build/_output/topo-generator ./cmd/topo-generator
           go build -o build/_output/topo-visualizer ./cmd/topo-visualizer
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -55,9 +55,8 @@ jobs:
         run: |
           git clone https://github.com/onosproject/build-tools.git build/build-tools
           go mod vendor
-          docker build --platform linux/x86_64 . -f build/onos-topo/Dockerfile -t onosproject/onos-topo:latest
+          docker build . -f build/onos-topo/Dockerfile -t onosproject/onos-topo:latest
           rm -rf vendor
-
   license-check:
     runs-on: ubuntu-latest
     steps:
