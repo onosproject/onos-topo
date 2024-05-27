@@ -9,7 +9,7 @@ COPY . /go/src/github.com/onosproject/onos-topo
 COPY build/build-tools /go/src/github.com/onosproject/onos-topo/build-tools/
 RUN cd /go/src/github.com/onosproject/onos-topo && GOFLAGS=-mod=vendor make build
 
-FROM alpine:3.16
+FROM alpine:3.20
 RUN apk add libc6-compat
 
 USER nobody
