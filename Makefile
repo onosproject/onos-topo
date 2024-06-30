@@ -37,7 +37,7 @@ docker-push-onos-topo: # @HELP push onos-topo Docker image
 	docker push onosproject/onos-topo:${ONOS_TOPO_VERSION}
 
 docker-push: # @HELP push docker images
-docker-push: docker-push-onos-pci
+docker-push: docker-push-onos-topo
 
 lint: # @HELP examines Go source code and reports coding problems
 	golangci-lint --version | grep $(GOLANG_CI_VERSION) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin $(GOLANG_CI_VERSION)
