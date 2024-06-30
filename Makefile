@@ -1,7 +1,6 @@
-# SPDX-FileCopyrightText: 2022-present Intel Corporation
-# SPDX-FileCopyrightText: 2019-present Open Networking Foundation <info@opennetworking.org>
-#
 # SPDX-License-Identifier: Apache-2.0
+# Copyright 2019 Open Networking Foundation
+# Copyright 2024 Intel Corporation
 
 export CGO_ENABLED=1
 export GO111MODULE=on
