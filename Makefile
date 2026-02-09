@@ -8,6 +8,10 @@ export GO111MODULE=on
 .PHONY: build
 
 ONOS_TOPO_VERSION ?= latest
+DOCKER_TAG        ?= ${ONOS_TOPO_VERSION}
+DOCKER_REPOSITORY ?= onosproject/
+DOCKER_REGISTRY   ?= ""
+DOCKER_IMAGENAME  := ${DOCKER_REGISTRY}${DOCKER_REPOSITORY}onos-topo:${DOCKER_TAG}
 PLATFORM ?= --platform linux/x86_64
 
 GOLANG_CI_VERSION := v1.52.2
@@ -27,14 +31,14 @@ test: build lint license
 docker-build-onos-topo: # @HELP build onos-topo base Docker image
 	@go mod vendor
 	docker build ${PLATFORM} . -f build/onos-topo/Dockerfile \
-		-t onosproject/onos-topo:${ONOS_TOPO_VERSION}
+		-t ${DOCKER_IMAGENAME}
 	@rm -rf vendor
 
 docker-build: # @HELP build all Docker images
 docker-build: build docker-build-onos-topo
 
 docker-push-onos-topo: # @HELP push onos-topo Docker image
-	docker push onosproject/onos-topo:${ONOS_TOPO_VERSION}
+	docker push ${DOCKER_IMAGENAME}
 
 docker-push: # @HELP push docker images
 docker-push: docker-push-onos-topo
